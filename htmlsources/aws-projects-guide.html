@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>10 AWS Practice Projects — Full Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #1a1a24;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8e8f0;
+  --muted: #7a7a90;
+  --accent1: #ff6b35;
+  --accent2: #00d4aa;
+  --accent3: #7c6dfa;
+  --accent4: #ffd166;
+  --accent5: #ef476f;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* NOISE OVERLAY */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+  opacity:0.4;
+}
+
+/* HEADER */
+.hero {
+  position: relative;
+  padding: 80px 40px 60px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -120px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(124,109,250,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--font-code);
+  font-size: 12px;
+  color: var(--accent2);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: var(--font-head);
+  font-size: clamp(36px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+}
+.hero h1 span { color: var(--accent1); }
+.hero-sub {
+  font-size: 17px;
+  color: var(--muted);
+  max-width: 560px;
+  margin: 0 auto 32px;
+}
+.badge-row {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+.badge {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-family: var(--font-code);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+}
+
+/* NAV SIDEBAR */
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  position: relative;
+}
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  background: var(--surface);
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.sidebar-title {
+  font-family: var(--font-code);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0 20px 12px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 20px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.nav-item.active { color: var(--text); border-left-color: var(--accent1); background: rgba(255,107,53,0.05); }
+.nav-num {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-family: var(--font-code);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* MAIN CONTENT */
+.main { padding: 0; }
+.project {
+  padding: 60px 56px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.project:nth-child(odd) { background: transparent; }
+.project:nth-child(even) { background: rgba(255,255,255,0.015); }
+
+.project-header { margin-bottom: 36px; }
+.project-num {
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+.project-title {
+  font-family: var(--font-head);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.project-desc {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 560px;
+  margin-bottom: 16px;
+}
+.service-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 24px; }
+.stag {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid;
+}
+.arch-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  font-family: var(--font-code);
+  font-size: 13px;
+  color: var(--accent2);
+  line-height: 1.8;
+}
+.arch-box .arch-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* SECTION TITLES */
+.section-title {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* STEPS */
+.steps { margin-bottom: 36px; }
+.step {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 15px; top: 36px;
+  width: 1px;
+  height: calc(100% - 10px);
+  background: var(--border);
+}
+.step-num-circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.step-body {}
+.step-title {
+  font-weight: 500;
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.step-detail {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.step-detail code {
+  font-family: var(--font-code);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--accent4);
+}
+
+/* CODE BLOCKS */
+.code-section { margin-bottom: 36px; }
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  padding: 10px 16px;
+}
+.code-filename {
+  font-family: var(--font-code);
+  font-size: 12px;
+  color: var(--muted);
+}
+.code-lang {
+  font-family: var(--font-code);
+  font-size: 10px;
+  color: var(--accent2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.code-body {
+  background: #0d0d14;
+  border: 1px solid var(--border);
+  border-radius: 0 0 10px 10px;
+  padding: 20px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.str { color: #c3e88d; }
+.num { color: #f78c6c; }
+.comment { color: #546e7a; font-style: italic; }
+.fn { color: #82aaff; }
+.var { color: #eeffff; }
+.key { color: #ffcb6b; }
+.op { color: #89ddff; }
+
+/* TIPS / ALERTS */
+.tip-box {
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 20px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.tip-box.info { background: rgba(0,212,170,0.07); border: 1px solid rgba(0,212,170,0.2); }
+.tip-box.warn { background: rgba(255,209,102,0.07); border: 1px solid rgba(255,209,102,0.2); }
+.tip-box.error { background: rgba(239,71,111,0.07); border: 1px solid rgba(239,71,111,0.2); }
+.tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.tip-box.info .tip-text { color: rgba(0,212,170,0.9); }
+.tip-box.warn .tip-text { color: rgba(255,209,102,0.9); }
+.tip-box.error .tip-text { color: rgba(239,71,111,0.9); }
+
+/* WHAT YOU LEARN */
+.learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 32px; }
+.learn-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.learn-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* DIVIDER */
+.proj-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2), transparent);
+  margin: 0;
+}
+
+/* FOOTER */
+.footer {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+}
+.footer strong { color: var(--text); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .project { padding: 40px 24px; }
+  .learn-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">// AWS Hands-On Practice Series</div>
+  <h1>10 Real <span>AWS Projects</span><br>with Full Code</h1>
+  <p class="hero-sub">Each project combines multiple AWS services. Step-by-step instructions, complete code, architecture explanations, and debugging tips.</p>
+  <div class="badge-row">
+    <span class="badge">Lambda</span>
+    <span class="badge">DynamoDB</span>
+    <span class="badge">S3</span>
+    <span class="badge">SQS</span>
+    <span class="badge">RDS</span>
+    <span class="badge">ECS</span>
+    <span class="badge">Step Functions</span>
+    <span class="badge">Kinesis</span>
+    <span class="badge">Rekognition</span>
+    <span class="badge">Comprehend</span>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+<!-- SIDEBAR NAV -->
+<nav class="sidebar">
+  <div class="sidebar-title">Projects</div>
+  <a href="#p1" class="nav-item active">
+    <span class="nav-num" style="background:rgba(255,107,53,0.15);color:#ff6b35">01</span>
+    Weather Dashboard
+  </a>
+  <a href="#p2" class="nav-item">
+    <span class="nav-num" style="background:rgba(0,212,170,0.15);color:#00d4aa">02</span>
+    Order Processing
+  </a>
+  <a href="#p3" class="nav-item">
+    <span class="nav-num" style="background:rgba(124,109,250,0.15);color:#7c6dfa">03</span>
+    Chat App Backend
+  </a>
+  <a href="#p4" class="nav-item">
+    <span class="nav-num" style="background:rgba(255,209,102,0.15);color:#ffd166">04</span>
+    AI Image Analyzer
+  </a>
+  <a href="#p5" class="nav-item">
+    <span class="nav-num" style="background:rgba(239,71,111,0.15);color:#ef476f">05</span>
+    File Virus Scanner
+  </a>
+  <a href="#p6" class="nav-item">
+    <span class="nav-num" style="background:rgba(255,107,53,0.15);color:#ff6b35">06</span>
+    Leaderboard API
+  </a>
+  <a href="#p7" class="nav-item">
+    <span class="nav-num" style="background:rgba(0,212,170,0.15);color:#00d4aa">07</span>
+    Sentiment Analyzer
+  </a>
+  <a href="#p8" class="nav-item">
+    <span class="nav-num" style="background:rgba(124,109,250,0.15);color:#7c6dfa">08</span>
+    Document Processor
+  </a>
+  <a href="#p9" class="nav-item">
+    <span class="nav-num" style="background:rgba(255,209,102,0.15);color:#ffd166">09</span>
+    Multi-Step Workflow
+  </a>
+  <a href="#p10" class="nav-item">
+    <span class="nav-num" style="background:rgba(239,71,111,0.15);color:#ef476f">10</span>
+    Real-Time Analytics
+  </a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ============================== PROJECT 1 ============================== -->
+<section class="project" id="p1">
+  <div class="project-header">
+    <div class="project-num">PROJECT 01 / 10</div>
+    <div class="project-title" style="color:#ff6b35">Weather Dashboard</div>
+    <div class="project-desc">Fetch live weather data from a public API, cache it in ElastiCache, serve it via Lambda + API Gateway, and store history in DynamoDB.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">Lambda</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">API Gateway</span>
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">DynamoDB</span>
+      <span class="stag" style="color:#ffd166;border-color:rgba(255,209,102,0.3);background:rgba(255,209,102,0.07)">Secrets Manager</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    User → API Gateway → Lambda → Secrets Manager (get API key) → External Weather API → DynamoDB (store history) → Return JSON
+  </div>
+
+  <div class="section-title">What You Will Learn</div>
+  <div class="learn-grid">
+    <div class="learn-item"><div class="learn-dot" style="background:#ff6b35"></div>Store secrets safely with Secrets Manager</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#ff6b35"></div>Call external HTTP APIs from Lambda</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#ff6b35"></div>Write + query DynamoDB with GSI</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#ff6b35"></div>Handle Lambda environment variables</div>
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num-circle">1</div>
+      <div class="step-body">
+        <div class="step-title">Get a free OpenWeatherMap API key</div>
+        <div class="step-detail">Sign up at openweathermap.org → My API Keys → copy the key. Free tier allows 1,000 calls/day.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">2</div>
+      <div class="step-body">
+        <div class="step-title">Store the API key in Secrets Manager</div>
+        <div class="step-detail">AWS Console → Secrets Manager → Store a new secret → Other type → Key: <code>weather_api_key</code>, Value: your key → Secret name: <code>weather/apikey</code></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">3</div>
+      <div class="step-body">
+        <div class="step-title">Create DynamoDB table for history</div>
+        <div class="step-detail">Table name: <code>weather_history</code> — Partition key: <code>city</code> (String) — Sort key: <code>timestamp</code> (String). Leave everything else as default.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">4</div>
+      <div class="step-body">
+        <div class="step-title">Create Lambda function</div>
+        <div class="step-detail">Runtime: Python 3.12 — Architecture: x86_64. Attach permissions: <code>SecretsManagerReadWrite</code> + <code>AmazonDynamoDBFullAccess</code> to the Lambda execution role.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">5</div>
+      <div class="step-body">
+        <div class="step-title">Paste the Lambda code below → Deploy</div>
+        <div class="step-detail">Click Deploy after pasting. Test with: <code>{"queryStringParameters": {"city": "Mumbai"}}</code></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">6</div>
+      <div class="step-body">
+        <div class="step-title">Create REST API in API Gateway</div>
+        <div class="step-detail">New REST API → Resource: <code>/weather</code> → Method: GET → Lambda Proxy Integration → Deploy to stage <code>prod</code></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">7</div>
+      <div class="step-body">
+        <div class="step-title">Test the final URL</div>
+        <div class="step-detail">Open browser: <code>https://YOUR_API.execute-api.us-east-1.amazonaws.com/prod/weather?city=London</code> — you should see live weather JSON + it gets saved to DynamoDB.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box info"><span class="tip-icon">💡</span><span class="tip-text">If Lambda times out, increase timeout to 10 seconds in Configuration → General Configuration. The external API call takes 1–3 seconds.</span></div>
+
+  <div class="section-title">Lambda Code — lambda_function.py</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">lambda_function.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, urllib.request
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="comment"># Clients</span>
+secrets = boto3.client(<span class="str">'secretsmanager'</span>)
+db      = boto3.resource(<span class="str">'dynamodb'</span>).Table(<span class="str">'weather_history'</span>)
+
+<span class="kw">def</span> <span class="fn">get_api_key</span>():
+    r = secrets.get_secret_value(SecretId=<span class="str">'weather/apikey'</span>)
+    <span class="kw">return</span> json.loads(r[<span class="str">'SecretString'</span>])[<span class="str">'weather_api_key'</span>]
+
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):
+    city = event.get(<span class="str">'queryStringParameters'</span>, {}).get(<span class="str">'city'</span>, <span class="str">'Mumbai'</span>)
+    
+    <span class="comment"># Fetch weather</span>
+    api_key = get_api_key()
+    url = (<span class="str">f'https://api.openweathermap.org/data/2.5/weather'</span>
+           <span class="str">f'?q={city}&appid={api_key}&units=metric'</span>)
+    
+    <span class="kw">with</span> urllib.request.urlopen(url) <span class="kw">as</span> resp:
+        data = json.loads(resp.read())
+    
+    result = {
+        <span class="str">'city'</span>:        data[<span class="str">'name'</span>],
+        <span class="str">'temp_c'</span>:      data[<span class="str">'main'</span>][<span class="str">'temp'</span>],
+        <span class="str">'feels_like'</span>:  data[<span class="str">'main'</span>][<span class="str">'feels_like'</span>],
+        <span class="str">'humidity'</span>:    data[<span class="str">'main'</span>][<span class="str">'humidity'</span>],
+        <span class="str">'description'</span>: data[<span class="str">'weather'</span>][<span class="num">0</span>][<span class="str">'description'</span>],
+        <span class="str">'wind_speed'</span>:  data[<span class="str">'wind'</span>][<span class="str">'speed'</span>]
+    }
+    
+    <span class="comment"># Save to DynamoDB history</span>
+    db.put_item(Item={
+        <span class="str">'city'</span>:      result[<span class="str">'city'</span>],
+        <span class="str">'timestamp'</span>: datetime.utcnow().isoformat(),
+        <span class="str">'data'</span>:      json.dumps(result)
+    })
+    
+    <span class="kw">return</span> {
+        <span class="str">'statusCode'</span>: <span class="num">200</span>,
+        <span class="str">'headers'</span>: {<span class="str">'Access-Control-Allow-Origin'</span>: <span class="str">'*'</span>},
+        <span class="str">'body'</span>: json.dumps(result)
+    }</div>
+  </div>
+
+  <div class="tip-box warn"><span class="tip-icon">⚠️</span><span class="tip-text">The city name must match OpenWeatherMap's format. "New York" works but "new york" might not. Always URL-encode spaces if calling from code.</span></div>
+</section>
+
+<!-- ============================== PROJECT 2 ============================== -->
+<section class="project" id="p2">
+  <div class="project-header">
+    <div class="project-num">PROJECT 02 / 10</div>
+    <div class="project-title" style="color:#00d4aa">Order Processing Pipeline</div>
+    <div class="project-desc">Simulate an e-commerce order system where orders flow through SQS queues, get processed by Lambda workers, stored in RDS (MySQL), and trigger email receipts via SES.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">SQS</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">Lambda</span>
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">RDS (MySQL)</span>
+      <span class="stag" style="color:#ffd166;border-color:rgba(255,209,102,0.3);background:rgba(255,209,102,0.07)">SES</span>
+      <span class="stag" style="color:#ef476f;border-color:rgba(239,71,111,0.3);background:rgba(239,71,111,0.07)">VPC</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    API Gateway → Lambda (Producer) → SQS Queue → Lambda (Consumer, triggered by SQS) → RDS MySQL (save order) → SES (send receipt email)
+  </div>
+
+  <div class="section-title">What You Will Learn</div>
+  <div class="learn-grid">
+    <div class="learn-item"><div class="learn-dot" style="background:#00d4aa"></div>SQS queue + dead-letter queue setup</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#00d4aa"></div>Lambda triggered by SQS events</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#00d4aa"></div>Connect Lambda to RDS inside a VPC</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#00d4aa"></div>Transactional email via SES</div>
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num-circle">1</div>
+      <div class="step-body">
+        <div class="step-title">Create RDS MySQL instance (Free Tier)</div>
+        <div class="step-detail">RDS → Create Database → MySQL → Free tier → DB name: <code>orders_db</code> → Username: <code>admin</code> → Set a password → Under Connectivity: allow public access YES (for practice) → Create.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">2</div>
+      <div class="step-body">
+        <div class="step-title">Create the orders table in MySQL</div>
+        <div class="step-detail">Connect via MySQL Workbench or RDS Query Editor. Run the SQL in the code section below to create the <code>orders</code> table.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">3</div>
+      <div class="step-body">
+        <div class="step-title">Create SQS Standard Queue</div>
+        <div class="step-detail">SQS → Create queue → Standard → Name: <code>order-queue</code> → Under Dead-letter queue: create another queue named <code>order-dlq</code> and attach it (max receives: 3) → Create.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">4</div>
+      <div class="step-body">
+        <div class="step-title">Verify email in SES</div>
+        <div class="step-detail">SES → Verified Identities → Create Identity → Email → Enter your email → Verify from inbox.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">5</div>
+      <div class="step-body">
+        <div class="step-title">Create Consumer Lambda</div>
+        <div class="step-detail">Python 3.12 — Add layer: <code>PyMySQL</code> (from Lambda layers or use the ARN for pymysql public layer) — Attach policies: <code>AmazonSQSFullAccess</code> + <code>AmazonSESFullAccess</code> — Add env variables: <code>DB_HOST</code>, <code>DB_USER</code>, <code>DB_PASS</code>, <code>FROM_EMAIL</code></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">6</div>
+      <div class="step-body">
+        <div class="step-title">Add SQS Trigger to Consumer Lambda</div>
+        <div class="step-detail">Lambda → Add Trigger → SQS → select <code>order-queue</code> → Batch size: 1 → Enable trigger.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">7</div>
+      <div class="step-body">
+        <div class="step-title">Create Producer Lambda + API Gateway</div>
+        <div class="step-detail">A second Lambda that receives POST /order from API Gateway and puts the message into SQS. See Producer code below.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-circle">8</div>
+      <div class="step-body">
+        <div class="step-title">Test the full pipeline</div>
+        <div class="step-detail">POST to API Gateway with: <code>{"orderId":"ORD001","item":"Laptop","price":999,"email":"you@example.com"}</code> — check RDS for the record and your inbox for the receipt.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">SQL — Create Table</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">setup.sql</span><span class="code-lang">SQL</span></div>
+    <div class="code-body"><span class="kw">CREATE DATABASE IF NOT EXISTS</span> orders_db;
+<span class="kw">USE</span> orders_db;
+
+<span class="kw">CREATE TABLE</span> orders (
+    id         <span class="kw">INT AUTO_INCREMENT PRIMARY KEY</span>,
+    order_id   <span class="kw">VARCHAR</span>(<span class="num">50</span>)  <span class="kw">NOT NULL</span>,
+    item       <span class="kw">VARCHAR</span>(<span class="num">200</span>) <span class="kw">NOT NULL</span>,
+    price      <span class="kw">DECIMAL</span>(<span class="num">10,2</span>),
+    email      <span class="kw">VARCHAR</span>(<span class="num">200</span>),
+    status     <span class="kw">VARCHAR</span>(<span class="num">50</span>) <span class="kw">DEFAULT</span> <span class="str">'PENDING'</span>,
+    created_at <span class="kw">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+);</div>
+  </div>
+
+  <div class="section-title">Consumer Lambda — processes SQS + writes to RDS + sends email</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">consumer_lambda.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, os, pymysql
+
+ses = boto3.client(<span class="str">'ses'</span>, region_name=<span class="str">'us-east-1'</span>)
+FROM_EMAIL = os.environ[<span class="str">'FROM_EMAIL'</span>]
+
+<span class="kw">def</span> <span class="fn">get_db</span>():
+    <span class="kw">return</span> pymysql.connect(
+        host   = os.environ[<span class="str">'DB_HOST'</span>],
+        user   = os.environ[<span class="str">'DB_USER'</span>],
+        passwd = os.environ[<span class="str">'DB_PASS'</span>],
+        db     = <span class="str">'orders_db'</span>,
+        cursorclass = pymysql.cursors.DictCursor
+    )
+
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):
+    <span class="kw">for</span> record <span class="kw">in</span> event[<span class="str">'Records'</span>]:
+        order = json.loads(record[<span class="str">'body'</span>])
+        
+        <span class="comment"># 1. Save to RDS</span>
+        conn = get_db()
+        <span class="kw">with</span> conn.cursor() <span class="kw">as</span> cur:
+            cur.execute(
+                <span class="str">"INSERT INTO orders (order_id,item,price,email,status) VALUES (%s,%s,%s,%s,%s)"</span>,
+                (order[<span class="str">'orderId'</span>], order[<span class="str">'item'</span>],
+                 order[<span class="str">'price'</span>],   order[<span class="str">'email'</span>], <span class="str">'CONFIRMED'</span>)
+            )
+        conn.commit()
+        conn.close()
+        
+        <span class="comment"># 2. Send receipt email via SES</span>
+        ses.send_email(
+            Source      = FROM_EMAIL,
+            Destination = {<span class="str">'ToAddresses'</span>: [order[<span class="str">'email'</span>]]},
+            Message     = {
+                <span class="str">'Subject'</span>: {<span class="str">'Data'</span>: <span class="str">f"Order Confirmed: {order['orderId']}"</span>},
+                <span class="str">'Body'</span>: {<span class="str">'Text'</span>: {<span class="str">'Data'</span>:
+                    <span class="str">f"Thank you!\n\nOrder: {order['orderId']}\nItem: {order['item']}\nTotal: ${order['price']}\n\nStatus: CONFIRMED"</span>
+                }}
+            }
+        )
+        <span class="fn">print</span>(<span class="str">f"Processed order {order['orderId']}"</span>)
+
+<span class="comment"># ---- Producer Lambda (separate function) ----</span>
+<span class="comment"># import boto3, json, os</span>
+<span class="comment"># sqs = boto3.client('sqs')</span>
+<span class="comment"># QUEUE_URL = os.environ['QUEUE_URL']</span>
+<span class="comment">#</span>
+<span class="comment"># def lambda_handler(event, ctx):</span>
+<span class="comment">#     body = json.loads(event['body'])</span>
+<span class="comment">#     sqs.send_message(QueueUrl=QUEUE_URL, MessageBody=json.dumps(body))</span>
+<span class="comment">#     return {'statusCode': 202, 'body': json.dumps({'status': 'queued'})}</span></div>
+  </div>
+</section>
+
+<!-- ============================== PROJECT 3 ============================== -->
+<section class="project" id="p3">
+  <div class="project-header">
+    <div class="project-num">PROJECT 03 / 10</div>
+    <div class="project-title" style="color:#7c6dfa">Real-Time Chat App Backend</div>
+    <div class="project-desc">Build a WebSocket-based chat backend. Users connect, send messages, and receive messages in real time. Uses API Gateway WebSocket API + Lambda + DynamoDB.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">API Gateway WebSocket</span>
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">Lambda</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">DynamoDB</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    WebSocket Client → API Gateway (WebSocket) → $connect Lambda (save connectionId to DynamoDB) → $sendMessage Lambda (read all connections → push message to each)
+  </div>
+
+  <div class="section-title">What You Will Learn</div>
+  <div class="learn-grid">
+    <div class="learn-item"><div class="learn-dot" style="background:#7c6dfa"></div>API Gateway WebSocket API routes</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#7c6dfa"></div>Managing connection IDs in DynamoDB</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#7c6dfa"></div>Posting back to WebSocket clients from Lambda</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#7c6dfa"></div>Handling $connect / $disconnect / custom routes</div>
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Create DynamoDB connections table</div><div class="step-detail">Table: <code>chat_connections</code> — Partition key: <code>connectionId</code> (String)</div></div></div>
+    <div class="step"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Create one Lambda function for all routes</div><div class="step-detail">Python 3.12 — Policy: <code>AmazonDynamoDBFullAccess</code> + <code>AmazonAPIGatewayInvokeFullAccess</code>. Paste code below.</div></div></div>
+    <div class="step"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">Create WebSocket API in API Gateway</div><div class="step-detail">API Gateway → Create API → WebSocket → Route selection expression: <code>$request.body.action</code></div></div></div>
+    <div class="step"><div class="step-num-circle">4</div><div class="step-body"><div class="step-title">Add three routes</div><div class="step-detail">Route key: <code>$connect</code> → Lambda integration. Route key: <code>$disconnect</code> → same Lambda. Route key: <code>sendMessage</code> → same Lambda. All use the same Lambda function.</div></div></div>
+    <div class="step"><div class="step-num-circle">5</div><div class="step-body"><div class="step-title">Deploy WebSocket API</div><div class="step-detail">Deploy → Stage name: <code>prod</code> — Copy the WebSocket URL: <code>wss://xxx.execute-api.us-east-1.amazonaws.com/prod</code></div></div></div>
+    <div class="step"><div class="step-num-circle">6</div><div class="step-body"><div class="step-title">Add APIGW endpoint as Lambda env variable</div><div class="step-detail">In Lambda → Configuration → Environment Variables → Add <code>APIGW_ENDPOINT</code> = <code>https://xxx.execute-api.us-east-1.amazonaws.com/prod</code> (note: https not wss)</div></div></div>
+    <div class="step"><div class="step-num-circle">7</div><div class="step-body"><div class="step-title">Test with wscat</div><div class="step-detail">Run: <code>npm install -g wscat</code> then <code>wscat -c wss://YOUR_URL/prod</code> in two terminals. From one, send: <code>{"action":"sendMessage","message":"Hello!"}</code> — both clients receive it.</div></div></div>
+  </div>
+
+  <div class="section-title">Lambda Code — All Routes Handler</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">chat_lambda.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, os
+
+db      = boto3.resource(<span class="str">'dynamodb'</span>).Table(<span class="str">'chat_connections'</span>)
+APIGW   = os.environ.get(<span class="str">'APIGW_ENDPOINT'</span>, <span class="str">''</span>)
+
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):
+    route = event[<span class="str">'requestContext'</span>][<span class="str">'routeKey'</span>]
+    cid   = event[<span class="str">'requestContext'</span>][<span class="str">'connectionId'</span>]
+    
+    <span class="kw">if</span> route == <span class="str">'$connect'</span>:
+        <span class="comment"># Save connection</span>
+        db.put_item(Item={<span class="str">'connectionId'</span>: cid})
+        <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>}
+    
+    <span class="kw">if</span> route == <span class="str">'$disconnect'</span>:
+        <span class="comment"># Remove connection</span>
+        db.delete_item(Key={<span class="str">'connectionId'</span>: cid})
+        <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>}
+    
+    <span class="kw">if</span> route == <span class="str">'sendMessage'</span>:
+        body    = json.loads(event.get(<span class="str">'body'</span>, <span class="str">'{}'</span>))
+        message = body.get(<span class="str">'message'</span>, <span class="str">''</span>)
+        
+        <span class="comment"># Get all active connections</span>
+        conns = db.scan()[<span class="str">'Items'</span>]
+        
+        apigw_client = boto3.client(
+            <span class="str">'apigatewaymanagementapi'</span>,
+            endpoint_url=APIGW
+        )
+        
+        stale = []
+        <span class="kw">for</span> conn <span class="kw">in</span> conns:
+            <span class="kw">try</span>:
+                apigw_client.post_to_connection(
+                    ConnectionId = conn[<span class="str">'connectionId'</span>],
+                    Data         = json.dumps({<span class="str">'from'</span>: cid[:8], <span class="str">'msg'</span>: message})
+                )
+            <span class="kw">except</span> Exception:
+                stale.append(conn[<span class="str">'connectionId'</span>])
+        
+        <span class="comment"># Clean up stale connections</span>
+        <span class="kw">for</span> s <span class="kw">in</span> stale:
+            db.delete_item(Key={<span class="str">'connectionId'</span>: s})
+        
+        <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>}
+    
+    <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">400</span>}</div>
+  </div>
+  <div class="tip-box info"><span class="tip-icon">💡</span><span class="tip-text">The APIGW_ENDPOINT must be HTTPS not WSS. Example: <code>https://abc123.execute-api.us-east-1.amazonaws.com/prod</code>. This is how Lambda posts messages back to connected clients.</span></div>
+</section>
+
+<!-- ============================== PROJECT 4 ============================== -->
+<section class="project" id="p4">
+  <div class="project-header">
+    <div class="project-num">PROJECT 04 / 10</div>
+    <div class="project-title" style="color:#ffd166">AI Image Analyzer</div>
+    <div class="project-desc">Upload images to S3, automatically analyze them with Rekognition (labels, faces, text detection), and store the results in DynamoDB. Query results via API.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#ffd166;border-color:rgba(255,209,102,0.3);background:rgba(255,209,102,0.07)">Rekognition</span>
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">S3</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">Lambda</span>
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">DynamoDB</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    Upload image to S3 → S3 Event triggers Lambda → Lambda calls Rekognition (detect_labels + detect_text) → Store analysis JSON in DynamoDB → Query via API Gateway
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Create S3 bucket</div><div class="step-detail">Bucket name: <code>image-analysis-uploads</code> — Region: us-east-1 — Keep default settings (block public access ON).</div></div></div>
+    <div class="step"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Create DynamoDB table</div><div class="step-detail">Table: <code>image_analysis</code> — Partition key: <code>imageKey</code> (String) — Sort key: <code>analyzedAt</code> (String)</div></div></div>
+    <div class="step"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">Create Lambda with correct policies</div><div class="step-detail">Policies needed: <code>AmazonS3ReadOnlyAccess</code> + <code>AmazonRekognitionFullAccess</code> + <code>AmazonDynamoDBFullAccess</code></div></div></div>
+    <div class="step"><div class="step-num-circle">4</div><div class="step-body"><div class="step-title">Add S3 trigger to Lambda</div><div class="step-detail">Lambda → Add Trigger → S3 → Bucket: image-analysis-uploads → Event: ObjectCreated → Suffix: .jpg (and repeat for .png)</div></div></div>
+    <div class="step"><div class="step-num-circle">5</div><div class="step-body"><div class="step-title">Upload a test image</div><div class="step-detail">Upload any .jpg to the bucket. Check CloudWatch Logs for Lambda output. Check DynamoDB for analysis results.</div></div></div>
+  </div>
+
+  <div class="section-title">Lambda Code</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">image_analyzer.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, urllib.parse
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+rek = boto3.client(<span class="str">'rekognition'</span>)
+db  = boto3.resource(<span class="str">'dynamodb'</span>).Table(<span class="str">'image_analysis'</span>)
+
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):
+    bucket = event[<span class="str">'Records'</span>][<span class="num">0</span>][<span class="str">'s3'</span>][<span class="str">'bucket'</span>][<span class="str">'name'</span>]
+    key    = urllib.parse.unquote_plus(
+                 event[<span class="str">'Records'</span>][<span class="num">0</span>][<span class="str">'s3'</span>][<span class="str">'object'</span>][<span class="str">'key'</span>])
+    
+    s3ref  = {<span class="str">'S3Object'</span>: {<span class="str">'Bucket'</span>: bucket, <span class="str">'Name'</span>: key}}
+    
+    <span class="comment"># 1. Detect object labels</span>
+    labels_resp = rek.detect_labels(Image=s3ref, MaxLabels=<span class="num">10</span>)
+    labels = [{<span class="str">'name'</span>: l[<span class="str">'Name'</span>], <span class="str">'confidence'</span>: <span class="fn">round</span>(l[<span class="str">'Confidence'</span>], <span class="num">2</span>)}
+              <span class="kw">for</span> l <span class="kw">in</span> labels_resp[<span class="str">'Labels'</span>]]
+    
+    <span class="comment"># 2. Detect text in image</span>
+    text_resp = rek.detect_text(Image=s3ref)
+    texts = [t[<span class="str">'DetectedText'</span>] <span class="kw">for</span> t <span class="kw">in</span> text_resp[<span class="str">'TextDetections'</span>]
+             <span class="kw">if</span> t[<span class="str">'Type'</span>] == <span class="str">'LINE'</span>]
+    
+    <span class="comment"># 3. Detect faces</span>
+    faces_resp = rek.detect_faces(Image=s3ref, Attributes=[<span class="str">'DEFAULT'</span>])
+    face_count = <span class="fn">len</span>(faces_resp[<span class="str">'FaceDetails'</span>])
+    
+    <span class="comment"># 4. Save results to DynamoDB</span>
+    result = {
+        <span class="str">'imageKey'</span>:    key,
+        <span class="str">'analyzedAt'</span>:  datetime.utcnow().isoformat(),
+        <span class="str">'bucket'</span>:      bucket,
+        <span class="str">'labels'</span>:      json.dumps(labels),
+        <span class="str">'texts'</span>:       json.dumps(texts),
+        <span class="str">'face_count'</span>:  face_count,
+        <span class="str">'top_label'</span>:   labels[<span class="num">0</span>][<span class="str">'name'</span>] <span class="kw">if</span> labels <span class="kw">else</span> <span class="str">'unknown'</span>
+    }
+    db.put_item(Item=result)
+    <span class="fn">print</span>(json.dumps(result, indent=<span class="num">2</span>))
+    <span class="kw">return</span> result</div>
+  </div>
+</section>
+
+<!-- ============================== PROJECT 5 ============================== -->
+<section class="project" id="p5">
+  <div class="project-header">
+    <div class="project-num">PROJECT 05 / 10</div>
+    <div class="project-title" style="color:#ef476f">File Upload Virus Scanner</div>
+    <div class="project-desc">Users upload files via pre-signed S3 URLs. A Lambda scans metadata and file size rules, quarantines suspicious files to a second bucket, and notifies admins via SNS.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#ef476f;border-color:rgba(239,71,111,0.3);background:rgba(239,71,111,0.07)">S3</span>
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">Lambda</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">SNS</span>
+      <span class="stag" style="color:#ffd166;border-color:rgba(255,209,102,0.3);background:rgba(255,209,102,0.07)">API Gateway</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    Client requests pre-signed URL → Lambda generates S3 pre-signed URL → Client uploads directly to S3 → S3 triggers scan Lambda → Lambda checks rules → Safe: keep / Suspicious: copy to quarantine bucket + SNS alert
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Create two S3 buckets</div><div class="step-detail"><code>uploads-inbox</code> for incoming files and <code>uploads-quarantine</code> for suspicious files. Keep both private.</div></div></div>
+    <div class="step"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Create SNS topic for alerts</div><div class="step-detail">SNS → Create Topic → Standard → Name: <code>security-alerts</code> → Subscribe your email to it.</div></div></div>
+    <div class="step"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">Create Presign Lambda</div><div class="step-detail">This Lambda generates a pre-signed URL so clients can upload directly to S3. Needs <code>AmazonS3FullAccess</code>. Deploy behind POST /upload-url in API Gateway.</div></div></div>
+    <div class="step"><div class="step-num-circle">4</div><div class="step-body"><div class="step-title">Create Scanner Lambda</div><div class="step-detail">Needs: <code>AmazonS3FullAccess</code> + <code>AmazonSNSFullAccess</code>. Add env var: <code>QUARANTINE_BUCKET</code> and <code>SNS_TOPIC_ARN</code>.</div></div></div>
+    <div class="step"><div class="step-num-circle">5</div><div class="step-body"><div class="step-title">Add S3 trigger to Scanner Lambda</div><div class="step-detail">Trigger on <code>uploads-inbox</code> → ObjectCreated → no suffix filter.</div></div></div>
+    <div class="step"><div class="step-num-circle">6</div><div class="step-body"><div class="step-title">Test: upload an .exe file</div><div class="step-detail">Request a presigned URL, upload a file named <code>test.exe</code>. It should be moved to the quarantine bucket and you'll get an SNS email alert.</div></div></div>
+  </div>
+
+  <div class="section-title">Scanner Lambda Code</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">scanner_lambda.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, os, urllib.parse
+
+s3  = boto3.client(<span class="str">'s3'</span>)
+sns = boto3.client(<span class="str">'sns'</span>)
+QUARANTINE = os.environ[<span class="str">'QUARANTINE_BUCKET'</span>]
+SNS_ARN    = os.environ[<span class="str">'SNS_TOPIC_ARN'</span>]
+
+BLOCKED_EXTENSIONS = {<span class="str">'.exe'</span>, <span class="str">'.bat'</span>, <span class="str">'.sh'</span>, <span class="str">'.ps1'</span>, <span class="str">'.vbs'</span>, <span class="str">'.cmd'</span>}
+MAX_SIZE_MB = <span class="num">10</span>
+
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):
+    bucket = event[<span class="str">'Records'</span>][<span class="num">0</span>][<span class="str">'s3'</span>][<span class="str">'bucket'</span>][<span class="str">'name'</span>]
+    key    = urllib.parse.unquote_plus(
+                 event[<span class="str">'Records'</span>][<span class="num">0</span>][<span class="str">'s3'</span>][<span class="str">'object'</span>][<span class="str">'key'</span>])
+    size   = event[<span class="str">'Records'</span>][<span class="num">0</span>][<span class="str">'s3'</span>][<span class="str">'object'</span>][<span class="str">'size'</span>]
+    
+    <span class="comment"># Check rules</span>
+    ext        = <span class="str">'.'</span> + key.rsplit(<span class="str">'.'</span>, <span class="num">1</span>)[-<span class="num">1</span>].lower()
+    size_mb    = size / (<span class="num">1024</span> * <span class="num">1024</span>)
+    suspicious = ext <span class="kw">in</span> BLOCKED_EXTENSIONS <span class="kw">or</span> size_mb > MAX_SIZE_MB
+    
+    <span class="kw">if</span> suspicious:
+        reason = <span class="str">f"Blocked extension: {ext}"</span> <span class="kw">if</span> ext <span class="kw">in</span> BLOCKED_EXTENSIONS \
+                 <span class="kw">else</span> <span class="str">f"File too large: {size_mb:.1f}MB"</span>
+        
+        <span class="comment"># Move to quarantine</span>
+        s3.copy_object(
+            Bucket     = QUARANTINE,
+            Key        = key,
+            CopySource = {<span class="str">'Bucket'</span>: bucket, <span class="str">'Key'</span>: key}
+        )
+        s3.delete_object(Bucket=bucket, Key=key)
+        
+        <span class="comment"># Send SNS alert</span>
+        sns.publish(
+            TopicArn = SNS_ARN,
+            Subject  = <span class="str">f"SECURITY ALERT: Suspicious file blocked"</span>,
+            Message  = <span class="str">f"File: {key}\nReason: {reason}\nSize: {size_mb:.2f}MB\nQuarantined: YES"</span>
+        )
+        <span class="fn">print</span>(<span class="str">f"QUARANTINED: {key} — {reason}"</span>)
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(<span class="str">f"CLEAN: {key} ({size_mb:.2f}MB)"</span>)
+
+<span class="comment"># ---- Presign Lambda ----</span>
+<span class="comment"># def lambda_handler(event, ctx):</span>
+<span class="comment">#     filename = json.loads(event['body'])['filename']</span>
+<span class="comment">#     url = boto3.client('s3').generate_presigned_url(</span>
+<span class="comment">#         'put_object',</span>
+<span class="comment">#         Params={'Bucket': 'uploads-inbox', 'Key': filename},</span>
+<span class="comment">#         ExpiresIn=300</span>
+<span class="comment">#     )</span>
+<span class="comment">#     return {'statusCode': 200, 'body': json.dumps({'uploadUrl': url})}</span></div>
+  </div>
+</section>
+
+<!-- ============================== PROJECT 6 ============================== -->
+<section class="project" id="p6">
+  <div class="project-header">
+    <div class="project-num">PROJECT 06 / 10</div>
+    <div class="project-title" style="color:#ff6b35">Game Leaderboard API</div>
+    <div class="project-desc">A leaderboard for a game. Players submit scores, DynamoDB stores them with a GSI for sorted queries. Lambda handles CRUD. Results are cached with API Gateway caching.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">DynamoDB + GSI</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">Lambda</span>
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">API Gateway</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    POST /score → Lambda → DynamoDB put_item (game_id + player + score) | GET /leaderboard?game=X → Lambda → DynamoDB query GSI sorted by score descending → top 10 returned
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Create DynamoDB table with GSI</div><div class="step-detail">Table: <code>leaderboard</code> — Partition key: <code>player_id</code> (String) — Sort key: <code>game_id</code> (String). Then add a GSI: Partition key: <code>game_id</code>, Sort key: <code>score</code> (Number), GSI name: <code>game-score-index</code>.</div></div></div>
+    <div class="step"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Create Lambda</div><div class="step-detail">Python 3.12 — Policy: <code>AmazonDynamoDBFullAccess</code> — paste code below.</div></div></div>
+    <div class="step"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">Create REST API with two endpoints</div><div class="step-detail">POST <code>/score</code> and GET <code>/leaderboard</code> — both proxy to the same Lambda. Deploy to stage <code>prod</code>.</div></div></div>
+    <div class="step"><div class="step-num-circle">4</div><div class="step-body"><div class="step-title">Submit test scores</div><div class="step-detail">POST /score with: <code>{"player":"Alice","game":"chess","score":2400}</code> — submit 5 different players.</div></div></div>
+    <div class="step"><div class="step-num-circle">5</div><div class="step-body"><div class="step-title">Query leaderboard</div><div class="step-detail">GET <code>/leaderboard?game=chess</code> — returns top 10 sorted by score.</div></div></div>
+  </div>
+
+  <div class="section-title">Lambda Code</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">leaderboard_lambda.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, time
+<span class="kw">from</span> boto3.dynamodb.conditions <span class="kw">import</span> Key
+
+table = boto3.resource(<span class="str">'dynamodb'</span>).Table(<span class="str">'leaderboard'</span>)
+
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):
+    method = event[<span class="str">'httpMethod'</span>]
+    
+    <span class="kw">if</span> method == <span class="str">'POST'</span>:
+        b = json.loads(event[<span class="str">'body'</span>])
+        
+        <span class="comment"># Upsert: keep highest score per player per game</span>
+        existing = table.get_item(Key={
+            <span class="str">'player_id'</span>: b[<span class="str">'player'</span>],
+            <span class="str">'game_id'</span>:   b[<span class="str">'game'</span>]
+        }).get(<span class="str">'Item'</span>)
+        
+        <span class="kw">if not</span> existing <span class="kw">or</span> b[<span class="str">'score'</span>] > existing[<span class="str">'score'</span>]:
+            table.put_item(Item={
+                <span class="str">'player_id'</span>:  b[<span class="str">'player'</span>],
+                <span class="str">'game_id'</span>:    b[<span class="str">'game'</span>],
+                <span class="str">'score'</span>:      b[<span class="str">'score'</span>],
+                <span class="str">'updated_at'</span>: <span class="fn">int</span>(time.time())
+            })
+            msg = <span class="str">'New high score!'</span>
+        <span class="kw">else</span>:
+            msg = <span class="str">'Score not beaten'</span>
+        
+        <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>,
+                <span class="str">'body'</span>: json.dumps({<span class="str">'status'</span>: msg})}
+    
+    <span class="kw">if</span> method == <span class="str">'GET'</span>:
+        game = event.get(<span class="str">'queryStringParameters'</span>, {}).get(<span class="str">'game'</span>, <span class="str">''</span>)
+        
+        <span class="comment"># Query GSI sorted by score (highest first)</span>
+        resp = table.query(
+            IndexName                  = <span class="str">'game-score-index'</span>,
+            KeyConditionExpression     = Key(<span class="str">'game_id'</span>).eq(game),
+            ScanIndexForward           = <span class="kw">False</span>,  <span class="comment"># descending</span>
+            Limit                      = <span class="num">10</span>
+        )
+        
+        board = [{<span class="str">'rank'</span>: i+<span class="num">1</span>,
+                  <span class="str">'player'</span>: r[<span class="str">'player_id'</span>],
+                  <span class="str">'score'</span>: <span class="fn">int</span>(r[<span class="str">'score'</span>])}
+                 <span class="kw">for</span> i, r <span class="kw">in</span> <span class="fn">enumerate</span>(resp[<span class="str">'Items'</span>])]
+        
+        <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>,
+                <span class="str">'body'</span>: json.dumps({<span class="str">'game'</span>: game, <span class="str">'leaderboard'</span>: board})}</div>
+  </div>
+  <div class="tip-box warn"><span class="tip-icon">⚠️</span><span class="tip-text">DynamoDB GSI sort keys are eventually consistent by default. The leaderboard might take a second to reflect new scores. Use <code>ScanIndexForward=False</code> to get descending order — DynamoDB sorts by sort key (score) ascending by default.</span></div>
+</section>
+
+<!-- ============================== PROJECT 7 ============================== -->
+<section class="project" id="p7">
+  <div class="project-header">
+    <div class="project-num">PROJECT 07 / 10</div>
+    <div class="project-title" style="color:#00d4aa">Customer Feedback Sentiment Analyzer</div>
+    <div class="project-desc">Customers submit text feedback via API. AWS Comprehend analyzes the sentiment (positive/negative/neutral). Results are stored in DynamoDB and weekly summaries are emailed via SES.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">Comprehend</span>
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">Lambda</span>
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">DynamoDB</span>
+      <span class="stag" style="color:#ffd166;border-color:rgba(255,209,102,0.3);background:rgba(255,209,102,0.07)">EventBridge</span>
+      <span class="stag" style="color:#ef476f;border-color:rgba(239,71,111,0.3);background:rgba(239,71,111,0.07)">SES</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    POST /feedback → Lambda → Comprehend.detect_sentiment → Save to DynamoDB (with sentiment score) | EventBridge (weekly cron) → Report Lambda → Scan DynamoDB → Aggregate stats → SES weekly email
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Create DynamoDB table</div><div class="step-detail">Table: <code>feedback</code> — Partition key: <code>id</code> (String). Enable TTL on attribute <code>expires</code> if you want auto-cleanup of old data.</div></div></div>
+    <div class="step"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Create Feedback Lambda</div><div class="step-detail">Policies: <code>ComprehendReadOnly</code> + <code>AmazonDynamoDBFullAccess</code> + <code>AmazonSESFullAccess</code>. Env vars: <code>FROM_EMAIL</code>, <code>REPORT_EMAIL</code>.</div></div></div>
+    <div class="step"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">Add POST /feedback to API Gateway</div><div class="step-detail">Enable CORS. Deploy to prod stage. The endpoint accepts: <code>{"text": "Your feedback here", "customer": "John"}</code></div></div></div>
+    <div class="step"><div class="step-num-circle">4</div><div class="step-body"><div class="step-title">Create weekly report via EventBridge</div><div class="step-detail">EventBridge → Rules → Schedule: <code>cron(0 9 ? * MON *)</code> (every Monday 9am UTC) → Target: Report Lambda function.</div></div></div>
+    <div class="step"><div class="step-num-circle">5</div><div class="step-body"><div class="step-title">Test with different feedback texts</div><div class="step-detail">Submit "Great product, love it!" (positive) and "Terrible experience, very slow" (negative) — check DynamoDB for the sentiment scores stored.</div></div></div>
+  </div>
+
+  <div class="section-title">Lambda Code</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">sentiment_lambda.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, uuid, os
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> boto3.dynamodb.conditions <span class="kw">import</span> Attr
+<span class="kw">from</span> decimal <span class="kw">import</span> Decimal
+
+comp  = boto3.client(<span class="str">'comprehend'</span>, region_name=<span class="str">'us-east-1'</span>)
+ses   = boto3.client(<span class="str">'ses'</span>,        region_name=<span class="str">'us-east-1'</span>)
+table = boto3.resource(<span class="str">'dynamodb'</span>).Table(<span class="str">'feedback'</span>)
+
+FROM_EMAIL   = os.environ.get(<span class="str">'FROM_EMAIL'</span>,  <span class="str">''</span>)
+REPORT_EMAIL = os.environ.get(<span class="str">'REPORT_EMAIL'</span>, <span class="str">''</span>)
+
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):
+    <span class="comment"># Weekly report trigger from EventBridge</span>
+    <span class="kw">if</span> <span class="str">'source'</span> <span class="kw">in</span> event <span class="kw">and</span> event[<span class="str">'source'</span>] == <span class="str">'aws.events'</span>:
+        <span class="kw">return</span> <span class="fn">send_weekly_report</span>()
+    
+    <span class="comment"># Regular feedback submission</span>
+    b    = json.loads(event[<span class="str">'body'</span>])
+    text = b[<span class="str">'text'</span>]
+    
+    <span class="comment"># Analyze sentiment with Comprehend</span>
+    result = comp.detect_sentiment(Text=text, LanguageCode=<span class="str">'en'</span>)
+    sentiment = result[<span class="str">'Sentiment'</span>]  <span class="comment"># POSITIVE / NEGATIVE / NEUTRAL / MIXED</span>
+    scores    = result[<span class="str">'SentimentScore'</span>]
+    
+    <span class="comment"># Store in DynamoDB (convert floats to Decimal for DynamoDB)</span>
+    table.put_item(Item={
+        <span class="str">'id'</span>:          str(uuid.uuid4()),
+        <span class="str">'customer'</span>:    b.get(<span class="str">'customer'</span>, <span class="str">'anonymous'</span>),
+        <span class="str">'text'</span>:        text,
+        <span class="str">'sentiment'</span>:   sentiment,
+        <span class="str">'score_pos'</span>:   Decimal(str(<span class="fn">round</span>(scores[<span class="str">'Positive'</span>], <span class="num">4</span>))),
+        <span class="str">'score_neg'</span>:   Decimal(str(<span class="fn">round</span>(scores[<span class="str">'Negative'</span>], <span class="num">4</span>))),
+        <span class="str">'submitted_at'</span>:datetime.utcnow().isoformat()
+    })
+    
+    <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>,
+            <span class="str">'body'</span>: json.dumps({<span class="str">'sentiment'</span>: sentiment})}
+
+<span class="kw">def</span> <span class="fn">send_weekly_report</span>():
+    items = table.scan()[<span class="str">'Items'</span>]
+    counts = {<span class="str">'POSITIVE'</span>:<span class="num">0</span>, <span class="str">'NEGATIVE'</span>:<span class="num">0</span>, <span class="str">'NEUTRAL'</span>:<span class="num">0</span>, <span class="str">'MIXED'</span>:<span class="num">0</span>}
+    <span class="kw">for</span> item <span class="kw">in</span> items:
+        counts[item.get(<span class="str">'sentiment'</span>, <span class="str">'NEUTRAL'</span>)] += <span class="num">1</span>
+    total = <span class="fn">sum</span>(counts.values()) <span class="kw">or</span> <span class="num">1</span>
+    
+    report = <span class="str">f"Weekly Feedback Report\n{'='*30}\n"</span>
+    report += <span class="str">f"Total responses: {total}\n\n"</span>
+    <span class="kw">for</span> s, c <span class="kw">in</span> counts.items():
+        report += <span class="str">f"{s}: {c} ({c/total*100:.1f}%)\n"</span>
+    
+    ses.send_email(Source=FROM_EMAIL,
+                   Destination={<span class="str">'ToAddresses'</span>: [REPORT_EMAIL]},
+                   Message={<span class="str">'Subject'</span>: {<span class="str">'Data'</span>: <span class="str">'Weekly Feedback Report'</span>},
+                            <span class="str">'Body'</span>: {<span class="str">'Text'</span>: {<span class="str">'Data'</span>: report}}})
+    <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>}</div>
+  </div>
+</section>
+
+<!-- ============================== PROJECT 8 ============================== -->
+<section class="project" id="p8">
+  <div class="project-header">
+    <div class="project-num">PROJECT 08 / 10</div>
+    <div class="project-title" style="color:#7c6dfa">Document Processing Pipeline</div>
+    <div class="project-desc">Upload PDF or image documents to S3. Textract extracts the text. Lambda processes and summarizes key information. Results are stored in DynamoDB and an SNS notification is sent.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">Textract</span>
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">S3</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">Lambda</span>
+      <span class="stag" style="color:#ffd166;border-color:rgba(255,209,102,0.3);background:rgba(255,209,102,0.07)">DynamoDB</span>
+      <span class="stag" style="color:#ef476f;border-color:rgba(239,71,111,0.3);background:rgba(239,71,111,0.07)">SNS</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    Upload PDF/image to S3 → Lambda triggered → Textract.detect_document_text → Extract all lines → Count words/lines → Save summary + full text to DynamoDB → SNS notification with word count
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Create S3 bucket and DynamoDB table</div><div class="step-detail">S3 bucket: <code>doc-processing-input</code> — DynamoDB table: <code>documents</code>, partition key: <code>docId</code> (String)</div></div></div>
+    <div class="step"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Create SNS topic</div><div class="step-detail">SNS → Create topic → <code>doc-processed</code> → Subscribe your email to it.</div></div></div>
+    <div class="step"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">Create Lambda with correct policies</div><div class="step-detail">Policies: <code>AmazonTextractFullAccess</code> + <code>AmazonS3ReadOnlyAccess</code> + <code>AmazonDynamoDBFullAccess</code> + <code>AmazonSNSFullAccess</code>. Add env vars: <code>SNS_TOPIC_ARN</code>. Set timeout to 30s.</div></div></div>
+    <div class="step"><div class="step-num-circle">4</div><div class="step-body"><div class="step-title">Add S3 trigger</div><div class="step-detail">Trigger Lambda on ObjectCreated on the <code>doc-processing-input</code> bucket. Suffix filters: <code>.pdf</code> and <code>.jpg</code> and <code>.png</code> (add separate triggers for each).</div></div></div>
+    <div class="step"><div class="step-num-circle">5</div><div class="step-body"><div class="step-title">Upload a test document</div><div class="step-detail">Upload any image with text (e.g., a screenshot of text, or a simple document). Check DynamoDB for the extracted text and SNS for the notification.</div></div></div>
+  </div>
+
+  <div class="tip-box warn"><span class="tip-icon">⚠️</span><span class="tip-text">Textract's <code>detect_document_text</code> works best with clear images. For PDFs, each page is processed separately in async mode. This example uses the synchronous API which works on single-page images and PDFs.</span></div>
+
+  <div class="section-title">Lambda Code</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">doc_processor.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, os, uuid, urllib.parse
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+textract = boto3.client(<span class="str">'textract'</span>)
+sns      = boto3.client(<span class="str">'sns'</span>)
+table    = boto3.resource(<span class="str">'dynamodb'</span>).Table(<span class="str">'documents'</span>)
+SNS_ARN  = os.environ[<span class="str">'SNS_TOPIC_ARN'</span>]
+
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):
+    bucket = event[<span class="str">'Records'</span>][<span class="num">0</span>][<span class="str">'s3'</span>][<span class="str">'bucket'</span>][<span class="str">'name'</span>]
+    key    = urllib.parse.unquote_plus(
+                 event[<span class="str">'Records'</span>][<span class="num">0</span>][<span class="str">'s3'</span>][<span class="str">'object'</span>][<span class="str">'key'</span>])
+    
+    <span class="comment"># Extract text with Textract</span>
+    response = textract.detect_document_text(
+        Document={<span class="str">'S3Object'</span>: {<span class="str">'Bucket'</span>: bucket, <span class="str">'Name'</span>: key}}
+    )
+    
+    <span class="comment"># Collect all LINE blocks</span>
+    lines = [b[<span class="str">'Text'</span>] <span class="kw">for</span> b <span class="kw">in</span> response[<span class="str">'Blocks'</span>]
+             <span class="kw">if</span> b[<span class="str">'BlockType'</span>] == <span class="str">'LINE'</span>]
+    
+    full_text  = <span class="str">'\n'</span>.join(lines)
+    word_count = <span class="fn">len</span>(full_text.split())
+    
+    doc_id = str(uuid.uuid4())
+    
+    <span class="comment"># Save to DynamoDB (truncate text if very large)</span>
+    table.put_item(Item={
+        <span class="str">'docId'</span>:       doc_id,
+        <span class="str">'s3Key'</span>:       key,
+        <span class="str">'bucket'</span>:      bucket,
+        <span class="str">'line_count'</span>:  <span class="fn">len</span>(lines),
+        <span class="str">'word_count'</span>:  word_count,
+        <span class="str">'extracted_at'</span>: datetime.utcnow().isoformat(),
+        <span class="str">'full_text'</span>:   full_text[:<span class="num">380000</span>]  <span class="comment"># DynamoDB item limit 400KB</span>
+    })
+    
+    <span class="comment"># Send notification</span>
+    sns.publish(
+        TopicArn = SNS_ARN,
+        Subject  = <span class="str">f"Document Processed: {key}"</span>,
+        Message  = (
+            <span class="str">f"Document: {key}\n"</span>
+            <span class="str">f"Lines extracted: {len(lines)}\n"</span>
+            <span class="str">f"Word count: {word_count}\n"</span>
+            <span class="str">f"Doc ID: {doc_id}\n\n"</span>
+            <span class="str">f"First 500 chars:\n{full_text[:500]}"</span>
+        )
+    )
+    <span class="fn">print</span>(<span class="str">f"Processed {key}: {word_count} words, {len(lines)} lines"</span>)
+    <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>, <span class="str">'docId'</span>: doc_id}</div>
+  </div>
+</section>
+
+<!-- ============================== PROJECT 9 ============================== -->
+<section class="project" id="p9">
+  <div class="project-header">
+    <div class="project-num">PROJECT 09 / 10</div>
+    <div class="project-title" style="color:#ffd166">Multi-Step Order Approval Workflow</div>
+    <div class="project-desc">An order goes through multiple approval stages: validation → inventory check → payment → fulfillment. Each step is a separate Lambda. AWS Step Functions orchestrates the flow with error handling.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#ffd166;border-color:rgba(255,209,102,0.3);background:rgba(255,209,102,0.07)">Step Functions</span>
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">Lambda (×3)</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">DynamoDB</span>
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">SNS</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    Start Execution → Step 1: ValidateOrder Lambda → Step 2: CheckInventory Lambda → Step 3: ProcessPayment Lambda → Step 4: FulfillOrder Lambda → Success | Any step fails → Catch → NotifyFailure Lambda → SNS alert
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Create 4 Lambda functions</div><div class="step-detail">Create: <code>validate-order</code>, <code>check-inventory</code>, <code>process-payment</code>, <code>fulfill-order</code>. Each is simple Python — paste from code below. All need <code>AmazonDynamoDBFullAccess</code>.</div></div></div>
+    <div class="step"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Create orders DynamoDB table</div><div class="step-detail">Table: <code>workflow_orders</code> — Partition key: <code>orderId</code> (String)</div></div></div>
+    <div class="step"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">Create Step Functions State Machine</div><div class="step-detail">Step Functions → Create state machine → Express workflow → Paste the ASL JSON definition below → IAM: auto-generate role → Create.</div></div></div>
+    <div class="step"><div class="step-num-circle">4</div><div class="step-body"><div class="step-title">Start a test execution</div><div class="step-detail">Click "Start execution" → Input: <code>{"orderId":"ORD999","item":"Phone","quantity":2,"price":599}</code> → Watch each step light up in the visual graph.</div></div></div>
+    <div class="step"><div class="step-num-circle">5</div><div class="step-body"><div class="step-title">Test failure path</div><div class="step-detail">Send input with <code>"quantity": 999</code> — the inventory check Lambda will throw an error, and Step Functions will route to the catch/failure path.</div></div></div>
+  </div>
+
+  <div class="section-title">Step Functions ASL Definition (JSON)</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">state_machine.json</span><span class="code-lang">ASL JSON</span></div>
+    <div class="code-body">{
+  <span class="key">"Comment"</span>: <span class="str">"Order Processing Workflow"</span>,
+  <span class="key">"StartAt"</span>: <span class="str">"ValidateOrder"</span>,
+  <span class="key">"States"</span>: {
+    <span class="key">"ValidateOrder"</span>: {
+      <span class="key">"Type"</span>: <span class="str">"Task"</span>,
+      <span class="key">"Resource"</span>: <span class="str">"arn:aws:lambda:REGION:ACCOUNT:function:validate-order"</span>,
+      <span class="key">"Next"</span>: <span class="str">"CheckInventory"</span>,
+      <span class="key">"Catch"</span>: [{<span class="key">"ErrorEquals"</span>: [<span class="str">"States.ALL"</span>], <span class="key">"Next"</span>: <span class="str">"OrderFailed"</span>}]
+    },
+    <span class="key">"CheckInventory"</span>: {
+      <span class="key">"Type"</span>: <span class="str">"Task"</span>,
+      <span class="key">"Resource"</span>: <span class="str">"arn:aws:lambda:REGION:ACCOUNT:function:check-inventory"</span>,
+      <span class="key">"Next"</span>: <span class="str">"ProcessPayment"</span>,
+      <span class="key">"Catch"</span>: [{<span class="key">"ErrorEquals"</span>: [<span class="str">"States.ALL"</span>], <span class="key">"Next"</span>: <span class="str">"OrderFailed"</span>}]
+    },
+    <span class="key">"ProcessPayment"</span>: {
+      <span class="key">"Type"</span>: <span class="str">"Task"</span>,
+      <span class="key">"Resource"</span>: <span class="str">"arn:aws:lambda:REGION:ACCOUNT:function:process-payment"</span>,
+      <span class="key">"Next"</span>: <span class="str">"FulfillOrder"</span>,
+      <span class="key">"Catch"</span>: [{<span class="key">"ErrorEquals"</span>: [<span class="str">"States.ALL"</span>], <span class="key">"Next"</span>: <span class="str">"OrderFailed"</span>}]
+    },
+    <span class="key">"FulfillOrder"</span>: {
+      <span class="key">"Type"</span>: <span class="str">"Task"</span>,
+      <span class="key">"Resource"</span>: <span class="str">"arn:aws:lambda:REGION:ACCOUNT:function:fulfill-order"</span>,
+      <span class="key">"Next"</span>: <span class="str">"OrderSuccess"</span>,
+      <span class="key">"Catch"</span>: [{<span class="key">"ErrorEquals"</span>: [<span class="str">"States.ALL"</span>], <span class="key">"Next"</span>: <span class="str">"OrderFailed"</span>}]
+    },
+    <span class="key">"OrderSuccess"</span>: {<span class="key">"Type"</span>: <span class="str">"Succeed"</span>},
+    <span class="key">"OrderFailed"</span>:  {<span class="key">"Type"</span>: <span class="str">"Fail"</span>, <span class="key">"Error"</span>: <span class="str">"OrderFailed"</span>}
+  }
+}</div>
+  </div>
+
+  <div class="section-title">Lambda Functions (all 4 steps)</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">all_step_lambdas.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json
+
+db = boto3.resource(<span class="str">'dynamodb'</span>).Table(<span class="str">'workflow_orders'</span>)
+
+<span class="comment"># ---- validate-order Lambda ----</span>
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):  <span class="comment"># validate-order</span>
+    <span class="kw">if not</span> event.get(<span class="str">'orderId'</span>) <span class="kw">or not</span> event.get(<span class="str">'item'</span>):
+        <span class="kw">raise</span> ValueError(<span class="str">"Missing required fields: orderId, item"</span>)
+    event[<span class="str">'status'</span>] = <span class="str">'VALIDATED'</span>
+    <span class="kw">return</span> event
+
+<span class="comment"># ---- check-inventory Lambda ----</span>
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):  <span class="comment"># check-inventory</span>
+    qty = event.get(<span class="str">'quantity'</span>, <span class="num">1</span>)
+    <span class="kw">if</span> qty > <span class="num">100</span>:  <span class="comment"># simulate out-of-stock</span>
+        <span class="kw">raise</span> Exception(<span class="str">f"Insufficient inventory for quantity {qty}"</span>)
+    event[<span class="str">'status'</span>] = <span class="str">'INVENTORY_OK'</span>
+    <span class="kw">return</span> event
+
+<span class="comment"># ---- process-payment Lambda ----</span>
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):  <span class="comment"># process-payment</span>
+    total = event.get(<span class="str">'price'</span>, <span class="num">0</span>) * event.get(<span class="str">'quantity'</span>, <span class="num">1</span>)
+    <span class="kw">if</span> total > <span class="num">10000</span>:  <span class="comment"># simulate payment limit</span>
+        <span class="kw">raise</span> Exception(<span class="str">f"Payment limit exceeded: ${total}"</span>)
+    event[<span class="str">'total_charged'</span>] = total
+    event[<span class="str">'status'</span>]        = <span class="str">'PAYMENT_OK'</span>
+    <span class="kw">return</span> event
+
+<span class="comment"># ---- fulfill-order Lambda ----</span>
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, ctx):  <span class="comment"># fulfill-order</span>
+    <span class="kw">import</span> time
+    event[<span class="str">'status'</span>]       = <span class="str">'FULFILLED'</span>
+    event[<span class="str">'fulfilled_at'</span>] = time.strftime(<span class="str">'%Y-%m-%dT%H:%M:%SZ'</span>)
+    
+    <span class="comment"># Save final order to DynamoDB</span>
+    db.put_item(Item={
+        <span class="str">'orderId'</span>:      event[<span class="str">'orderId'</span>],
+        <span class="str">'item'</span>:         event[<span class="str">'item'</span>],
+        <span class="str">'total'</span>:        str(event.get(<span class="str">'total_charged'</span>, <span class="num">0</span>)),
+        <span class="str">'status'</span>:       <span class="str">'FULFILLED'</span>,
+        <span class="str">'fulfilled_at'</span>: event[<span class="str">'fulfilled_at'</span>]
+    })
+    <span class="kw">return</span> event</div>
+  </div>
+  <div class="tip-box info"><span class="tip-icon">💡</span><span class="tip-text">Replace REGION and ACCOUNT in the ASL JSON with your actual values. Find your Account ID in the top-right of the AWS Console. Copy each Lambda ARN from its function page.</span></div>
+</section>
+
+<!-- ============================== PROJECT 10 ============================== -->
+<section class="project" id="p10">
+  <div class="project-header">
+    <div class="project-num">PROJECT 10 / 10</div>
+    <div class="project-title" style="color:#ef476f">Real-Time Analytics Dashboard</div>
+    <div class="project-desc">Clickstream events from a website are sent to Kinesis Data Stream. A Lambda consumer processes them in real time, aggregates metrics, and stores them in DynamoDB. A dashboard API serves live stats.</div>
+    <div class="service-tags">
+      <span class="stag" style="color:#ef476f;border-color:rgba(239,71,111,0.3);background:rgba(239,71,111,0.07)">Kinesis Data Streams</span>
+      <span class="stag" style="color:#ff6b35;border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.07)">Lambda</span>
+      <span class="stag" style="color:#00d4aa;border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.07)">DynamoDB</span>
+      <span class="stag" style="color:#7c6dfa;border-color:rgba(124,109,250,0.3);background:rgba(124,109,250,0.07)">API Gateway</span>
+    </div>
+  </div>
+
+  <div class="arch-box">
+    <span class="arch-label">Architecture Flow</span>
+    Website event → PUT record to Kinesis stream → Lambda (Kinesis trigger, batch=100) → Aggregate page views per URL → DynamoDB UpdateItem (atomic counter) → Dashboard API reads totals
+  </div>
+
+  <div class="section-title">What You Will Learn</div>
+  <div class="learn-grid">
+    <div class="learn-item"><div class="learn-dot" style="background:#ef476f"></div>Kinesis Data Streams producer + consumer</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#ef476f"></div>Lambda batch processing from Kinesis</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#ef476f"></div>DynamoDB atomic counters with ADD</div>
+    <div class="learn-item"><div class="learn-dot" style="background:#ef476f"></div>High-throughput serverless data pipeline</div>
+  </div>
+
+  <div class="section-title">Step-by-Step Setup</div>
+  <div class="steps">
+    <div class="step"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Create Kinesis Data Stream</div><div class="step-detail">Kinesis → Create data stream → Name: <code>clickstream</code> → Capacity mode: On-demand → Create.</div></div></div>
+    <div class="step"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Create DynamoDB table</div><div class="step-detail">Table: <code>page_views</code> — Partition key: <code>page</code> (String). This table stores the running view count per page.</div></div></div>
+    <div class="step"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">Create Consumer Lambda</div><div class="step-detail">Policies: <code>AmazonKinesisReadOnlyAccess</code> + <code>AmazonDynamoDBFullAccess</code>. Paste consumer code below. Set timeout: 30s.</div></div></div>
+    <div class="step"><div class="step-num-circle">4</div><div class="step-body"><div class="step-title">Add Kinesis trigger to Consumer Lambda</div><div class="step-detail">Lambda → Add Trigger → Kinesis → Stream: clickstream → Batch size: 100 → Bisect on error: ON → Enable trigger.</div></div></div>
+    <div class="step"><div class="step-num-circle">5</div><div class="step-body"><div class="step-title">Create Producer Lambda + API endpoint</div><div class="step-detail">A second Lambda that receives POST /event and puts a record into Kinesis. Deploy behind POST /event in API Gateway. See producer code below.</div></div></div>
+    <div class="step"><div class="step-num-circle">6</div><div class="step-body"><div class="step-title">Create Dashboard API endpoint</div><div class="step-detail">GET /stats → Lambda reads DynamoDB table scan → returns all page view counts sorted descending. Deploy to API Gateway.</div></div></div>
+    <div class="step"><div class="step-num-circle">7</div><div class="step-body"><div class="step-title">Send test events</div><div class="step-detail">POST /event with: <code>{"page":"/home","user":"u123"}</code> — send 10–20 events to different pages — then GET /stats to see live counts.</div></div></div>
+  </div>
+
+  <div class="section-title">Producer Lambda + Consumer Lambda + Stats Lambda</div>
+  <div class="code-section">
+    <div class="code-header"><span class="code-filename">analytics_lambdas.py</span><span class="code-lang">Python</span></div>
+    <div class="code-body"><span class="kw">import</span> boto3, json, base64, os, time
+
+<span class="comment"># ============================================================</span>
+<span class="comment"># PRODUCER LAMBDA — receives POST /event from API Gateway</span>
+<span class="comment"># ============================================================</span>
+kinesis = boto3.client(<span class="str">'kinesis'</span>)
+STREAM  = <span class="str">'clickstream'</span>
+
+<span class="kw">def</span> <span class="fn">producer_handler</span>(event, ctx):
+    b = json.loads(event[<span class="str">'body'</span>])
+    b[<span class="str">'timestamp'</span>] = <span class="fn">int</span>(time.time() * <span class="num">1000</span>)
+    
+    kinesis.put_record(
+        StreamName    = STREAM,
+        Data          = json.dumps(b).encode(<span class="str">'utf-8'</span>),
+        PartitionKey  = b.get(<span class="str">'page'</span>, <span class="str">'default'</span>)
+    )
+    <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>,
+            <span class="str">'body'</span>: json.dumps({<span class="str">'status'</span>: <span class="str">'event queued'</span>})}
+
+
+<span class="comment"># ============================================================</span>
+<span class="comment"># CONSUMER LAMBDA — triggered by Kinesis, batch of up to 100</span>
+<span class="comment"># ============================================================</span>
+table = boto3.resource(<span class="str">'dynamodb'</span>).Table(<span class="str">'page_views'</span>)
+
+<span class="kw">def</span> <span class="fn">consumer_handler</span>(event, ctx):
+    page_counts = {}
+    
+    <span class="kw">for</span> record <span class="kw">in</span> event[<span class="str">'Records'</span>]:
+        <span class="comment"># Decode Kinesis record</span>
+        payload = json.loads(
+            base64.b64decode(record[<span class="str">'kinesis'</span>][<span class="str">'data'</span>]).decode(<span class="str">'utf-8'</span>)
+        )
+        page = payload.get(<span class="str">'page'</span>, <span class="str">'unknown'</span>)
+        page_counts[page] = page_counts.get(page, <span class="num">0</span>) + <span class="num">1</span>
+    
+    <span class="comment"># Batch update DynamoDB with atomic ADD</span>
+    <span class="kw">for</span> page, count <span class="kw">in</span> page_counts.items():
+        table.update_item(
+            Key                        = {<span class="str">'page'</span>: page},
+            UpdateExpression           = <span class="str">'ADD #v :c'</span>,
+            ExpressionAttributeNames   = {<span class="str">'#v'</span>: <span class="str">'views'</span>},
+            ExpressionAttributeValues  = {<span class="str">':c'</span>: count}
+        )
+    
+    <span class="fn">print</span>(<span class="str">f"Processed {len(event['Records'])} events: {page_counts}"</span>)
+
+
+<span class="comment"># ============================================================</span>
+<span class="comment"># STATS LAMBDA — GET /stats, returns dashboard data</span>
+<span class="comment"># ============================================================</span>
+<span class="kw">def</span> <span class="fn">stats_handler</span>(event, ctx):
+    items = table.scan()[<span class="str">'Items'</span>]
+    
+    <span class="comment"># Sort by views descending</span>
+    sorted_pages = <span class="fn">sorted</span>(items,
+        key=<span class="kw">lambda</span> x: <span class="fn">int</span>(x.get(<span class="str">'views'</span>, <span class="num">0</span>)), reverse=<span class="kw">True</span>)
+    
+    result = [{<span class="str">'page'</span>: p[<span class="str">'page'</span>], <span class="str">'views'</span>: <span class="fn">int</span>(p.get(<span class="str">'views'</span>, <span class="num">0</span>))}
+              <span class="kw">for</span> p <span class="kw">in</span> sorted_pages]
+    
+    <span class="kw">return</span> {
+        <span class="str">'statusCode'</span>: <span class="num">200</span>,
+        <span class="str">'headers'</span>: {<span class="str">'Access-Control-Allow-Origin'</span>: <span class="str">'*'</span>},
+        <span class="str">'body'</span>: json.dumps({<span class="str">'pages'</span>: result,
+                            <span class="str">'total_events'</span>: <span class="fn">sum</span>(p[<span class="str">'views'</span>] <span class="kw">for</span> p <span class="kw">in</span> result)})
+    }</div>
+  </div>
+  <div class="tip-box info"><span class="tip-icon">💡</span><span class="tip-text">Note: producer_handler, consumer_handler, and stats_handler can be in separate Lambda functions (recommended) or you can use environment variables to route to the right handler in a single function. For learning, keep them separate.</span></div>
+  <div class="tip-box warn"><span class="tip-icon">⚠️</span><span class="tip-text">Kinesis streams cost money even when idle (about $0.015/hour for on-demand). Delete or pause the stream when not practicing to avoid charges.</span></div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <strong>10 AWS Practice Projects</strong> — All services used are available on AWS Free Tier or very low cost during practice.<br>
+  Always clean up resources (delete S3 buckets, DynamoDB tables, Kinesis streams) after each project to avoid charges.<br><br>
+  <span style="color:var(--muted)">Services covered: Lambda · API Gateway · DynamoDB · S3 · SQS · RDS · Kinesis · Rekognition · Textract · Comprehend · Step Functions · SNS · SES · Secrets Manager · CloudWatch · EventBridge</span>
+</div>
+
+</main>
+</div>
+
+<script>
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('.project');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

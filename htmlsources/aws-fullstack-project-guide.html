@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Full-Stack Project — End-to-End Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #FF9900;
+    --primary-dark: #c77200;
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2435;
+    --card: #1a2035;
+    --border: #2a3350;
+    --text: #e8eaf6;
+    --muted: #8892a4;
+    --accent-blue: #4fc3f7;
+    --accent-green: #69f0ae;
+    --accent-pink: #f48fb1;
+    --accent-purple: #ce93d8;
+    --accent-orange: #FF9900;
+    --accent-red: #ef5350;
+    --accent-teal: #4db6ac;
+    --code-bg: #0d1117;
+  }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(15,17,23,0.96); border-bottom: 1px solid var(--border); backdrop-filter: blur(12px); }
+  .nav-inner { max-width: 1200px; margin: auto; display: flex; align-items: center; gap: 0; padding: 0 24px; overflow-x: auto; }
+  .nav-logo { font-weight: 700; font-size: 15px; color: var(--primary); padding: 14px 20px 14px 0; border-right: 1px solid var(--border); margin-right: 8px; white-space: nowrap; }
+  .nav-logo span { color: var(--text); }
+  nav a { color: var(--muted); text-decoration: none; font-size: 12px; padding: 14px 12px; white-space: nowrap; transition: color .2s; border-bottom: 2px solid transparent; }
+  nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #0d1117 0%, #1a1f35 50%, #0f1117 100%); border-bottom: 1px solid var(--border); padding: 60px 24px 50px; text-align: center; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,153,0,0.12); border: 1px solid rgba(255,153,0,0.3); border-radius: 20px; padding: 6px 16px; font-size: 12px; color: var(--primary); margin-bottom: 20px; }
+  .hero h1 { font-size: clamp(24px, 5vw, 42px); font-weight: 700; margin-bottom: 12px; }
+  .hero h1 span { color: var(--primary); }
+  .hero p { font-size: 16px; color: var(--muted); max-width: 640px; margin: 0 auto 28px; }
+  .services-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 900px; margin: 0 auto; }
+  .svc-pill { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; font-size: 11px; color: var(--muted); }
+  .svc-pill.hot { border-color: var(--primary); color: var(--primary); background: rgba(255,153,0,0.08); }
+
+  /* LAYOUT */
+  .page { max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+  .section { margin-top: 60px; }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 8px; }
+  .section-title { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 6px; }
+  .section-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch-diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 28px; overflow-x: auto; }
+  .arch-layers { display: flex; flex-direction: column; gap: 12px; min-width: 700px; }
+  .arch-layer { display: flex; align-items: stretch; gap: 10px; }
+  .layer-label { writing-mode: vertical-rl; text-orientation: mixed; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); display: flex; align-items: center; justify-content: center; min-width: 32px; background: var(--bg3); border-radius: 6px; padding: 8px 4px; }
+  .layer-boxes { display: flex; gap: 8px; flex: 1; flex-wrap: nowrap; }
+  .abox { flex: 1; background: var(--bg3); border-radius: 8px; padding: 10px 12px; border-left: 3px solid; font-size: 12px; }
+  .abox .abox-name { font-weight: 600; font-size: 11px; margin-bottom: 2px; }
+  .abox .abox-svc { font-size: 10px; color: var(--muted); }
+  .blue { border-color: var(--accent-blue); } .blue .abox-name { color: var(--accent-blue); }
+  .green { border-color: var(--accent-green); } .green .abox-name { color: var(--accent-green); }
+  .orange { border-color: var(--accent-orange); } .orange .abox-name { color: var(--accent-orange); }
+  .purple { border-color: var(--accent-purple); } .purple .abox-name { color: var(--accent-purple); }
+  .pink { border-color: var(--accent-pink); } .pink .abox-name { color: var(--accent-pink); }
+  .teal { border-color: var(--accent-teal); } .teal .abox-name { color: var(--accent-teal); }
+  .red { border-color: var(--accent-red); } .red .abox-name { color: var(--accent-red); }
+  .arch-arrow { text-align: center; color: var(--muted); font-size: 18px; margin: -4px 0; }
+
+  /* SERVICE CARDS GRID */
+  .svc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .svc-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; transition: border-color .2s; }
+  .svc-card:hover { border-color: var(--primary); }
+  .svc-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .svc-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .svc-card-head h3 { font-size: 14px; font-weight: 600; }
+  .svc-card-head .badge { font-size: 10px; background: rgba(255,153,0,0.15); color: var(--primary); border: 1px solid rgba(255,153,0,0.3); border-radius: 4px; padding: 2px 6px; margin-top: 2px; display: inline-block; }
+  .svc-card p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .svc-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { font-size: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; color: var(--muted); }
+
+  /* CODE BLOCKS */
+  .code-section { margin-top: 28px; }
+  .code-tabs { display: flex; gap: 2px; margin-bottom: 0; flex-wrap: wrap; }
+  .code-tab { background: var(--bg3); border: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; padding: 8px 16px; font-size: 12px; color: var(--muted); cursor: pointer; transition: all .2s; }
+  .code-tab.active { background: var(--code-bg); color: var(--text); border-color: var(--border); }
+  .code-wrap { background: var(--code-bg); border: 1px solid var(--border); border-radius: 0 8px 8px 8px; overflow-x: auto; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .code-header .filename { font-size: 12px; color: var(--muted); font-family: 'Consolas', monospace; }
+  .copy-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 11px; padding: 4px 10px; border-radius: 4px; cursor: pointer; transition: all .2s; }
+  .copy-btn:hover { color: var(--text); border-color: var(--primary); }
+  pre { padding: 20px; overflow-x: auto; }
+  code { font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.8; }
+  .k { color: #ff79c6; }
+  .s { color: #f1fa8c; }
+  .c { color: #6272a4; }
+  .f { color: #50fa7b; }
+  .v { color: #bd93f9; }
+  .n { color: #8be9fd; }
+  .num { color: #ffb86c; }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 20px; }
+  .step-line { display: flex; flex-direction: column; align-items: center; }
+  .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #000; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-connector { width: 2px; background: var(--border); flex: 1; margin: 4px 0; }
+  .step-content { padding-bottom: 28px; flex: 1; }
+  .step-content h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; margin-top: 7px; }
+  .step-content p { font-size: 13px; color: var(--muted); }
+  .step-content .cmd { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: monospace; font-size: 12px; color: var(--accent-green); margin-top: 10px; overflow-x: auto; }
+
+  /* INFO BOXES */
+  .info-box { border-radius: 8px; padding: 14px 18px; margin: 16px 0; font-size: 13px; border-left: 3px solid; }
+  .info-box.tip { background: rgba(105,240,174,0.07); border-color: var(--accent-green); color: var(--accent-green); }
+  .info-box.warn { background: rgba(255,153,0,0.07); border-color: var(--primary); color: var(--primary); }
+  .info-box.note { background: rgba(79,195,247,0.07); border-color: var(--accent-blue); color: var(--accent-blue); }
+
+  /* TABLES */
+  .tbl-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--bg3); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid rgba(42,51,80,0.5); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .cost-free { color: var(--accent-green); font-weight: 600; }
+  .cost-low { color: var(--accent-orange); }
+  .cost-med { color: var(--accent-pink); }
+
+  /* FLOW ARROWS */
+  .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+  .flow-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12px; }
+  .flow-arrow { color: var(--primary); font-size: 16px; }
+
+  /* CHECKLIST */
+  .checklist { display: flex; flex-direction: column; gap: 6px; }
+  .chk { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--primary); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .chk-box.done { background: var(--primary); }
+  .chk-box.done::after { content: '✓'; color: #000; font-size: 11px; font-weight: 700; }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .arch-layer { flex-direction: column; }
+    .layer-label { writing-mode: horizontal-tb; min-width: unset; min-height: 24px; }
+    .layer-boxes { flex-wrap: wrap; }
+    .abox { min-width: 120px; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">☁️ AWS <span>Full-Stack</span></div>
+    <a href="#architecture">Architecture</a>
+    <a href="#services">Services</a>
+    <a href="#frontend">Frontend</a>
+    <a href="#backend">Backend</a>
+    <a href="#database">Database</a>
+    <a href="#infra">Infrastructure</a>
+    <a href="#cicd">CI/CD</a>
+    <a href="#monitoring">Monitoring</a>
+    <a href="#security">Security</a>
+    <a href="#deploy">Deploy</a>
+    <a href="#cost">Cost</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🏗️ End-to-End AWS Project</div>
+  <h1>Full-Stack <span>Task Manager</span> App<br>on AWS — 20+ Services</h1>
+  <p>A production-grade, cloud-native application using maximum AWS services across frontend, backend, database, networking, security, CI/CD, and monitoring.</p>
+  <div class="services-strip">
+    <span class="svc-pill hot">EC2</span><span class="svc-pill hot">S3</span><span class="svc-pill hot">RDS</span>
+    <span class="svc-pill hot">Lambda</span><span class="svc-pill hot">API Gateway</span><span class="svc-pill hot">CloudFront</span>
+    <span class="svc-pill hot">DynamoDB</span><span class="svc-pill hot">ELB</span><span class="svc-pill hot">VPC</span>
+    <span class="svc-pill">Cognito</span><span class="svc-pill">SQS</span><span class="svc-pill">SNS</span>
+    <span class="svc-pill">ElastiCache</span><span class="svc-pill">ECR</span><span class="svc-pill">ECS</span>
+    <span class="svc-pill">CodePipeline</span><span class="svc-pill">CloudWatch</span><span class="svc-pill">IAM</span>
+    <span class="svc-pill">Route 53</span><span class="svc-pill">ACM</span><span class="svc-pill">Secrets Manager</span>
+    <span class="svc-pill">CloudTrail</span><span class="svc-pill">WAF</span><span class="svc-pill">SES</span>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ======================== ARCHITECTURE ======================== -->
+<section class="section" id="architecture">
+  <div class="section-label">Section 01</div>
+  <div class="section-title">System Architecture</div>
+  <div class="section-sub">Full cloud-native architecture — every layer uses dedicated AWS services</div>
+
+  <div class="arch-diagram">
+    <div class="arch-layers">
+
+      <div class="arch-layer">
+        <div class="layer-label">USER</div>
+        <div class="layer-boxes">
+          <div class="abox blue"><div class="abox-name">Browser / Mobile</div><div class="abox-svc">React SPA</div></div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ DNS Lookup</div>
+
+      <div class="arch-layer">
+        <div class="layer-label">DNS + CDN</div>
+        <div class="layer-boxes">
+          <div class="abox orange"><div class="abox-name">Route 53</div><div class="abox-svc">DNS Management</div></div>
+          <div class="abox orange"><div class="abox-name">CloudFront</div><div class="abox-svc">CDN + Edge Cache</div></div>
+          <div class="abox orange"><div class="abox-name">ACM</div><div class="abox-svc">SSL/TLS Certificates</div></div>
+          <div class="abox orange"><div class="abox-name">WAF</div><div class="abox-svc">Web App Firewall</div></div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ Static → S3 | Dynamic → ALB</div>
+
+      <div class="arch-layer">
+        <div class="layer-label">FRONTEND</div>
+        <div class="layer-boxes">
+          <div class="abox green"><div class="abox-name">S3 Bucket</div><div class="abox-svc">Static Files (HTML/JS/CSS)</div></div>
+          <div class="abox green"><div class="abox-name">Application Load Balancer</div><div class="abox-svc">HTTP/HTTPS Load Balancing</div></div>
+          <div class="abox green"><div class="abox-name">Cognito</div><div class="abox-svc">Auth (Login/Signup/JWT)</div></div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ API Calls</div>
+
+      <div class="arch-layer">
+        <div class="layer-label">API LAYER</div>
+        <div class="layer-boxes">
+          <div class="abox purple"><div class="abox-name">API Gateway</div><div class="abox-svc">REST API / WebSocket</div></div>
+          <div class="abox purple"><div class="abox-name">Lambda (Auth)</div><div class="abox-svc">Serverless Authorizer</div></div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ Compute</div>
+
+      <div class="arch-layer">
+        <div class="layer-label">COMPUTE</div>
+        <div class="layer-boxes">
+          <div class="abox pink"><div class="abox-name">EC2 (App Server)</div><div class="abox-svc">Node.js / Express</div></div>
+          <div class="abox pink"><div class="abox-name">ECS Fargate</div><div class="abox-svc">Containerized Workers</div></div>
+          <div class="abox pink"><div class="abox-name">Lambda Functions</div><div class="abox-svc">Serverless Handlers</div></div>
+          <div class="abox pink"><div class="abox-name">ECR</div><div class="abox-svc">Docker Image Registry</div></div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ Messaging &amp; Storage</div>
+
+      <div class="arch-layer">
+        <div class="layer-label">ASYNC</div>
+        <div class="layer-boxes">
+          <div class="abox teal"><div class="abox-name">SQS</div><div class="abox-svc">Task Queues</div></div>
+          <div class="abox teal"><div class="abox-name">SNS</div><div class="abox-svc">Push Notifications</div></div>
+          <div class="abox teal"><div class="abox-name">SES</div><div class="abox-svc">Email Service</div></div>
+          <div class="abox teal"><div class="abox-name">EventBridge</div><div class="abox-svc">Event Bus / Scheduler</div></div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ Data Layer</div>
+
+      <div class="arch-layer">
+        <div class="layer-label">DATABASE</div>
+        <div class="layer-boxes">
+          <div class="abox red"><div class="abox-name">RDS (PostgreSQL)</div><div class="abox-svc">Primary Relational DB</div></div>
+          <div class="abox red"><div class="abox-name">DynamoDB</div><div class="abox-svc">NoSQL / Sessions</div></div>
+          <div class="abox red"><div class="abox-name">ElastiCache (Redis)</div><div class="abox-svc">Caching Layer</div></div>
+          <div class="abox red"><div class="abox-name">S3 (Media)</div><div class="abox-svc">File / Object Storage</div></div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ Infrastructure</div>
+
+      <div class="arch-layer">
+        <div class="layer-label">INFRA</div>
+        <div class="layer-boxes">
+          <div class="abox blue"><div class="abox-name">VPC + Subnets</div><div class="abox-svc">Network Isolation</div></div>
+          <div class="abox blue"><div class="abox-name">IAM + Roles</div><div class="abox-svc">Access Control</div></div>
+          <div class="abox blue"><div class="abox-name">Secrets Manager</div><div class="abox-svc">Credentials Vault</div></div>
+          <div class="abox blue"><div class="abox-name">CloudWatch + CloudTrail</div><div class="abox-svc">Logs &amp; Audit</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SERVICES BREAKDOWN ======================== -->
+<section class="section" id="services">
+  <div class="section-label">Section 02</div>
+  <div class="section-title">AWS Services — What Each Does</div>
+  <div class="section-sub">24 services used in this project — grouped by purpose</div>
+
+  <div class="svc-grid">
+    <!-- Frontend -->
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(255,153,0,0.15)">🪣</div><div><h3>Amazon S3</h3><div class="badge">FRONTEND</div></div></div>
+      <p>Hosts the static React app (HTML, JS, CSS). Configured as a static website host with public read access.</p>
+      <div class="svc-tags"><span class="tag">Static Hosting</span><span class="tag">Object Store</span><span class="tag">Media Files</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(79,195,247,0.15)">🌐</div><div><h3>CloudFront</h3><div class="badge">CDN</div></div></div>
+      <p>Distributes static files globally via edge locations, caches assets, reduces latency for users worldwide.</p>
+      <div class="svc-tags"><span class="tag">CDN</span><span class="tag">Edge Cache</span><span class="tag">HTTPS</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(105,240,174,0.15)">🔍</div><div><h3>Route 53</h3><div class="badge">DNS</div></div></div>
+      <p>DNS management for your custom domain. Routes traffic to CloudFront, ALB, or API Gateway endpoints.</p>
+      <div class="svc-tags"><span class="tag">DNS</span><span class="tag">Health Checks</span><span class="tag">Routing</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(206,147,216,0.15)">🔒</div><div><h3>ACM</h3><div class="badge">SECURITY</div></div></div>
+      <p>AWS Certificate Manager provisions and auto-renews free SSL/TLS certificates for HTTPS everywhere.</p>
+      <div class="svc-tags"><span class="tag">SSL/TLS</span><span class="tag">Free Certs</span><span class="tag">Auto-Renew</span></div>
+    </div>
+    <!-- Auth -->
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(255,153,0,0.15)">🔑</div><div><h3>Cognito</h3><div class="badge">AUTH</div></div></div>
+      <p>User pools for sign-up/sign-in, JWT tokens, MFA support, social login (Google/Facebook). No custom auth code needed.</p>
+      <div class="svc-tags"><span class="tag">User Pool</span><span class="tag">JWT</span><span class="tag">OAuth 2.0</span></div>
+    </div>
+    <!-- API -->
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(79,195,247,0.15)">🔌</div><div><h3>API Gateway</h3><div class="badge">API</div></div></div>
+      <p>Exposes REST API endpoints, handles auth via Lambda authorizers, rate limiting, CORS, and request validation.</p>
+      <div class="svc-tags"><span class="tag">REST</span><span class="tag">WebSocket</span><span class="tag">Rate Limit</span></div>
+    </div>
+    <!-- Compute -->
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(244,143,177,0.15)">🖥️</div><div><h3>EC2</h3><div class="badge">COMPUTE</div></div></div>
+      <p>Virtual machines running the Node.js Express backend. Use Auto Scaling groups for high availability.</p>
+      <div class="svc-tags"><span class="tag">VM</span><span class="tag">t3.micro</span><span class="tag">Auto Scale</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(105,240,174,0.15)">⚡</div><div><h3>Lambda</h3><div class="badge">SERVERLESS</div></div></div>
+      <p>Serverless functions for event-driven processing: image resize on S3 upload, SQS consumers, auth authorizers.</p>
+      <div class="svc-tags"><span class="tag">Serverless</span><span class="tag">Event-driven</span><span class="tag">Pay-per-use</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(206,147,216,0.15)">🐳</div><div><h3>ECS Fargate</h3><div class="badge">CONTAINERS</div></div></div>
+      <p>Runs Docker containers without managing servers. Used for background workers (email processing, reports).</p>
+      <div class="svc-tags"><span class="tag">Docker</span><span class="tag">No Servers</span><span class="tag">Workers</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(255,153,0,0.15)">📦</div><div><h3>ECR</h3><div class="badge">REGISTRY</div></div></div>
+      <p>Elastic Container Registry stores Docker images for ECS deployments. Integrates with CI/CD pipelines.</p>
+      <div class="svc-tags"><span class="tag">Docker Registry</span><span class="tag">Private</span><span class="tag">Scanning</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(79,195,247,0.15)">⚖️</div><div><h3>Application Load Balancer</h3><div class="badge">NETWORKING</div></div></div>
+      <p>Distributes traffic across EC2 instances or ECS tasks. Handles health checks and SSL termination.</p>
+      <div class="svc-tags"><span class="tag">Layer 7</span><span class="tag">Health Checks</span><span class="tag">SSL Termination</span></div>
+    </div>
+    <!-- Database -->
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(239,83,80,0.15)">🐘</div><div><h3>RDS PostgreSQL</h3><div class="badge">DATABASE</div></div></div>
+      <p>Managed relational database. Stores users, tasks, projects. Multi-AZ deployment for high availability.</p>
+      <div class="svc-tags"><span class="tag">PostgreSQL</span><span class="tag">Multi-AZ</span><span class="tag">Backups</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(105,240,174,0.15)">⚡</div><div><h3>DynamoDB</h3><div class="badge">NOSQL</div></div></div>
+      <p>NoSQL for high-speed session storage, notifications, audit logs. Single-digit millisecond latency at any scale.</p>
+      <div class="svc-tags"><span class="tag">NoSQL</span><span class="tag">Sessions</span><span class="tag">Auto Scale</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(79,195,247,0.15)">💨</div><div><h3>ElastiCache Redis</h3><div class="badge">CACHE</div></div></div>
+      <p>In-memory cache for API responses, rate limiting, and session data. Reduces DB load dramatically.</p>
+      <div class="svc-tags"><span class="tag">Redis</span><span class="tag">Cache</span><span class="tag">Rate Limit</span></div>
+    </div>
+    <!-- Messaging -->
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(255,153,0,0.15)">📬</div><div><h3>SQS</h3><div class="badge">MESSAGING</div></div></div>
+      <p>Message queue for async task processing. Decouples the API from background workers (emails, reports, exports).</p>
+      <div class="svc-tags"><span class="tag">Queue</span><span class="tag">Async</span><span class="tag">Dead Letter</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(206,147,216,0.15)">📢</div><div><h3>SNS</h3><div class="badge">MESSAGING</div></div></div>
+      <p>Pub/Sub notifications for mobile push, SMS alerts, and fan-out to multiple SQS queues.</p>
+      <div class="svc-tags"><span class="tag">Pub/Sub</span><span class="tag">Push</span><span class="tag">Fan-out</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(105,240,174,0.15)">📧</div><div><h3>SES</h3><div class="badge">EMAIL</div></div></div>
+      <p>Simple Email Service sends transactional emails: task reminders, account verification, password reset.</p>
+      <div class="svc-tags"><span class="tag">Email</span><span class="tag">SMTP</span><span class="tag">Templates</span></div>
+    </div>
+    <!-- Infra -->
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(79,195,247,0.15)">🏗️</div><div><h3>VPC</h3><div class="badge">NETWORK</div></div></div>
+      <p>Virtual Private Cloud isolates your resources. Public subnets for ALB, private subnets for EC2/RDS.</p>
+      <div class="svc-tags"><span class="tag">Isolation</span><span class="tag">Subnets</span><span class="tag">NAT Gateway</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(244,143,177,0.15)">🛡️</div><div><h3>IAM</h3><div class="badge">SECURITY</div></div></div>
+      <p>Identity & Access Management defines who/what can do what. Roles for EC2, Lambda, ECS with least privilege.</p>
+      <div class="svc-tags"><span class="tag">Roles</span><span class="tag">Policies</span><span class="tag">Least Privilege</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(239,83,80,0.15)">🔐</div><div><h3>Secrets Manager</h3><div class="badge">SECURITY</div></div></div>
+      <p>Stores DB passwords, API keys, JWT secrets. Rotates credentials automatically. No hardcoded secrets.</p>
+      <div class="svc-tags"><span class="tag">Secrets</span><span class="tag">Auto-rotate</span><span class="tag">Encryption</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(255,153,0,0.15)">🛡️</div><div><h3>WAF</h3><div class="badge">SECURITY</div></div></div>
+      <p>Web Application Firewall blocks SQL injection, XSS, bot traffic. Attaches to CloudFront or ALB.</p>
+      <div class="svc-tags"><span class="tag">DDoS</span><span class="tag">SQL Injection</span><span class="tag">Rate Limit</span></div>
+    </div>
+    <!-- Observability -->
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(105,240,174,0.15)">📊</div><div><h3>CloudWatch</h3><div class="badge">MONITORING</div></div></div>
+      <p>Metrics, logs, alarms, dashboards. Set alarms for high CPU, error rates, latency spikes.</p>
+      <div class="svc-tags"><span class="tag">Metrics</span><span class="tag">Alarms</span><span class="tag">Dashboards</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(79,195,247,0.15)">📋</div><div><h3>CloudTrail</h3><div class="badge">AUDIT</div></div></div>
+      <p>Records every AWS API call. Who did what, when, from where. Essential for compliance and forensics.</p>
+      <div class="svc-tags"><span class="tag">Audit Logs</span><span class="tag">Compliance</span><span class="tag">API Calls</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-card-head"><div class="svc-icon" style="background:rgba(206,147,216,0.15)">🔄</div><div><h3>CodePipeline + CodeBuild</h3><div class="badge">CI/CD</div></div></div>
+      <p>Fully managed CI/CD. Push to GitHub → Build → Test → Deploy to EC2/ECS/S3 automatically.</p>
+      <div class="svc-tags"><span class="tag">CI/CD</span><span class="tag">Auto Deploy</span><span class="tag">GitHub</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== FRONTEND CODE ======================== -->
+<section class="section" id="frontend">
+  <div class="section-label">Section 03</div>
+  <div class="section-title">Frontend — React App</div>
+  <div class="section-sub">Hosted on S3 + CloudFront | Auth via Cognito | API calls to API Gateway</div>
+
+  <div class="info-box note">The React app is built and uploaded to S3. CloudFront serves it globally with HTTPS via ACM certificate.</div>
+
+  <div class="code-section">
+    <div class="code-tabs">
+      <div class="code-tab active">App.jsx</div>
+      <div class="code-tab">api.js</div>
+      <div class="code-tab">auth.js</div>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">src/App.jsx — Main React Component</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="k">import</span> React, { useState, useEffect } <span class="k">from</span> <span class="s">'react'</span>;
+<span class="k">import</span> { fetchTasks, createTask, deleteTask } <span class="k">from</span> <span class="s">'./api'</span>;
+<span class="k">import</span> { getCurrentUser, signOut } <span class="k">from</span> <span class="s">'./auth'</span>;
+
+<span class="k">export default function</span> <span class="f">App</span>() {
+  <span class="k">const</span> [tasks, setTasks] = useState([]);
+  <span class="k">const</span> [user, setUser]   = useState(<span class="k">null</span>);
+  <span class="k">const</span> [input, setInput] = useState(<span class="s">''</span>);
+  <span class="k">const</span> [loading, setLoading] = useState(<span class="k">true</span>);
+
+  useEffect(() => {
+    <span class="c">// Get logged-in user from Cognito JWT</span>
+    <span class="f">getCurrentUser</span>().then(u => {
+      setUser(u);
+      <span class="k">if</span> (u) <span class="f">loadTasks</span>();
+    });
+  }, []);
+
+  <span class="k">async function</span> <span class="f">loadTasks</span>() {
+    setLoading(<span class="k">true</span>);
+    <span class="k">const</span> data = <span class="k">await</span> <span class="f">fetchTasks</span>(); <span class="c">// GET /tasks via API Gateway</span>
+    setTasks(data);
+    setLoading(<span class="k">false</span>);
+  }
+
+  <span class="k">async function</span> <span class="f">addTask</span>() {
+    <span class="k">if</span> (!input.trim()) <span class="k">return</span>;
+    <span class="k">const</span> task = <span class="k">await</span> <span class="f">createTask</span>({ title: input }); <span class="c">// POST /tasks</span>
+    setTasks(prev => [task, ...prev]);
+    setInput(<span class="s">''</span>);
+  }
+
+  <span class="k">async function</span> <span class="f">removeTask</span>(id) {
+    <span class="k">await</span> <span class="f">deleteTask</span>(id); <span class="c">// DELETE /tasks/{id}</span>
+    setTasks(prev => prev.<span class="f">filter</span>(t => t.id !== id));
+  }
+
+  <span class="k">if</span> (!user) <span class="k">return</span> &lt;<span class="n">LoginPage</span> /&gt;;
+
+  <span class="k">return</span> (
+    &lt;<span class="n">div</span> className=<span class="s">"app"</span>&gt;
+      &lt;<span class="n">header</span>&gt;
+        &lt;<span class="n">h1</span>&gt;Task Manager&lt;/<span class="n">h1</span>&gt;
+        &lt;<span class="n">button</span> onClick={signOut}&gt;Logout&lt;/<span class="n">button</span>&gt;
+      &lt;/<span class="n">header</span>&gt;
+
+      &lt;<span class="n">div</span> className=<span class="s">"input-row"</span>&gt;
+        &lt;<span class="n">input</span>
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          placeholder=<span class="s">"Add a task..."</span>
+          onKeyDown={e => e.key === <span class="s">'Enter'</span> && <span class="f">addTask</span>()}
+        /&gt;
+        &lt;<span class="n">button</span> onClick={addTask}&gt;Add Task&lt;/<span class="n">button</span>&gt;
+      &lt;/<span class="n">div</span>&gt;
+
+      {loading ? &lt;<span class="n">p</span>&gt;Loading...&lt;/<span class="n">p</span>&gt; : (
+        &lt;<span class="n">ul</span>&gt;
+          {tasks.<span class="f">map</span>(task => (
+            &lt;<span class="n">li</span> key={task.id}&gt;
+              {task.title}
+              &lt;<span class="n">button</span> onClick={() => <span class="f">removeTask</span>(task.id)}&gt;✕&lt;/<span class="n">button</span>&gt;
+            &lt;/<span class="n">li</span>&gt;
+          ))}
+        &lt;/<span class="n">ul</span>&gt;
+      )}
+    &lt;/<span class="n">div</span>&gt;
+  );
+}
+</code></pre>
+    </div>
+  </div>
+
+  <div class="code-section">
+    <div class="code-wrap" style="margin-top:16px">
+      <div class="code-header">
+        <span class="filename">src/api.js — API Gateway Client</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="k">import</span> { getJwtToken } <span class="k">from</span> <span class="s">'./auth'</span>;
+
+<span class="k">const</span> API_BASE = process.env.<span class="n">REACT_APP_API_URL</span>;
+<span class="c">// e.g. https://abc123.execute-api.ap-south-1.amazonaws.com/prod</span>
+
+<span class="k">async function</span> <span class="f">authFetch</span>(path, options = {}) {
+  <span class="k">const</span> token = <span class="k">await</span> <span class="f">getJwtToken</span>(); <span class="c">// From Cognito</span>
+  <span class="k">const</span> res = <span class="k">await</span> <span class="f">fetch</span>(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span>,
+      <span class="s">'Authorization'</span>: `Bearer ${token}`, <span class="c">// JWT sent to API Gateway</span>
+      ...options.headers,
+    },
+  });
+  <span class="k">if</span> (!res.ok) <span class="k">throw new</span> Error(<span class="k">await</span> res.<span class="f">text</span>());
+  <span class="k">return</span> res.<span class="f">json</span>();
+}
+
+<span class="k">export const</span> <span class="f">fetchTasks</span>  = ()     => <span class="f">authFetch</span>(<span class="s">'/tasks'</span>);
+<span class="k">export const</span> <span class="f">createTask</span>  = (body)  => <span class="f">authFetch</span>(<span class="s">'/tasks'</span>, { method: <span class="s">'POST'</span>,   body: <span class="n">JSON</span>.<span class="f">stringify</span>(body) });
+<span class="k">export const</span> <span class="f">updateTask</span>  = (id, b) => <span class="f">authFetch</span>(<span class="s">`/tasks/${id}`</span>, { method: <span class="s">'PUT'</span>,    body: <span class="n">JSON</span>.<span class="f">stringify</span>(b) });
+<span class="k">export const</span> <span class="f">deleteTask</span>  = (id)    => <span class="f">authFetch</span>(<span class="s">`/tasks/${id}`</span>, { method: <span class="s">'DELETE'</span> });
+<span class="k">export const</span> <span class="f">uploadFile</span>  = (data)  => <span class="f">authFetch</span>(<span class="s">'/upload'</span>,   { method: <span class="s">'POST'</span>,   body: data });
+</code></pre>
+    </div>
+  </div>
+
+  <div class="code-section">
+    <div class="code-wrap" style="margin-top:16px">
+      <div class="code-header">
+        <span class="filename">S3 deploy commands</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="c"># Build the React app</span>
+npm run build
+
+<span class="c"># Sync to S3 bucket (replace YOUR-BUCKET)</span>
+aws s3 sync ./build s3://YOUR-BUCKET-NAME --delete
+
+<span class="c"># Invalidate CloudFront cache after deploy</span>
+aws cloudfront create-invalidation \
+  --distribution-id YOUR-CF-DIST-ID \
+  --paths "/*"
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== BACKEND CODE ======================== -->
+<section class="section" id="backend">
+  <div class="section-label">Section 04</div>
+  <div class="section-title">Backend — Node.js on EC2 + Lambda</div>
+  <div class="section-sub">Express API on EC2 behind ALB | Lambda for async events | API Gateway as the entry point</div>
+
+  <div class="info-box warn">EC2 runs the main Express server. Lambda handles async tasks triggered by SQS/S3 events. Both are behind API Gateway.</div>
+
+  <div class="code-section">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">server/index.js — Express App on EC2</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="k">const</span> express       = <span class="f">require</span>(<span class="s">'express'</span>);
+<span class="k">const</span> cors          = <span class="f">require</span>(<span class="s">'cors'</span>);
+<span class="k">const</span> { Pool }      = <span class="f">require</span>(<span class="s">'pg'</span>);         <span class="c">// RDS PostgreSQL</span>
+<span class="k">const</span> redis         = <span class="f">require</span>(<span class="s">'redis'</span>);       <span class="c">// ElastiCache</span>
+<span class="k">const</span> AWS           = <span class="f">require</span>(<span class="s">'aws-sdk'</span>);
+<span class="k">const</span> { verifyJWT } = <span class="f">require</span>(<span class="s">'./auth'</span>);
+
+<span class="k">const</span> app  = <span class="f">express</span>();
+<span class="k">const</span> sqs  = <span class="k">new</span> AWS.<span class="f">SQS</span>();
+<span class="k">const</span> s3   = <span class="k">new</span> AWS.<span class="f">S3</span>();
+<span class="k">const</span> ses  = <span class="k">new</span> AWS.<span class="f">SES</span>({ region: <span class="s">'ap-south-1'</span> });
+<span class="k">const</span> ssm  = <span class="k">new</span> AWS.<span class="f">SecretsManager</span>();
+
+app.<span class="f">use</span>(cors());
+app.<span class="f">use</span>(express.<span class="f">json</span>());
+
+<span class="c">// ─── Database (RDS PostgreSQL) ─────────────────────────────</span>
+<span class="k">const</span> pool = <span class="k">new</span> <span class="f">Pool</span>({
+  host:     process.env.<span class="n">DB_HOST</span>,     <span class="c">// RDS endpoint (from Secrets Manager)</span>
+  database: process.env.<span class="n">DB_NAME</span>,
+  user:     process.env.<span class="n">DB_USER</span>,
+  password: process.env.<span class="n">DB_PASS</span>,
+  port:     <span class="num">5432</span>,
+  ssl:      { rejectUnauthorized: <span class="k">false</span> },
+});
+
+<span class="c">// ─── Redis Cache (ElastiCache) ─────────────────────────────</span>
+<span class="k">const</span> redisClient = redis.<span class="f">createClient</span>({ url: process.env.<span class="n">REDIS_URL</span> });
+<span class="k">await</span> redisClient.<span class="f">connect</span>();
+
+<span class="c">// ─── Auth Middleware ──────────────────────────────────────</span>
+<span class="k">async function</span> <span class="f">authenticate</span>(req, res, next) {
+  <span class="k">const</span> token = req.headers.authorization?.split(<span class="s">' '</span>)[<span class="num">1</span>];
+  <span class="k">if</span> (!token) <span class="k">return</span> res.<span class="f">status</span>(<span class="num">401</span>).<span class="f">json</span>({ error: <span class="s">'Unauthorized'</span> });
+  <span class="k">try</span> {
+    req.user = <span class="k">await</span> <span class="f">verifyJWT</span>(token); <span class="c">// Validates Cognito JWT</span>
+    <span class="f">next</span>();
+  } <span class="k">catch</span> { res.<span class="f">status</span>(<span class="num">401</span>).<span class="f">json</span>({ error: <span class="s">'Invalid token'</span> }); }
+}
+
+<span class="c">// ─── GET /tasks ───────────────────────────────────────────</span>
+app.<span class="f">get</span>(<span class="s">'/tasks'</span>, authenticate, <span class="k">async</span> (req, res) => {
+  <span class="k">const</span> cacheKey = `tasks:${req.user.sub}`;
+  <span class="k">const</span> cached   = <span class="k">await</span> redisClient.<span class="f">get</span>(cacheKey); <span class="c">// Check Redis first</span>
+  <span class="k">if</span> (cached) <span class="k">return</span> res.<span class="f">json</span>(<span class="n">JSON</span>.<span class="f">parse</span>(cached));
+
+  <span class="k">const</span> { rows } = <span class="k">await</span> pool.<span class="f">query</span>(
+    <span class="s">'SELECT * FROM tasks WHERE user_id=$1 ORDER BY created_at DESC'</span>,
+    [req.user.sub]
+  );
+  <span class="k">await</span> redisClient.<span class="f">setEx</span>(cacheKey, <span class="num">60</span>, <span class="n">JSON</span>.<span class="f">stringify</span>(rows)); <span class="c">// Cache 60s</span>
+  res.<span class="f">json</span>(rows);
+});
+
+<span class="c">// ─── POST /tasks ──────────────────────────────────────────</span>
+app.<span class="f">post</span>(<span class="s">'/tasks'</span>, authenticate, <span class="k">async</span> (req, res) => {
+  <span class="k">const</span> { title, description, due_date } = req.body;
+  <span class="k">const</span> { rows } = <span class="k">await</span> pool.<span class="f">query</span>(
+    <span class="s">'INSERT INTO tasks(user_id,title,description,due_date) VALUES($1,$2,$3,$4) RETURNING *'</span>,
+    [req.user.sub, title, description, due_date]
+  );
+  <span class="k">await</span> redisClient.<span class="f">del</span>(`tasks:${req.user.sub}`); <span class="c">// Invalidate cache</span>
+
+  <span class="c">// Push to SQS for async processing (email notification)</span>
+  <span class="k">await</span> sqs.<span class="f">sendMessage</span>({
+    QueueUrl: process.env.<span class="n">SQS_TASK_QUEUE_URL</span>,
+    MessageBody: <span class="n">JSON</span>.<span class="f">stringify</span>({ type: <span class="s">'TASK_CREATED'</span>, task: rows[<span class="num">0</span>], userId: req.user.sub })
+  }).<span class="f">promise</span>();
+
+  res.<span class="f">status</span>(<span class="num">201</span>).<span class="f">json</span>(rows[<span class="num">0</span>]);
+});
+
+<span class="c">// ─── S3 Presigned URL for file upload ─────────────────────</span>
+app.<span class="f">post</span>(<span class="s">'/upload'</span>, authenticate, <span class="k">async</span> (req, res) => {
+  <span class="k">const</span> { filename, contentType } = req.body;
+  <span class="k">const</span> key = `uploads/${req.user.sub}/${Date.<span class="f">now</span>()}-${filename}`;
+  <span class="k">const</span> url = s3.<span class="f">getSignedUrl</span>(<span class="s">'putObject'</span>, {
+    Bucket:      process.env.<span class="n">S3_UPLOADS_BUCKET</span>,
+    Key:         key,
+    ContentType: contentType,
+    Expires:     <span class="num">300</span>, <span class="c">// 5 minutes</span>
+  });
+  res.<span class="f">json</span>({ uploadUrl: url, key });
+});
+
+app.<span class="f">listen</span>(<span class="num">3000</span>, () => console.<span class="f">log</span>(<span class="s">'Server running on port 3000'</span>));
+</code></pre>
+    </div>
+  </div>
+
+  <div class="code-section" style="margin-top:16px">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">lambda/emailWorker.js — SQS Consumer Lambda</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="k">const</span> AWS = <span class="f">require</span>(<span class="s">'aws-sdk'</span>);
+<span class="k">const</span> ses = <span class="k">new</span> AWS.<span class="f">SES</span>({ region: <span class="s">'ap-south-1'</span> });
+
+<span class="c">// Triggered automatically when SQS has messages</span>
+<span class="k">exports</span>.handler = <span class="k">async</span> (event) => {
+  <span class="k">for</span> (<span class="k">const</span> record <span class="k">of</span> event.Records) {
+    <span class="k">const</span> { type, task, userId } = <span class="n">JSON</span>.<span class="f">parse</span>(record.body);
+
+    <span class="k">if</span> (type === <span class="s">'TASK_CREATED'</span>) {
+      <span class="c">// Look up user email from DynamoDB</span>
+      <span class="k">const</span> dynamo = <span class="k">new</span> AWS.<span class="f">DynamoDB</span>.<span class="f">DocumentClient</span>();
+      <span class="k">const</span> { Item: user } = <span class="k">await</span> dynamo.<span class="f">get</span>({
+        TableName: process.env.<span class="n">USERS_TABLE</span>,
+        Key: { userId }
+      }).<span class="f">promise</span>();
+
+      <span class="c">// Send confirmation email via SES</span>
+      <span class="k">await</span> ses.<span class="f">sendEmail</span>({
+        Source:      <span class="s">'noreply@yourdomain.com'</span>,
+        Destination: { ToAddresses: [user.email] },
+        Message: {
+          Subject: { Data: <span class="s">`✅ Task Created: ${task.title}`</span> },
+          Body:    { Text: { Data: <span class="s">`Your task "${task.title}" was created successfully!`</span> } }
+        }
+      }).<span class="f">promise</span>();
+    }
+  }
+  <span class="k">return</span> { statusCode: <span class="num">200</span> };
+};
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== DATABASE ======================== -->
+<section class="section" id="database">
+  <div class="section-label">Section 05</div>
+  <div class="section-title">Database Layer — RDS + DynamoDB + ElastiCache</div>
+  <div class="section-sub">Three storage services for different needs: relational, NoSQL, and cache</div>
+
+  <div class="code-section">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">db/schema.sql — RDS PostgreSQL Schema</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="c">-- Run this in your RDS PostgreSQL instance</span>
+
+<span class="k">CREATE TABLE</span> users (
+  id         UUID <span class="k">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  cognito_id VARCHAR(<span class="num">128</span>) <span class="k">UNIQUE NOT NULL</span>,   <span class="c">-- Cognito sub</span>
+  email      VARCHAR(<span class="num">255</span>) <span class="k">UNIQUE NOT NULL</span>,
+  name       VARCHAR(<span class="num">100</span>),
+  created_at TIMESTAMPTZ <span class="k">DEFAULT</span> now()
+);
+
+<span class="k">CREATE TABLE</span> projects (
+  id          UUID <span class="k">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  user_id     UUID <span class="k">REFERENCES</span> users(id) <span class="k">ON DELETE CASCADE</span>,
+  name        VARCHAR(<span class="num">200</span>) <span class="k">NOT NULL</span>,
+  description TEXT,
+  created_at  TIMESTAMPTZ <span class="k">DEFAULT</span> now()
+);
+
+<span class="k">CREATE TABLE</span> tasks (
+  id          UUID <span class="k">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  user_id     VARCHAR(<span class="num">128</span>) <span class="k">NOT NULL</span>,          <span class="c">-- Cognito sub</span>
+  project_id  UUID <span class="k">REFERENCES</span> projects(id),
+  title       VARCHAR(<span class="num">500</span>) <span class="k">NOT NULL</span>,
+  description TEXT,
+  status      VARCHAR(<span class="num">20</span>) <span class="k">DEFAULT</span> <span class="s">'pending'</span>,   <span class="c">-- pending/done/archived</span>
+  priority    SMALLINT <span class="k">DEFAULT</span> <span class="num">2</span>,              <span class="c">-- 1=low,2=med,3=high</span>
+  due_date    TIMESTAMPTZ,
+  s3_file_key VARCHAR(<span class="num">500</span>),                    <span class="c">-- Attached file in S3</span>
+  created_at  TIMESTAMPTZ <span class="k">DEFAULT</span> now(),
+  updated_at  TIMESTAMPTZ <span class="k">DEFAULT</span> now()
+);
+
+<span class="k">CREATE INDEX</span> idx_tasks_user    <span class="k">ON</span> tasks(user_id);
+<span class="k">CREATE INDEX</span> idx_tasks_status  <span class="k">ON</span> tasks(status);
+<span class="k">CREATE INDEX</span> idx_tasks_due     <span class="k">ON</span> tasks(due_date);
+
+<span class="c">-- Auto-update updated_at on row change</span>
+<span class="k">CREATE OR REPLACE FUNCTION</span> <span class="f">update_timestamp</span>()
+<span class="k">RETURNS TRIGGER AS</span> $$
+<span class="k">BEGIN</span> NEW.updated_at = now(); <span class="k">RETURN</span> NEW; <span class="k">END</span>;
+$$ <span class="k">LANGUAGE</span> plpgsql;
+
+<span class="k">CREATE TRIGGER</span> set_updated_at
+  <span class="k">BEFORE UPDATE ON</span> tasks
+  <span class="k">FOR EACH ROW EXECUTE FUNCTION</span> <span class="f">update_timestamp</span>();
+</code></pre>
+    </div>
+  </div>
+
+  <div style="margin-top:16px; display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+    <div class="code-wrap">
+      <div class="code-header"><span class="filename">DynamoDB — Sessions Table</span></div>
+      <pre><code><span class="c"># Create via AWS CLI</span>
+aws dynamodb create-table \
+  --table-name Sessions \
+  --attribute-definitions \
+    AttributeName=userId,AttributeType=S \
+    AttributeName=sessionId,AttributeType=S \
+  --key-schema \
+    AttributeName=userId,KeyType=HASH \
+    AttributeName=sessionId,KeyType=RANGE \
+  --billing-mode PAY_PER_REQUEST \
+  --time-to-live-specification \
+    Enabled=true,AttributeName=ttl
+</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="filename">ElastiCache Redis — Connection</span></div>
+      <pre><code><span class="c"># In EC2 server (same VPC as cache)</span>
+<span class="k">const</span> redis = <span class="f">require</span>(<span class="s">'redis'</span>);
+<span class="k">const</span> client = redis.<span class="f">createClient</span>({
+  url: <span class="s">`redis://${REDIS_HOST}:6379`</span>
+});
+
+<span class="c">// Cache pattern: cache-aside</span>
+<span class="k">const</span> cached = <span class="k">await</span> client.<span class="f">get</span>(key);
+<span class="k">if</span> (cached) <span class="k">return</span> <span class="n">JSON</span>.<span class="f">parse</span>(cached);
+
+<span class="k">const</span> data = <span class="k">await</span> db.<span class="f">query</span>(...);
+<span class="k">await</span> client.<span class="f">setEx</span>(key, <span class="num">300</span>,
+  <span class="n">JSON</span>.<span class="f">stringify</span>(data));
+<span class="k">return</span> data;
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== INFRASTRUCTURE ======================== -->
+<section class="section" id="infra">
+  <div class="section-label">Section 06</div>
+  <div class="section-title">Infrastructure — VPC, EC2, IAM</div>
+  <div class="section-sub">Network isolation with VPC | EC2 setup | IAM roles with least privilege</div>
+
+  <div class="code-section">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">infra/setup.sh — VPC + EC2 Setup via AWS CLI</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="c">#!/bin/bash
+# ── 1. Create VPC ───────────────────────────────────────────</span>
+VPC_ID=$(aws ec2 create-vpc --cidr-block <span class="s">10.0.0.0/16</span> \
+  --query <span class="s">'Vpc.VpcId'</span> --output text)
+aws ec2 create-tags --resources $VPC_ID \
+  --tags Key=Name,Value=taskapp-vpc
+
+<span class="c"># ── 2. Create Subnets ───────────────────────────────────────</span>
+<span class="c"># Public subnet (for ALB)</span>
+PUB_SUBNET=$(aws ec2 create-subnet --vpc-id $VPC_ID \
+  --cidr-block <span class="s">10.0.1.0/24</span> --availability-zone ap-south-1a \
+  --query <span class="s">'Subnet.SubnetId'</span> --output text)
+
+<span class="c"># Private subnet (for EC2, RDS, ElastiCache)</span>
+PRV_SUBNET=$(aws ec2 create-subnet --vpc-id $VPC_ID \
+  --cidr-block <span class="s">10.0.2.0/24</span> --availability-zone ap-south-1b \
+  --query <span class="s">'Subnet.SubnetId'</span> --output text)
+
+<span class="c"># ── 3. Internet Gateway ─────────────────────────────────────</span>
+IGW_ID=$(aws ec2 create-internet-gateway \
+  --query <span class="s">'InternetGateway.InternetGatewayId'</span> --output text)
+aws ec2 attach-internet-gateway --vpc-id $VPC_ID \
+  --internet-gateway-id $IGW_ID
+
+<span class="c"># ── 4. Launch EC2 (t3.micro — Free Tier) ───────────────────</span>
+aws ec2 run-instances \
+  --image-id ami-0c55b159cbfafe1f0 \
+  --instance-type t3.micro \
+  --subnet-id $PRV_SUBNET \
+  --iam-instance-profile Name=taskapp-ec2-role \
+  --user-data file://userdata.sh \
+  --tag-specifications <span class="s">'ResourceType=instance,Tags=[{Key=Name,Value=taskapp-server}]'</span>
+</code></pre>
+    </div>
+  </div>
+
+  <div class="code-section" style="margin-top:16px">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">infra/iam-policy.json — EC2 Role Policy</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code>{
+  <span class="n">"Version"</span>: <span class="s">"2012-10-17"</span>,
+  <span class="n">"Statement"</span>: [
+    {
+      <span class="n">"Sid"</span>: <span class="s">"S3Access"</span>,
+      <span class="n">"Effect"</span>: <span class="s">"Allow"</span>,
+      <span class="n">"Action"</span>: [<span class="s">"s3:GetObject"</span>, <span class="s">"s3:PutObject"</span>, <span class="s">"s3:DeleteObject"</span>],
+      <span class="n">"Resource"</span>: <span class="s">"arn:aws:s3:::taskapp-uploads/*"</span>
+    },
+    {
+      <span class="n">"Sid"</span>: <span class="s">"SQSAccess"</span>,
+      <span class="n">"Effect"</span>: <span class="s">"Allow"</span>,
+      <span class="n">"Action"</span>: [<span class="s">"sqs:SendMessage"</span>, <span class="s">"sqs:ReceiveMessage"</span>],
+      <span class="n">"Resource"</span>: <span class="s">"arn:aws:sqs:ap-south-1:*:taskapp-*"</span>
+    },
+    {
+      <span class="n">"Sid"</span>: <span class="s">"SecretsAccess"</span>,
+      <span class="n">"Effect"</span>: <span class="s">"Allow"</span>,
+      <span class="n">"Action"</span>: <span class="s">"secretsmanager:GetSecretValue"</span>,
+      <span class="n">"Resource"</span>: <span class="s">"arn:aws:secretsmanager:ap-south-1:*:secret:taskapp/*"</span>
+    },
+    {
+      <span class="n">"Sid"</span>: <span class="s">"CloudWatchLogs"</span>,
+      <span class="n">"Effect"</span>: <span class="s">"Allow"</span>,
+      <span class="n">"Action"</span>: [<span class="s">"logs:CreateLogGroup"</span>, <span class="s">"logs:CreateLogStream"</span>, <span class="s">"logs:PutLogEvents"</span>],
+      <span class="n">"Resource"</span>: <span class="s">"*"</span>
+    }
+  ]
+}
+</code></pre>
+    </div>
+  </div>
+
+  <div class="code-section" style="margin-top:16px">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">infra/userdata.sh — EC2 Bootstrap Script</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="c">#!/bin/bash
+# This runs automatically when EC2 instance starts</span>
+yum update -y
+curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+yum install -y nodejs git
+
+<span class="c"># Fetch secrets from AWS Secrets Manager (no hardcoded passwords!)</span>
+SECRET=$(aws secretsmanager get-secret-value \
+  --secret-id taskapp/db --query SecretString --output text)
+<span class="k">export</span> DB_HOST=$(echo $SECRET | python3 -c <span class="s">"import sys,json;print(json.load(sys.stdin)['host'])"</span>)
+<span class="k">export</span> DB_PASS=$(echo $SECRET | python3 -c <span class="s">"import sys,json;print(json.load(sys.stdin)['password'])"</span>)
+
+<span class="c"># Clone and start the app</span>
+git clone https://github.com/youruser/taskapp /app
+cd /app && npm install
+npm start &
+
+<span class="c"># Setup PM2 for process management</span>
+npm install -g pm2
+pm2 start npm --name <span class="s">"taskapp"</span> -- start
+pm2 startup && pm2 save
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== CI/CD ======================== -->
+<section class="section" id="cicd">
+  <div class="section-label">Section 07</div>
+  <div class="section-title">CI/CD Pipeline — CodePipeline + CodeBuild</div>
+  <div class="section-sub">Push to GitHub → Build → Test → Deploy automatically</div>
+
+  <div class="flow">
+    <div class="flow-item">📝 GitHub Push</div><div class="flow-arrow">→</div>
+    <div class="flow-item">🔧 CodeBuild (Test + Build)</div><div class="flow-arrow">→</div>
+    <div class="flow-item">🐳 Push to ECR</div><div class="flow-arrow">→</div>
+    <div class="flow-item">🚀 Deploy to ECS</div><div class="flow-arrow">→</div>
+    <div class="flow-item">🌐 S3 + CloudFront (Frontend)</div>
+  </div>
+
+  <div class="code-section">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">buildspec.yml — CodeBuild Config</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code>version: <span class="num">0.2</span>
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: <span class="num">18</span>
+    commands:
+      - npm install
+
+  pre_build:
+    commands:
+      - echo <span class="s">"Running tests..."</span>
+      - npm test
+      - echo <span class="s">"Logging in to ECR..."</span>
+      - aws ecr get-login-password --region $AWS_REGION |
+          docker login --username AWS --password-stdin $ECR_URI
+
+  build:
+    commands:
+      - echo <span class="s">"Building Docker image..."</span>
+      - docker build -t $ECR_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - docker tag $ECR_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION $ECR_URI:latest
+
+      - echo <span class="s">"Building React frontend..."</span>
+      - cd frontend && npm install && npm run build
+
+  post_build:
+    commands:
+      - docker push $ECR_URI:latest
+      - aws s3 sync frontend/build s3://$FRONTEND_BUCKET --delete
+      - aws cloudfront create-invalidation \
+          --distribution-id $CF_DIST_ID --paths "/*"
+      - printf <span class="s">'[{"name":"app","imageUri":"%s"}]'</span> $ECR_URI:latest > imagedefs.json
+
+artifacts:
+  files:
+    - imagedefs.json
+    - appspec.yml
+</code></pre>
+    </div>
+  </div>
+
+  <div class="code-section" style="margin-top:16px">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">Dockerfile — Container for ECS Fargate</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="k">FROM</span> node:18-alpine
+
+WORKDIR /app
+
+<span class="c"># Copy package files and install dependencies</span>
+COPY package*.json ./
+RUN npm ci --only=production
+
+<span class="c"># Copy application source</span>
+COPY . .
+
+<span class="c"># Run as non-root user (security best practice)</span>
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+EXPOSE <span class="num">3000</span>
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+  CMD wget -q -O- http://localhost:3000/health || exit 1
+
+CMD [<span class="s">"node"</span>, <span class="s">"server/index.js"</span>]
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== MONITORING ======================== -->
+<section class="section" id="monitoring">
+  <div class="section-label">Section 08</div>
+  <div class="section-title">Monitoring & Observability — CloudWatch</div>
+  <div class="section-sub">Metrics, logs, alarms, and dashboards for production visibility</div>
+
+  <div class="code-section">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">monitoring/alarms.sh — CloudWatch Alarms</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="c"># ── High CPU Alarm ─────────────────────────────────────────</span>
+aws cloudwatch put-metric-alarm \
+  --alarm-name <span class="s">"taskapp-high-cpu"</span> \
+  --metric-name CPUUtilization \
+  --namespace AWS/EC2 \
+  --statistic Average \
+  --period <span class="num">300</span> --threshold <span class="num">80</span> \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods <span class="num">2</span> \
+  --alarm-actions arn:aws:sns:ap-south-1:ACCOUNT:taskapp-alerts
+
+<span class="c"># ── High Error Rate on API Gateway ─────────────────────────</span>
+aws cloudwatch put-metric-alarm \
+  --alarm-name <span class="s">"taskapp-api-errors"</span> \
+  --metric-name <span class="s">"5XXError"</span> \
+  --namespace AWS/ApiGateway \
+  --statistic Sum \
+  --period <span class="num">60</span> --threshold <span class="num">10</span> \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods <span class="num">1</span> \
+  --alarm-actions arn:aws:sns:ap-south-1:ACCOUNT:taskapp-alerts
+
+<span class="c"># ── RDS Free Storage Low ───────────────────────────────────</span>
+aws cloudwatch put-metric-alarm \
+  --alarm-name <span class="s">"taskapp-rds-storage-low"</span> \
+  --metric-name FreeStorageSpace \
+  --namespace AWS/RDS \
+  --statistic Average \
+  --period <span class="num">300</span> --threshold <span class="num">5368709120</span> \
+  --comparison-operator LessThanThreshold \
+  --evaluation-periods <span class="num">1</span> \
+  --alarm-actions arn:aws:sns:ap-south-1:ACCOUNT:taskapp-alerts
+</code></pre>
+    </div>
+  </div>
+
+  <div class="code-section" style="margin-top:16px">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">server/logger.js — CloudWatch Structured Logging</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="k">const</span> winston   = <span class="f">require</span>(<span class="s">'winston'</span>);
+<span class="k">const</span> CloudWatch = <span class="f">require</span>(<span class="s">'winston-cloudwatch'</span>);
+
+<span class="k">const</span> logger = winston.<span class="f">createLogger</span>({
+  format: winston.format.<span class="f">combine</span>(
+    winston.format.<span class="f">timestamp</span>(),
+    winston.format.<span class="f">json</span>()      <span class="c">// Structured JSON logs for CloudWatch Insights</span>
+  ),
+  transports: [
+    <span class="k">new</span> winston.transports.<span class="f">Console</span>(),
+    <span class="k">new</span> <span class="f">CloudWatch</span>({
+      logGroupName:  <span class="s">'/taskapp/server'</span>,
+      logStreamName: `${process.env.INSTANCE_ID}/app`,
+      awsRegion:     <span class="s">'ap-south-1'</span>,
+    })
+  ]
+});
+
+<span class="c">// Usage in routes:</span>
+logger.<span class="f">info</span>(<span class="s">'task_created'</span>, { userId, taskId, title });
+logger.<span class="f">error</span>(<span class="s">'db_error'</span>, { error: err.message, query, userId });
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SECURITY ======================== -->
+<section class="section" id="security">
+  <div class="section-label">Section 09</div>
+  <div class="section-title">Security — WAF + Cognito + Secrets Manager</div>
+  <div class="section-sub">Multi-layer security: network, auth, secrets, and audit</div>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
+    <div class="info-box tip" style="margin:0"><strong>WAF</strong> — Blocks SQLi, XSS, bad bots at CloudFront edge before reaching your server</div>
+    <div class="info-box note" style="margin:0"><strong>Cognito</strong> — Manages all auth. Your server never stores passwords. JWT validated server-side.</div>
+    <div class="info-box warn" style="margin:0"><strong>Secrets Manager</strong> — All credentials in vault. EC2 fetches at runtime. No env file on disk.</div>
+  </div>
+
+  <div class="code-section">
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="filename">security/waf-setup.sh</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="c"># Create WAF Web ACL with AWS managed rules</span>
+aws wafv2 create-web-acl \
+  --name taskapp-waf \
+  --scope CLOUDFRONT \
+  --region us-east-1 \
+  --default-action Allow={} \
+  --rules <span class="s">'[
+    {
+      "Name": "AWSManagedCommonRules",
+      "Priority": 1,
+      "OverrideAction": {"None": {}},
+      "Statement": {
+        "ManagedRuleGroupStatement": {
+          "VendorName": "AWS",
+          "Name": "AWSManagedRulesCommonRuleSet"
+        }
+      },
+      "VisibilityConfig": {
+        "SampledRequestsEnabled": true,
+        "CloudWatchMetricsEnabled": true,
+        "MetricName": "CommonRules"
+      }
+    },
+    {
+      "Name": "RateLimit",
+      "Priority": 2,
+      "Action": {"Block": {}},
+      "Statement": {
+        "RateBasedStatement": {
+          "Limit": 2000,
+          "AggregateKeyType": "IP"
+        }
+      }
+    }
+  ]'</span>
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== DEPLOY STEPS ======================== -->
+<section class="section" id="deploy">
+  <div class="section-label">Section 10</div>
+  <div class="section-title">Step-by-Step Deployment Guide</div>
+  <div class="section-sub">Follow these steps in order to deploy the complete stack</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-line"><div class="step-num">1</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>AWS Account & CLI Setup</h3>
+        <p>Create an AWS account, create an IAM user with AdministratorAccess, and configure the CLI.</p>
+        <div class="cmd">aws configure<br># Enter: Access Key, Secret Key, Region (ap-south-1), Output (json)</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">2</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Create VPC + Subnets + Security Groups</h3>
+        <p>Run the VPC setup script. Creates public subnets (ALB), private subnets (EC2, RDS), and a NAT Gateway for private subnet internet access.</p>
+        <div class="cmd">bash infra/setup.sh</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">3</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Setup Cognito User Pool</h3>
+        <p>Create a Cognito User Pool with email sign-in, MFA optional, and an App Client. Note the User Pool ID and App Client ID.</p>
+        <div class="cmd">aws cognito-idp create-user-pool --pool-name taskapp-users --auto-verified-attributes email</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">4</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Launch RDS PostgreSQL</h3>
+        <p>Create a db.t3.micro RDS instance in the private subnet. Multi-AZ for production, single-AZ for dev. Automated backups enabled.</p>
+        <div class="cmd">aws rds create-db-instance --db-instance-identifier taskapp-db --db-instance-class db.t3.micro --engine postgres --master-username admin --master-user-password &lt;use-secrets-manager&gt; --allocated-storage 20 --vpc-security-group-ids sg-xxx --db-subnet-group-name taskapp-subnet-group</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">5</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Create ElastiCache Redis Cluster</h3>
+        <p>Deploy a cache.t3.micro Redis node in the private subnet. Must be in the same VPC as EC2.</p>
+        <div class="cmd">aws elasticache create-cache-cluster --cache-cluster-id taskapp-redis --engine redis --cache-node-type cache.t3.micro --num-cache-nodes 1 --cache-subnet-group-name taskapp-cache-subnet</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">6</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Store Secrets in Secrets Manager</h3>
+        <p>Never hardcode credentials. Store DB password, Redis URL, JWT secret here. EC2/Lambda fetch at runtime via IAM role.</p>
+        <div class="cmd">aws secretsmanager create-secret --name taskapp/db --secret-string '{"host":"xxx.rds.amazonaws.com","user":"admin","password":"Str0ngP@ss"}'</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">7</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Create SQS Queue + SNS Topic</h3>
+        <p>The task queue receives messages from the API and triggers Lambda to send emails. SNS for broadcast notifications.</p>
+        <div class="cmd">aws sqs create-queue --queue-name taskapp-tasks --attributes VisibilityTimeout=60,MessageRetentionPeriod=86400<br>aws sns create-topic --name taskapp-notifications</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">8</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Launch EC2 + Application Load Balancer</h3>
+        <p>Launch EC2 (t3.micro) with the userdata bootstrap script. Create ALB in public subnets forwarding to EC2 on port 3000.</p>
+        <div class="cmd">bash infra/launch-ec2.sh<br>bash infra/create-alb.sh</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">9</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Deploy Lambda Functions</h3>
+        <p>Package and deploy the email worker Lambda. Set the SQS queue as trigger with batch size 10.</p>
+        <div class="cmd">cd lambda && zip -r function.zip .<br>aws lambda create-function --function-name taskapp-email-worker --runtime nodejs18.x --zip-file fileb://function.zip --role arn:aws:iam::ACCOUNT:role/taskapp-lambda-role --handler emailWorker.handler</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">10</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Setup API Gateway</h3>
+        <p>Create REST API, add Cognito authorizer, create resources (/tasks, /upload), and link methods to the EC2 ALB endpoint.</p>
+        <div class="cmd">aws apigateway create-rest-api --name taskapp-api --region ap-south-1</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">11</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>S3 Bucket + CloudFront for Frontend</h3>
+        <p>Create S3 bucket for React app. Configure static website hosting. Create CloudFront distribution pointing to S3 with ACM HTTPS cert.</p>
+        <div class="cmd">aws s3 mb s3://taskapp-frontend-YOUR-UNIQUE-NAME --region ap-south-1<br>aws s3 website s3://taskapp-frontend-YOUR-UNIQUE-NAME --index-document index.html</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">12</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Route 53 + ACM Certificate</h3>
+        <p>Request an ACM certificate for your domain. Validate via DNS. Create Route 53 A record aliasing to CloudFront.</p>
+        <div class="cmd">aws acm request-certificate --domain-name yourdomain.com --validation-method DNS --region us-east-1</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">13</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>Setup CI/CD Pipeline</h3>
+        <p>Connect GitHub repo to CodePipeline. Add buildspec.yml. Pipeline auto-triggers on every push to main branch.</p>
+        <div class="cmd">aws codepipeline create-pipeline --cli-input-json file://pipeline.json</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">14</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>CloudWatch Alarms + WAF</h3>
+        <p>Set up CloudWatch alarms for CPU, errors, RDS storage. Attach WAF to CloudFront. Enable CloudTrail for audit logging.</p>
+        <div class="cmd">bash monitoring/alarms.sh<br>bash security/waf-setup.sh</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">15</div><div class="step-connector"></div></div>
+      <div class="step-content">
+        <h3>✅ Deploy & Verify</h3>
+        <p>Build and push React app to S3. Verify CloudFront serves the app. Test API Gateway endpoints. Check CloudWatch for logs.</p>
+        <div class="cmd">npm run build && aws s3 sync ./build s3://taskapp-frontend-YOUR-UNIQUE-NAME --delete<br>curl https://api.yourdomain.com/health</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== COST ======================== -->
+<section class="section" id="cost">
+  <div class="section-label">Section 11</div>
+  <div class="section-title">Estimated Monthly Cost</div>
+  <div class="section-sub">For a low-traffic project — scale up as traffic grows</div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>Service</th><th>Tier Used</th><th>Est. Cost/Month</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>EC2</td><td>t3.micro</td><td class="cost-free">Free (1 yr)</td><td>1 instance, Free Tier eligible</td></tr>
+        <tr><td>RDS PostgreSQL</td><td>db.t3.micro</td><td class="cost-free">Free (1 yr)</td><td>20 GB storage, Free Tier</td></tr>
+        <tr><td>S3</td><td>Standard</td><td class="cost-free">~$0.02</td><td>5 GB storage free</td></tr>
+        <tr><td>CloudFront</td><td>Free Tier</td><td class="cost-free">Free</td><td>1 TB/month data transfer free</td></tr>
+        <tr><td>Lambda</td><td>Free Tier</td><td class="cost-free">Free</td><td>1M requests/month free</td></tr>
+        <tr><td>API Gateway</td><td>Free Tier</td><td class="cost-free">Free</td><td>1M calls/month free for 12 months</td></tr>
+        <tr><td>DynamoDB</td><td>On-Demand</td><td class="cost-free">Free</td><td>25 GB free forever</td></tr>
+        <tr><td>Cognito</td><td>Free Tier</td><td class="cost-free">Free</td><td>50,000 MAUs free</td></tr>
+        <tr><td>SQS</td><td>Standard</td><td class="cost-free">Free</td><td>1M requests/month free</td></tr>
+        <tr><td>SNS</td><td>Standard</td><td class="cost-free">Free</td><td>1M publishes/month free</td></tr>
+        <tr><td>SES</td><td>On-demand</td><td class="cost-low">~$0.10</td><td>$0.10 per 1000 emails sent</td></tr>
+        <tr><td>ElastiCache (Redis)</td><td>cache.t3.micro</td><td class="cost-low">~$13</td><td>Not in Free Tier (lowest cost tier)</td></tr>
+        <tr><td>NAT Gateway</td><td>Standard</td><td class="cost-med">~$32</td><td>$0.045/hr + data transfer</td></tr>
+        <tr><td>Route 53</td><td>Hosted Zone</td><td class="cost-low">$0.50</td><td>Per hosted zone/month</td></tr>
+        <tr><td>WAF</td><td>Standard</td><td class="cost-low">$5.00</td><td>$5/web ACL + $1/1M requests</td></tr>
+        <tr><td>CloudWatch</td><td>Basic</td><td class="cost-free">Free</td><td>10 metrics, 5 alarms free</td></tr>
+        <tr><td><strong>TOTAL (after Free Tier)</strong></td><td></td><td class="cost-med"><strong>~$50–60/mo</strong></td><td>Dominated by NAT Gateway + ElastiCache</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="info-box tip">💡 <strong>Save money:</strong> Use VPC Endpoints instead of NAT Gateway ($0/hr vs $0.045/hr). Use a single-AZ ElastiCache. Keep EC2 + RDS as t3.micro for the AWS Free Tier (first 12 months).</div>
+</section>
+
+<!-- ======================== CHECKLIST ======================== -->
+<section class="section">
+  <div class="section-label">Section 12</div>
+  <div class="section-title">Production Readiness Checklist</div>
+  <div class="section-sub">Things to do before going live</div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:16px;">
+    <div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600">INFRASTRUCTURE</p>
+      <div class="checklist">
+        <div class="chk"><div class="chk-box done"></div><span>VPC with public + private subnets</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>Security groups (least-privilege rules)</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>EC2 in private subnet, ALB in public</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>RDS Multi-AZ enabled for production</span></div>
+        <div class="chk"><div class="chk-box"></div><span>Auto Scaling group for EC2</span></div>
+        <div class="chk"><div class="chk-box"></div><span>RDS automated backups (7-day retention)</span></div>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600">SECURITY</p>
+      <div class="checklist">
+        <div class="chk"><div class="chk-box done"></div><span>All secrets in Secrets Manager</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>IAM roles with least privilege</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>WAF attached to CloudFront</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>ACM SSL cert on all endpoints</span></div>
+        <div class="chk"><div class="chk-box"></div><span>CloudTrail enabled (all regions)</span></div>
+        <div class="chk"><div class="chk-box"></div><span>MFA on root AWS account</span></div>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600">OBSERVABILITY</p>
+      <div class="checklist">
+        <div class="chk"><div class="chk-box done"></div><span>CloudWatch alarms for CPU, errors, DB</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>Structured JSON logging to CloudWatch</span></div>
+        <div class="chk"><div class="chk-box"></div><span>CloudWatch dashboard created</span></div>
+        <div class="chk"><div class="chk-box"></div><span>SNS alarm notifications to email</span></div>
+        <div class="chk"><div class="chk-box"></div><span>CloudWatch Logs Insights queries ready</span></div>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600">CI/CD & DEPLOYMENT</p>
+      <div class="checklist">
+        <div class="chk"><div class="chk-box done"></div><span>CodePipeline connected to GitHub</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>CodeBuild runs tests before deploy</span></div>
+        <div class="chk"><div class="chk-box done"></div><span>Docker images in ECR</span></div>
+        <div class="chk"><div class="chk-box"></div><span>Blue/green deployment on ECS</span></div>
+        <div class="chk"><div class="chk-box"></div><span>Rollback strategy defined</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer style="background:var(--bg2);border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--muted);font-size:12px;margin-top:60px;">
+  AWS Full-Stack Task Manager — 24 Services | EC2 · S3 · RDS · Lambda · API Gateway · CloudFront · DynamoDB · ECS · ECR · ElastiCache · SQS · SNS · SES · Cognito · VPC · IAM · Secrets Manager · ACM · WAF · Route 53 · CloudWatch · CloudTrail · CodePipeline · CodeBuild
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>

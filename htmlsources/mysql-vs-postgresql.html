@@ -1,0 +1,2911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MySQL vs PostgreSQL — Complete Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0f12;
+    --bg2: #141720;
+    --bg3: #1c2030;
+    --border: #2a2f3d;
+    --border2: #3a4060;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --mysql: #f97316;
+    --mysql-bg: rgba(249,115,22,0.08);
+    --mysql-border: rgba(249,115,22,0.25);
+    --pg: #3b82f6;
+    --pg-bg: rgba(59,130,246,0.08);
+    --pg-border: rgba(59,130,246,0.25);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.08);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.08);
+    --amber: #f59e0b;
+    --amber-bg: rgba(245,158,11,0.08);
+    --purple: #a855f7;
+    --purple-bg: rgba(168,85,247,0.08);
+    --cyan: #06b6d4;
+    --cyan-bg: rgba(6,182,212,0.08);
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── LAYOUT ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 0 0 2rem;
+  }
+  .sidebar-header {
+    padding: 1.5rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+  }
+  .sidebar-logo {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+  .sidebar-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .sidebar-nav { padding: 0 0.75rem; }
+  .nav-group { margin-bottom: 4px; }
+  .nav-group-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 10px 0.5rem 4px;
+    display: block;
+  }
+  .nav-item {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all .15s;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font-sans);
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--bg3); color: var(--text); }
+  .nav-item .badge {
+    float: right;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+  }
+  .badge-pg { background: var(--pg-bg); color: var(--pg); }
+  .badge-both { background: var(--green-bg); color: var(--green); }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 2.5rem 4rem;
+    max-width: 960px;
+  }
+
+  /* ── SECTIONS ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-subtitle {
+    font-size: 12px;
+    color: var(--text3);
+    margin-bottom: 1rem;
+  }
+  .card-note {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    line-height: 1.6;
+  }
+
+  /* ── CODE PAIR ── */
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width: 700px) { .pair { grid-template-columns: 1fr; } .main { padding: 1rem; } .sidebar { display: none; } }
+
+  .code-block-wrap { position: relative; }
+  .code-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 6px 12px 5px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid;
+    border-bottom: none;
+  }
+  .code-label.mysql { color: var(--mysql); background: var(--mysql-bg); border-color: var(--mysql-border); }
+  .code-label.pg { color: var(--pg); background: var(--pg-bg); border-color: var(--pg-border); }
+  .code-label.both { color: var(--green); background: var(--green-bg); border-color: rgba(34,197,94,0.25); }
+
+  pre {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 0 6px 6px 6px;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.75;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .code-label + pre { border-top-left-radius: 0; }
+
+  .keyword { color: #7dd3fc; }
+  .type { color: #fbbf24; }
+  .string { color: #86efac; }
+  .comment { color: #475569; font-style: italic; }
+  .pg-only { color: #a78bfa; }
+  .mysql-only { color: #fb923c; }
+  .number { color: #f472b6; }
+  .fn { color: #34d399; }
+
+  /* ── SINGLE CODE ── */
+  .code-single pre { border-radius: 6px; }
+  .code-single .code-label + pre { border-top-left-radius: 0; }
+
+  /* ── BADGES ── */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .tag-pg { background: var(--pg-bg); color: var(--pg); border: 1px solid var(--pg-border); }
+  .tag-mysql { background: var(--mysql-bg); color: var(--mysql); border: 1px solid var(--mysql-border); }
+  .tag-both { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,.25); }
+  .tag-no { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,.25); }
+  .tag-tip { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,158,11,.25); }
+
+  /* ── COMPARISON TABLE ── */
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cmp-table th {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border2);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+  .cmp-table th:nth-child(2) { color: var(--mysql); }
+  .cmp-table th:nth-child(3) { color: var(--pg); }
+  .cmp-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table td:first-child { font-weight: 500; color: var(--text); }
+  .cmp-table td:not(:first-child) { color: var(--text2); font-size: 12.5px; }
+
+  /* ── ALERT BOXES ── */
+  .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 1rem;
+    border-left: 3px solid;
+    line-height: 1.6;
+  }
+  .alert-pg { background: var(--pg-bg); border-color: var(--pg); color: #93c5fd; }
+  .alert-tip { background: var(--amber-bg); border-color: var(--amber); color: #fcd34d; }
+  .alert-warn { background: var(--red-bg); border-color: var(--red); color: #fca5a5; }
+  .alert-green { background: var(--green-bg); border-color: var(--green); color: #86efac; }
+  .alert strong { font-weight: 600; }
+
+  /* ── EXTRAS GRID ── */
+  .extras-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+  .extra-pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .extra-pill:hover { border-color: var(--pg); color: var(--pg); background: var(--pg-bg); }
+  .extra-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pg); flex-shrink: 0; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, rgba(59,130,246,.06) 0%, rgba(168,85,247,.04) 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .hero-side { }
+  .hero-label { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .hero-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .hero-mysql .hero-label { color: var(--mysql); }
+  .hero-mysql .hero-name { color: var(--mysql); }
+  .hero-pg .hero-label { color: var(--pg); }
+  .hero-pg .hero-name { color: var(--pg); }
+  .hero-stat { font-size: 12px; color: var(--text2); margin-bottom: 3px; }
+  .hero-stat span { font-family: var(--font-mono); color: var(--text); font-weight: 500; }
+
+  /* ── VERSION HISTORY ── */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 7px; top: 4px; bottom: 4px; width: 1px; background: var(--border2); }
+  .timeline-item { position: relative; margin-bottom: 1.5rem; }
+  .timeline-dot { position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--bg3); border: 2px solid var(--border2); }
+  .timeline-dot.mysql-dot { border-color: var(--mysql); background: var(--mysql-bg); }
+  .timeline-dot.pg-dot { border-color: var(--pg); background: var(--pg-bg); }
+  .timeline-version { font-family: var(--font-mono); font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+  .timeline-features { font-size: 12.5px; color: var(--text2); line-height: 1.7; }
+  .timeline-features li { margin-bottom: 2px; list-style: none; padding-left: 14px; position: relative; }
+  .timeline-features li::before { content: '›'; position: absolute; left: 0; color: var(--text3); }
+
+  /* ── DUMP SECTION ── */
+  .dump-card { border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin-bottom: 1.25rem; }
+  .dump-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .dump-header-left { display: flex; align-items: center; gap: 10px; }
+  .dump-title { font-weight: 600; font-size: 14px; }
+  .dump-body { padding: 0; }
+  .dump-body pre { border-radius: 0; border: none; border-top: 1px solid var(--border); margin: 0; font-size: 12px; }
+
+  /* ── QUIZ ── */
+  .quiz-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .quiz-q { font-weight: 600; font-size: 14px; margin-bottom: 12px; line-height: 1.5; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 7px; }
+  .quiz-opt {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    background: var(--bg3);
+    color: var(--text2);
+    transition: all .15s;
+    text-align: left;
+    font-family: var(--font-sans);
+    width: 100%;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--border2); color: var(--text); }
+  .quiz-opt.correct { background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.4); color: var(--green); }
+  .quiz-opt.wrong { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.4); color: var(--red); }
+  .quiz-explain { font-size: 12.5px; color: var(--text2); margin-top: 12px; padding: 12px 14px; background: var(--bg3); border-radius: 7px; display: none; border-left: 3px solid var(--pg); line-height: 1.6; }
+  .quiz-score { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1.5rem; }
+  .score-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .score-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .4s ease; }
+  .score-text { font-family: var(--font-mono); font-size: 13px; color: var(--text); font-weight: 500; white-space: nowrap; }
+
+  /* ── UI QUERY TABS ── */
+  .ui-tabs { margin-top: 1rem; }
+  .ui-tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
+  .ui-tab-btn {
+    padding: 5px 12px;
+    border-radius: 6px 6px 0 0;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    background: var(--bg);
+    color: var(--text3);
+    transition: all .15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .ui-tab-btn:hover { color: var(--text2); background: var(--bg3); }
+  .ui-tab-btn.active-cmd { background: var(--bg3); color: var(--cyan); border-color: rgba(6,182,212,.3); }
+  .ui-tab-btn.active-wb  { background: var(--bg3); color: var(--mysql); border-color: var(--mysql-border); }
+  .ui-tab-btn.active-pg  { background: var(--bg3); color: var(--pg); border-color: var(--pg-border); }
+
+  .ui-tab-panel {
+    display: none;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 0 6px 6px 6px;
+    padding: 14px 16px;
+  }
+  .ui-tab-panel.active { display: block; }
+
+  .ui-step-list { list-style: none; padding: 0; margin: 0; }
+  .ui-step { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--text2); line-height: 1.55; }
+  .ui-step:last-child { border-bottom: none; padding-bottom: 0; }
+  .ui-step-num {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .wb-num  { background: var(--mysql-bg); color: var(--mysql); border: 1px solid var(--mysql-border); }
+  .pg-num  { background: var(--pg-bg); color: var(--pg); border: 1px solid var(--pg-border); }
+  .ui-step-text strong { color: var(--text); }
+  .ui-step-text code {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    padding: 0 5px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--cyan);
+  }
+  .ui-nav-note { font-size: 11.5px; color: var(--text3); margin-bottom: 10px; padding: 6px 10px; background: var(--bg2); border-radius: 5px; border-left: 2px solid var(--border2); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">SQL Reference</div>
+      <div class="sidebar-title">MySQL vs PostgreSQL<br><span style="font-size:11px;color:var(--cyan);font-weight:400">+ UI Query Steps</span></div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group">
+        <span class="nav-group-label">Overview</span>
+        <button class="nav-item active" onclick="show('overview')">Quick comparison</button>
+        <button class="nav-item" onclick="show('versions')">Version history <span class="badge badge-both">timeline</span></button>
+      </div>
+      <div class="nav-group">
+        <span class="nav-group-label">Core SQL</span>
+        <button class="nav-item" onclick="show('basics')">Connect + basics</button>
+        <button class="nav-item" onclick="show('crud')">CRUD operations</button>
+        <button class="nav-item" onclick="show('joins')">JOINs (all types)</button>
+        <button class="nav-item" onclick="show('subqueries')">Subqueries</button>
+        <button class="nav-item" onclick="show('aggregates')">Aggregates + GROUP BY</button>
+        <button class="nav-item" onclick="show('indexes')">Indexes</button>
+        <button class="nav-item" onclick="show('transactions')">Transactions + locks</button>
+      </div>
+      <div class="nav-group">
+        <span class="nav-group-label">Advanced SQL</span>
+        <button class="nav-item" onclick="show('window')">Window functions</button>
+        <button class="nav-item" onclick="show('ctes')">CTEs + recursion</button>
+        <button class="nav-item" onclick="show('json')">JSON / JSONB <span class="badge badge-pg">PG</span></button>
+        <button class="nav-item" onclick="show('arrays')">Arrays + ranges <span class="badge badge-pg">PG</span></button>
+        <button class="nav-item" onclick="show('fulltext')">Full-text search</button>
+        <button class="nav-item" onclick="show('stored')">Stored procs + triggers</button>
+        <button class="nav-item" onclick="show('views')">Views + materialized</button>
+      </div>
+      <div class="nav-group">
+        <span class="nav-group-label">PostgreSQL Specials</span>
+        <button class="nav-item" onclick="show('pg-types')">Custom types <span class="badge badge-pg">PG</span></button>
+        <button class="nav-item" onclick="show('pg-listen')">LISTEN / NOTIFY <span class="badge badge-pg">PG</span></button>
+        <button class="nav-item" onclick="show('pg-lateral')">LATERAL joins <span class="badge badge-pg">PG</span></button>
+        <button class="nav-item" onclick="show('pg-partitions')">Partitioning <span class="badge badge-pg">PG</span></button>
+        <button class="nav-item" onclick="show('pg-misc')">Extensions + misc <span class="badge badge-pg">PG</span></button>
+      </div>
+      <div class="nav-group">
+        <span class="nav-group-label">Admin & Ops</span>
+        <button class="nav-item" onclick="show('dump')">Dump + restore</button>
+        <button class="nav-item" onclick="show('replication')">Replication</button>
+        <button class="nav-item" onclick="show('performance')">Performance tuning</button>
+      </div>
+      <div class="nav-group">
+        <span class="nav-group-label">Practice</span>
+        <button class="nav-item" onclick="show('quiz')">Quiz (15 questions)</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ══════════════════════════ OVERVIEW ══════════════════════════ -->
+    <div id="overview" class="section active">
+      <h1 class="section-title">Quick Comparison</h1>
+      <p class="section-desc">At-a-glance database selection guide.</p>
+
+      <div class="alert alert-pg" style="margin-bottom:1.5rem">
+        <strong>✨ New: UI-Level Query Steps</strong> — Every card now has a <span style="color:var(--mysql);font-weight:600">MySQL Workbench</span> and <span style="color:var(--pg);font-weight:600">pgAdmin 4</span> tab showing click-by-click UI navigation steps alongside the SQL commands.
+      </div>
+
+      <div class="hero">
+        <div class="hero-side hero-mysql">
+          <div class="hero-label">Challenger</div>
+          <div class="hero-name">MySQL</div>
+          <div class="hero-stat">Latest stable: <span>8.4 (2024)</span></div>
+          <div class="hero-stat">License: <span>GPL / Commercial</span></div>
+          <div class="hero-stat">Owner: <span>Oracle</span></div>
+          <div class="hero-stat">Best for: <span>Web apps, CMS, read-heavy</span></div>
+          <div class="hero-stat">Default engine: <span>InnoDB</span></div>
+        </div>
+        <div class="hero-side hero-pg">
+          <div class="hero-label">The Standard</div>
+          <div class="hero-name">PostgreSQL</div>
+          <div class="hero-stat">Latest stable: <span>16.4 (2024)</span></div>
+          <div class="hero-stat">License: <span>PostgreSQL (permissive)</span></div>
+          <div class="hero-stat">Owner: <span>Community</span></div>
+          <div class="hero-stat">Best for: <span>Complex queries, strict integrity</span></div>
+          <div class="hero-stat">Default engine: <span>Single engine (heap)</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <table class="cmp-table">
+          <thead>
+            <tr><th>Feature</th><th>MySQL 8+</th><th>PostgreSQL 16</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ACID compliance</td><td><span class="tag tag-mysql">InnoDB only</span></td><td><span class="tag tag-pg">Always</span></td></tr>
+            <tr><td>JSON support</td><td>JSON column (not indexed)</td><td><span class="tag tag-pg">JSONB — indexed, binary</span></td></tr>
+            <tr><td>Arrays</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">Native TEXT[], INT[] etc.</span></td></tr>
+            <tr><td>Custom types</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">CREATE TYPE / DOMAIN</span></td></tr>
+            <tr><td>Table inheritance</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">Yes</span></td></tr>
+            <tr><td>Partial indexes</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">Yes</span></td></tr>
+            <tr><td>RETURNING clause</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">Yes</span></td></tr>
+            <tr><td>DDL in transactions</td><td><span class="tag tag-no">Implicit commit</span></td><td><span class="tag tag-pg">Fully transactional</span></td></tr>
+            <tr><td>Window functions</td><td>MySQL 8+</td><td>Full + FILTER clause</td></tr>
+            <tr><td>Recursive CTEs</td><td>MySQL 8+</td><td>Full + materialization hints</td></tr>
+            <tr><td>Full-text search</td><td>Built-in, limited</td><td><span class="tag tag-pg">tsvector + GIN + ranking</span></td></tr>
+            <tr><td>Index types</td><td>B-Tree, Hash, Full-text</td><td><span class="tag tag-pg">B-Tree, GIN, GiST, BRIN, Hash, SP-GiST</span></td></tr>
+            <tr><td>Stored procs language</td><td>SQL dialect only</td><td><span class="tag tag-pg">PL/pgSQL, Python, JS, Perl, C</span></td></tr>
+            <tr><td>LISTEN/NOTIFY</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">Real-time pub/sub</span></td></tr>
+            <tr><td>Materialized views</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">Yes + CONCURRENTLY refresh</span></td></tr>
+            <tr><td>Geospatial</td><td>Spatial extension</td><td><span class="tag tag-pg">PostGIS (industry standard)</span></td></tr>
+            <tr><td>LATERAL joins</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">Yes</span></td></tr>
+            <tr><td>Row-level security</td><td><span class="tag tag-no">No</span></td><td><span class="tag tag-pg">Yes (RLS)</span></td></tr>
+            <tr><td>Table partitioning</td><td>Basic (RANGE, LIST, HASH)</td><td><span class="tag tag-pg">Declarative + inheritance</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ VERSIONS ══════════════════════════ -->
+    <div id="versions" class="section">
+      <h1 class="section-title">Version History</h1>
+      <p class="section-desc">Key releases and the features they introduced.</p>
+
+      <div class="pair">
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mysql);margin-bottom:1rem;font-family:var(--font-mono)">MySQL</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot mysql-dot"></div>
+              <div class="timeline-version" style="color:var(--mysql)">MySQL 8.4 — 2024 LTS</div>
+              <ul class="timeline-features">
+                <li>GTID replication improvements</li>
+                <li>InnoDB Transparent Page Compression</li>
+                <li>Long-term support designation</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot mysql-dot"></div>
+              <div class="timeline-version" style="color:var(--mysql)">MySQL 8.0 — 2018</div>
+              <ul class="timeline-features">
+                <li>Window functions</li>
+                <li>Common Table Expressions (CTEs)</li>
+                <li>Recursive queries</li>
+                <li>JSON functions expanded</li>
+                <li>Invisible indexes</li>
+                <li>Descending indexes</li>
+                <li>Hash joins (8.0.18)</li>
+                <li>utf8mb4 default charset</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot mysql-dot"></div>
+              <div class="timeline-version" style="color:var(--mysql)">MySQL 5.7 — 2015</div>
+              <ul class="timeline-features">
+                <li>Native JSON data type</li>
+                <li>Generated columns</li>
+                <li>InnoDB spatial indexes</li>
+                <li>sys schema</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot mysql-dot"></div>
+              <div class="timeline-version" style="color:var(--mysql)">MySQL 5.6 — 2013</div>
+              <ul class="timeline-features">
+                <li>Full-text search in InnoDB</li>
+                <li>Online DDL</li>
+                <li>GTID-based replication</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot mysql-dot"></div>
+              <div class="timeline-version" style="color:var(--mysql)">MySQL 5.5 — 2010</div>
+              <ul class="timeline-features">
+                <li>InnoDB became default engine</li>
+                <li>Semi-sync replication</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--pg);margin-bottom:1rem;font-family:var(--font-mono)">PostgreSQL</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot pg-dot"></div>
+              <div class="timeline-version" style="color:var(--pg)">PostgreSQL 17 — 2024</div>
+              <ul class="timeline-features">
+                <li>Incremental JSON parsing</li>
+                <li>MERGE improvements</li>
+                <li>COPY improvements</li>
+                <li>Vacuum process speed boost</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot pg-dot"></div>
+              <div class="timeline-version" style="color:var(--pg)">PostgreSQL 16 — 2023</div>
+              <ul class="timeline-features">
+                <li>Logical replication from standby</li>
+                <li>Parallel query for full sequential scans</li>
+                <li>pg_stat improvements</li>
+                <li>SQL/JSON standard functions</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot pg-dot"></div>
+              <div class="timeline-version" style="color:var(--pg)">PostgreSQL 15 — 2022</div>
+              <ul class="timeline-features">
+                <li>MERGE statement (SQL:2003 standard)</li>
+                <li>Logical replication row filtering</li>
+                <li>UNIQUE NULLS NOT DISTINCT</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot pg-dot"></div>
+              <div class="timeline-version" style="color:var(--pg)">PostgreSQL 14 — 2021</div>
+              <ul class="timeline-features">
+                <li>Subscript notation for JSONB</li>
+                <li>Range multiranges</li>
+                <li>Improved partitioned table performance</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot pg-dot"></div>
+              <div class="timeline-version" style="color:var(--pg)">PostgreSQL 13 — 2020</div>
+              <ul class="timeline-features">
+                <li>Deduplication in B-Tree indexes</li>
+                <li>Parallel vacuum</li>
+                <li>Incremental sort</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot pg-dot"></div>
+              <div class="timeline-version" style="color:var(--pg)">PostgreSQL 12 — 2019</div>
+              <ul class="timeline-features">
+                <li>Generated columns</li>
+                <li>SQL/JSON path language</li>
+                <li>CTE not always materialized</li>
+              </ul>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot pg-dot"></div>
+              <div class="timeline-version" style="color:var(--pg)">PostgreSQL 10 — 2017</div>
+              <ul class="timeline-features">
+                <li>Declarative table partitioning</li>
+                <li>Logical replication</li>
+                <li>Parallel queries improved</li>
+                <li>IDENTITY columns (SQL standard)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ BASICS ══════════════════════════ -->
+    <div id="basics" class="section">
+      <h1 class="section-title">Connect + Basics</h1>
+      <p class="section-desc">Connecting, listing databases, describing tables.</p>
+
+      <div class="card">
+        <div class="card-title">Connect to server</div>
+        <div class="pair">
+          <div class="code-block-wrap">
+            <div class="code-label mysql">MySQL</div>
+            <pre><span class="comment"># CLI login</span>
+<span class="fn">mysql</span> -u root -p
+<span class="fn">mysql</span> -u root -p -h 127.0.0.1 -P 3306
+<span class="fn">mysql</span> -u user -p mydb</pre>
+          </div>
+          <div class="code-block-wrap">
+            <div class="code-label pg">PostgreSQL</div>
+            <pre><span class="comment"># CLI login</span>
+<span class="fn">psql</span> -U postgres
+<span class="fn">psql</span> -U user -h 127.0.0.1 -p 5432 -d mydb
+<span class="fn">psql</span> <span class="string">"postgres://user:pass@host/db"</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">List & switch databases / schemas</div>
+        <div class="pair">
+          <div class="code-block-wrap">
+            <div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">SHOW DATABASES</span>;
+<span class="keyword">USE</span> mydb;
+<span class="keyword">SHOW TABLES</span>;
+<span class="keyword">DESCRIBE</span> users;
+<span class="keyword">SHOW CREATE TABLE</span> users;</pre>
+          </div>
+          <div class="code-block-wrap">
+            <div class="code-label pg">PostgreSQL</div>
+            <pre><span class="pg-only">\l</span>            <span class="comment">-- list databases</span>
+<span class="pg-only">\c</span> mydb       <span class="comment">-- switch database</span>
+<span class="pg-only">\dt</span>           <span class="comment">-- list tables in schema</span>
+<span class="pg-only">\d</span> users      <span class="comment">-- describe table</span>
+<span class="pg-only">\dn</span>           <span class="comment">-- list schemas</span>
+<span class="pg-only">\df</span>           <span class="comment">-- list functions</span>
+<span class="pg-only">\dv</span>           <span class="comment">-- list views</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Create table — auto-increment</div>
+        <div class="pair">
+          <div class="code-block-wrap">
+            <div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">CREATE TABLE</span> users (
+  id    <span class="type">INT</span> <span class="mysql-only">AUTO_INCREMENT</span> <span class="keyword">PRIMARY KEY</span>,
+  name  <span class="type">VARCHAR</span>(100) <span class="keyword">NOT NULL</span>,
+  email <span class="type">VARCHAR</span>(255) <span class="keyword">UNIQUE</span>,
+  bio   <span class="type">TEXT</span>,
+  age   <span class="type">TINYINT UNSIGNED</span>,
+  score <span class="type">DECIMAL</span>(5,2),
+  created_at <span class="type">TIMESTAMP</span>
+    <span class="keyword">DEFAULT</span> <span class="fn">CURRENT_TIMESTAMP</span>
+) <span class="mysql-only">ENGINE=InnoDB</span>
+  <span class="mysql-only">DEFAULT CHARSET=utf8mb4</span>;</pre>
+          </div>
+          <div class="code-block-wrap">
+            <div class="code-label pg">PostgreSQL</div>
+            <pre><span class="keyword">CREATE TABLE</span> users (
+  id    <span class="pg-only">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,  <span class="comment">-- or BIGSERIAL</span>
+  name  <span class="type">VARCHAR</span>(100) <span class="keyword">NOT NULL</span>,
+  email <span class="type">VARCHAR</span>(255) <span class="keyword">UNIQUE</span>,
+  bio   <span class="type">TEXT</span>,
+  age   <span class="type">SMALLINT</span>,
+  score <span class="type">NUMERIC</span>(5,2),
+  created_at <span class="type">TIMESTAMPTZ</span>
+    <span class="keyword">DEFAULT</span> <span class="fn">NOW</span>()
+);
+<span class="comment">-- Modern alternative (SQL standard):</span>
+<span class="comment">-- id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ CRUD ══════════════════════════ -->
+    <div id="crud" class="section">
+      <h1 class="section-title">CRUD Operations</h1>
+      <p class="section-desc">INSERT, SELECT, UPDATE, DELETE — and PostgreSQL's powerful RETURNING clause.</p>
+
+      <div class="card">
+        <div class="card-title">INSERT</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">INSERT INTO</span> users (name, email)
+<span class="keyword">VALUES</span> (<span class="string">'Ali'</span>, <span class="string">'ali@x.com'</span>);
+
+<span class="comment">-- Multi-row</span>
+<span class="keyword">INSERT INTO</span> users (name, email) <span class="keyword">VALUES</span>
+  (<span class="string">'Priya'</span>, <span class="string">'p@x.com'</span>),
+  (<span class="string">'Reza'</span>,  <span class="string">'r@x.com'</span>);</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="keyword">INSERT INTO</span> users (name, email)
+<span class="keyword">VALUES</span> (<span class="string">'Ali'</span>, <span class="string">'ali@x.com'</span>)
+<span class="pg-only">RETURNING id, created_at</span>;
+
+<span class="comment">-- Multi-row + return all</span>
+<span class="keyword">INSERT INTO</span> users (name, email) <span class="keyword">VALUES</span>
+  (<span class="string">'Priya'</span>, <span class="string">'p@x.com'</span>),
+  (<span class="string">'Reza'</span>,  <span class="string">'r@x.com'</span>)
+<span class="pg-only">RETURNING *</span>;</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SELECT with filtering</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (same syntax)</div>
+          <pre><span class="keyword">SELECT</span> id, name, email
+<span class="keyword">FROM</span> users
+<span class="keyword">WHERE</span> age <span class="keyword">BETWEEN</span> <span class="number">18</span> <span class="keyword">AND</span> <span class="number">35</span>
+  <span class="keyword">AND</span> email <span class="keyword">LIKE</span> <span class="string">'%@gmail.com'</span>
+  <span class="keyword">AND</span> status <span class="keyword">IN</span> (<span class="string">'active'</span>, <span class="string">'pending'</span>)
+<span class="keyword">ORDER BY</span> name <span class="keyword">ASC</span>, created_at <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> 20 <span class="keyword">OFFSET</span> 40;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">UPDATE & DELETE with RETURNING</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">UPDATE</span> users
+<span class="keyword">SET</span> name = <span class="string">'New Name'</span>, age = <span class="number">30</span>
+<span class="keyword">WHERE</span> id = <span class="number">1</span>;
+<span class="comment">-- Need separate SELECT to see result</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id = <span class="number">1</span>;</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="keyword">UPDATE</span> users
+<span class="keyword">SET</span> name = <span class="string">'New Name'</span>, age = <span class="number">30</span>
+<span class="keyword">WHERE</span> id = <span class="number">1</span>
+<span class="pg-only">RETURNING *</span>;  <span class="comment">-- returns updated rows</span>
+
+<span class="keyword">DELETE FROM</span> users
+<span class="keyword">WHERE</span> status = <span class="string">'inactive'</span>
+<span class="pg-only">RETURNING id, email</span>;</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">UPSERT (insert or update on conflict)</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">INSERT INTO</span> users (id, name, score)
+<span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'Ali'</span>, <span class="number">95</span>)
+<span class="mysql-only">ON DUPLICATE KEY UPDATE</span>
+  name  = <span class="keyword">VALUES</span>(name),
+  score = <span class="keyword">VALUES</span>(score);</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="keyword">INSERT INTO</span> users (id, name, score)
+<span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'Ali'</span>, <span class="number">95</span>)
+<span class="pg-only">ON CONFLICT (id)</span>
+<span class="pg-only">DO UPDATE SET</span>
+  name  = <span class="keyword">EXCLUDED</span>.name,
+  score = <span class="keyword">EXCLUDED</span>.score
+<span class="pg-only">RETURNING *</span>;
+
+<span class="comment">-- Skip on conflict:</span>
+<span class="keyword">INSERT INTO</span> users (email)
+<span class="keyword">VALUES</span> (<span class="string">'a@x.com'</span>)
+<span class="pg-only">ON CONFLICT DO NOTHING</span>;</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ JOINS ══════════════════════════ -->
+    <div id="joins" class="section">
+      <h1 class="section-title">JOINs — All Types</h1>
+      <p class="section-desc">INNER, LEFT, RIGHT, FULL, CROSS, SELF — syntax and use cases.</p>
+
+      <div class="card">
+        <div class="card-title">INNER JOIN — only matching rows</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (same syntax)</div>
+          <pre><span class="keyword">SELECT</span>
+  u.id,
+  u.name,
+  o.id      <span class="keyword">AS</span> order_id,
+  o.total,
+  o.created_at
+<span class="keyword">FROM</span> users u
+<span class="keyword">INNER JOIN</span> orders o <span class="keyword">ON</span> o.user_id = u.id
+<span class="keyword">WHERE</span> o.total > <span class="number">100</span>
+<span class="keyword">ORDER BY</span> o.created_at <span class="keyword">DESC</span>;</pre>
+        </div>
+        <div class="card-note">Returns only users who have at least one matching order. Users with no orders are excluded.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">LEFT JOIN — all left rows + nulls for unmatched right</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (same syntax)</div>
+          <pre><span class="keyword">SELECT</span>
+  u.name,
+  <span class="fn">COUNT</span>(o.id)    <span class="keyword">AS</span> order_count,
+  <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(o.total), <span class="number">0</span>) <span class="keyword">AS</span> total_spent
+<span class="keyword">FROM</span> users u
+<span class="keyword">LEFT JOIN</span> orders o <span class="keyword">ON</span> o.user_id = u.id
+<span class="keyword">GROUP BY</span> u.id, u.name
+<span class="keyword">ORDER BY</span> total_spent <span class="keyword">DESC</span>;</pre>
+        </div>
+        <div class="card-note">All users appear even if they have no orders (order_count = 0, total_spent = 0).</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">FULL OUTER JOIN — all rows from both sides</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL — emulated</div>
+            <pre><span class="comment">-- MySQL has no FULL OUTER JOIN.</span>
+<span class="comment">-- Emulate with UNION:</span>
+<span class="keyword">SELECT</span> u.name, o.total
+<span class="keyword">FROM</span> users u
+<span class="keyword">LEFT JOIN</span> orders o
+  <span class="keyword">ON</span> o.user_id = u.id
+<span class="keyword">UNION</span>
+<span class="keyword">SELECT</span> u.name, o.total
+<span class="keyword">FROM</span> users u
+<span class="keyword">RIGHT JOIN</span> orders o
+  <span class="keyword">ON</span> o.user_id = u.id;</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL — native</div>
+            <pre><span class="keyword">SELECT</span>
+  u.name,
+  o.total
+<span class="keyword">FROM</span> users u
+<span class="pg-only">FULL OUTER JOIN</span> orders o
+  <span class="keyword">ON</span> o.user_id = u.id;
+<span class="comment">-- Rows appear from both sides.</span>
+<span class="comment">-- Unmatched sides show NULL.</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">CROSS JOIN — cartesian product</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="comment">-- Every combination of rows (n × m rows)</span>
+<span class="keyword">SELECT</span> s.size, c.color
+<span class="keyword">FROM</span> sizes s
+<span class="keyword">CROSS JOIN</span> colors c;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SELF JOIN — join table to itself</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="comment">-- Find employees and their managers</span>
+<span class="keyword">SELECT</span>
+  e.name  <span class="keyword">AS</span> employee,
+  m.name  <span class="keyword">AS</span> manager
+<span class="keyword">FROM</span> employees e
+<span class="keyword">LEFT JOIN</span> employees m
+  <span class="keyword">ON</span> m.id = e.manager_id
+<span class="keyword">ORDER BY</span> m.name NULLS LAST;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Multiple JOINs</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="keyword">SELECT</span>
+  u.name,
+  o.id        <span class="keyword">AS</span> order_id,
+  p.name      <span class="keyword">AS</span> product,
+  oi.quantity,
+  oi.unit_price
+<span class="keyword">FROM</span> users u
+<span class="keyword">JOIN</span> orders      o  <span class="keyword">ON</span> o.user_id    = u.id
+<span class="keyword">JOIN</span> order_items oi <span class="keyword">ON</span> oi.order_id  = o.id
+<span class="keyword">JOIN</span> products    p  <span class="keyword">ON</span> p.id         = oi.product_id
+<span class="keyword">WHERE</span> o.created_at >= <span class="string">'2024-01-01'</span>
+<span class="keyword">ORDER BY</span> o.id, p.name;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ SUBQUERIES ══════════════════════════ -->
+    <div id="subqueries" class="section">
+      <h1 class="section-title">Subqueries</h1>
+      <p class="section-desc">Scalar, correlated, IN/EXISTS/ANY/ALL — with PostgreSQL extras.</p>
+
+      <div class="card">
+        <div class="card-title">Scalar subquery — single value</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="comment">-- Show each order with user's total order count</span>
+<span class="keyword">SELECT</span>
+  o.id,
+  o.total,
+  (<span class="keyword">SELECT</span> <span class="fn">COUNT</span>(*) <span class="keyword">FROM</span> orders
+   <span class="keyword">WHERE</span> user_id = o.user_id) <span class="keyword">AS</span> user_order_count
+<span class="keyword">FROM</span> orders o;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Subquery in FROM (derived table)</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="keyword">SELECT</span> dept, avg_salary
+<span class="keyword">FROM</span> (
+  <span class="keyword">SELECT</span>
+    department   <span class="keyword">AS</span> dept,
+    <span class="fn">AVG</span>(salary)  <span class="keyword">AS</span> avg_salary
+  <span class="keyword">FROM</span> employees
+  <span class="keyword">GROUP BY</span> department
+) <span class="keyword">AS</span> dept_avg
+<span class="keyword">WHERE</span> avg_salary > <span class="number">60000</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Correlated subquery — references outer row</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="comment">-- Employees earning more than their dept average</span>
+<span class="keyword">SELECT</span> name, salary, department
+<span class="keyword">FROM</span> employees e
+<span class="keyword">WHERE</span> salary > (
+  <span class="keyword">SELECT</span> <span class="fn">AVG</span>(salary)
+  <span class="keyword">FROM</span> employees
+  <span class="keyword">WHERE</span> department = e.department  <span class="comment">-- ← outer ref</span>
+);</pre>
+        </div>
+        <div class="card-note">Re-executed for every outer row — can be slow on large tables. Often better rewritten as a window function or CTE.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">IN / NOT IN</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="comment">-- Users who have placed at least one order</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users
+<span class="keyword">WHERE</span> id <span class="keyword">IN</span> (<span class="keyword">SELECT</span> user_id <span class="keyword">FROM</span> orders);
+
+<span class="comment">-- Users with NO orders at all</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users
+<span class="keyword">WHERE</span> id <span class="keyword">NOT IN</span> (
+  <span class="keyword">SELECT</span> user_id <span class="keyword">FROM</span> orders
+  <span class="keyword">WHERE</span> user_id <span class="keyword">IS NOT NULL</span>  <span class="comment">-- ⚠ NULLs in NOT IN = no rows!</span>
+);</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">EXISTS / NOT EXISTS — often faster than IN</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="comment">-- Users with at least one high-value order</span>
+<span class="keyword">SELECT</span> u.name
+<span class="keyword">FROM</span> users u
+<span class="keyword">WHERE</span> <span class="keyword">EXISTS</span> (
+  <span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">FROM</span> orders o
+  <span class="keyword">WHERE</span> o.user_id = u.id
+    <span class="keyword">AND</span> o.total > <span class="number">1000</span>
+);
+
+<span class="comment">-- Users with NO orders</span>
+<span class="keyword">SELECT</span> u.name
+<span class="keyword">FROM</span> users u
+<span class="keyword">WHERE</span> <span class="keyword">NOT EXISTS</span> (
+  <span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">FROM</span> orders o
+  <span class="keyword">WHERE</span> o.user_id = u.id
+);</pre>
+        </div>
+        <div class="card-note">EXISTS stops at the first match (short-circuits). Prefer EXISTS over IN for large subquery results.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ANY / ALL comparisons</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="comment">-- Salary > any single salary in IT dept</span>
+<span class="keyword">SELECT</span> name, salary <span class="keyword">FROM</span> employees
+<span class="keyword">WHERE</span> salary > <span class="keyword">ANY</span> (
+  <span class="keyword">SELECT</span> salary <span class="keyword">FROM</span> employees
+  <span class="keyword">WHERE</span> department = <span class="string">'IT'</span>
+);
+
+<span class="comment">-- Salary > ALL salaries in IT dept (= highest)</span>
+<span class="keyword">SELECT</span> name, salary <span class="keyword">FROM</span> employees
+<span class="keyword">WHERE</span> salary > <span class="keyword">ALL</span> (
+  <span class="keyword">SELECT</span> salary <span class="keyword">FROM</span> employees
+  <span class="keyword">WHERE</span> department = <span class="string">'IT'</span>
+);</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Subquery in SELECT list (column subquery)</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="keyword">SELECT</span>
+  p.name,
+  p.price,
+  (
+    <span class="keyword">SELECT</span> <span class="fn">AVG</span>(price)
+    <span class="keyword">FROM</span> products
+    <span class="keyword">WHERE</span> category_id = p.category_id
+  ) <span class="keyword">AS</span> category_avg_price,
+  p.price - (
+    <span class="keyword">SELECT</span> <span class="fn">AVG</span>(price)
+    <span class="keyword">FROM</span> products
+    <span class="keyword">WHERE</span> category_id = p.category_id
+  ) <span class="keyword">AS</span> diff_from_avg
+<span class="keyword">FROM</span> products p;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ AGGREGATES ══════════════════════════ -->
+    <div id="aggregates" class="section">
+      <h1 class="section-title">Aggregates + GROUP BY</h1>
+      <p class="section-desc">COUNT, SUM, AVG, MIN/MAX, GROUP BY, HAVING, ROLLUP.</p>
+
+      <div class="card">
+        <div class="card-title">Basic aggregates</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="keyword">SELECT</span>
+  department,
+  <span class="fn">COUNT</span>(*)           <span class="keyword">AS</span> headcount,
+  <span class="fn">COUNT</span>(DISTINCT mgr) <span class="keyword">AS</span> unique_managers,
+  <span class="fn">AVG</span>(salary)        <span class="keyword">AS</span> avg_salary,
+  <span class="fn">SUM</span>(salary)        <span class="keyword">AS</span> total_payroll,
+  <span class="fn">MIN</span>(salary)        <span class="keyword">AS</span> min_salary,
+  <span class="fn">MAX</span>(salary)        <span class="keyword">AS</span> max_salary
+<span class="keyword">FROM</span> employees
+<span class="keyword">GROUP BY</span> department
+<span class="keyword">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="number">5</span>
+<span class="keyword">ORDER BY</span> total_payroll <span class="keyword">DESC</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ROLLUP — subtotals and grand total</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="keyword">SELECT</span>
+  year,
+  quarter,
+  <span class="fn">SUM</span>(revenue) <span class="keyword">AS</span> total
+<span class="keyword">FROM</span> sales
+<span class="keyword">GROUP BY</span> <span class="fn">ROLLUP</span>(year, quarter);
+<span class="comment">-- Produces subtotal per year + grand total</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">GROUP_CONCAT vs STRING_AGG — aggregate strings</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">SELECT</span>
+  user_id,
+  <span class="mysql-only">GROUP_CONCAT</span>(
+    tag <span class="keyword">ORDER BY</span> tag
+    <span class="keyword">SEPARATOR</span> <span class="string">', '</span>
+  ) <span class="keyword">AS</span> all_tags
+<span class="keyword">FROM</span> post_tags
+<span class="keyword">GROUP BY</span> user_id;</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="keyword">SELECT</span>
+  user_id,
+  <span class="pg-only">STRING_AGG</span>(
+    tag, <span class="string">', '</span>
+    <span class="keyword">ORDER BY</span> tag
+  ) <span class="keyword">AS</span> all_tags,
+  <span class="pg-only">ARRAY_AGG</span>(tag <span class="keyword">ORDER BY</span> tag)
+    <span class="keyword">AS</span> tags_array
+<span class="keyword">FROM</span> post_tags
+<span class="keyword">GROUP BY</span> user_id;</pre>
+          </div>
+        </div>
+        <div class="card-note"><span class="tag tag-pg">PG</span> PostgreSQL also has <code>ARRAY_AGG</code> to aggregate into a native array, and <code>JSON_AGG</code> / <code>JSONB_AGG</code> to aggregate into JSON.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">FILTER clause on aggregates (PostgreSQL only)</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Conditional aggregation without CASE WHEN</span>
+<span class="keyword">SELECT</span>
+  department,
+  <span class="fn">COUNT</span>(*) <span class="keyword">AS</span> total,
+  <span class="fn">COUNT</span>(*) <span class="pg-only">FILTER (WHERE</span> status = <span class="string">'active'</span><span class="pg-only">)</span>   <span class="keyword">AS</span> active_count,
+  <span class="fn">AVG</span>(salary) <span class="pg-only">FILTER (WHERE</span> hired_year = <span class="number">2024</span><span class="pg-only">)</span> <span class="keyword">AS</span> avg_new_hire_salary
+<span class="keyword">FROM</span> employees
+<span class="keyword">GROUP BY</span> department;</pre>
+        </div>
+        <div class="card-note">The FILTER clause is cleaner than CASE WHEN inside SUM/COUNT and works with any aggregate function including window functions.</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ INDEXES ══════════════════════════ -->
+    <div id="indexes" class="section">
+      <h1 class="section-title">Indexes</h1>
+      <p class="section-desc">B-Tree, composite, partial, covering, GIN, GiST — creation and use.</p>
+
+      <div class="card">
+        <div class="card-title">Basic index creation</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="comment">-- Basic index</span>
+<span class="keyword">CREATE INDEX</span> idx_email
+  <span class="keyword">ON</span> users (email);
+
+<span class="comment">-- Composite index</span>
+<span class="keyword">CREATE INDEX</span> idx_dept_salary
+  <span class="keyword">ON</span> employees (department, salary);
+
+<span class="comment">-- Unique index</span>
+<span class="keyword">CREATE UNIQUE INDEX</span> idx_uq_slug
+  <span class="keyword">ON</span> posts (slug);
+
+<span class="comment">-- Full-text index</span>
+<span class="keyword">CREATE FULLTEXT INDEX</span> idx_ft_body
+  <span class="keyword">ON</span> posts (title, body);</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="comment">-- Basic index</span>
+<span class="keyword">CREATE INDEX</span> idx_email
+  <span class="keyword">ON</span> users (email);
+
+<span class="comment">-- Composite index</span>
+<span class="keyword">CREATE INDEX</span> idx_dept_salary
+  <span class="keyword">ON</span> employees (department, salary);
+
+<span class="comment">-- Partial index (only active users)</span>
+<span class="keyword">CREATE INDEX</span> idx_active_email
+  <span class="keyword">ON</span> users (email)
+  <span class="pg-only">WHERE status = 'active'</span>;
+
+<span class="comment">-- GIN index for full-text</span>
+<span class="keyword">CREATE INDEX</span> idx_ft_body
+  <span class="keyword">ON</span> posts <span class="pg-only">USING GIN</span>
+  (<span class="pg-only">to_tsvector</span>(<span class="string">'english'</span>, title || body));
+
+<span class="comment">-- Concurrent (no table lock)</span>
+<span class="keyword">CREATE INDEX CONCURRENTLY</span> idx_name
+  <span class="keyword">ON</span> users (name);</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Index types in PostgreSQL</div>
+        <div class="card">
+          <table class="cmp-table">
+            <thead><tr><th>Type</th><th>Use case</th><th>Operators</th></tr></thead>
+            <tbody>
+              <tr><td>B-Tree (default)</td><td>Equality, range, ORDER BY, LIKE 'foo%'</td><td>=, &lt;, &gt;, &lt;=, &gt;=, BETWEEN</td></tr>
+              <tr><td>GIN</td><td>Full-text search, JSONB, arrays, tsvector</td><td>@@, @&gt;, &lt;@, &amp;&amp;</td></tr>
+              <tr><td>GiST</td><td>Geometric, geographic, range types, fuzzy</td><td>&amp;&amp;, @&gt;, &lt;&lt;, &gt;&gt;</td></tr>
+              <tr><td>BRIN</td><td>Very large append-only tables (time-series)</td><td>=, &lt;, &gt; (physical order)</td></tr>
+              <tr><td>Hash</td><td>Equality-only lookups (faster than B-Tree)</td><td>= only</td></tr>
+              <tr><td>SP-GiST</td><td>Space-partitioned trees, IP, phone numbers</td><td>Varies by operator class</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">EXPLAIN ANALYZE — query plan</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">EXPLAIN</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users
+<span class="keyword">WHERE</span> email = <span class="string">'a@x.com'</span>;</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="keyword">EXPLAIN</span> <span class="pg-only">ANALYZE</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users
+<span class="keyword">WHERE</span> email = <span class="string">'a@x.com'</span>;
+
+<span class="comment">-- With full details</span>
+<span class="keyword">EXPLAIN</span> (<span class="pg-only">ANALYZE, BUFFERS, FORMAT JSON</span>)
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users
+<span class="keyword">WHERE</span> email = <span class="string">'a@x.com'</span>;</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ TRANSACTIONS ══════════════════════════ -->
+    <div id="transactions" class="section">
+      <h1 class="section-title">Transactions + Locks</h1>
+      <p class="section-desc">ACID transactions, savepoints, isolation levels, advisory locks.</p>
+
+      <div class="card">
+        <div class="card-title">Basic transaction</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="keyword">BEGIN</span>;
+  <span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = balance - <span class="number">100</span> <span class="keyword">WHERE</span> id = <span class="number">1</span>;
+  <span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = balance + <span class="number">100</span> <span class="keyword">WHERE</span> id = <span class="number">2</span>;
+  <span class="comment">-- Check condition</span>
+  <span class="keyword">SELECT</span> balance <span class="keyword">FROM</span> accounts <span class="keyword">WHERE</span> id = <span class="number">1</span>;
+<span class="keyword">COMMIT</span>;  <span class="comment">-- or ROLLBACK;</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SAVEPOINT — partial rollback</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="keyword">BEGIN</span>;
+  <span class="keyword">INSERT INTO</span> orders (user_id, total) <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="number">200</span>);
+  <span class="keyword">SAVEPOINT</span> after_order;
+
+  <span class="keyword">INSERT INTO</span> payments (order_id, amount) <span class="keyword">VALUES</span> (<span class="number">99</span>, <span class="number">200</span>);
+  <span class="comment">-- If payment fails:</span>
+  <span class="keyword">ROLLBACK TO</span> after_order;   <span class="comment">-- undo only the payment</span>
+  <span class="comment">-- Order insert is still pending</span>
+
+  <span class="keyword">RELEASE SAVEPOINT</span> after_order;
+<span class="keyword">COMMIT</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Isolation levels</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">SET</span> <span class="mysql-only">SESSION</span>
+  <span class="mysql-only">TRANSACTION ISOLATION LEVEL</span>
+  <span class="keyword">REPEATABLE READ</span>; <span class="comment">-- default</span>
+
+<span class="comment">-- Levels: READ UNCOMMITTED</span>
+<span class="comment">--         READ COMMITTED</span>
+<span class="comment">--         REPEATABLE READ (default)</span>
+<span class="comment">--         SERIALIZABLE</span></pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="keyword">BEGIN</span>
+  <span class="pg-only">ISOLATION LEVEL</span>
+  <span class="keyword">READ COMMITTED</span>; <span class="comment">-- default</span>
+
+<span class="comment">-- Levels: READ UNCOMMITTED</span>
+<span class="comment">--         READ COMMITTED (default)</span>
+<span class="comment">--         REPEATABLE READ</span>
+<span class="comment">--         SERIALIZABLE</span>
+
+<span class="comment">-- Session default:</span>
+<span class="keyword">SET</span> <span class="pg-only">default_transaction_isolation</span>
+  = <span class="string">'serializable'</span>;</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Advisory locks (PostgreSQL only)</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Application-level mutex (useful for cron jobs)</span>
+<span class="keyword">SELECT</span> <span class="pg-only">pg_advisory_lock</span>(<span class="number">12345</span>);
+<span class="comment">-- ... do exclusive work ...</span>
+<span class="keyword">SELECT</span> <span class="pg-only">pg_advisory_unlock</span>(<span class="number">12345</span>);
+
+<span class="comment">-- Non-blocking try:</span>
+<span class="keyword">SELECT</span> <span class="pg-only">pg_try_advisory_lock</span>(<span class="number">12345</span>);
+<span class="comment">-- Returns true if acquired, false if busy</span></pre>
+        </div>
+        <div class="card-note">Advisory locks are entirely application-managed — they don't lock any table rows, just a key. Useful for distributed cron jobs or ensuring only one process runs a migration.</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ WINDOW ══════════════════════════ -->
+    <div id="window" class="section">
+      <h1 class="section-title">Window Functions</h1>
+      <p class="section-desc">RANK, ROW_NUMBER, LAG/LEAD, NTILE, running totals.</p>
+
+      <div class="card">
+        <div class="card-title">Ranking functions</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (MySQL 8+)</div>
+          <pre><span class="keyword">SELECT</span>
+  name,
+  department,
+  salary,
+  <span class="fn">RANK</span>()        <span class="keyword">OVER</span> (<span class="keyword">PARTITION BY</span> department <span class="keyword">ORDER BY</span> salary <span class="keyword">DESC</span>) <span class="keyword">AS</span> rank_in_dept,
+  <span class="fn">DENSE_RANK</span>()  <span class="keyword">OVER</span> (<span class="keyword">PARTITION BY</span> department <span class="keyword">ORDER BY</span> salary <span class="keyword">DESC</span>) <span class="keyword">AS</span> dense_rank,
+  <span class="fn">ROW_NUMBER</span>()  <span class="keyword">OVER</span> (<span class="keyword">PARTITION BY</span> department <span class="keyword">ORDER BY</span> salary <span class="keyword">DESC</span>) <span class="keyword">AS</span> row_num,
+  <span class="fn">NTILE</span>(<span class="number">4</span>)      <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> salary <span class="keyword">DESC</span>)                          <span class="keyword">AS</span> quartile
+<span class="keyword">FROM</span> employees;</pre>
+        </div>
+        <div class="card-note">RANK skips numbers after ties (1,1,3). DENSE_RANK does not skip (1,1,2). ROW_NUMBER is always unique.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">LAG / LEAD — access adjacent rows</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (MySQL 8+)</div>
+          <pre><span class="keyword">SELECT</span>
+  month,
+  revenue,
+  <span class="fn">LAG</span>(revenue, <span class="number">1</span>, <span class="number">0</span>) <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> month) <span class="keyword">AS</span> prev_month,
+  <span class="fn">LEAD</span>(revenue, <span class="number">1</span>)   <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> month) <span class="keyword">AS</span> next_month,
+  revenue - <span class="fn">LAG</span>(revenue, <span class="number">1</span>, revenue)
+    <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> month)               <span class="keyword">AS</span> mom_change
+<span class="keyword">FROM</span> monthly_revenue;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Running totals + moving averages</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (MySQL 8+)</div>
+          <pre><span class="keyword">SELECT</span>
+  sale_date,
+  amount,
+  <span class="fn">SUM</span>(amount) <span class="keyword">OVER</span> (
+    <span class="keyword">ORDER BY</span> sale_date
+    <span class="keyword">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>
+  ) <span class="keyword">AS</span> running_total,
+  <span class="fn">AVG</span>(amount) <span class="keyword">OVER</span> (
+    <span class="keyword">ORDER BY</span> sale_date
+    <span class="keyword">ROWS BETWEEN</span> <span class="number">6</span> <span class="keyword">PRECEDING AND CURRENT ROW</span>
+  ) <span class="keyword">AS</span> moving_avg_7day
+<span class="keyword">FROM</span> sales;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">FIRST_VALUE / LAST_VALUE</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (MySQL 8+)</div>
+          <pre><span class="keyword">SELECT</span>
+  name,
+  department,
+  salary,
+  <span class="fn">FIRST_VALUE</span>(name) <span class="keyword">OVER</span> (
+    <span class="keyword">PARTITION BY</span> department
+    <span class="keyword">ORDER BY</span> salary <span class="keyword">DESC</span>
+    <span class="keyword">ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</span>
+  ) <span class="keyword">AS</span> top_earner_in_dept
+<span class="keyword">FROM</span> employees;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ CTEs ══════════════════════════ -->
+    <div id="ctes" class="section">
+      <h1 class="section-title">CTEs + Recursive Queries</h1>
+      <p class="section-desc">WITH clause, chained CTEs, recursive trees/graphs.</p>
+
+      <div class="card">
+        <div class="card-title">Basic CTE</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (MySQL 8+)</div>
+          <pre><span class="keyword">WITH</span> top_customers <span class="keyword">AS</span> (
+  <span class="keyword">SELECT</span> user_id, <span class="fn">SUM</span>(total) <span class="keyword">AS</span> spent
+  <span class="keyword">FROM</span> orders
+  <span class="keyword">GROUP BY</span> user_id
+  <span class="keyword">HAVING</span> <span class="fn">SUM</span>(total) > <span class="number">1000</span>
+)
+<span class="keyword">SELECT</span> u.name, tc.spent
+<span class="keyword">FROM</span> users u
+<span class="keyword">JOIN</span> top_customers tc <span class="keyword">ON</span> tc.user_id = u.id
+<span class="keyword">ORDER BY</span> tc.spent <span class="keyword">DESC</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Chained CTEs</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (MySQL 8+)</div>
+          <pre><span class="keyword">WITH</span>
+  order_totals <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span> user_id, <span class="fn">SUM</span>(total) <span class="keyword">AS</span> total
+    <span class="keyword">FROM</span> orders
+    <span class="keyword">GROUP BY</span> user_id
+  ),
+  ranked_customers <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+      user_id,
+      total,
+      <span class="fn">RANK</span>() <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> total <span class="keyword">DESC</span>) <span class="keyword">AS</span> rnk
+    <span class="keyword">FROM</span> order_totals
+  )
+<span class="keyword">SELECT</span> u.name, rc.total, rc.rnk
+<span class="keyword">FROM</span> users u
+<span class="keyword">JOIN</span> ranked_customers rc <span class="keyword">ON</span> rc.user_id = u.id
+<span class="keyword">WHERE</span> rc.rnk <= <span class="number">10</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recursive CTE — walk a tree / org chart</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both (MySQL 8+)</div>
+          <pre><span class="keyword">WITH RECURSIVE</span> org_tree <span class="keyword">AS</span> (
+  <span class="comment">-- Anchor: start from CEO (no manager)</span>
+  <span class="keyword">SELECT</span> id, name, manager_id, <span class="number">0</span> <span class="keyword">AS</span> depth
+  <span class="keyword">FROM</span> employees
+  <span class="keyword">WHERE</span> manager_id <span class="keyword">IS NULL</span>
+
+  <span class="keyword">UNION ALL</span>
+
+  <span class="comment">-- Recursive: join children to parents</span>
+  <span class="keyword">SELECT</span> e.id, e.name, e.manager_id, ot.depth + <span class="number">1</span>
+  <span class="keyword">FROM</span> employees e
+  <span class="keyword">JOIN</span> org_tree ot <span class="keyword">ON</span> ot.id = e.manager_id
+)
+<span class="keyword">SELECT</span>
+  <span class="fn">REPEAT</span>(<span class="string">'  '</span>, depth) || name <span class="keyword">AS</span> org_chart,
+  depth
+<span class="keyword">FROM</span> org_tree
+<span class="keyword">ORDER BY</span> depth, name;</pre>
+        </div>
+        <div class="card-note">Works for any tree structure: categories, comments, file systems, org charts, bill-of-materials.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">CTE materialization hint (PostgreSQL)</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Force CTE to execute once and cache result</span>
+<span class="keyword">WITH</span> expensive_query <span class="keyword">AS</span> <span class="pg-only">MATERIALIZED</span> (
+  <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> huge_table <span class="keyword">WHERE</span> expensive_condition
+)
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> expensive_query <span class="keyword">WHERE</span> x = <span class="number">1</span>
+<span class="keyword">UNION ALL</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> expensive_query <span class="keyword">WHERE</span> y = <span class="number">2</span>;
+
+<span class="comment">-- Force inline (let planner optimize through)</span>
+<span class="keyword">WITH</span> inline_cte <span class="keyword">AS</span> <span class="pg-only">NOT MATERIALIZED</span> (
+  <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users
+)
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> inline_cte <span class="keyword">WHERE</span> id = <span class="number">1</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ JSON ══════════════════════════ -->
+    <div id="json" class="section">
+      <h1 class="section-title">JSON / JSONB</h1>
+      <p class="section-desc">PostgreSQL's powerful binary JSON — operators, indexing, querying.</p>
+
+      <div class="alert alert-pg"><strong>JSONB vs JSON:</strong> JSONB is stored as binary (decomposed), supports GIN indexing, and query operators. JSON is stored as text (preserves whitespace/key order). Use JSONB almost always.</div>
+
+      <div class="card">
+        <div class="card-title">Create JSONB column + GIN index</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TABLE</span> products (
+  id    <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+  name  <span class="type">TEXT</span>,
+  attrs <span class="type">JSONB</span>
+);
+
+<span class="comment">-- GIN index enables fast @>, ?, @? etc.</span>
+<span class="keyword">CREATE INDEX</span> idx_attrs_gin
+  <span class="keyword">ON</span> products <span class="pg-only">USING GIN</span> (attrs);
+
+<span class="keyword">INSERT INTO</span> products (name, attrs) <span class="keyword">VALUES</span>
+  (<span class="string">'Shirt'</span>,   <span class="string">'{"color":"red","size":42,"tags":["sale","new"]}'</span>),
+  (<span class="string">'Jeans'</span>,   <span class="string">'{"color":"blue","size":32,"tags":["denim"]}'</span>),
+  (<span class="string">'Sneakers'</span>,<span class="string">'{"color":"white","size":10,"brand":"Nike"}'</span>);</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">JSON operators</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- -> returns JSON,  ->> returns text</span>
+<span class="keyword">SELECT</span> attrs<span class="pg-only">->'color'</span>          <span class="comment">-- "red"  (JSON)</span>
+<span class="keyword">SELECT</span> attrs<span class="pg-only">->>'color'</span>         <span class="comment">-- red   (text, no quotes)</span>
+<span class="keyword">SELECT</span> attrs<span class="pg-only">#>'{tags,0}'</span>      <span class="comment">-- path: first tag (JSON)</span>
+<span class="keyword">SELECT</span> attrs<span class="pg-only">#>>'{tags,0}'</span>     <span class="comment">-- path: first tag (text)</span>
+
+<span class="comment">-- Containment: does attrs @> this JSON?</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> products
+<span class="keyword">WHERE</span> attrs <span class="pg-only">@></span> <span class="string">'{"color":"red"}'</span>;
+
+<span class="comment">-- Key exists?</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> products <span class="keyword">WHERE</span> attrs <span class="pg-only">?</span> <span class="string">'brand'</span>;
+
+<span class="comment">-- Any of these keys exist?</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> products <span class="keyword">WHERE</span> attrs <span class="pg-only">?|</span> <span class="type">ARRAY</span>[<span class="string">'brand'</span>,<span class="string">'sku'</span>];
+
+<span class="comment">-- Cast and compare</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> products
+<span class="keyword">WHERE</span> (attrs<span class="pg-only">->>'size'</span>)::<span class="type">int</span> > <span class="number">10</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Update JSONB values</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Set a key</span>
+<span class="keyword">UPDATE</span> products
+<span class="keyword">SET</span> attrs = attrs <span class="pg-only">|| '{"on_sale":true}'</span>
+<span class="keyword">WHERE</span> id = <span class="number">1</span>;
+
+<span class="comment">-- Remove a key</span>
+<span class="keyword">UPDATE</span> products
+<span class="keyword">SET</span> attrs = attrs <span class="pg-only">- 'on_sale'</span>
+<span class="keyword">WHERE</span> id = <span class="number">1</span>;
+
+<span class="comment">-- Deep set with jsonb_set</span>
+<span class="keyword">UPDATE</span> products
+<span class="keyword">SET</span> attrs = <span class="pg-only">jsonb_set</span>(attrs, <span class="string">'{nested,price}'</span>, <span class="string">'99.99'</span>)
+<span class="keyword">WHERE</span> id = <span class="number">1</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">jsonb_each — expand JSONB into rows</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Expand each key-value pair</span>
+<span class="keyword">SELECT</span> id, key, value
+<span class="keyword">FROM</span> products,
+     <span class="pg-only">jsonb_each</span>(attrs);
+
+<span class="comment">-- Expand array into rows</span>
+<span class="keyword">SELECT</span> id, tag
+<span class="keyword">FROM</span> products,
+     <span class="pg-only">jsonb_array_elements_text</span>(attrs<span class="pg-only">->'tags'</span>) <span class="keyword">AS</span> tag;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ ARRAYS ══════════════════════════ -->
+    <div id="arrays" class="section">
+      <h1 class="section-title">Arrays + Ranges</h1>
+      <p class="section-desc">Native arrays, unnesting, range types — PostgreSQL only.</p>
+
+      <div class="card">
+        <div class="card-title">Array column basics</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TABLE</span> articles (
+  id       <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+  title    <span class="type">TEXT</span>,
+  tags     <span class="type">TEXT[]</span>,
+  scores   <span class="type">INT[]</span>,
+  matrix   <span class="type">INTEGER[][]</span>   <span class="comment">-- 2D array</span>
+);
+
+<span class="keyword">INSERT INTO</span> articles (title, tags, scores) <span class="keyword">VALUES</span>
+  (<span class="string">'PostgreSQL'</span>, <span class="string">'{postgres,sql,db}'</span>, <span class="string">'{95,87,92}'</span>),
+  (<span class="string">'Arrays'</span>,     <span class="string">ARRAY['array','postgres']</span>, <span class="string">ARRAY[80,75]</span>);
+
+<span class="comment">-- Index access (1-based!)</span>
+<span class="keyword">SELECT</span> tags[<span class="number">1</span>] <span class="keyword">FROM</span> articles;  <span class="comment">-- 'postgres'</span>
+
+<span class="comment">-- Array contains element</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> articles
+<span class="keyword">WHERE</span> <span class="string">'postgres'</span> <span class="pg-only">= ANY(tags)</span>;
+
+<span class="comment">-- Array contains all of these</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> articles
+<span class="keyword">WHERE</span> tags <span class="pg-only">@></span> <span class="string">ARRAY['sql','postgres']</span>;
+
+<span class="comment">-- GIN index for fast array queries</span>
+<span class="keyword">CREATE INDEX ON</span> articles <span class="pg-only">USING GIN</span> (tags);</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">UNNEST — expand array into rows</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Expand tags into individual rows</span>
+<span class="keyword">SELECT</span> id, <span class="pg-only">unnest</span>(tags) <span class="keyword">AS</span> tag
+<span class="keyword">FROM</span> articles;
+
+<span class="comment">-- Count tag frequency across all articles</span>
+<span class="keyword">SELECT</span> tag, <span class="fn">COUNT</span>(*) <span class="keyword">AS</span> freq
+<span class="keyword">FROM</span> articles, <span class="pg-only">unnest</span>(tags) <span class="keyword">AS</span> tag
+<span class="keyword">GROUP BY</span> tag
+<span class="keyword">ORDER BY</span> freq <span class="keyword">DESC</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Range types</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TABLE</span> bookings (
+  id       <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+  room_id  <span class="type">INT</span>,
+  period   <span class="type">TSRANGE</span>   <span class="comment">-- timestamp range</span>
+);
+
+<span class="comment">-- Exclude overlapping bookings (constraint)</span>
+<span class="keyword">ALTER TABLE</span> bookings
+  <span class="keyword">ADD CONSTRAINT</span> no_overlap
+  <span class="pg-only">EXCLUDE USING GIST</span> (
+    room_id <span class="keyword">WITH =</span>,
+    period  <span class="keyword">WITH &&</span>
+  );
+
+<span class="comment">-- Insert a booking</span>
+<span class="keyword">INSERT INTO</span> bookings (room_id, period) <span class="keyword">VALUES</span>
+  (<span class="number">1</span>, <span class="string">'[2024-12-01 14:00, 2024-12-01 16:00)'</span>);
+
+<span class="comment">-- Find bookings overlapping a range</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> bookings
+<span class="keyword">WHERE</span> period <span class="pg-only">&&</span>
+  <span class="string">'[2024-12-01 15:00, 2024-12-01 17:00)'</span>;<span class="type">TSRANGE</span></pre>
+        </div>
+        <div class="card-note">Range types: INT4RANGE, INT8RANGE, NUMRANGE, TSRANGE, TSTZRANGE, DATERANGE. The EXCLUDE constraint enforces no-overlap at the database level.</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ FULL TEXT ══════════════════════════ -->
+    <div id="fulltext" class="section">
+      <h1 class="section-title">Full-Text Search</h1>
+      <p class="section-desc">tsvector, tsquery, ranking, and highlighting.</p>
+
+      <div class="card">
+        <div class="card-title">Basic full-text search</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="comment">-- Needs FULLTEXT index first</span>
+<span class="keyword">ALTER TABLE</span> posts
+  <span class="keyword">ADD FULLTEXT</span> (title, body);
+
+<span class="comment">-- Natural language search</span>
+<span class="keyword">SELECT</span> *, <span class="mysql-only">MATCH</span>(title, body)
+  <span class="mysql-only">AGAINST</span>(<span class="string">'postgresql database'</span>)
+  <span class="keyword">AS</span> score
+<span class="keyword">FROM</span> posts
+<span class="keyword">WHERE</span> <span class="mysql-only">MATCH</span>(title, body)
+  <span class="mysql-only">AGAINST</span>(<span class="string">'postgresql database'</span>)
+<span class="keyword">ORDER BY</span> score <span class="keyword">DESC</span>;</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="comment">-- Search with ranking</span>
+<span class="keyword">SELECT</span>
+  title,
+  <span class="pg-only">ts_rank</span>(
+    <span class="pg-only">to_tsvector</span>(<span class="string">'english'</span>, title||<span class="string">' '</span>||body),
+    <span class="pg-only">to_tsquery</span>(<span class="string">'english'</span>, <span class="string">'postgres &amp; database'</span>)
+  ) <span class="keyword">AS</span> rank
+<span class="keyword">FROM</span> posts
+<span class="keyword">WHERE</span>
+  <span class="pg-only">to_tsvector</span>(<span class="string">'english'</span>, title||<span class="string">' '</span>||body)
+  <span class="pg-only">@@</span>
+  <span class="pg-only">to_tsquery</span>(<span class="string">'english'</span>, <span class="string">'postgres &amp; database'</span>)
+<span class="keyword">ORDER BY</span> rank <span class="keyword">DESC</span>;</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Stored tsvector + GIN index (fast search)</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Add a tsvector column for performance</span>
+<span class="keyword">ALTER TABLE</span> posts
+  <span class="keyword">ADD COLUMN</span> search_vec <span class="type">TSVECTOR</span>
+  <span class="keyword">GENERATED ALWAYS AS</span> (
+    <span class="pg-only">to_tsvector</span>(<span class="string">'english'</span>, title || <span class="string">' '</span> || body)
+  ) STORED;
+
+<span class="keyword">CREATE INDEX</span> idx_search_vec
+  <span class="keyword">ON</span> posts <span class="pg-only">USING GIN</span> (search_vec);
+
+<span class="comment">-- Fast search uses index</span>
+<span class="keyword">SELECT</span> title <span class="keyword">FROM</span> posts
+<span class="keyword">WHERE</span> search_vec <span class="pg-only">@@</span> <span class="pg-only">websearch_to_tsquery</span>(<span class="string">'postgres arrays'</span>)
+<span class="keyword">ORDER BY</span> <span class="pg-only">ts_rank</span>(search_vec, <span class="pg-only">websearch_to_tsquery</span>(<span class="string">'postgres arrays'</span>)) <span class="keyword">DESC</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ts_headline — highlight matches</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">SELECT</span>
+  title,
+  <span class="pg-only">ts_headline</span>(
+    <span class="string">'english'</span>,
+    body,
+    <span class="pg-only">websearch_to_tsquery</span>(<span class="string">'postgres database'</span>),
+    <span class="string">'MaxWords=25, MinWords=10, StartSel=&lt;b&gt;, StopSel=&lt;/b&gt;'</span>
+  ) <span class="keyword">AS</span> excerpt
+<span class="keyword">FROM</span> posts
+<span class="keyword">WHERE</span> search_vec <span class="pg-only">@@</span> <span class="pg-only">websearch_to_tsquery</span>(<span class="string">'postgres database'</span>);</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ STORED PROCS ══════════════════════════ -->
+    <div id="stored" class="section">
+      <h1 class="section-title">Stored Procs + Triggers</h1>
+      <p class="section-desc">Functions, procedures, triggers in MySQL and PostgreSQL.</p>
+
+      <div class="card">
+        <div class="card-title">Stored function</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">DELIMITER</span> $$
+<span class="keyword">CREATE FUNCTION</span> get_user_total(
+  p_user_id <span class="type">INT</span>
+)
+<span class="keyword">RETURNS</span> <span class="type">DECIMAL</span>(10,2)
+<span class="keyword">READS SQL DATA</span>
+<span class="keyword">BEGIN</span>
+  <span class="keyword">DECLARE</span> total <span class="type">DECIMAL</span>(10,2);
+  <span class="keyword">SELECT</span> <span class="fn">SUM</span>(amount) <span class="keyword">INTO</span> total
+  <span class="keyword">FROM</span> orders
+  <span class="keyword">WHERE</span> user_id = p_user_id;
+  <span class="keyword">RETURN</span> IFNULL(total, 0);
+<span class="keyword">END</span>$$
+<span class="keyword">DELIMITER</span> ;
+
+<span class="keyword">SELECT</span> get_user_total(<span class="number">1</span>);</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="keyword">CREATE OR REPLACE FUNCTION</span>
+  get_user_total(p_user_id <span class="type">INT</span>)
+<span class="keyword">RETURNS</span> <span class="type">NUMERIC</span>
+<span class="pg-only">LANGUAGE plpgsql</span>
+<span class="keyword">AS</span> $$
+<span class="keyword">DECLARE</span>
+  v_total <span class="type">NUMERIC</span>;
+<span class="keyword">BEGIN</span>
+  <span class="keyword">SELECT</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(amount), 0)
+  <span class="keyword">INTO</span> v_total
+  <span class="keyword">FROM</span> orders
+  <span class="keyword">WHERE</span> user_id = p_user_id;
+  <span class="keyword">RETURN</span> v_total;
+<span class="keyword">END</span>;
+$$;
+
+<span class="keyword">SELECT</span> get_user_total(<span class="number">1</span>);</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Trigger — auto-update updated_at</div>
+        <div class="pair">
+          <div class="code-block-wrap"><div class="code-label mysql">MySQL</div>
+            <pre><span class="keyword">CREATE TRIGGER</span> trg_users_updated
+<span class="keyword">BEFORE UPDATE ON</span> users
+<span class="keyword">FOR EACH ROW</span>
+<span class="keyword">SET</span> NEW.updated_at = <span class="fn">NOW</span>();</pre>
+          </div>
+          <div class="code-block-wrap"><div class="code-label pg">PostgreSQL</div>
+            <pre><span class="comment">-- Step 1: create the trigger function</span>
+<span class="keyword">CREATE OR REPLACE FUNCTION</span>
+  set_updated_at()
+<span class="keyword">RETURNS</span> <span class="pg-only">TRIGGER</span>
+<span class="pg-only">LANGUAGE plpgsql</span> <span class="keyword">AS</span> $$
+<span class="keyword">BEGIN</span>
+  NEW.updated_at = <span class="fn">NOW</span>();
+  <span class="keyword">RETURN</span> NEW;
+<span class="keyword">END</span>; $$;
+
+<span class="comment">-- Step 2: attach it</span>
+<span class="keyword">CREATE TRIGGER</span> trg_users_updated
+<span class="keyword">BEFORE UPDATE ON</span> users
+<span class="keyword">FOR EACH ROW</span>
+<span class="keyword">EXECUTE FUNCTION</span> set_updated_at();</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Stored procedure (with OUT params)</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE OR REPLACE PROCEDURE</span>
+  transfer_funds(
+    from_id <span class="type">INT</span>,
+    to_id   <span class="type">INT</span>,
+    amount  <span class="type">NUMERIC</span>
+  )
+<span class="pg-only">LANGUAGE plpgsql</span> <span class="keyword">AS</span> $$
+<span class="keyword">BEGIN</span>
+  <span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = balance - amount <span class="keyword">WHERE</span> id = from_id;
+  <span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = balance + amount <span class="keyword">WHERE</span> id = to_id;
+
+  <span class="keyword">IF</span> (<span class="keyword">SELECT</span> balance <span class="keyword">FROM</span> accounts <span class="keyword">WHERE</span> id = from_id) < <span class="number">0</span> <span class="keyword">THEN</span>
+    <span class="keyword">RAISE EXCEPTION</span> <span class="string">'Insufficient funds'</span>;
+  <span class="keyword">END IF</span>;
+<span class="keyword">END</span>;
+$$;
+
+<span class="keyword">CALL</span> transfer_funds(<span class="number">1</span>, <span class="number">2</span>, <span class="number">100.00</span>);</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ VIEWS ══════════════════════════ -->
+    <div id="views" class="section">
+      <h1 class="section-title">Views + Materialized Views</h1>
+      <p class="section-desc">Regular views, updatable views, materialized views with refresh.</p>
+
+      <div class="card">
+        <div class="card-title">Regular view</div>
+        <div class="code-block-wrap code-single"><div class="code-label both">Both</div>
+          <pre><span class="keyword">CREATE OR REPLACE VIEW</span> customer_summary <span class="keyword">AS</span>
+<span class="keyword">SELECT</span>
+  u.id,
+  u.name,
+  u.email,
+  <span class="fn">COUNT</span>(o.id)    <span class="keyword">AS</span> order_count,
+  <span class="fn">SUM</span>(o.total)   <span class="keyword">AS</span> lifetime_value,
+  <span class="fn">MAX</span>(o.created_at) <span class="keyword">AS</span> last_order
+<span class="keyword">FROM</span> users u
+<span class="keyword">LEFT JOIN</span> orders o <span class="keyword">ON</span> o.user_id = u.id
+<span class="keyword">GROUP BY</span> u.id, u.name, u.email;
+
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> customer_summary
+<span class="keyword">WHERE</span> lifetime_value > <span class="number">500</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Materialized view (PostgreSQL only)</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Creates and caches the result on disk</span>
+<span class="keyword">CREATE MATERIALIZED VIEW</span> daily_revenue <span class="keyword">AS</span>
+<span class="keyword">SELECT</span>
+  <span class="fn">DATE</span>(created_at) <span class="keyword">AS</span> day,
+  <span class="fn">COUNT</span>(*)         <span class="keyword">AS</span> orders,
+  <span class="fn">SUM</span>(total)       <span class="keyword">AS</span> revenue
+<span class="keyword">FROM</span> orders
+<span class="keyword">GROUP BY</span> <span class="fn">DATE</span>(created_at);
+
+<span class="comment">-- Add indexes on the materialized view</span>
+<span class="keyword">CREATE INDEX ON</span> daily_revenue (day);
+
+<span class="comment">-- Refresh (blocks reads)</span>
+<span class="keyword">REFRESH MATERIALIZED VIEW</span> daily_revenue;
+
+<span class="comment">-- Concurrent refresh (no read blocking, needs UNIQUE index)</span>
+<span class="keyword">CREATE UNIQUE INDEX ON</span> daily_revenue (day);
+<span class="keyword">REFRESH MATERIALIZED VIEW CONCURRENTLY</span> daily_revenue;</pre>
+        </div>
+        <div class="card-note">Materialized views store results physically — great for expensive aggregations. MySQL has no equivalent; you'd need an application-level cache table.</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ PG TYPES ══════════════════════════ -->
+    <div id="pg-types" class="section">
+      <h1 class="section-title">Custom Types (PostgreSQL)</h1>
+      <p class="section-desc">ENUM, composite types, domains, table inheritance.</p>
+
+      <div class="card">
+        <div class="card-title">ENUM type</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TYPE</span> order_status <span class="keyword">AS ENUM</span> (
+  <span class="string">'pending'</span>, <span class="string">'processing'</span>,
+  <span class="string">'shipped'</span>, <span class="string">'delivered'</span>, <span class="string">'cancelled'</span>
+);
+
+<span class="keyword">CREATE TABLE</span> orders (
+  id     <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+  status <span class="type">order_status</span> <span class="keyword">DEFAULT</span> <span class="string">'pending'</span>
+);
+
+<span class="comment">-- Add a new value to existing ENUM</span>
+<span class="keyword">ALTER TYPE</span> order_status
+  <span class="keyword">ADD VALUE</span> <span class="string">'refunded'</span> <span class="keyword">AFTER</span> <span class="string">'delivered'</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">DOMAIN — type with validation constraint</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE DOMAIN</span> email_address <span class="keyword">AS</span> <span class="type">TEXT</span>
+  <span class="keyword">CHECK</span> (<span class="keyword">VALUE</span> ~ <span class="string">'^[^@\s]+@[^@\s]+\.[^@\s]+$'</span>);
+
+<span class="keyword">CREATE DOMAIN</span> positive_money <span class="keyword">AS</span> <span class="type">NUMERIC</span>(12,2)
+  <span class="keyword">CHECK</span> (<span class="keyword">VALUE</span> >= <span class="number">0</span>);
+
+<span class="keyword">CREATE TABLE</span> payments (
+  id      <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+  email   <span class="type">email_address</span>,
+  amount  <span class="type">positive_money</span>
+);</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Composite type</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TYPE</span> address <span class="keyword">AS</span> (
+  street  <span class="type">TEXT</span>,
+  city    <span class="type">TEXT</span>,
+  country <span class="type">TEXT</span>,
+  zip     <span class="type">VARCHAR</span>(10)
+);
+
+<span class="keyword">CREATE TABLE</span> customers (
+  id           <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+  name         <span class="type">TEXT</span>,
+  billing_addr <span class="type">address</span>,
+  ship_addr    <span class="type">address</span>
+);
+
+<span class="comment">-- Access composite fields</span>
+<span class="keyword">SELECT</span> name, (billing_addr).city
+<span class="keyword">FROM</span> customers;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Table inheritance</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TABLE</span> vehicles (
+  id    <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+  make  <span class="type">TEXT</span>,
+  model <span class="type">TEXT</span>,
+  year  <span class="type">INT</span>
+);
+
+<span class="keyword">CREATE TABLE</span> cars (
+  doors <span class="type">INT</span>
+) <span class="pg-only">INHERITS</span> (vehicles);
+
+<span class="keyword">CREATE TABLE</span> trucks (
+  payload_kg <span class="type">INT</span>
+) <span class="pg-only">INHERITS</span> (vehicles);
+
+<span class="comment">-- Query parent returns ALL child rows too</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> vehicles;
+
+<span class="comment">-- Query only parent's own rows</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">ONLY</span> vehicles;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Row-level security (RLS)</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Enable RLS on the table</span>
+<span class="keyword">ALTER TABLE</span> documents <span class="pg-only">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="comment">-- Policy: users can only see their own docs</span>
+<span class="keyword">CREATE POLICY</span> doc_owner_policy
+  <span class="keyword">ON</span> documents
+  <span class="keyword">FOR ALL</span>
+  <span class="keyword">USING</span> (owner_id = <span class="pg-only">current_setting</span>(<span class="string">'app.user_id'</span>)::<span class="type">INT</span>);
+
+<span class="comment">-- Set the user context in your app:</span>
+<span class="keyword">SET</span> app.user_id = <span class="string">'42'</span>;</pre>
+        </div>
+        <div class="card-note">RLS policies filter rows automatically — you can't accidentally query another user's data even with a plain SELECT *.</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ LISTEN/NOTIFY ══════════════════════════ -->
+    <div id="pg-listen" class="section">
+      <h1 class="section-title">LISTEN / NOTIFY</h1>
+      <p class="section-desc">Real-time pub/sub messaging between database connections.</p>
+
+      <div class="alert alert-pg"><strong>No extra infrastructure needed.</strong> LISTEN/NOTIFY lets you build real-time features (live dashboards, cache invalidation, job queues) using only PostgreSQL — no Redis, Kafka, or message broker required for simple cases.</div>
+
+      <div class="card">
+        <div class="card-title">Basic LISTEN / NOTIFY</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Connection A: subscribe to channel</span>
+<span class="pg-only">LISTEN</span> <span class="string">new_order</span>;
+
+<span class="comment">-- Connection B: publish event with payload</span>
+<span class="pg-only">NOTIFY</span> <span class="string">new_order</span>, <span class="string">'{"order_id":42,"total":199.99}'</span>;
+
+<span class="comment">-- Connection A receives async notification immediately</span>
+<span class="comment">-- Payload is a text string (use JSON for structured data)</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Trigger-based notification</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE OR REPLACE FUNCTION</span> notify_new_order()
+<span class="keyword">RETURNS</span> <span class="pg-only">TRIGGER</span> <span class="pg-only">LANGUAGE plpgsql</span> <span class="keyword">AS</span> $$
+<span class="keyword">BEGIN</span>
+  <span class="pg-only">PERFORM pg_notify</span>(
+    <span class="string">'new_order'</span>,
+    <span class="pg-only">row_to_json</span>(NEW)::text
+  );
+  <span class="keyword">RETURN</span> NEW;
+<span class="keyword">END</span>; $$;
+
+<span class="keyword">CREATE TRIGGER</span> trg_notify_order
+<span class="keyword">AFTER INSERT ON</span> orders
+<span class="keyword">FOR EACH ROW</span>
+<span class="keyword">EXECUTE FUNCTION</span> notify_new_order();
+
+<span class="comment">-- Any app listening on 'new_order' channel</span>
+<span class="comment">-- gets notified instantly on each INSERT</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Node.js example</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">Node.js + pg</div>
+          <pre><span class="keyword">import</span> { Client } from <span class="string">'pg'</span>;
+
+const client = new Client();
+await client.connect();
+await client.query(<span class="string">'LISTEN new_order'</span>);
+
+client.on(<span class="string">'notification'</span>, (msg) => {
+  const order = JSON.parse(msg.payload);
+  console.log(<span class="string">'New order:'</span>, order.order_id);
+  <span class="comment">// update dashboard, send email, etc.</span>
+});</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ LATERAL ══════════════════════════ -->
+    <div id="pg-lateral" class="section">
+      <h1 class="section-title">LATERAL Joins</h1>
+      <p class="section-desc">Reference outer query rows from a subquery in the FROM clause.</p>
+
+      <div class="card">
+        <div class="card-title">Top N per group — most common use case</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Get the 3 most recent orders per user</span>
+<span class="keyword">SELECT</span> u.name, recent.id, recent.total, recent.created_at
+<span class="keyword">FROM</span> users u
+<span class="keyword">JOIN LATERAL</span> (
+  <span class="keyword">SELECT</span> id, total, created_at
+  <span class="keyword">FROM</span> orders o
+  <span class="keyword">WHERE</span> o.user_id = u.id     <span class="comment">-- ← references outer row</span>
+  <span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span>
+  <span class="keyword">LIMIT</span> <span class="number">3</span>
+) recent <span class="keyword">ON TRUE</span>
+<span class="keyword">ORDER BY</span> u.name, recent.created_at <span class="keyword">DESC</span>;</pre>
+        </div>
+        <div class="card-note">Without LATERAL you'd need a window function + subquery. LATERAL makes this natural and often faster.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">LATERAL with LEFT JOIN (include users with no orders)</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">SELECT</span> u.name, recent.total
+<span class="keyword">FROM</span> users u
+<span class="keyword">LEFT JOIN LATERAL</span> (
+  <span class="keyword">SELECT</span> total
+  <span class="keyword">FROM</span> orders o
+  <span class="keyword">WHERE</span> o.user_id = u.id
+  <span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span>
+  <span class="keyword">LIMIT</span> <span class="number">1</span>
+) recent <span class="keyword">ON TRUE</span>;
+<span class="comment">-- Users with no orders: recent.total = NULL</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">LATERAL with UNNEST / set-returning functions</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Expand each user's tags array into rows</span>
+<span class="keyword">SELECT</span> u.name, tag
+<span class="keyword">FROM</span> users u,
+<span class="keyword">LATERAL</span> <span class="pg-only">unnest</span>(u.tags) <span class="keyword">AS</span> tag;
+
+<span class="comment">-- Same as above but explicit CROSS JOIN LATERAL:</span>
+<span class="keyword">SELECT</span> u.name, tag
+<span class="keyword">FROM</span> users u
+<span class="keyword">CROSS JOIN LATERAL</span> <span class="pg-only">unnest</span>(u.tags) <span class="keyword">AS</span> tag;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ PARTITIONS ══════════════════════════ -->
+    <div id="pg-partitions" class="section">
+      <h1 class="section-title">Table Partitioning</h1>
+      <p class="section-desc">Declarative RANGE, LIST, and HASH partitioning.</p>
+
+      <div class="card">
+        <div class="card-title">RANGE partitioning — time-series data</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Parent table (no data stored here)</span>
+<span class="keyword">CREATE TABLE</span> events (
+  id         <span class="type">BIGSERIAL</span>,
+  created_at <span class="type">TIMESTAMPTZ</span> <span class="keyword">NOT NULL</span>,
+  type       <span class="type">TEXT</span>,
+  payload    <span class="type">JSONB</span>
+) <span class="pg-only">PARTITION BY RANGE</span> (created_at);
+
+<span class="comment">-- Create monthly partitions</span>
+<span class="keyword">CREATE TABLE</span> events_2024_01
+  <span class="pg-only">PARTITION OF</span> events
+  <span class="pg-only">FOR VALUES FROM</span> (<span class="string">'2024-01-01'</span>) <span class="pg-only">TO</span> (<span class="string">'2024-02-01'</span>);
+
+<span class="keyword">CREATE TABLE</span> events_2024_02
+  <span class="pg-only">PARTITION OF</span> events
+  <span class="pg-only">FOR VALUES FROM</span> (<span class="string">'2024-02-01'</span>) <span class="pg-only">TO</span> (<span class="string">'2024-03-01'</span>);
+
+<span class="comment">-- Query hits only relevant partition (partition pruning)</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> events
+<span class="keyword">WHERE</span> created_at >= <span class="string">'2024-01-15'</span>
+  <span class="keyword">AND</span> created_at < <span class="string">'2024-01-20'</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">LIST partitioning — by region</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TABLE</span> sales (
+  id     <span class="type">SERIAL</span>,
+  region <span class="type">TEXT</span> <span class="keyword">NOT NULL</span>,
+  amount <span class="type">NUMERIC</span>
+) <span class="pg-only">PARTITION BY LIST</span> (region);
+
+<span class="keyword">CREATE TABLE</span> sales_india
+  <span class="pg-only">PARTITION OF</span> sales
+  <span class="pg-only">FOR VALUES IN</span> (<span class="string">'IN'</span>, <span class="string">'SL'</span>, <span class="string">'BD'</span>);
+
+<span class="keyword">CREATE TABLE</span> sales_europe
+  <span class="pg-only">PARTITION OF</span> sales
+  <span class="pg-only">FOR VALUES IN</span> (<span class="string">'GB'</span>, <span class="string">'DE'</span>, <span class="string">'FR'</span>, <span class="string">'IT'</span>);
+
+<span class="keyword">CREATE TABLE</span> sales_other
+  <span class="pg-only">PARTITION OF</span> sales <span class="keyword">DEFAULT</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">HASH partitioning — even distribution</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TABLE</span> user_events (
+  user_id    <span class="type">INT</span> <span class="keyword">NOT NULL</span>,
+  event_type <span class="type">TEXT</span>,
+  ts         <span class="type">TIMESTAMPTZ</span>
+) <span class="pg-only">PARTITION BY HASH</span> (user_id);
+
+<span class="comment">-- 4 partitions, evenly distributed</span>
+<span class="keyword">CREATE TABLE</span> user_events_0
+  <span class="pg-only">PARTITION OF</span> user_events
+  <span class="pg-only">FOR VALUES WITH (MODULUS 4, REMAINDER 0)</span>;
+<span class="keyword">CREATE TABLE</span> user_events_1
+  <span class="pg-only">PARTITION OF</span> user_events
+  <span class="pg-only">FOR VALUES WITH (MODULUS 4, REMAINDER 1)</span>;
+<span class="comment">-- ... 2, 3</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ PG MISC ══════════════════════════ -->
+    <div id="pg-misc" class="section">
+      <h1 class="section-title">Extensions + Miscellaneous PostgreSQL</h1>
+      <p class="section-desc">pg_stat_statements, pg_cron, uuid-ossp, ltree, pgcrypto, and more.</p>
+
+      <div class="card">
+        <div class="card-title">Extensions</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- List available extensions</span>
+<span class="keyword">SELECT</span> name, default_version <span class="keyword">FROM</span> <span class="pg-only">pg_available_extensions</span>;
+
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> <span class="string">"uuid-ossp"</span>;    <span class="comment">-- UUIDs</span>
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> <span class="string">"pgcrypto"</span>;     <span class="comment">-- Encryption</span>
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> <span class="string">"pg_trgm"</span>;      <span class="comment">-- Fuzzy search</span>
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> <span class="string">"ltree"</span>;        <span class="comment">-- Hierarchical labels</span>
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> <span class="string">"hstore"</span>;       <span class="comment">-- Key-value store</span>
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> <span class="string">"postgis"</span>;      <span class="comment">-- Geospatial</span>
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> <span class="string">"pg_stat_statements"</span>; <span class="comment">-- Query stats</span>
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> <span class="string">"pg_cron"</span>;      <span class="comment">-- Cron inside DB</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">UUID primary keys</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE TABLE</span> sessions (
+  id         <span class="type">UUID</span> <span class="keyword">PRIMARY KEY</span>
+             <span class="keyword">DEFAULT</span> <span class="pg-only">gen_random_uuid()</span>, <span class="comment">-- PG 13+ built-in</span>
+  user_id    <span class="type">INT</span>,
+  token      <span class="type">TEXT</span>
+);</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">pg_stat_statements — find slow queries</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Top 10 slowest queries</span>
+<span class="keyword">SELECT</span>
+  <span class="fn">LEFT</span>(query, <span class="number">80</span>)           <span class="keyword">AS</span> query,
+  calls,
+  total_exec_time / calls  <span class="keyword">AS</span> avg_ms,
+  stddev_exec_time         <span class="keyword">AS</span> stddev_ms,
+  rows / calls             <span class="keyword">AS</span> avg_rows
+<span class="keyword">FROM</span> <span class="pg-only">pg_stat_statements</span>
+<span class="keyword">ORDER BY</span> avg_ms <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> <span class="number">10</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">pg_trgm — fuzzy / similarity search</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE EXTENSION</span> pg_trgm;
+<span class="keyword">CREATE INDEX</span> idx_trgm ON products
+  <span class="pg-only">USING GIN</span> (name <span class="pg-only">gin_trgm_ops</span>);
+
+<span class="comment">-- Find similar product names (typo-tolerant)</span>
+<span class="keyword">SELECT</span> name,
+  <span class="pg-only">similarity</span>(name, <span class="string">'Postgress'</span>) <span class="keyword">AS</span> sim
+<span class="keyword">FROM</span> products
+<span class="keyword">WHERE</span> name <span class="pg-only">%</span> <span class="string">'Postgress'</span>   <span class="comment">-- similarity > 0.3</span>
+<span class="keyword">ORDER BY</span> sim <span class="keyword">DESC</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ltree — hierarchical path labels</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="keyword">CREATE EXTENSION</span> ltree;
+<span class="keyword">CREATE TABLE</span> categories (
+  id   <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+  path <span class="type">LTREE</span>
+);
+
+<span class="keyword">INSERT INTO</span> categories (path) <span class="keyword">VALUES</span>
+  (<span class="string">'tech'</span>),
+  (<span class="string">'tech.databases'</span>),
+  (<span class="string">'tech.databases.postgres'</span>),
+  (<span class="string">'tech.databases.mysql'</span>);
+
+<span class="comment">-- Find all descendants of tech.databases</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> categories
+<span class="keyword">WHERE</span> path <span class="pg-only"><@</span> <span class="string">'tech.databases'</span>;
+
+<span class="comment">-- Find at exactly 2 levels deep</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> categories
+<span class="keyword">WHERE</span> path ~ <span class="string">'*{2}'</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">GENERATE_SERIES — date/number sequences</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Generate a series of dates (fill gaps)</span>
+<span class="keyword">SELECT</span>
+  day::date,
+  <span class="fn">COALESCE</span>(daily.revenue, <span class="number">0</span>) <span class="keyword">AS</span> revenue
+<span class="keyword">FROM</span>
+  <span class="pg-only">generate_series</span>(
+    <span class="string">'2024-01-01'</span>::date,
+    <span class="string">'2024-12-31'</span>::date,
+    <span class="string">'1 day'</span>::interval
+  ) <span class="keyword">AS</span> day
+<span class="keyword">LEFT JOIN</span> (
+  <span class="keyword">SELECT</span> <span class="fn">DATE</span>(created_at) d, <span class="fn">SUM</span>(total) revenue
+  <span class="keyword">FROM</span> orders <span class="keyword">GROUP BY</span> d
+) daily <span class="keyword">ON</span> daily.d = day::date;</pre>
+        </div>
+        <div class="card-note">Great for building time-series charts with no gaps — the LEFT JOIN fills missing days with 0.</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ DUMP ══════════════════════════ -->
+    <div id="dump" class="section">
+      <h1 class="section-title">Dump + Restore</h1>
+      <p class="section-desc">Backup, restore, partial dump, copy between databases.</p>
+
+      <div class="dump-card">
+        <div class="dump-header">
+          <div class="dump-header-left">
+            <span style="color:var(--mysql);font-weight:600;font-size:13px;font-family:var(--font-mono)">MySQL</span>
+            <span style="color:var(--text3);font-size:12px">— mysqldump</span>
+          </div>
+        </div>
+        <div class="dump-body">
+          <pre><span class="comment"># Dump entire database</span>
+<span class="fn">mysqldump</span> -u root -p mydb > backup.sql
+
+<span class="comment"># Dump with create-database statement</span>
+<span class="fn">mysqldump</span> -u root -p --databases mydb > backup_with_create.sql
+
+<span class="comment"># Dump all databases</span>
+<span class="fn">mysqldump</span> -u root -p --all-databases > all_dbs.sql
+
+<span class="comment"># Dump only specific tables</span>
+<span class="fn">mysqldump</span> -u root -p mydb users orders > tables.sql
+
+<span class="comment"># Dump schema only (no data)</span>
+<span class="fn">mysqldump</span> -u root -p --no-data mydb > schema_only.sql
+
+<span class="comment"># Dump data only (no schema)</span>
+<span class="fn">mysqldump</span> -u root -p --no-create-info mydb > data_only.sql
+
+<span class="comment"># Compressed dump</span>
+<span class="fn">mysqldump</span> -u root -p mydb | gzip > backup.sql.gz
+
+<span class="comment"># Restore</span>
+<span class="fn">mysql</span> -u root -p mydb < backup.sql
+<span class="fn">mysql</span> -u root -p mydb < backup.sql.gz   <span class="comment"># won't work, decompress first</span>
+gunzip < backup.sql.gz | <span class="fn">mysql</span> -u root -p mydb
+
+<span class="comment"># Dump with WHERE filter</span>
+<span class="fn">mysqldump</span> -u root -p mydb orders \
+  --where="created_at > '2024-01-01'" > recent_orders.sql</pre>
+        </div>
+      </div>
+
+      <div class="dump-card">
+        <div class="dump-header">
+          <div class="dump-header-left">
+            <span style="color:var(--pg);font-weight:600;font-size:13px;font-family:var(--font-mono)">PostgreSQL</span>
+            <span style="color:var(--text3);font-size:12px">— pg_dump / pg_restore</span>
+          </div>
+        </div>
+        <div class="dump-body">
+          <pre><span class="comment"># Plain SQL dump</span>
+<span class="fn">pg_dump</span> -U postgres mydb > backup.sql
+
+<span class="comment"># Custom format (compressed, supports parallel restore)</span>
+<span class="fn">pg_dump</span> -U postgres -Fc mydb > backup.dump
+
+<span class="comment"># Directory format (parallel dump)</span>
+<span class="fn">pg_dump</span> -U postgres -Fd -j 4 mydb -f backup_dir/
+
+<span class="comment"># Schema only</span>
+<span class="fn">pg_dump</span> -U postgres --schema-only mydb > schema.sql
+
+<span class="comment"># Data only</span>
+<span class="fn">pg_dump</span> -U postgres --data-only mydb > data.sql
+
+<span class="comment"># Specific tables</span>
+<span class="fn">pg_dump</span> -U postgres -t users -t orders mydb > tables.sql
+
+<span class="comment"># Exclude a table</span>
+<span class="fn">pg_dump</span> -U postgres --exclude-table=logs mydb > no_logs.sql
+
+<span class="comment"># All databases (roles + tablespaces too)</span>
+<span class="fn">pg_dumpall</span> -U postgres > all_dbs.sql
+
+<span class="comment"># Restore SQL format</span>
+<span class="fn">psql</span> -U postgres mydb < backup.sql
+
+<span class="comment"># Restore custom format</span>
+<span class="fn">pg_restore</span> -U postgres -d mydb backup.dump
+
+<span class="comment"># Parallel restore (4 workers)</span>
+<span class="fn">pg_restore</span> -U postgres -d mydb -j 4 backup.dump
+
+<span class="comment"># Restore only specific table</span>
+<span class="fn">pg_restore</span> -U postgres -d mydb -t users backup.dump</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">COPY — fast bulk load/export</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL (server-side)</div>
+          <pre><span class="comment">-- Export table to CSV (server writes file)</span>
+<span class="keyword">COPY</span> users <span class="keyword">TO</span> <span class="string">'/tmp/users.csv'</span>
+  <span class="keyword">WITH</span> (<span class="pg-only">FORMAT CSV, HEADER, DELIMITER ','</span>);
+
+<span class="comment">-- Import from CSV</span>
+<span class="keyword">COPY</span> users (name, email) <span class="keyword">FROM</span> <span class="string">'/tmp/users.csv'</span>
+  <span class="keyword">WITH</span> (<span class="pg-only">FORMAT CSV, HEADER</span>);
+
+<span class="comment">-- Client-side (\copy in psql — no server file access needed)</span>
+<span class="pg-only">\copy</span> users <span class="keyword">TO</span> <span class="string">'users.csv'</span> CSV HEADER
+<span class="pg-only">\copy</span> users <span class="keyword">FROM</span> <span class="string">'users.csv'</span> CSV HEADER
+
+<span class="comment">-- COPY from SELECT (export filtered data)</span>
+<span class="keyword">COPY</span> (
+  <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> created_at > <span class="string">'2024-01-01'</span>
+) <span class="keyword">TO</span> <span class="string">'/tmp/new_users.csv'</span> CSV HEADER;</pre>
+        </div>
+        <div class="card-note">COPY is orders of magnitude faster than row-by-row INSERTs for bulk loading. MySQL equivalent is LOAD DATA INFILE.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">MySQL: LOAD DATA INFILE</div>
+        <div class="code-block-wrap code-single"><div class="code-label mysql">MySQL</div>
+          <pre><span class="comment">-- Export to CSV</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users
+  <span class="mysql-only">INTO OUTFILE</span> <span class="string">'/tmp/users.csv'</span>
+  <span class="mysql-only">FIELDS TERMINATED BY ','</span>
+  <span class="mysql-only">ENCLOSED BY '"'</span>
+  <span class="mysql-only">LINES TERMINATED BY '\n'</span>;
+
+<span class="comment">-- Import from CSV</span>
+<span class="mysql-only">LOAD DATA INFILE</span> <span class="string">'/tmp/users.csv'</span>
+  <span class="keyword">INTO TABLE</span> users
+  <span class="mysql-only">FIELDS TERMINATED BY ','</span>
+  <span class="mysql-only">ENCLOSED BY '"'</span>
+  <span class="mysql-only">LINES TERMINATED BY '\n'</span>
+  <span class="mysql-only">IGNORE 1 ROWS</span>;   <span class="comment">-- skip header</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ REPLICATION ══════════════════════════ -->
+    <div id="replication" class="section">
+      <h1 class="section-title">Replication</h1>
+      <p class="section-desc">Streaming replication, logical replication, configuration snippets.</p>
+
+      <div class="card">
+        <div class="card-title">PostgreSQL streaming replication setup</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">postgresql.conf (primary)</div>
+          <pre><span class="comment"># Enable WAL streaming</span>
+wal_level = <span class="string">replica</span>
+max_wal_senders = <span class="number">5</span>
+wal_keep_size = <span class="string">256MB</span>
+synchronous_commit = <span class="string">on</span>          <span class="comment"># or 'remote_apply' for stronger</span>
+synchronous_standby_names = <span class="string">'*'</span> <span class="comment"># for sync replication</span></pre>
+        </div>
+        <div class="code-block-wrap code-single" style="margin-top:8px"><div class="code-label pg">pg_hba.conf (primary)</div>
+          <pre>host  replication  replica_user  10.0.0.2/32  md5</pre>
+        </div>
+        <div class="code-block-wrap code-single" style="margin-top:8px"><div class="code-label pg">Shell (create replica)</div>
+          <pre><span class="comment"># Base backup from primary</span>
+<span class="fn">pg_basebackup</span> -h primary_host -U replica_user \
+  -D /var/lib/postgresql/data -P -Xs -R
+<span class="comment"># -R creates standby.signal + primary_conninfo automatically</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">PostgreSQL logical replication</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- On publisher (source)</span>
+<span class="comment">-- postgresql.conf: wal_level = logical</span>
+
+<span class="keyword">CREATE PUBLICATION</span> my_pub
+  <span class="keyword">FOR TABLE</span> users, orders;
+
+<span class="comment">-- On subscriber (destination)</span>
+<span class="keyword">CREATE SUBSCRIPTION</span> my_sub
+  <span class="keyword">CONNECTION</span> <span class="string">'host=primary_host dbname=mydb user=replicator'</span>
+  <span class="keyword">PUBLICATION</span> my_pub;
+
+<span class="comment">-- Check subscription status</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="pg-only">pg_stat_subscription</span>;</pre>
+        </div>
+        <div class="card-note">Logical replication lets you replicate specific tables, replicate to different PostgreSQL versions, and replicate to other databases (Debezium, etc.).</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">MySQL replication setup</div>
+        <div class="code-block-wrap code-single"><div class="code-label mysql">my.cnf (primary)</div>
+          <pre><span class="comment">[mysqld]</span>
+server-id   = 1
+log-bin     = mysql-bin
+binlog-format = ROW
+gtid-mode   = ON
+enforce-gtid-consistency = ON</pre>
+        </div>
+        <div class="code-block-wrap code-single" style="margin-top:8px"><div class="code-label mysql">SQL (replica setup)</div>
+          <pre><span class="comment">-- Create replication user on primary</span>
+<span class="keyword">CREATE USER</span> <span class="string">'replica'</span>@<span class="string">'%'</span>
+  <span class="keyword">IDENTIFIED WITH</span> mysql_native_password
+  <span class="keyword">BY</span> <span class="string">'secret'</span>;
+<span class="keyword">GRANT REPLICATION SLAVE ON</span> *.* <span class="keyword">TO</span> <span class="string">'replica'</span>@<span class="string">'%'</span>;
+
+<span class="comment">-- On replica</span>
+<span class="keyword">CHANGE REPLICATION SOURCE TO</span>
+  SOURCE_HOST = <span class="string">'primary_host'</span>,
+  SOURCE_USER = <span class="string">'replica'</span>,
+  SOURCE_PASSWORD = <span class="string">'secret'</span>,
+  SOURCE_AUTO_POSITION = <span class="number">1</span>;
+<span class="keyword">START REPLICA</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ PERFORMANCE ══════════════════════════ -->
+    <div id="performance" class="section">
+      <h1 class="section-title">Performance Tuning</h1>
+      <p class="section-desc">Config, vacuum, autovacuum, query analysis.</p>
+
+      <div class="card">
+        <div class="card-title">Key PostgreSQL config params</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">postgresql.conf</div>
+          <pre><span class="comment"># Memory</span>
+shared_buffers         = <span class="string">4GB</span>      <span class="comment"># ~25% of total RAM</span>
+effective_cache_size   = <span class="string">12GB</span>     <span class="comment"># ~75% of RAM (planner hint)</span>
+work_mem               = <span class="string">64MB</span>     <span class="comment"># per sort/hash op — be careful</span>
+maintenance_work_mem   = <span class="string">1GB</span>      <span class="comment"># for VACUUM, CREATE INDEX</span>
+
+<span class="comment"># Parallelism</span>
+max_parallel_workers_per_gather = <span class="number">4</span>
+
+<span class="comment"># WAL / checkpoints</span>
+checkpoint_completion_target = <span class="number">0.9</span>
+wal_buffers            = <span class="string">64MB</span>
+
+<span class="comment"># Logging slow queries</span>
+log_min_duration_statement = <span class="number">1000</span>  <span class="comment"># log queries > 1s</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">VACUUM + ANALYZE</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Reclaim dead tuple space</span>
+<span class="keyword">VACUUM</span> orders;
+
+<span class="comment">-- Full vacuum (locks table, rewrites heap)</span>
+<span class="keyword">VACUUM FULL</span> orders;
+
+<span class="comment">-- Update planner statistics</span>
+<span class="keyword">ANALYZE</span> orders;
+
+<span class="comment">-- Both at once</span>
+<span class="keyword">VACUUM ANALYZE</span> orders;
+
+<span class="comment">-- Check table bloat</span>
+<span class="keyword">SELECT</span>
+  relname,
+  n_dead_tup,
+  n_live_tup,
+  last_vacuum,
+  last_autovacuum
+<span class="keyword">FROM</span> <span class="pg-only">pg_stat_user_tables</span>
+<span class="keyword">ORDER BY</span> n_dead_tup <span class="keyword">DESC</span>;</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Find missing indexes — table stats</div>
+        <div class="code-block-wrap code-single"><div class="code-label pg">PostgreSQL</div>
+          <pre><span class="comment">-- Tables with lots of sequential scans (may need indexes)</span>
+<span class="keyword">SELECT</span>
+  relname,
+  seq_scan,
+  seq_tup_read,
+  idx_scan,
+  idx_tup_fetch
+<span class="keyword">FROM</span> <span class="pg-only">pg_stat_user_tables</span>
+<span class="keyword">WHERE</span> seq_scan > <span class="number">100</span>
+<span class="keyword">ORDER BY</span> seq_tup_read <span class="keyword">DESC</span>;
+
+<span class="comment">-- Unused indexes (wasting write performance)</span>
+<span class="keyword">SELECT</span>
+  indexrelname,
+  idx_scan,
+  idx_tup_read
+<span class="keyword">FROM</span> <span class="pg-only">pg_stat_user_indexes</span>
+<span class="keyword">WHERE</span> idx_scan = <span class="number">0</span>
+  <span class="keyword">AND</span> indexrelname NOT LIKE <span class="string">'%pkey%'</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════ QUIZ ══════════════════════════ -->
+    <div id="quiz" class="section">
+      <h1 class="section-title">Practice Quiz</h1>
+      <p class="section-desc">15 questions — basic to advanced. Click an answer to reveal explanation.</p>
+
+      <div class="quiz-score" id="score-wrap" style="display:none">
+        <div class="score-text" id="score-text">0 / 15</div>
+        <div class="score-track"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+      </div>
+
+      <div id="quiz-container"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  document.querySelector('.main').scrollTop = 0;
+}
+
+const quizData = [
+  {q:"Which keyword does PostgreSQL use for auto-increment, and what is the SQL-standard alternative?",opts:["AUTO_INCREMENT / GENERATED ALWAYS AS IDENTITY","SERIAL / GENERATED ALWAYS AS IDENTITY","SEQUENCE / AUTOINCREMENT","BIGINT / SEQUENCE"],correct:1,explain:"PostgreSQL uses SERIAL (shorthand that creates a sequence). The modern SQL-standard alternative is GENERATED ALWAYS AS IDENTITY. MySQL uses AUTO_INCREMENT."},
+  {q:"What does the RETURNING clause do in PostgreSQL?",opts:["Returns the query execution plan","Returns the modified rows after INSERT/UPDATE/DELETE","Returns the number of affected rows only","Returns the auto-generated ID only"],correct:1,explain:"RETURNING returns the actual modified rows (or any columns you specify) after an INSERT, UPDATE, or DELETE. MySQL has no equivalent — you need a separate SELECT to retrieve the affected data."},
+  {q:"What is the key difference between JSON and JSONB in PostgreSQL?",opts:["JSONB supports nesting, JSON does not","JSONB is binary and can be GIN-indexed; JSON is text only","JSON allows more operators","JSONB has lower storage overhead always"],correct:1,explain:"JSONB is stored as binary, supports GIN indexing, and has 50+ operators for querying. JSON is stored as text (preserves whitespace and key order). Use JSONB for queryable data."},
+  {q:"MySQL has no native FULL OUTER JOIN. How do you emulate it?",opts:["Use INNER JOIN with NULL checks","Use UNION of LEFT JOIN and RIGHT JOIN","Use CROSS JOIN with HAVING","Use two subqueries with OR"],correct:1,explain:"MySQL doesn't support FULL OUTER JOIN natively. You emulate it with UNION of a LEFT JOIN and a RIGHT JOIN. PostgreSQL supports it natively."},
+  {q:"What does a LATERAL JOIN in PostgreSQL enable that a regular subquery cannot do?",opts:["It runs in parallel","The subquery can reference columns from the preceding FROM item","It allows JOINs without an ON clause","It automatically de-duplicates results"],correct:1,explain:"LATERAL allows a subquery in the FROM clause to reference columns from preceding tables in the same FROM clause — making 'top N per group' queries natural and efficient."},
+  {q:"What index type does PostgreSQL use for JSONB, arrays, and full-text search?",opts:["B-Tree","Hash","GIN","GiST"],correct:2,explain:"GIN (Generalized Inverted Index) is used for JSONB, arrays, and tsvector. GiST is used for geometric/range types. B-Tree is the default for regular columns."},
+  {q:"Can you ROLLBACK an ALTER TABLE statement in MySQL?",opts:["Yes, always","No — MySQL issues an implicit COMMIT before DDL","Only with InnoDB engine","Only if in SERIALIZABLE isolation"],correct:1,explain:"MySQL automatically commits any open transaction before executing DDL (CREATE TABLE, ALTER TABLE, DROP TABLE). PostgreSQL allows DDL inside a transaction and can fully roll it back."},
+  {q:"What is the purpose of VACUUM in PostgreSQL?",opts:["Compresses the database","Reclaims space from dead tuples created by MVCC updates/deletes","Rebuilds all indexes","Syncs data to disk immediately"],correct:1,explain:"MVCC in PostgreSQL creates 'dead tuples' on every UPDATE/DELETE (old versions kept for concurrent readers). VACUUM reclaims that space. Autovacuum runs this automatically in the background."},
+  {q:"Which PostgreSQL feature lets you build real-time pub/sub without Redis?",opts:["Logical Replication","LISTEN / NOTIFY","pg_cron","Streaming Replication"],correct:1,explain:"LISTEN/NOTIFY is a built-in pub/sub mechanism. One connection does NOTIFY channel, 'payload' and all connections doing LISTEN channel receive the payload asynchronously — no Redis needed for simple cases."},
+  {q:"What does pg_dump -Fc produce?",opts:["A plain SQL file","A custom-format binary dump that supports parallel pg_restore","A directory of SQL files","A compressed tar archive only"],correct:1,explain:"-Fc produces a custom binary format that: is compressed by default, supports parallel restoration with -j, allows selective table restoration, and is the recommended format for production backups."},
+  {q:"In PostgreSQL, what does a partial index (CREATE INDEX ... WHERE ...) achieve?",opts:["Indexes only NULL values","Indexes a subset of rows, making the index smaller and faster","Indexes only the first N characters","Creates a covering index"],correct:1,explain:"A partial index only indexes rows matching the WHERE clause. For example, CREATE INDEX ON users(email) WHERE status='active' creates a tiny index over only active users instead of all 10M rows."},
+  {q:"What does EXPLAIN ANALYZE do vs plain EXPLAIN in PostgreSQL?",opts:["Same — both just show the plan","EXPLAIN ANALYZE actually executes the query and shows real timing/rows","ANALYZE refreshes table statistics without showing a plan","EXPLAIN ANALYZE only works on SELECT"],correct:1,explain:"Plain EXPLAIN shows the estimated plan. EXPLAIN ANALYZE actually runs the query and shows real execution times and row counts alongside estimates, revealing where estimates were wrong."},
+  {q:"Which PostgreSQL feature prevents double-booking rooms automatically at the DB level?",opts:["UNIQUE constraint","CHECK constraint","EXCLUDE USING GIST with range types","Trigger with manual check"],correct:2,explain:"The EXCLUDE USING GIST constraint on range types (like TSRANGE) enforces no-overlap at the database level using a GiST index. You define EXCLUDE USING GIST (room_id WITH =, period WITH &&) and the DB rejects overlapping inserts."},
+  {q:"What is the difference between RANK() and DENSE_RANK() window functions?",opts:["No difference","RANK skips numbers after ties (1,1,3); DENSE_RANK doesn't (1,1,2)","DENSE_RANK requires ORDER BY; RANK doesn't","RANK works across partitions; DENSE_RANK only within"],correct:1,explain:"With scores 100, 100, 90: RANK() gives 1,1,3 (skips 2). DENSE_RANK() gives 1,1,2 (no skip). ROW_NUMBER() gives 1,2,3 (always unique). Choose based on whether gaps matter."},
+  {q:"In PostgreSQL's WITH RECURSIVE, what is the 'anchor member'?",opts:["The final SELECT that returns results","The base case SELECT that does NOT reference the CTE itself","The UNION ALL keyword","The recursive termination condition"],correct:1,explain:"A recursive CTE has two parts joined by UNION ALL. The anchor member is the base case (runs once, no self-reference). The recursive member references the CTE itself and runs repeatedly until it returns no rows."},
+];
+
+let scores = {};
+
+function renderQuiz() {
+  const c = document.getElementById('quiz-container');
+  c.innerHTML = quizData.map((q,i) => `
+    <div class="quiz-card" id="qcard${i}">
+      <div class="quiz-q">${i+1}. ${q.q}</div>
+      <div class="quiz-opts">
+        ${q.opts.map((o,j) => `<button class="quiz-opt" onclick="answer(${i},${j})">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="exp${i}">💡 ${q.explain}</div>
+    </div>`).join('');
+}
+
+function answer(qi, chosen) {
+  if (scores[qi] !== undefined) return;
+  const q = quizData[qi];
+  const opts = document.querySelectorAll(`#qcard${qi} .quiz-opt`);
+  opts.forEach((o,j) => {
+    o.disabled = true;
+    if (j === q.correct) o.classList.add('correct');
+    else if (j === chosen && chosen !== q.correct) o.classList.add('wrong');
+  });
+  scores[qi] = chosen === q.correct ? 1 : 0;
+  document.getElementById('exp'+qi).style.display = 'block';
+  updateScore();
+}
+
+function updateScore() {
+  const answered = Object.keys(scores).length;
+  const correct = Object.values(scores).reduce((a,b) => a+b, 0);
+  document.getElementById('score-wrap').style.display = 'flex';
+  document.getElementById('score-text').textContent = correct + ' / ' + answered;
+  document.getElementById('score-fill').style.width = Math.round(correct / quizData.length * 100) + '%';
+}
+
+renderQuiz();
+
+// ═══════════════════════════════════════════════
+//  UI-LEVEL QUERY DATA  (MySQL Workbench + pgAdmin)
+// ═══════════════════════════════════════════════
+const uiData = {
+  // BASICS section
+  "Connect to server": {
+    wb: ["Open <strong>MySQL Workbench</strong>", "Click <strong>+</strong> next to <em>MySQL Connections</em>", "Fill in <strong>Connection Name</strong>, <strong>Hostname</strong> (127.0.0.1), <strong>Port</strong> (3306), <strong>Username</strong>", "Click <strong>Test Connection</strong> → enter password", "Click <strong>OK</strong> → double-click the connection to open"],
+    pg: ["Open <strong>pgAdmin 4</strong>", "Right-click <strong>Servers</strong> → <em>Register → Server…</em>", "Under <strong>General</strong> tab: give it a <strong>Name</strong>", "Under <strong>Connection</strong> tab: fill <strong>Host</strong>, <strong>Port</strong> (5432), <strong>Username</strong>, <strong>Password</strong>", "Click <strong>Save</strong> → expand the server node to connect"]
+  },
+  "List &amp; switch databases / schemas": {
+    wb: ["In the <strong>Navigator</strong> panel (left), expand <strong>SCHEMAS</strong>", "Double-click a schema name to set it as <strong>default</strong>", "Alternatively: right-click schema → <em>Set as Default Schema</em>", "To see tables: expand schema → expand <strong>Tables</strong>", "To describe a table: right-click table → <em>Table Inspector</em>"],
+    pg: ["In <strong>pgAdmin</strong>, expand <strong>Servers → your_server → Databases</strong>", "Click a database to select it (or right-click → <em>Connect Database</em>)", "Expand <strong>Schemas → public → Tables</strong> to browse objects", "Right-click a table → <em>Properties</em> to inspect columns and constraints", "Use <strong>Query Tool</strong> on the selected database (wrench icon)"]
+  },
+  "Create table — auto-increment": {
+    wb: ["Right-click a schema → <em>Create Table…</em>", "Enter <strong>Table Name</strong> at the top", "Click <strong>+</strong> in Columns panel to add each column, set <strong>Type</strong>, check <strong>PK</strong> and <strong>AI</strong> (Auto Increment) for the id column", "Set <strong>NOT NULL</strong>, <strong>UQ</strong> (Unique) checkboxes as needed", "Click <strong>Apply</strong> → review generated SQL → <em>Apply</em> again"],
+    pg: ["Right-click <strong>Tables</strong> → <em>Create → Table…</em>", "Under <strong>General</strong>: set <strong>Table name</strong>", "Under <strong>Columns</strong> tab: click <strong>+</strong> to add columns, set <strong>Data type</strong> (e.g. <code>serial</code>)", "Under <strong>Constraints</strong> tab: set <strong>Primary Key</strong>", "Click <strong>Save</strong> → pgAdmin generates and runs the DDL"]
+  },
+
+  // CRUD section
+  "INSERT": {
+    wb: ["Open <strong>Query Editor</strong> (Ctrl+T)", "Type your INSERT statement and press <strong>⚡ Execute</strong> (Ctrl+Enter)", "View affected rows count in the <strong>Output</strong> panel below", "To insert via UI: right-click table → <em>Select Rows – Limit 1000</em> → click an empty row at bottom → type values → click <strong>Apply</strong>"],
+    pg: ["Open <strong>Query Tool</strong> for your database (wrench icon)", "Type your INSERT statement, press <strong>▶ Execute/Refresh</strong> (F5)", "Result panel shows rows affected", "For visual insert: right-click table → <em>View/Edit Data → All Rows</em> → click <strong>+</strong> in toolbar → fill cells → click <strong>Save Data Changes</strong>"]
+  },
+  "SELECT with filtering": {
+    wb: ["Right-click table → <em>Select Rows – Limit 1000</em> for quick preview", "For custom filters: open <strong>Query Editor</strong>, write your SELECT", "Use <strong>Filter Rows</strong> field (magnifier icon in results grid) to filter displayed results", "Click column headers to <strong>sort</strong>; use the <strong>Export</strong> button to save results as CSV"],
+    pg: ["Right-click table → <em>View/Edit Data → First 100 Rows</em>", "In the <strong>Query Tool</strong>: write SELECT and press <strong>F5</strong>", "Use the <strong>Filter</strong> bar (funnel icon) above results to add WHERE conditions visually", "Click column headers to sort; use <strong>Copy</strong> or <strong>Save results to file</strong> icons"]
+  },
+  "UPDATE &amp; DELETE with RETURNING": {
+    wb: ["Open <strong>Query Editor</strong>, write your UPDATE/DELETE statement", "Execute with <strong>Ctrl+Enter</strong>", "Check <strong>Output</strong> pane for affected row count", "For row-level edit: right-click table → <em>Select Rows</em> → double-click a cell to edit → click <strong>Apply</strong>", "For visual delete: select a row → press <strong>Delete</strong> icon in toolbar → <em>Apply</em>"],
+    pg: ["Open <strong>Query Tool</strong>", "Write UPDATE ... RETURNING * and press <strong>F5</strong>", "The returned rows appear in the <strong>Data Output</strong> panel (unique to PostgreSQL)", "For visual edit: <em>View/Edit Data → All Rows</em> → click cell, edit, then click <strong>Save Data Changes</strong>", "For visual delete: select row(s) → click <strong>Delete</strong> icon (trash can) → confirm"]
+  },
+  "UPSERT (insert or update on conflict)": {
+    wb: ["Open <strong>Query Editor</strong>", "Write <code>INSERT ... ON DUPLICATE KEY UPDATE ...</code>", "Execute with <strong>Ctrl+Enter</strong>; check output for affected rows (2 = updated, 1 = inserted)"],
+    pg: ["Open <strong>Query Tool</strong>", "Write <code>INSERT ... ON CONFLICT ... DO UPDATE SET ...</code>", "Press <strong>F5</strong>; if using RETURNING, updated/inserted rows appear in results panel"]
+  },
+
+  // JOINS
+  "INNER JOIN — only matching rows": {
+    wb: ["Open <strong>Query Editor</strong> → write the JOIN query → <strong>Execute</strong>", "To visualize: open <em>Database → Reverse Engineer</em> to see EER diagram showing FK relationships", "Use <strong>Visual Explain</strong> (Execution Plan icon) to see how the join is processed"],
+    pg: ["Open <strong>Query Tool</strong> → write JOIN query → <strong>F5</strong>", "Click <strong>Explain</strong> button (≡ icon) to see graphical execution plan", "In the explain output, hover over nodes to see row estimates vs actuals"]
+  },
+  "LEFT JOIN — all left rows + nulls for unmatched right": {
+    wb: ["Open <strong>Query Editor</strong>", "Write LEFT JOIN query and <strong>Execute</strong>", "NULLs in results show unmatched rows — visible in the results grid"],
+    pg: ["Open <strong>Query Tool</strong>", "Write LEFT JOIN query → press <strong>F5</strong>", "NULL cells are shown blank in results; use <em>Explain</em> to validate join strategy"]
+  },
+  "FULL OUTER JOIN — all rows from both sides": {
+    wb: ["No native FULL OUTER JOIN in MySQL — write the UNION workaround in <strong>Query Editor</strong>", "Execute with <strong>Ctrl+Enter</strong>", "Inspect results — rows with NULLs on either side are the unmatched ones"],
+    pg: ["Open <strong>Query Tool</strong>", "Write <code>FULL OUTER JOIN</code> directly → <strong>F5</strong>", "PostgreSQL supports this natively — all rows appear, NULLs on unmatched sides"]
+  },
+
+  // AGGREGATES
+  "GROUP BY + HAVING": {
+    wb: ["Open <strong>Query Editor</strong> → write GROUP BY query → Execute", "Sort result columns by clicking headers in the output grid", "Use <strong>Export</strong> to save aggregated results as CSV/JSON"],
+    pg: ["Open <strong>Query Tool</strong>", "Write GROUP BY ... HAVING → press <strong>F5</strong>", "Column headers are clickable for sorting; use <strong>Copy</strong> or <strong>Download</strong> button for exports"]
+  },
+
+  // INDEXES
+  "Create indexes": {
+    wb: ["Right-click table → <em>Alter Table…</em>", "Click <strong>Indexes</strong> tab at bottom", "Click <strong>+</strong> to add index; set Index Name, Type (UNIQUE/INDEX), and select columns", "Click <strong>Apply</strong> → review DDL → <em>Apply</em>"],
+    pg: ["Right-click table → <em>Properties</em>", "Under <strong>Indexes</strong> tab: click <strong>+</strong> to add", "Set <strong>Name</strong>, <strong>Access method</strong> (btree/gin/gist), <strong>Columns</strong>", "Check <strong>Unique</strong> if needed → click <strong>Save</strong>", "Or: right-click <strong>Indexes</strong> node under table → <em>Create → Index…</em>"]
+  },
+  "Partial index (WHERE clause)": {
+    wb: ["MySQL doesn't support partial indexes natively — no UI option available", "Write <code>CREATE INDEX</code> in <strong>Query Editor</strong> as a workaround (functional index only)"],
+    pg: ["Right-click table's <strong>Indexes</strong> node → <em>Create → Index…</em>", "In <strong>Definition</strong> tab: add <strong>Where</strong> clause field (e.g. <code>status = 'active'</code>)", "Click <strong>Save</strong> — pgAdmin generates the partial index DDL"]
+  },
+
+  // TRANSACTIONS
+  "BEGIN / COMMIT / ROLLBACK": {
+    wb: ["In <strong>Query Editor</strong>: uncheck <strong>Auto-Commit</strong> in the toolbar (toggle icon)", "Write your statements and execute them", "Click <strong>Commit</strong> (checkmark) or <strong>Rollback</strong> (X) in the toolbar", "Re-enable Auto-Commit when done"],
+    pg: ["In <strong>Query Tool</strong>: click the <strong>Transaction controls</strong> icons in toolbar", "Or write <code>BEGIN;</code> manually → run statements → <code>COMMIT;</code> or <code>ROLLBACK;</code>", "pgAdmin shows transaction state in the status bar at the bottom"]
+  },
+
+  // WINDOW FUNCTIONS
+  "Ranking functions": {
+    wb: ["Open <strong>Query Editor</strong>", "Write RANK()/DENSE_RANK() query → Execute", "Results show per-partition rankings — sort by clicking column headers in output"],
+    pg: ["Open <strong>Query Tool</strong>", "Write window function query → <strong>F5</strong>", "Use <strong>Explain Analyze</strong> to inspect WindowAgg plan nodes if performance is a concern"]
+  },
+
+  // CTEs
+  "Basic CTE": {
+    wb: ["Open <strong>Query Editor</strong>", "Write the full WITH ... SELECT query → <strong>Execute</strong>", "MySQL 8+ supports CTEs — ensure server version ≥ 8.0 shown in connection info"],
+    pg: ["Open <strong>Query Tool</strong>", "Write WITH ... SELECT → <strong>F5</strong>", "Click <strong>Explain</strong> to see how the CTE is optimized (materialized vs inlined)"]
+  },
+
+  // JSON
+  "Create JSONB column + GIN index": {
+    wb: ["MySQL JSON is created in Alter Table UI → Columns tab, type = <code>JSON</code>", "No GIN index in MySQL — use full-text or generated column index workaround"],
+    pg: ["Right-click table → <em>Properties → Columns</em> → add column, set type <code>jsonb</code>", "To add GIN index: right-click <strong>Indexes</strong> node → <em>Create → Index</em> → set Access Method to <strong>gin</strong> → select jsonb column", "Click <strong>Save</strong>"]
+  },
+
+  // FULL TEXT SEARCH
+  "Full-text search": {
+    wb: ["Open <strong>Query Editor</strong>", "Write <code>MATCH(col) AGAINST('term' IN BOOLEAN MODE)</code>", "First ensure a FULLTEXT index exists: Alter Table → Indexes tab → type = FULLTEXT"],
+    pg: ["Open <strong>Query Tool</strong>", "Write query using <code>to_tsvector</code> and <code>to_tsquery</code> → <strong>F5</strong>", "For GIN index on tsvector: right-click Indexes → Create → Index → Access Method: <strong>gin</strong>"]
+  },
+
+  // STORED PROCS
+  "Stored procedure": {
+    wb: ["Expand schema → <strong>Stored Procedures</strong>", "Right-click → <em>Create Stored Procedure…</em>", "Edit the template in the code editor → click <strong>Apply</strong>", "To execute: right-click procedure → <em>Execute Stored Procedure…</em> → fill parameters"],
+    pg: ["Expand schema → <strong>Functions</strong> (procedures appear here too)", "Right-click → <em>Create → Function…</em>", "Under <strong>Code</strong> tab: write the function body in PL/pgSQL", "Under <strong>Parameters</strong> tab: add args; under <strong>Options</strong>: set language", "Click <strong>Save</strong> → right-click function → <em>Execute/Debug</em>"]
+  },
+
+  // VIEWS
+  "CREATE VIEW": {
+    wb: ["Expand schema → <strong>Views</strong>", "Right-click → <em>Create View…</em>", "Write the SELECT in the code editor → click <strong>Apply</strong>", "View appears under Views node — right-click → <em>Select Rows</em> to query it"],
+    pg: ["Expand schema → <strong>Views</strong>", "Right-click → <em>Create → View…</em>", "Under <strong>Code</strong> tab: write the SELECT query", "Click <strong>Save</strong>; query the view by right-clicking → <em>View/Edit Data</em>"]
+  },
+  "Materialized view": {
+    wb: ["MySQL has no materialized views — use a regular table + scheduled event to refresh"],
+    pg: ["Expand schema → <strong>Materialized Views</strong>", "Right-click → <em>Create → Materialized View…</em>", "Under <strong>Code</strong> tab: write the SELECT", "Click <strong>Save</strong>", "To refresh: right-click the mat view → <em>Refresh View…</em> (optionally CONCURRENTLY)"]
+  },
+
+  // DUMP & RESTORE
+  "pg_dump + pg_restore": {
+    wb: ["Go to <strong>Server → Data Export</strong>", "Select schemas/tables to export", "Choose <em>Export to Dump Project Folder</em> or <em>Self-Contained File</em>", "Click <strong>Start Export</strong>", "For import: <strong>Server → Data Import</strong> → select dump file → <em>Start Import</em>"],
+    pg: ["Right-click <strong>database</strong> → <em>Backup…</em>", "Set <strong>Filename</strong>, <strong>Format</strong> (Custom = -Fc, Plain = SQL)", "Under <strong>Dump Options</strong>: choose tables, schemas, include/exclude options", "Click <strong>Backup</strong>", "To restore: right-click database → <em>Restore…</em> → select .dump file → <em>Restore</em>"]
+  },
+
+  // PERFORMANCE
+  "EXPLAIN / EXPLAIN ANALYZE": {
+    wb: ["Write your query in <strong>Query Editor</strong>", "Click the <strong>Execution Plan</strong> icon (magnifier with lines) in toolbar", "Visual explain shows nodes with cost estimates", "For actual stats: prepend <code>EXPLAIN ANALYZE</code> and execute normally"],
+    pg: ["In <strong>Query Tool</strong>: write your query", "Click <strong>Explain</strong> button (tree icon) for estimated plan", "Click <strong>Explain Analyze</strong> button for real execution stats", "Switch between <strong>Graphical</strong> and <strong>Statistics</strong> tabs in the explain output panel"]
+  },
+
+  // REPLICATION
+  "Replication setup": {
+    wb: ["Go to <strong>Server → Replication → Add Slave Server</strong> to configure slave", "Use <em>Replication → Master Status</em> to check binlog position", "MySQL Router configuration is separate from Workbench"],
+    pg: ["pgAdmin doesn't configure streaming replication directly — use the <strong>Query Tool</strong>", "For logical replication: expand <strong>Subscriptions</strong> or <strong>Publications</strong> nodes under the database", "Right-click <strong>Publications</strong> → <em>Create → Publication…</em> to set up a publisher", "Right-click <strong>Subscriptions</strong> → <em>Create → Subscription…</em> on the subscriber side"]
+  },
+
+  // TYPES
+  "Custom types (ENUM, DOMAIN, composite)": {
+    wb: ["For ENUM: set column type as <code>ENUM</code> in Alter Table → Columns tab → enter allowed values", "MySQL doesn't support DOMAIN or composite types"],
+    pg: ["Expand schema → <strong>Types</strong>", "Right-click → <em>Create → Type…</em>", "Choose type class: <strong>Enumerated</strong>, <strong>Composite</strong>, <strong>Range</strong>, or <strong>Base</strong>", "Fill in values/attributes → click <strong>Save</strong>", "For DOMAIN: right-click <strong>Domains</strong> → <em>Create → Domain…</em> → set base type and constraints"]
+  },
+
+  // LISTEN/NOTIFY
+  "LISTEN / NOTIFY": {
+    wb: ["No equivalent in MySQL — closest is a trigger writing to a log table"],
+    pg: ["Open <strong>Query Tool</strong> on Connection A → run <code>LISTEN channel_name;</code>", "Open another <strong>Query Tool</strong> on Connection B → run <code>NOTIFY channel_name, 'payload';</code>", "Connection A's <strong>Notifications</strong> panel (bell icon in bottom bar) shows received messages in real time"]
+  },
+
+  // PARTITIONS
+  "RANGE partitioning — time-series data": {
+    wb: ["MySQL partitioning via UI: right-click table → <em>Alter Table → Partitioning tab</em>", "Set <strong>Partition By</strong> to RANGE, set expression, add partitions with LESS THAN values", "Click <strong>Apply</strong>"],
+    pg: ["pgAdmin doesn't have a dedicated partition UI — use <strong>Query Tool</strong>", "Create parent table with <code>PARTITION BY RANGE</code>, then create child tables with <code>PARTITION OF ... FOR VALUES FROM ... TO ...</code>", "Partitions appear under the parent table node in the object tree"]
+  },
+
+  // EXTENSIONS
+  "PostgreSQL extensions": {
+    wb: ["Not applicable — MySQL uses plugins configured in my.cnf, not SQL extensions"],
+    pg: ["Expand database → <strong>Extensions</strong>", "Right-click → <em>Create → Extension…</em>", "Select extension name from dropdown (e.g. <code>pg_trgm</code>, <code>uuid-ossp</code>, <code>postgis</code>)", "Click <strong>Save</strong> — pgAdmin runs <code>CREATE EXTENSION</code>"]
+  }
+};
+
+// ─── TAB COUNTER (for unique IDs) ───
+let tabCounter = 0;
+
+function makeUiTabs(cardTitleText, cardEl) {
+  // find a matching key in uiData
+  const matchKey = Object.keys(uiData).find(k => {
+    const decoded = k.replace(/&amp;/g,'&').replace(/&gt;/g,'>').replace(/&lt;/g,'<');
+    return cardTitleText.includes(decoded) || decoded.includes(cardTitleText) ||
+           cardTitleText.toLowerCase().includes(decoded.toLowerCase().substring(0,20));
+  });
+  if (!matchKey) return null;
+  const d = uiData[matchKey];
+  const id = ++tabCounter;
+
+  const wbSteps = d.wb ? d.wb.map((s,i)=>`
+    <li class="ui-step">
+      <span class="ui-step-num wb-num">${i+1}</span>
+      <span class="ui-step-text">${s}</span>
+    </li>`).join('') : '<li class="ui-step"><span class="ui-step-text" style="color:var(--red)">⚠ Not supported in MySQL Workbench UI</span></li>';
+
+  const pgSteps = d.pg ? d.pg.map((s,i)=>`
+    <li class="ui-step">
+      <span class="ui-step-num pg-num">${i+1}</span>
+      <span class="ui-step-text">${s}</span>
+    </li>`).join('') : '<li class="ui-step"><span class="ui-step-text" style="color:var(--red)">⚠ Not applicable</span></li>';
+
+  return `
+  <div class="ui-tabs" id="uitabs-${id}">
+    <div class="ui-tab-bar">
+      <button class="ui-tab-btn active-wb" onclick="switchTab(${id},'wb',this)">🖱 MySQL Workbench UI</button>
+      <button class="ui-tab-btn" onclick="switchTab(${id},'pg',this)">🖱 pgAdmin UI</button>
+    </div>
+    <div class="ui-tab-panel active" id="uitabs-${id}-wb">
+      <div class="ui-nav-note">📌 MySQL Workbench — click-by-click navigation steps</div>
+      <ul class="ui-step-list">${wbSteps}</ul>
+    </div>
+    <div class="ui-tab-panel" id="uitabs-${id}-pg">
+      <div class="ui-nav-note">📌 pgAdmin 4 — click-by-click navigation steps</div>
+      <ul class="ui-step-list">${pgSteps}</ul>
+    </div>
+  </div>`;
+}
+
+function switchTab(id, panel, btn) {
+  const wrap = document.getElementById('uitabs-' + id);
+  wrap.querySelectorAll('.ui-tab-panel').forEach(p => p.classList.remove('active'));
+  wrap.querySelectorAll('.ui-tab-btn').forEach(b => { b.className = 'ui-tab-btn'; });
+  document.getElementById('uitabs-' + id + '-' + panel).classList.add('active');
+  btn.classList.add(panel === 'wb' ? 'active-wb' : 'active-pg');
+}
+
+// Inject UI tabs into every card that has a matching title
+document.querySelectorAll('.card').forEach(card => {
+  const titleEl = card.querySelector('.card-title');
+  if (!titleEl) return;
+  const titleText = titleEl.textContent.trim();
+  const tabs = makeUiTabs(titleText, card);
+  if (tabs) {
+    const div = document.createElement('div');
+    div.innerHTML = tabs;
+    card.appendChild(div.firstElementChild);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes — Windows & Linux Setup Guide</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #05080f;
+    --surf:   #0c1220;
+    --surf2:  #111928;
+    --border: #1a2438;
+    --k8s:    #326ce5;
+    --k8s2:   #1a4bb8;
+    --win:    #00adef;
+    --linux:  #fcc624;
+    --green:  #00e676;
+    --red:    #ff1744;
+    --cyan:   #18ffff;
+    --text:   #c8d8f0;
+    --muted:  #4a5f80;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.65;}
+
+  .hero{background:linear-gradient(150deg,#05080f 0%,#0a1228 55%,#05080f 100%);border-bottom:1px solid var(--border);padding:54px 0 38px;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:380px;height:380px;background:radial-gradient(circle,rgba(50,108,229,0.11) 0%,transparent 70%);}
+  .hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(24,255,255,0.06) 0%,transparent 70%);}
+  .badge-hero{display:inline-flex;align-items:center;gap:7px;background:rgba(50,108,229,0.12);border:1px solid rgba(50,108,229,0.28);color:var(--k8s);padding:4px 14px;border-radius:100px;font-size:.72rem;font-family:'Source Code Pro',monospace;letter-spacing:1.2px;margin-bottom:18px;}
+  .hero h1{font-size:clamp(1.8rem,4vw,2.9rem);font-weight:800;line-height:1.1;background:linear-gradient(120deg,#fff 0%,var(--k8s) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;}
+  .hero p{color:var(--muted);font-size:.97rem;max-width:560px;}
+  .os-chips{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+  .oschip{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:100px;font-family:'Source Code Pro',monospace;font-size:.76rem;font-weight:600;border:1px solid;}
+  .win-chip{background:rgba(0,173,239,.1);border-color:rgba(0,173,239,.3);color:var(--win);}
+  .lin-chip{background:rgba(252,198,36,.1);border-color:rgba(252,198,36,.3);color:var(--linux);}
+  .k8-chip{background:rgba(50,108,229,.1);border-color:rgba(50,108,229,.3);color:var(--k8s);}
+
+  .section{padding:44px 0 0;}
+  .sec-hdr{display:flex;align-items:center;gap:13px;margin-bottom:22px;}
+  .snum{width:38px;height:38px;border-radius:9px;flex-shrink:0;background:linear-gradient(135deg,var(--k8s2),var(--k8s));display:flex;align-items:center;justify-content:center;font-family:'Source Code Pro',monospace;font-weight:700;font-size:.95rem;color:#fff;}
+  .stitle{font-size:1.28rem;font-weight:700;color:#fff;}
+  .ssub{color:var(--muted);font-size:.82rem;margin-top:2px;}
+
+  .cdk{background:var(--surf);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .chdr{background:var(--surf2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:7px;font-family:'Source Code Pro',monospace;font-size:.76rem;color:var(--muted);}
+  .dot{width:9px;height:9px;border-radius:50%;}.dr{background:var(--red);}.dy{background:#ffa000;}.dg{background:var(--green);}
+
+  .otabs{display:flex;gap:0;margin-bottom:-1px;}
+  .otab{padding:7px 18px;font-size:.78rem;font-family:'Source Code Pro',monospace;cursor:pointer;border:1px solid transparent;border-radius:8px 8px 0 0;color:var(--muted);background:transparent;transition:all .15s;}
+  .otab.active{background:var(--surf2);border-color:var(--border);border-bottom-color:var(--surf2);color:var(--k8s);}
+  .tpane{display:none;}.tpane.active{display:block;}
+
+  pre{margin:0;padding:16px 18px;font-family:'Source Code Pro',monospace;font-size:.8rem;line-height:1.85;overflow-x:auto;background:transparent!important;color:var(--text);}
+  .cmd{color:var(--k8s);}.cmt{color:var(--muted);font-style:italic;}
+  .str{color:var(--green);}.kw{color:var(--cyan);}
+  .hi{color:#fff;font-weight:700;}.win{color:var(--win);font-weight:600;}
+  .lin{color:var(--linux);font-weight:600;}.ok{color:var(--green);}.err{color:var(--red);}
+  .bw{border-left:3px solid var(--win)!important;}
+  .bl{border-left:3px solid var(--linux)!important;}
+
+  .tip{background:rgba(50,108,229,.06);border:1px solid rgba(50,108,229,.2);border-left:3px solid var(--k8s);border-radius:10px;padding:12px 16px;font-size:.86rem;display:flex;gap:10px;align-items:flex-start;}
+  .warn{background:rgba(255,23,68,.06);border:1px solid rgba(255,23,68,.2);border-left:3px solid var(--red);border-radius:10px;padding:12px 16px;font-size:.86rem;display:flex;gap:10px;align-items:flex-start;}
+  .ai{font-size:1rem;flex-shrink:0;margin-top:2px;}
+
+  .ref-table{width:100%;border-collapse:collapse;}
+  .ref-table th{background:var(--surf2);color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;padding:10px 14px;font-family:'Source Code Pro',monospace;border-bottom:1px solid var(--border);text-align:left;}
+  .ref-table td{padding:10px 14px;font-size:.8rem;font-family:'Source Code Pro',monospace;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;}
+  .ref-table tr:last-child td{border-bottom:none;}
+  .ref-table tr:hover td{background:rgba(255,255,255,.02);}
+
+  .cpybtn{margin-left:auto;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);font-size:.68rem;padding:2px 9px;border-radius:5px;cursor:pointer;font-family:'Source Code Pro',monospace;transition:all .15s;}
+  .cpybtn:hover{background:rgba(50,108,229,.1);color:var(--k8s);border-color:var(--k8s);}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:44px 0 0;}
+  footer{margin-top:56px;border-top:1px solid var(--border);padding:24px 0;color:var(--muted);font-size:.78rem;text-align:center;}
+  ::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <div class="badge-hero"><i class="bi bi-diagram-3-fill"></i> KUBERNETES · SETUP GUIDE</div>
+    <h1>Kubernetes Setup<br>Windows & Linux</h1>
+    <p>Install kubectl & minikube, write manifests, deploy Pods/Services/Deployments, and connect to EKS — complete end to end.</p>
+    <div class="os-chips">
+      <span class="oschip win-chip"><i class="bi bi-windows"></i> Windows</span>
+      <span class="oschip lin-chip"><i class="bi bi-ubuntu"></i> Linux</span>
+      <span class="oschip k8-chip"><i class="bi bi-diagram-3"></i> kubectl + minikube</span>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-4">
+
+<!-- STEP 1: INSTALL KUBECTL -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">1</div>
+    <div><div class="stitle">Install kubectl</div><div class="ssub">CLI tool to talk to any Kubernetes cluster</div></div>
+  </div>
+  <div class="otabs" id="ot1">
+    <button class="otab active" onclick="sw('t1win','ot1',this)"><i class="bi bi-windows"></i> Windows</button>
+    <button class="otab" onclick="sw('t1lin','ot1',this)"><i class="bi bi-ubuntu"></i> Linux</button>
+  </div>
+  <div class="cdk" style="border-radius:0 12px 12px 12px">
+    <div id="t1win" class="tpane active">
+      <div class="chdr bw"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="win">Windows — PowerShell</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Option 1: winget</span>
+<span class="cmd">winget install</span> Kubernetes.kubectl
+
+<span class="cmt"># Option 2: Chocolatey</span>
+<span class="cmd">choco install</span> kubernetes-cli
+
+<span class="cmt"># Option 3: Manual download</span>
+<span class="cmt"># https://kubernetes.io/releases/download/</span>
+<span class="cmt"># Download kubectl.exe → add to PATH</span>
+
+<span class="cmt"># Verify</span>
+<span class="cmd">kubectl</span> version --client
+<span class="cmt"># should show: Client Version: v1.x.x</span></pre>
+    </div>
+    <div id="t1lin" class="tpane">
+      <div class="chdr bl"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="lin">Linux — curl install</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Download latest kubectl binary</span>
+<span class="cmd">curl</span> -LO "https://dl.k8s.io/release/$(curl -L -s \
+  https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+<span class="cmt"># Install</span>
+<span class="cmd">sudo install</span> -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+<span class="cmt"># OR via apt (Ubuntu)</span>
+<span class="cmd">sudo apt install</span> -y kubectl
+
+<span class="cmt"># Verify</span>
+<span class="cmd">kubectl</span> version --client</pre>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 2: INSTALL MINIKUBE (local cluster) -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">2</div>
+    <div><div class="stitle">Install Minikube — Local Kubernetes Cluster</div><div class="ssub">Run K8s on your laptop for testing — needs Docker installed first</div></div>
+  </div>
+  <div class="otabs" id="ot2">
+    <button class="otab active" onclick="sw('t2win','ot2',this)"><i class="bi bi-windows"></i> Windows</button>
+    <button class="otab" onclick="sw('t2lin','ot2',this)"><i class="bi bi-ubuntu"></i> Linux</button>
+  </div>
+  <div class="cdk" style="border-radius:0 12px 12px 12px">
+    <div id="t2win" class="tpane active">
+      <div class="chdr bw"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="win">Windows</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Install minikube</span>
+<span class="cmd">winget install</span> Kubernetes.minikube
+<span class="cmt"># OR:</span>
+<span class="cmd">choco install</span> minikube
+
+<span class="cmt"># Start cluster (uses Docker as driver)</span>
+<span class="cmd">minikube start</span> --driver=docker
+
+<span class="cmt"># Check cluster is running</span>
+<span class="cmd">minikube status</span>
+<span class="cmd">kubectl cluster-info</span>
+<span class="cmd">kubectl get nodes</span>
+<span class="cmt"># should show 1 node: minikube   Ready</span>
+
+<span class="cmt"># Open dashboard in browser</span>
+<span class="cmd">minikube dashboard</span></pre>
+    </div>
+    <div id="t2lin" class="tpane">
+      <div class="chdr bl"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="lin">Linux</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Download and install minikube</span>
+<span class="cmd">curl</span> -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+<span class="cmd">sudo install</span> minikube-linux-amd64 /usr/local/bin/minikube
+
+<span class="cmt"># Start cluster</span>
+<span class="cmd">minikube start</span> --driver=docker
+
+<span class="cmt"># Check status</span>
+<span class="cmd">minikube status</span>
+<span class="cmd">kubectl get nodes</span>
+<span class="cmt"># should show: minikube   Ready</span>
+
+<span class="cmt"># Open dashboard</span>
+<span class="cmd">minikube dashboard</span></pre>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 3: CORE CONCEPTS -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">3</div>
+    <div><div class="stitle">Core Concepts — What You Need to Know</div><div class="ssub">The 4 main K8s objects you'll use every day</div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-3">
+      <div class="cdk h-100">
+        <div class="chdr" style="border-left:3px solid var(--k8s)"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span style="color:var(--k8s)">Pod</span></div>
+        <pre><span class="cmt"># Smallest unit
+# Runs 1 or more containers
+# Temporary — gets recreated
+# when it dies</span>
+
+<span class="ok">1 Pod = 1 or more</span>
+<span class="ok">     containers running</span>
+<span class="ok">     together</span></pre>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="cdk h-100">
+        <div class="chdr" style="border-left:3px solid var(--cyan)"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span style="color:var(--cyan)">Deployment</span></div>
+        <pre><span class="cmt"># Manages multiple Pods
+# Handles rolling updates
+# Keeps desired replicas
+# running always</span>
+
+<span class="ok">1 Deployment = N Pods</span>
+<span class="ok">     auto-heals if</span>
+<span class="ok">     pods crash</span></pre>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="cdk h-100">
+        <div class="chdr" style="border-left:3px solid var(--green)"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span style="color:var(--green)">Service</span></div>
+        <pre><span class="cmt"># Stable network access
+# to a set of Pods
+# Pods can die & change IP
+# Service stays the same</span>
+
+<span class="ok">Service = stable URL</span>
+<span class="ok">     pointing to pods</span>
+<span class="ok">     via label selector</span></pre>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="cdk h-100">
+        <div class="chdr" style="border-left:3px solid var(--linux)"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span style="color:var(--linux)">ConfigMap</span></div>
+        <pre><span class="cmt"># Store config separately
+# from container image
+# Inject as env vars
+# or as files</span>
+
+<span class="ok">ConfigMap = env vars</span>
+<span class="ok">     and config files</span>
+<span class="ok">     for your app</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 4: YAML MANIFESTS -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">4</div>
+    <div><div class="stitle">YAML Manifests — Deploy Your App</div><div class="ssub">Write these files then apply with kubectl — same on Windows & Linux</div></div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>deployment.yaml</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="kw">apiVersion</span>: apps/v1
+<span class="kw">kind</span>: Deployment
+<span class="kw">metadata</span>:
+  name: my-app
+<span class="kw">spec</span>:
+  replicas: <span class="str">3</span>         <span class="cmt">← run 3 pods</span>
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: <span class="str">my-app:latest</span>
+        ports:
+        - containerPort: <span class="str">3000</span>
+        env:
+        - name: NODE_ENV
+          value: <span class="str">"production"</span>
+        resources:
+          requests:
+            memory: <span class="str">"128Mi"</span>
+            cpu: <span class="str">"250m"</span>
+          limits:
+            memory: <span class="str">"256Mi"</span>
+            cpu: <span class="str">"500m"</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>service.yaml</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="kw">apiVersion</span>: v1
+<span class="kw">kind</span>: Service
+<span class="kw">metadata</span>:
+  name: my-app-service
+<span class="kw">spec</span>:
+  selector:
+    app: my-app       <span class="cmt">← must match Deployment label</span>
+  ports:
+  - protocol: TCP
+    port: <span class="str">80</span>          <span class="cmt">← external port</span>
+    targetPort: <span class="str">3000</span>   <span class="cmt">← container port</span>
+  type: LoadBalancer  <span class="cmt">← use NodePort for local/minikube</span>
+
+<span class="cmt">---</span>
+<span class="cmt"># For minikube (local testing) use:</span>
+<span class="cmt">#   type: NodePort</span>
+<span class="cmt"># For AWS EKS use:</span>
+<span class="cmt">#   type: LoadBalancer</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — apply manifests</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># Apply (create or update)</span>
+<span class="cmd">kubectl apply</span> -f deployment.yaml
+<span class="cmd">kubectl apply</span> -f service.yaml
+
+<span class="cmt"># Apply all yaml files in a folder</span>
+<span class="cmd">kubectl apply</span> -f ./k8s/
+
+<span class="cmt"># Check what was created</span>
+<span class="cmd">kubectl get deployments</span>
+<span class="cmd">kubectl get pods</span>
+<span class="cmd">kubectl get services</span>
+
+<span class="cmt"># For minikube — get URL to access service</span>
+<span class="cmd">minikube service</span> my-app-service --url</pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 5: KUBECTL DAILY COMMANDS -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">5</div>
+    <div><div class="stitle">kubectl Daily Commands</div><div class="ssub">Everything you need — same on Windows & Linux</div></div>
+  </div>
+
+  <div class="cdk mb-3">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — most used kubectl commands</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># ── View resources ────────────────────────────────</span>
+<span class="cmd">kubectl get pods</span>                <span class="cmt">← list all pods</span>
+<span class="cmd">kubectl get pods</span> -o wide        <span class="cmt">← with node & IP info</span>
+<span class="cmd">kubectl get all</span>                 <span class="cmt">← pods + services + deployments</span>
+<span class="cmd">kubectl describe pod</span> my-pod     <span class="cmt">← detailed info + events</span>
+
+<span class="cmt"># ── Logs ─────────────────────────────────────────</span>
+<span class="cmd">kubectl logs</span> my-pod             <span class="cmt">← view logs</span>
+<span class="cmd">kubectl logs</span> -f my-pod          <span class="cmt">← follow logs live</span>
+<span class="cmd">kubectl logs</span> my-pod -c my-app   <span class="cmt">← specific container</span>
+
+<span class="cmt"># ── Shell into pod ───────────────────────────────</span>
+<span class="cmd">kubectl exec</span> -it my-pod -- bash
+<span class="cmd">kubectl exec</span> -it my-pod -- sh   <span class="cmt">← for alpine</span>
+
+<span class="cmt"># ── Scale up / down ──────────────────────────────</span>
+<span class="cmd">kubectl scale deployment</span> my-app --replicas=5
+<span class="cmd">kubectl scale deployment</span> my-app --replicas=1
+
+<span class="cmt"># ── Update image (rolling update) ────────────────</span>
+<span class="cmd">kubectl set image deployment</span>/my-app my-app=my-app:v2
+<span class="cmd">kubectl rollout status deployment</span>/my-app   <span class="cmt">← watch rollout</span>
+<span class="cmd">kubectl rollout undo deployment</span>/my-app     <span class="cmt">← rollback</span>
+
+<span class="cmt"># ── Delete resources ─────────────────────────────</span>
+<span class="cmd">kubectl delete pod</span> my-pod
+<span class="cmd">kubectl delete</span> -f deployment.yaml
+<span class="cmd">kubectl delete deployment</span> my-app
+
+<span class="cmt"># ── Port forward (access pod locally) ────────────</span>
+<span class="cmd">kubectl port-forward</span> pod/my-pod 8080:3000
+<span class="cmt"># now open http://localhost:8080</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 6: NAMESPACES -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">6</div>
+    <div><div class="stitle">Namespaces — Separate Environments</div><div class="ssub">Isolate dev / staging / prod in the same cluster</div></div>
+  </div>
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — namespace commands</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># Create namespaces</span>
+<span class="cmd">kubectl create namespace</span> dev
+<span class="cmd">kubectl create namespace</span> staging
+<span class="cmd">kubectl create namespace</span> prod
+
+<span class="cmt"># List namespaces</span>
+<span class="cmd">kubectl get namespaces</span>
+
+<span class="cmt"># Deploy to a specific namespace</span>
+<span class="cmd">kubectl apply</span> -f deployment.yaml -n dev
+<span class="cmd">kubectl apply</span> -f deployment.yaml -n prod
+
+<span class="cmt"># Get pods in a namespace</span>
+<span class="cmd">kubectl get pods</span> -n dev
+<span class="cmd">kubectl get pods</span> -n prod
+
+<span class="cmt"># Set default namespace for current session</span>
+<span class="cmd">kubectl config set-context</span> --current --namespace=dev
+<span class="cmt"># now all kubectl commands use dev namespace</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 7: CONNECT TO AWS EKS -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">7</div>
+    <div><div class="stitle">Connect to AWS EKS (Production Cluster)</div><div class="ssub">Point kubectl to your EKS cluster on AWS</div></div>
+  </div>
+  <div class="tip mb-3">
+    <span class="ai" style="color:var(--k8s)"><i class="bi bi-info-circle-fill"></i></span>
+    <span>AWS CLI must be configured (<code>aws configure</code>) before connecting to EKS. See the AWS SDK guide.</span>
+  </div>
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — connect kubectl to EKS (same on Windows & Linux)</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># Update kubeconfig to point to your EKS cluster</span>
+<span class="cmd">aws eks update-kubeconfig</span> \
+  --region us-east-1 \
+  --name my-eks-cluster
+
+<span class="cmt"># For secondary AWS profile</span>
+<span class="cmd">aws eks update-kubeconfig</span> \
+  --region us-east-1 \
+  --name my-eks-cluster \
+  --profile secondary
+
+<span class="cmt"># Verify connection</span>
+<span class="cmd">kubectl cluster-info</span>
+<span class="cmd">kubectl get nodes</span>
+<span class="cmt"># should show your EKS worker nodes</span>
+
+<span class="cmt"># Switch between minikube and EKS</span>
+<span class="cmd">kubectl config get-contexts</span>     <span class="cmt">← list all clusters</span>
+<span class="cmd">kubectl config use-context</span> minikube               <span class="cmt">← local</span>
+<span class="cmd">kubectl config use-context</span> arn:aws:eks:...        <span class="cmt">← AWS EKS</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- REFERENCE TABLE -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum"><i class="bi bi-table"></i></div>
+    <div><div class="stitle">Quick Reference</div></div>
+  </div>
+  <div class="cdk">
+    <table class="ref-table">
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--k8s)">kubectl apply -f file.yaml</td><td>Create / update resources from YAML</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl get pods / services / all</td><td>List resources</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl describe pod name</td><td>Detailed info + events (debug here!)</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl logs -f pod-name</td><td>Follow pod logs live</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl exec -it pod -- bash</td><td>Shell into running pod</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl scale deployment X --replicas=N</td><td>Scale up or down</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl set image deployment/X</td><td>Rolling update to new image</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl rollout undo deployment/X</td><td>Rollback to previous version</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl port-forward pod/X 8080:3000</td><td>Access pod locally on port 8080</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl delete -f file.yaml</td><td>Delete resources from YAML</td></tr>
+        <tr><td style="color:var(--k8s)">kubectl config get-contexts</td><td>List all clusters (minikube, EKS etc)</td></tr>
+        <tr><td style="color:var(--k8s)">minikube start / stop / dashboard</td><td>Control local cluster</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+<footer><div class="container"><span style="color:var(--k8s);font-family:'Source Code Pro',monospace;font-weight:700">Kubernetes</span> · Windows & Linux · minikube · kubectl · AWS EKS</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function sw(id,grp,btn){
+  const tabs=document.getElementById(grp);
+  tabs.parentElement.querySelectorAll('.tpane').forEach(p=>p.classList.remove('active'));
+  tabs.querySelectorAll('.otab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
+}
+function cp(btn){
+  const pre=btn.closest('.cdk').querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='copied!';btn.style.color='var(--green)';
+    setTimeout(()=>{btn.textContent='copy';btn.style.color='';},2000);
+  });
+}
+</script>
+</body>
+</html>

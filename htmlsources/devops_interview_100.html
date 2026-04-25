@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps War Room — 100 Interview Scenarios</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #1a1d24;
+    --border: #2a2d35;
+    --accent: #00ff88;
+    --accent2: #ff4d6d;
+    --accent3: #ffd60a;
+    --accent4: #6c9fff;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --red: #ff4d6d;
+    --yellow: #ffd60a;
+    --green: #00ff88;
+    --blue: #6c9fff;
+    --purple: #c084fc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ANIMATED BG */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 10% 20%, rgba(0,255,136,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 300px at 90% 80%, rgba(108,159,255,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,255,136,0.03) 0%, transparent 100%);
+    z-index: 1;
+  }
+
+  .header-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-tag::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .header-sub {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* SEARCH + FILTERS */
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 12, 16, 0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px 10px 38px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  .filter-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 8px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
+
+  .filter-btn[data-cat="k8s"].active { background: var(--blue); border-color: var(--blue); color: #000; }
+  .filter-btn[data-cat="docker"].active { background: var(--blue); border-color: var(--blue); color: #000; }
+  .filter-btn[data-cat="debug"].active { background: var(--red); border-color: var(--red); color: #fff; }
+  .filter-btn[data-cat="perf"].active { background: var(--yellow); border-color: var(--yellow); color: #000; }
+  .filter-btn[data-cat="network"].active { background: var(--purple); border-color: var(--purple); color: #000; }
+  .filter-btn[data-cat="storage"].active { background: var(--accent); border-color: var(--accent); color: #000; }
+  .filter-btn[data-cat="ci"].active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+  /* COUNT */
+  .results-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 0 40px 12px;
+    margin-top: 8px;
+  }
+
+  /* MAIN */
+  main {
+    position: relative;
+    z-index: 1;
+    padding: 24px 40px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* CATEGORY SECTION */
+  .category-section { margin-bottom: 48px; }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .category-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .category-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .category-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* QUESTION CARD */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .q-card:hover { border-color: #3a3d45; }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .q-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 28px;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+
+  .q-text {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .q-tags {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 3px 7px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tag-k8s { background: rgba(108,159,255,0.15); color: var(--blue); }
+  .tag-docker { background: rgba(108,159,255,0.1); color: #60a5fa; }
+  .tag-debug { background: rgba(255,77,109,0.15); color: var(--red); }
+  .tag-perf { background: rgba(255,214,10,0.15); color: var(--yellow); }
+  .tag-network { background: rgba(192,132,252,0.15); color: var(--purple); }
+  .tag-storage { background: rgba(0,255,136,0.12); color: var(--green); }
+  .tag-ci { background: rgba(0,255,136,0.1); color: #34d399; }
+  .tag-hot { background: rgba(255,77,109,0.2); color: var(--red); }
+
+  .q-toggle {
+    font-size: 12px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    min-width: 16px;
+    text-align: center;
+    margin-top: 3px;
+  }
+
+  .q-card.open .q-toggle { transform: rotate(180deg); color: var(--accent); }
+  .q-card.open .q-header { border-bottom: 1px solid var(--border); }
+
+  /* ANSWER */
+  .q-answer {
+    display: none;
+    padding: 20px 20px 20px 62px;
+    background: var(--surface2);
+  }
+
+  .q-card.open .q-answer { display: block; }
+
+  .answer-section { margin-bottom: 16px; }
+
+  .answer-section:last-child { margin-bottom: 0; }
+
+  .ans-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .ans-text {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.7;
+  }
+
+  .ans-text strong { color: var(--text); font-weight: 700; }
+
+  .cmd-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin: 10px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #e2e8f0;
+    overflow-x: auto;
+    line-height: 1.8;
+    white-space: pre;
+  }
+
+  .cmd-comment { color: var(--muted); }
+  .cmd-cmd { color: var(--green); }
+  .cmd-flag { color: var(--yellow); }
+  .cmd-val { color: var(--blue); }
+
+  .steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .steps li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 20px;
+    margin-top: 2px;
+  }
+
+  .tip-box {
+    background: rgba(255,214,10,0.06);
+    border: 1px solid rgba(255,214,10,0.2);
+    border-radius: 4px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #a89040;
+    margin-top: 12px;
+  }
+
+  .tip-box strong { color: var(--yellow); }
+
+  /* HIDDEN */
+  .q-card.hidden { display: none; }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border);
+    z-index: 999;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.1s;
+  }
+
+  /* BACK TO TOP */
+  .back-top {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .back-top.visible { opacity: 1; pointer-events: all; }
+  .back-top:hover { background: var(--accent); color: #000; }
+
+  @media (max-width: 768px) {
+    header, .controls, main { padding-left: 20px; padding-right: 20px; }
+    .q-answer { padding-left: 20px; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar-wrap"><div class="progress-bar" id="pgbar"></div></div>
+
+<header>
+  <div class="header-tag">⚡ DevOps Interview Prep</div>
+  <h1>The <span>War Room</span><br>Interview Bible</h1>
+  <div class="header-sub">// 100 real production scenarios — K8s · Docker · Debugging · Performance · Networking</div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">100</div><div class="stat-label">Questions</div></div>
+    <div class="stat"><div class="stat-num">7</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Commands</div></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <div class="search-icon">⌕</div>
+    <input type="text" id="searchInput" placeholder="Search questions, commands, concepts...">
+  </div>
+  <div class="filter-btns">
+    <button class="filter-btn active" data-cat="all">All</button>
+    <button class="filter-btn" data-cat="k8s">☸ K8s</button>
+    <button class="filter-btn" data-cat="docker">🐳 Docker</button>
+    <button class="filter-btn" data-cat="debug">🔥 Debug</button>
+    <button class="filter-btn" data-cat="perf">⚡ Perf</button>
+    <button class="filter-btn" data-cat="network">🌐 Network</button>
+    <button class="filter-btn" data-cat="storage">💾 Storage</button>
+    <button class="filter-btn" data-cat="ci">🚀 CI/CD</button>
+  </div>
+</div>
+
+<div class="results-count" id="resultsCount">Showing 100 of 100 questions</div>
+
+<main id="mainContent"></main>
+
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ TOP</button>
+
+<script>
+const questions = [
+  // ═══════════════════════════════════════════
+  // KUBERNETES — POD & CLUSTER ISSUES
+  // ═══════════════════════════════════════════
+  {
+    num: 1, cat: "k8s", hot: true,
+    q: "A Pod is suddenly in CrashLoopBackOff. How do you diagnose and fix it?",
+    steps: ["Check pod status: kubectl get pod <name> -n <ns>","Describe for events: kubectl describe pod <name>","Get logs of crashed container: kubectl logs <pod> --previous","If init container issue: kubectl logs <pod> -c <init-container>","Check resource limits, liveness probes, env vars","Fix config/image and rollout: kubectl rollout restart deploy/<name>"],
+    cmds: `kubectl get pod <pod-name> -n <namespace> -o wide\nkubectl describe pod <pod-name> -n <namespace>\nkubectl logs <pod-name> --previous --tail=100\nkubectl logs <pod-name> -c <init-container-name>\nkubectl get events --sort-by=.lastTimestamp -n <namespace>`,
+    tip: "CrashLoopBackOff means the container starts, crashes, K8s waits (backoff), retries. Always check --previous logs first."
+  },
+  {
+    num: 2, cat: "k8s", hot: true,
+    q: "Pod CPU/memory spikes suddenly. How do you investigate and resolve?",
+    steps: ["Check resource usage: kubectl top pods","Identify the spiky pod and check its limits","Exec into pod: kubectl exec -it <pod> -- top","Check HPA status: kubectl get hpa","Look at recent deployments or config changes","Temporarily scale up replicas if needed","Review and tune resource requests/limits"],
+    cmds: `kubectl top pods -n <namespace> --sort-by=cpu\nkubectl top nodes\nkubectl exec -it <pod> -n <ns> -- top\nkubectl get hpa -n <namespace>\nkubectl describe hpa <hpa-name>\nkubectl scale deploy <name> --replicas=5`,
+    tip: "Always set both requests AND limits. Requests are for scheduling; limits are the hard cap. Missing requests = wrong node placement."
+  },
+  {
+    num: 3, cat: "k8s",
+    q: "Node is NotReady. What's your triage process?",
+    steps: ["kubectl get nodes to see status","kubectl describe node <name> for conditions","SSH into node, check kubelet: systemctl status kubelet","Check disk: df -h, memory: free -m","Check node network connectivity","Look at kubelet logs: journalctl -u kubelet -n 200","Drain and cordon if needed"],
+    cmds: `kubectl get nodes -o wide\nkubectl describe node <node-name>\nkubectl cordon <node-name>   # stop scheduling\nkubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data\nssh <node-ip>\nsystemctl status kubelet\njournalctl -u kubelet -n 200 --no-pager`,
+    tip: "Most common causes: disk pressure, memory pressure, kubelet crash, network plugin failure. Check conditions in describe node output."
+  },
+  {
+    num: 4, cat: "k8s",
+    q: "Deployment rollout is stuck. How do you debug?",
+    steps: ["Check rollout status: kubectl rollout status","Describe deployment for events","Check ReplicaSet status","Look at pod events for image pull or probe failures","If needed, rollback immediately"],
+    cmds: `kubectl rollout status deployment/<name> -n <ns>\nkubectl rollout history deployment/<name>\nkubectl describe deployment <name>\nkubectl get rs -n <namespace>\n# Rollback immediately:\nkubectl rollout undo deployment/<name>\nkubectl rollout undo deployment/<name> --to-revision=2`,
+    tip: "Set maxUnavailable and maxSurge in your strategy. A stuck rollout usually means new pods can't start (image, probe, quota)."
+  },
+  {
+    num: 5, cat: "k8s",
+    q: "Service is not reachable inside the cluster. How do you troubleshoot?",
+    steps: ["Verify service exists and endpoints are populated","Check selector matches pod labels","Test DNS resolution from a pod","curl the ClusterIP directly","Check NetworkPolicy if present","Verify kube-proxy is running on nodes"],
+    cmds: `kubectl get svc <svc-name> -n <ns>\nkubectl get endpoints <svc-name> -n <ns>\n# Test from inside cluster:\nkubectl run tmp --image=busybox --rm -it -- sh\n# Inside pod:\nnslookup <svc-name>.<namespace>.svc.cluster.local\ncurl http://<svc-name>.<namespace>.svc.cluster.local:<port>\nkubectl get networkpolicy -n <namespace>`,
+    tip: "Empty Endpoints = selector mismatch. Check kubectl get pods --show-labels vs service selector."
+  },
+  {
+    num: 6, cat: "k8s", hot: true,
+    q: "OOMKilled — Pod keeps getting killed by OOM. What do you do?",
+    steps: ["Check termination reason: kubectl describe pod","Look at memory limits set on container","Check what's consuming memory (exec + top/ps)","Increase memory limit or optimize app","Consider VPA for auto-recommendations","Add memory profiling to app"],
+    cmds: `kubectl describe pod <pod> | grep -A5 "Last State"\nkubectl top pod <pod> -n <ns> --containers\n# Check limits set:\nkubectl get pod <pod> -o jsonpath='{.spec.containers[*].resources}'\n# Exec and check:\nkubectl exec -it <pod> -- cat /proc/meminfo\nkubectl exec -it <pod> -- ps aux --sort=-%mem | head`,
+    tip: "OOMKilled exit code is 137 (128 + SIGKILL=9). If it's the JVM, add -Xmx flags. If Node.js, use --max-old-space-size."
+  },
+  {
+    num: 7, cat: "k8s",
+    q: "Pods are in Pending state — not being scheduled. Why?",
+    steps: ["kubectl describe pod to see reason","Check if nodes have enough resources","Check taints and tolerations","Check NodeSelector or Affinity rules","Check PVC if pod needs persistent storage","Check resource quota in namespace"],
+    cmds: `kubectl describe pod <pod> | grep -A10 Events\nkubectl get nodes -o custom-columns='NAME:.metadata.name,CPU:.status.allocatable.cpu,MEM:.status.allocatable.memory'\nkubectl describe node <node> | grep -A10 Taints\nkubectl get resourcequota -n <namespace>\nkubectl get pvc -n <namespace>`,
+    tip: "Most common: InsufficientCPU/Memory, Taint not tolerated, PVC not bound. Read the Events section in describe output."
+  },
+  {
+    num: 8, cat: "k8s",
+    q: "How do you investigate a sudden increase in API server latency?",
+    steps: ["Check API server metrics via Prometheus/Grafana","Look for LIST/WATCH storms from controllers","Check etcd latency","Audit large watch connections","Check if any bulk operations running","Rate-limit or throttle clients"],
+    cmds: `kubectl get --raw /metrics | grep apiserver_request_duration\nkubectl get --raw /metrics | grep etcd_request_duration\n# Check who's hammering the API:\nkubectl get --raw /metrics | grep apiserver_current_inflight\n# etcd check:\nETCDCTL_API=3 etcdctl endpoint health\nETCDCTL_API=3 etcdctl endpoint status`,
+    tip: "API server latency spikes are often caused by unbounded LIST requests or too many watchers. Use resource version and pagination."
+  },
+  {
+    num: 9, cat: "k8s",
+    q: "etcd disk usage is high. How do you handle this?",
+    steps: ["Check etcd data directory size","Run compaction: etcdctl compact","Run defrag after compaction","Monitor DB size metric","Set auto-compaction-retention","Consider increasing disk or migrating data"],
+    cmds: `ETCDCTL_API=3 etcdctl endpoint status --write-out=table\nETCDCTL_API=3 etcdctl compact $(etcdctl endpoint status --write-out=json | jq '.[].Status.header.revision')\nETCDCTL_API=3 etcdctl defrag\nETCDCTL_API=3 etcdctl alarm disarm`,
+    tip: "etcd has a default 2GB quota. If hit, cluster goes read-only. Compact + defrag regularly. Use --auto-compaction-retention=1."
+  },
+  {
+    num: 10, cat: "k8s",
+    q: "How do you debug a failing Kubernetes Job or CronJob?",
+    steps: ["Check job status and completions","Look at pod created by job","Get logs from job pod","Check backoffLimit setting","Debug scheduling if CronJob not firing","Check time zone and schedule syntax"],
+    cmds: `kubectl get jobs -n <ns>\nkubectl describe job <job-name>\nkubectl get pods --selector=job-name=<job-name> -n <ns>\nkubectl logs <job-pod-name>\n# CronJob:\nkubectl get cronjob -n <ns>\nkubectl describe cronjob <name>`,
+    tip: "CronJobs use UTC by default. If your cron expression uses local time, account for offset. Also check concurrencyPolicy."
+  },
+
+  // ═══════════════════════════════════════════
+  // KUBERNETES — NETWORKING
+  // ═══════════════════════════════════════════
+  {
+    num: 11, cat: "network",
+    q: "Ingress is returning 502 Bad Gateway. How do you debug?",
+    steps: ["Check ingress controller pod logs","Verify backend service and endpoints","Check ingress rules for correct service/port","Test service directly via kubectl port-forward","Check annotations for timeout settings","Verify TLS if HTTPS"],
+    cmds: `kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx --tail=100\nkubectl get ingress <name> -n <ns> -o yaml\nkubectl get svc <backend-svc> -n <ns>\nkubectl get endpoints <backend-svc> -n <ns>\nkubectl port-forward svc/<backend-svc> 8080:80 -n <ns>`,
+    tip: "502 = ingress reached backend but backend failed. 503 = no backend available. 504 = timeout. Each points to different root cause."
+  },
+  {
+    num: 12, cat: "network",
+    q: "DNS resolution is failing inside pods. How do you diagnose?",
+    steps: ["Check CoreDNS pods are running","Describe CoreDNS pods for errors","Check CoreDNS ConfigMap","Test DNS from a debug pod","Check ndots setting in pod spec","Verify cluster DNS service"],
+    cmds: `kubectl get pods -n kube-system -l k8s-app=kube-dns\nkubectl logs -n kube-system -l k8s-app=kube-dns\nkubectl get configmap coredns -n kube-system -o yaml\n# Test DNS:\nkubectl run dnstest --image=busybox --rm -it -- nslookup kubernetes.default\nkubectl exec -it <pod> -- cat /etc/resolv.conf`,
+    tip: "Check /etc/resolv.conf inside the pod. ndots:5 means adding domain suffixes before going external — can cause slow DNS for external URLs."
+  },
+  {
+    num: 13, cat: "network",
+    q: "NetworkPolicy is accidentally blocking traffic. How do you debug and fix?",
+    steps: ["List all NetworkPolicies in namespace","Describe the policy that may be blocking","Temporarily remove suspect policy to test","Use kubectl exec + curl to test connectivity","Rewrite policy with correct pod selector","Apply corrected policy"],
+    cmds: `kubectl get networkpolicy -n <ns>\nkubectl describe networkpolicy <policy-name> -n <ns>\n# Temporarily delete to test:\nkubectl delete networkpolicy <policy-name> -n <ns>\n# Test connectivity:\nkubectl exec -it <pod> -- curl http://<other-svc>:<port>`,
+    tip: "A NetworkPolicy with an empty podSelector {} selects ALL pods. Ingress/egress rules are additive. Default deny = no NP in namespace + NP that selects pods."
+  },
+  {
+    num: 14, cat: "network",
+    q: "LoadBalancer service stuck in pending state (no external IP). Why?",
+    steps: ["Check cloud provider LB controller is running","Verify IAM/service account permissions","Check if quota for LBs is exhausted","Look at events on the service","Check cloud provider console","Consider using NodePort temporarily"],
+    cmds: `kubectl describe svc <svc-name> -n <ns>\nkubectl get events -n <ns> | grep <svc-name>\n# If on AWS, check cloud-controller-manager:\nkubectl logs -n kube-system -l app=aws-cloud-controller-manager\n# GKE:\nkubectl logs -n kube-system -l component=cloud-controller-manager`,
+    tip: "Pending external IP means the cloud controller can't provision. Check IAM roles, VPC subnets tagged for ELB, and LB quotas."
+  },
+  {
+    num: 15, cat: "network",
+    q: "Inter-pod latency increased significantly. How do you investigate?",
+    steps: ["Ping between pods to measure baseline","Check CNI plugin health (Calico/Cilium/Flannel)","Look for node CPU saturation affecting network","Check for noisy neighbor on the node","Analyze with iperf3 between pods","Check if overlay network is the bottleneck"],
+    cmds: `# Install iperf3 test:\nkubectl run iperf-server --image=networkstatic/iperf3 -n <ns> -- iperf3 -s\nkubectl run iperf-client --image=networkstatic/iperf3 --rm -it -n <ns> -- iperf3 -c <server-ip>\n# Check CNI:\nkubectl get pods -n kube-system | grep -E 'calico|cilium|flannel'\nkubectl top nodes`,
+    tip: "High latency on same node = CNI issue or CPU saturation. Cross-node = MTU mismatch (VXLAN default MTU 1450, not 1500), or underlay congestion."
+  },
+
+  // ═══════════════════════════════════════════
+  // DOCKER
+  // ═══════════════════════════════════════════
+  {
+    num: 16, cat: "docker", hot: true,
+    q: "Docker container exits immediately after start. How do you debug?",
+    steps: ["Run with --rm to see output immediately","Check exit code: docker ps -a","Get logs: docker logs <container>","Run with interactive shell to inspect","Check entrypoint/cmd in Dockerfile","Verify env vars and volumes are correct"],
+    cmds: `docker ps -a\ndocker logs <container-id>\ndocker inspect <container-id> | jq '.[].State'\n# Debug by overriding entrypoint:\ndocker run -it --entrypoint sh <image>\n# Check exit code:\ndocker inspect <container-id> --format='{{.State.ExitCode}}'`,
+    tip: "Exit code 0 = process finished normally. Exit 1 = app error. Exit 137 = OOM or kill. Exit 127 = command not found. Exit 126 = permission denied."
+  },
+  {
+    num: 17, cat: "docker",
+    q: "Docker image build is very slow. How do you optimize?",
+    steps: ["Analyze layer cache misses (use --progress=plain)","Reorder layers: COPY requirements before source","Use .dockerignore to exclude unnecessary files","Use multi-stage builds","Use BuildKit for parallel builds","Consider using smaller base images"],
+    cmds: `# Enable BuildKit:\nDOCKER_BUILDKIT=1 docker build .\n# Or:\nexport DOCKER_BUILDKIT=1\n# Analyze image layers:\ndocker history <image>:tag\ndocker image inspect <image>:tag\n# Use buildx for advanced caching:\ndocker buildx build --cache-from type=registry,ref=<image>:cache .`,
+    tip: "Cache invalidation = every layer after the changed line rebuilds. Put rarely-changing instructions (apt, pip) BEFORE frequently-changing ones (COPY src)."
+  },
+  {
+    num: 18, cat: "docker",
+    q: "docker: container can't reach the internet but host can. Why?",
+    steps: ["Check docker network: docker network ls","Inspect container network settings","Test DNS from inside container","Check iptables rules on host","Check docker daemon DNS config","Verify bridge network is up"],
+    cmds: `docker network ls\ndocker network inspect bridge\ndocker exec -it <container> ping 8.8.8.8\ndocker exec -it <container> cat /etc/resolv.conf\n# Check iptables:\nsudo iptables -t nat -L POSTROUTING -n\n# Docker daemon DNS:\ncat /etc/docker/daemon.json`,
+    tip: "Common causes: docker0 bridge missing, iptables FORWARD chain DROP, incorrect daemon.json dns setting, or firewalld conflict on Linux."
+  },
+  {
+    num: 19, cat: "docker",
+    q: "Docker registry push failing. How do you debug?",
+    steps: ["Check auth: docker login","Verify image is tagged with registry URL","Check registry connectivity","Look at registry logs if self-hosted","Check TLS/cert issues","Verify disk space on registry"],
+    cmds: `docker login <registry-url>\ndocker tag <local-image> <registry>/<repo>:<tag>\ndocker push <registry>/<repo>:<tag>\n# Verbose debug:\ndocker push <image> --verbose\n# For insecure registry add to daemon.json:\n# { "insecure-registries": ["myregistry:5000"] }\ndocker system info | grep Registry`,
+    tip: "For private registries: certificate errors need the CA cert added to /etc/docker/certs.d/<registry>/ca.crt (no daemon restart needed)."
+  },
+  {
+    num: 20, cat: "docker",
+    q: "Docker disk usage is 100% on server. How do you free space?",
+    steps: ["Check docker disk usage: docker system df","Remove stopped containers","Remove unused images","Remove unused volumes","Remove build cache","Prune everything at once"],
+    cmds: `docker system df\ndocker container prune -f\ndocker image prune -a -f\ndocker volume prune -f\ndocker builder prune -a -f\n# Nuclear option (removes everything unused):\ndocker system prune -a --volumes -f`,
+    tip: "Build cache is usually the biggest culprit. Set up daily cron: docker system prune -f. For prod, use separate overlay2 disk or remote cache."
+  },
+  {
+    num: 21, cat: "docker",
+    q: "Container running as root — how do you fix it and why does it matter?",
+    steps: ["Check current user: docker exec <c> whoami","Add USER directive in Dockerfile","Set runAsNonRoot in K8s securityContext","Use --user flag when running","Ensure file permissions allow non-root","Verify with docker inspect"],
+    cmds: `# Check current user:\ndocker exec -it <container> whoami\ndocker inspect <container> | jq '.[].Config.User'\n# Dockerfile fix:\n# RUN useradd -r -u 1001 appuser\n# USER appuser\n# K8s securityContext:\n# securityContext:\n#   runAsNonRoot: true\n#   runAsUser: 1001`,
+    tip: "Root in container ≠ root on host (namespaced), BUT if container escapes (CVE), root = full host access. Always use non-root in prod."
+  },
+  {
+    num: 22, cat: "docker",
+    q: "Multi-stage build — how does it work and when to use it?",
+    steps: ["Stage 1: use heavy build image (golang, node, maven)","Copy only build artifacts to Stage 2","Stage 2: use minimal runtime image (alpine, distroless)","Result: tiny final image without build tools","Name stages with AS for clarity"],
+    cmds: `# Example Dockerfile:\n# FROM node:18 AS builder\n# WORKDIR /app\n# COPY package*.json ./\n# RUN npm ci\n# COPY . .\n# RUN npm run build\n\n# FROM node:18-alpine AS runtime\n# COPY --from=builder /app/dist ./dist\n# CMD ["node", "dist/index.js"]\n\ndocker build --target builder -t debug-image .  # build only first stage`,
+    tip: "Multi-stage cuts image size from 1GB → 50MB typically. Fewer layers = smaller attack surface. Use distroless for zero shell access."
+  },
+  {
+    num: 23, cat: "docker",
+    q: "How do you handle secrets in Docker without baking them into the image?",
+    steps: ["Never use ENV or ARG for secrets in Dockerfile","Use Docker secrets (Swarm) or K8s secrets","Mount secrets as files at runtime","Use secret management: Vault, AWS SM","Use BuildKit --secret for build-time secrets","Scan images for leaked secrets (trufflehog)"],
+    cmds: `# BuildKit build secret (not stored in layer):\nDOCKER_BUILDKIT=1 docker build --secret id=mysecret,src=./secret.txt .\n# In Dockerfile:\n# RUN --mount=type=secret,id=mysecret cat /run/secrets/mysecret\n\n# K8s: mount secret as env:\n# env:\n#   - name: DB_PASS\n#     valueFrom:\n#       secretKeyRef:\n#         name: db-secret\n#         key: password`,
+    tip: "docker history shows all layers. If you ADD a secret and DELETE it, it's still visible in the layer. Use BuildKit secrets or runtime injection only."
+  },
+
+  // ═══════════════════════════════════════════
+  // DEBUGGING & TROUBLESHOOTING
+  // ═══════════════════════════════════════════
+  {
+    num: 24, cat: "debug", hot: true,
+    q: "Production is down — alert fired. Walk through your incident response process.",
+    steps: ["Declare incident, notify team","Check monitoring dashboard for anomalies","Check recent deployments/changes","Identify affected components","Mitigate first (rollback/scale) before finding root cause","Document timeline and communicate status","Post-mortem after resolution"],
+    cmds: `# Check recent K8s events:\nkubectl get events --sort-by=.lastTimestamp -A | tail -30\n# Check deployments in last hour:\nkubectl rollout history deploy -A\n# Quick health check:\nkubectl get pods -A | grep -v Running | grep -v Completed\n# App logs:\nkubectl logs -n <ns> -l app=<name> --since=30m | grep -i error`,
+    tip: "Mitigation before investigation. A 5-min rollback beats a 2-hour debug session during an outage. Restore service first, find root cause second."
+  },
+  {
+    num: 25, cat: "debug",
+    q: "How do you debug a container with no shell (distroless image)?",
+    steps: ["Use kubectl debug with ephemeral container","Attach a sidecar debug container","Copy files out with kubectl cp","Use nsenter on the host node","Use strace/tcpdump on the node for the PID","Build a debug variant of the image"],
+    cmds: `# Ephemeral debug container (K8s 1.23+):\nkubectl debug -it <pod> --image=busybox --target=<container>\n# Or:\nkubectl debug -it <pod> --image=nicolaka/netshoot --share-processes\n# nsenter on node (find PID first):\ndocker inspect <container> | jq '.[].State.Pid'\nnsenter -t <PID> -n -- ss -tlnp`,
+    tip: "ephemeral containers share the pod's namespaces but have their own filesystem. Use --share-processes to see app processes."
+  },
+  {
+    num: 26, cat: "debug",
+    q: "Application logs are flooded — how do you find the actual error in noise?",
+    steps: ["Filter by log level: grep ERROR/FATAL","Use stern for multi-pod log tailing","Stream and grep with pattern matching","Look at log rate (if 10x normal = problem)","Check timestamps around alert firing","Use structured logging + jq for JSON logs"],
+    cmds: `# stern: tail multiple pods:\nstern <pod-prefix> -n <ns> --since 30m | grep -i error\n# kubectl with grep:\nkubectl logs -l app=<name> -n <ns> --since=1h | grep -E 'ERROR|FATAL|panic'\n# JSON logs with jq:\nkubectl logs <pod> | jq 'select(.level == \"error\")'\n# Count errors per minute:\nkubectl logs <pod> | grep ERROR | awk '{print $1}' | sort | uniq -c`,
+    tip: "Use structured (JSON) logging in production. Unstructured logs are impossible to query at scale. Add correlation IDs for tracing."
+  },
+  {
+    num: 27, cat: "debug",
+    q: "How do you find what changed right before a production incident?",
+    steps: ["Check deployment history: kubectl rollout history","Check git log / recent PRs merged","Check CI/CD pipeline runs","Check infra changes (Terraform plan logs)","Check config/secret changes","Check external dependency changes (DB, 3rd party API)"],
+    cmds: `kubectl rollout history deploy/<name> -n <ns>\nkubectl rollout history deploy/<name> -n <ns> --revision=5\n# Get diff between revisions:\nkubectl diff -f k8s/\n# Check configmap changes:\nkubectl get cm <name> -o yaml | grep -A2 annotations`,
+    tip: "Build a 'change log' in your incident doc: deployments, config changes, infra changes, traffic changes, external changes. Correlation = causation (usually)."
+  },
+  {
+    num: 28, cat: "debug",
+    q: "Intermittent 500 errors but pods look healthy. How do you catch it?",
+    steps: ["Enable access logs on ingress/LB","Correlate error timestamps with events","Add distributed tracing (Jaeger/Zipkin)","Check for connection pool exhaustion","Monitor DB slow queries at same time","Add synthetic monitoring to reproduce"],
+    cmds: `# Check ingress access logs:\nkubectl logs -n ingress-nginx <pod> | grep ' 500 '\n# Prometheus: query 5xx rate:\n# rate(nginx_ingress_controller_requests{status=~\"5.*\"}[5m])\n# Capture during spike:\nkubectl logs -n <ns> -l app=<name> -f | grep -E 'ERROR|500'`,
+    tip: "Intermittent = usually race condition, connection pool exhaustion, GC pause, or thundering herd. Add trace IDs and sample 100% during investigation."
+  },
+  {
+    num: 29, cat: "debug",
+    q: "How do you use strace/tcpdump to debug a containerized application?",
+    steps: ["Get container PID on host","Run strace attached to PID","Capture network with tcpdump on container network interface","Filter traffic by port or host","Save pcap and analyze in Wireshark","Use nsenter to run inside container namespace"],
+    cmds: `# Get PID:\ndocker inspect <container> --format '{{.State.Pid}}'\n# strace system calls:\nsudo strace -p <PID> -f -e trace=network,file\n# tcpdump on container interface:\ncontainer_id=<id>\ncontainer_pid=$(docker inspect -f '{{.State.Pid}}' $container_id)\nsudo nsenter -t $container_pid -n tcpdump -i eth0 -w /tmp/capture.pcap`,
+    tip: "strace adds significant overhead. Use -c flag for summary without full output in prod. tcpdump is safer for network debugging."
+  },
+  {
+    num: 30, cat: "debug",
+    q: "Health check is passing but the app is actually broken. What do you do?",
+    steps: ["Review what the health check actually tests (too shallow?)","Add deeper health check logic (DB connection, cache)","Distinguish liveness vs readiness vs startup probes","Check if probe interval is too infrequent","Add synthetic end-to-end tests","Consider application-level health endpoint that tests business logic"],
+    cmds: `# K8s probe config:\n# livenessProbe:\n#   httpGet:\n#     path: /health/live\n#     port: 8080\n#   initialDelaySeconds: 30\n#   periodSeconds: 10\n# readinessProbe:\n#   httpGet:\n#     path: /health/ready  # checks DB, cache, etc.\n#     port: 8080\n# Test probe endpoint:\nkubectl exec -it <pod> -- curl localhost:8080/health/ready`,
+    tip: "Liveness = should K8s restart me? Readiness = should K8s send me traffic? Startup = am I still initializing? Don't make liveness too strict."
+  },
+
+  // ═══════════════════════════════════════════
+  // PERFORMANCE
+  // ═══════════════════════════════════════════
+  {
+    num: 31, cat: "perf", hot: true,
+    q: "Application response time suddenly doubled. What's your investigation process?",
+    steps: ["Check metrics: CPU, memory, network, disk I/O","Check DB query performance (slow query log)","Check external API call latencies","Profile the app (flame graphs)","Check GC activity if JVM/Node","Look for recent traffic volume increase"],
+    cmds: `kubectl top pods -n <ns>\n# Check DB slow queries (MySQL):\n# SHOW PROCESSLIST;\n# SHOW FULL PROCESSLIST;\n# Check if under load:\nkubectl exec -it <pod> -- curl localhost:9090/metrics | grep http_request_duration\n# Node.js: check event loop lag:\n# process.hrtime() or clinic.js`,
+    tip: "Use the USE method: Utilization, Saturation, Errors per resource. Check CPU, memory, disk, network for each service in the call chain."
+  },
+  {
+    num: 32, cat: "perf",
+    q: "HPA is not scaling up even though CPU is high. Why?",
+    steps: ["Check metrics-server is running","Verify HPA has correct targetCPUUtilizationPercentage","Check requests are set on containers (HPA uses request as baseline)","Check scaleUp stabilizationWindow","Check minReplicas/maxReplicas","Look at HPA events"],
+    cmds: `kubectl get hpa -n <ns>\nkubectl describe hpa <name> -n <ns>\nkubectl top pods -n <ns>\n# Check metrics-server:\nkubectl get deploy metrics-server -n kube-system\nkubectl logs -n kube-system -l k8s-app=metrics-server | tail -50\n# Check pod resource requests:\nkubectl get pod <pod> -o jsonpath='{.spec.containers[*].resources.requests}'`,
+    tip: "HPA compares actual CPU vs request.cpu. If requests not set, HPA can't calculate ratio. Always set CPU requests on containers when using HPA."
+  },
+  {
+    num: 33, cat: "perf",
+    q: "Database is the bottleneck — high latency queries. How do you solve this without code changes?",
+    steps: ["Identify slow queries (EXPLAIN ANALYZE)","Add missing indexes","Use connection pooling (PgBouncer/ProxySQL)","Enable read replicas for read traffic","Implement query caching","Review and tune DB parameters"],
+    cmds: `# PostgreSQL slow queries:\nSELECT query, calls, mean_exec_time, total_exec_time\nFROM pg_stat_statements\nORDER BY mean_exec_time DESC LIMIT 10;\n# EXPLAIN a query:\nEXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) SELECT ...;\n# MySQL slow query log:\nSET GLOBAL slow_query_log = 'ON';\nSET GLOBAL long_query_time = 1;`,
+    tip: "80% of DB perf issues = missing indexes. Run EXPLAIN ANALYZE, look for Seq Scan on large tables. Index the WHERE/JOIN/ORDER BY columns."
+  },
+  {
+    num: 34, cat: "perf",
+    q: "Node.js app has high event loop lag. How do you diagnose and fix?",
+    steps: ["Measure event loop lag with perf hooks","Find CPU-intensive synchronous operations","Move CPU work to worker threads","Offload work to queue/background jobs","Profile with clinic.js or --prof flag","Check for unoptimized loops/JSON parsing"],
+    cmds: `node --prof app.js\nnode --prof-process isolate-*.log > processed.txt\n# clinic.js:\nnpx clinic doctor -- node app.js\nnpx clinic flame -- node app.js\n# measure event loop lag:\n# const { monitorEventLoopDelay } = require('perf_hooks');\n# const h = monitorEventLoopDelay(); h.enable();`,
+    tip: "Anything taking >10ms in the event loop is a problem under load. JSON.parse on large payloads, synchronous crypto, unindexed DB queries are common culprits."
+  },
+  {
+    num: 35, cat: "perf",
+    q: "Container startup time is too slow — taking 2+ minutes. How to fix?",
+    steps: ["Profile startup: time the container run","Optimize Dockerfile layer order","Reduce image size (less to pull)","Use startup probes correctly","Pre-warm or lazy-load expensive resources","Consider init containers for dependencies"],
+    cmds: `# Measure startup:\ntime docker run <image> --entrypoint /health-check\n# Check image size:\ndocker images | grep <image>\n# Dive: layer-by-layer analysis:\ndocker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive <image>`,
+    tip: "2-minute startup usually means: large image download, DB migration on startup, or slow readinessProbe passing. Separate migration jobs from app startup."
+  },
+
+  // ═══════════════════════════════════════════
+  // STORAGE
+  // ═══════════════════════════════════════════
+  {
+    num: 36, cat: "storage",
+    q: "PVC is stuck in Pending state. How do you fix it?",
+    steps: ["Describe PVC for events","Check StorageClass exists","Check if provisioner pod is running","Verify storage quota in namespace","Check node affinity if using local storage","Check PV is available if static provisioning"],
+    cmds: `kubectl get pvc -n <ns>\nkubectl describe pvc <name> -n <ns>\nkubectl get storageclass\nkubectl get pv | grep <pvc-name>\n# Check provisioner:\nkubectl get pods -n kube-system | grep provisioner`,
+    tip: "Dynamic provisioning requires StorageClass with a running provisioner. Static: PVC selector must match PV labels + same storageClassName."
+  },
+  {
+    num: 37, cat: "storage",
+    q: "Pod can't write to mounted volume — permission denied. How do you fix?",
+    steps: ["Check volume ownership inside pod","Set fsGroup in securityContext","Use initContainer to chown the volume","Check if readOnly volume is being mounted","Verify pod's user matches directory owner"],
+    cmds: `kubectl exec -it <pod> -- ls -la /data\n# Fix with fsGroup:\n# securityContext:\n#   fsGroup: 1001\n# Or initContainer:\n# initContainers:\n# - name: fix-perms\n#   image: busybox\n#   command: ['sh', '-c', 'chown -R 1001:1001 /data']\n#   volumeMounts:\n#   - name: data\n#     mountPath: /data`,
+    tip: "fsGroup makes K8s chown the volume to that GID on mount. Simpler than initContainer. Both work but fsGroup is the recommended approach."
+  },
+  {
+    num: 38, cat: "storage",
+    q: "Disk I/O is high on a node. How do you find the cause?",
+    steps: ["Check which process is using disk: iotop","Find which container: systemd-cgtop","Check filesystem usage: df -h","Look at dirty page cache ratio","Check for log file bloat","Profile with iostat","Check for DB write storms"],
+    cmds: `sudo iotop -o -b -n 5\nsudo systemd-cgtop -d 1\ndf -h\ndf -i  # inode usage\nio iostat -xz 1\n# Find large files:\nfind / -size +1G -type f 2>/dev/null\n# Check container log sizes:\ndu -sh /var/lib/docker/containers/*/`,
+    tip: "Container logs go to /var/lib/docker/containers/ on host. No log rotation = disk full. Set max-size and max-file in docker daemon.json."
+  },
+
+  // ═══════════════════════════════════════════
+  // CI/CD
+  // ═══════════════════════════════════════════
+  {
+    num: 39, cat: "ci",
+    q: "CI pipeline is taking 45 minutes. How do you optimize it to under 10?",
+    steps: ["Identify bottleneck stages (test, build, lint)","Parallelize independent stages","Cache dependencies (npm, pip, maven)","Use Docker layer caching","Split test suite for parallel execution","Use faster runners/larger instances for bottleneck stages"],
+    cmds: `# GitHub Actions cache:\n# - uses: actions/cache@v3\n#   with:\n#     path: ~/.npm\n#     key: \${{ runner.os }}-node-\${{ hashFiles('**/package-lock.json') }}\n\n# Run jobs in parallel:\n# jobs:\n#   test: ...\n#   lint: ...\n#   build:\n#     needs: [test, lint]`,
+    tip: "Measure each step's duration first. Usually 1-2 steps are 80% of the time. Caching npm/pip typically saves 3-5 minutes alone."
+  },
+  {
+    num: 40, cat: "ci",
+    q: "Deployment is failing in CI but works locally. Classic issue — how to fix?",
+    steps: ["Check environment variable differences","Verify same tool versions (node, python, docker)","Check network access from CI (firewalls)","Use docker-compose in CI to mirror local setup","Check secrets/credentials are set in CI","Review CI runner OS vs local OS"],
+    cmds: `# Print env in CI for debugging:\nenv | sort\nnode --version; npm --version; docker --version\n# Run same docker-compose as local:\ndocker-compose -f docker-compose.yml -f docker-compose.ci.yml up --abort-on-container-exit`,
+    tip: '"Works on my machine" = environment mismatch. Commit a .nvmrc/.tool-versions file. Use Docker in CI to guarantee same environment.'
+  },
+  {
+    num: 41, cat: "ci",
+    q: "How do you implement zero-downtime deployments in Kubernetes?",
+    steps: ["Use RollingUpdate strategy (default)","Set appropriate maxUnavailable and maxSurge","Configure proper readiness probes","Use preStop hook for graceful shutdown","Set terminationGracePeriodSeconds appropriately","Test with traffic during deployment"],
+    cmds: `# Deployment strategy:\n# strategy:\n#   type: RollingUpdate\n#   rollingUpdate:\n#     maxSurge: 1\n#     maxUnavailable: 0\n\n# Graceful shutdown:\n# lifecycle:\n#   preStop:\n#     exec:\n#       command: [\"sleep\", \"5\"]\n# terminationGracePeriodSeconds: 60\n\nkubectl rollout status deploy/<name> -w`,
+    tip: "maxUnavailable: 0 = no downtime but slower. Sleep in preStop gives load balancer time to deregister the pod before it stops accepting connections."
+  },
+  {
+    num: 42, cat: "ci",
+    q: "How do you do a canary deployment in Kubernetes?",
+    steps: ["Deploy canary with small replica count","Use same service selector + pod label","Split traffic by replica ratio (e.g., 1 canary : 9 stable)","Monitor error rate and latency","If good: scale canary, remove stable","Use Argo Rollouts or Flagger for advanced canary"],
+    cmds: `# Simple canary via replica count:\n# stable: 9 replicas, canary: 1 replica = 10% canary\nkubectl scale deploy <app>-stable --replicas=9\nkubectl scale deploy <app>-canary --replicas=1\n# Service selects BOTH via common label:\n# selector:\n#   app: myapp  # both stable and canary have this\n\n# Argo Rollouts:\nkubectl argo rollouts get rollout <name> --watch`,
+    tip: "Canary without Argo Rollouts = coarse traffic split by pod ratio. Argo Rollouts + Istio/NGINX = fine-grained % traffic control."
+  },
+
+  // ═══════════════════════════════════════════
+  // MORE K8S ADVANCED
+  // ═══════════════════════════════════════════
+  {
+    num: 43, cat: "k8s",
+    q: "RBAC is misconfigured — user can't access resources. How do you fix?",
+    steps: ["Check what user can do: kubectl auth can-i","List roles and bindings in namespace","Create/update Role or ClusterRole","Bind with RoleBinding or ClusterRoleBinding","Test with --as flag"],
+    cmds: `kubectl auth can-i list pods --namespace=<ns> --as=<user>\nkubectl auth can-i --list --namespace=<ns> --as=<user>\nkubectl get rolebinding,clusterrolebinding -n <ns> | grep <user>\n# Create role:\nkubectl create role pod-reader --verb=get,list,watch --resource=pods -n <ns>\n# Bind it:\nkubectl create rolebinding pod-reader-binding --role=pod-reader --user=<user> -n <ns>`,
+    tip: "Use kubectl auth can-i to test permissions before and after. --as=<serviceaccount-name> to test SA permissions."
+  },
+  {
+    num: 44, cat: "k8s",
+    q: "Pod can't pull image — ImagePullBackOff. What do you check?",
+    steps: ["Verify image name and tag exist","Check registry credentials (imagePullSecrets)","Verify secret is in correct namespace","Check registry network access from node","Test manually: docker pull on the node","Check if registry requires auth"],
+    cmds: `kubectl describe pod <name> | grep -A5 Events\n# Create pull secret:\nkubectl create secret docker-registry regcred \\\n  --docker-server=<registry> \\\n  --docker-username=<user> \\\n  --docker-password=<pass> \\\n  -n <namespace>\n# Reference in pod spec:\n# imagePullSecrets:\n# - name: regcred`,
+    tip: "ErrImagePull = first attempt fail. ImagePullBackOff = retry with backoff. Check: correct image tag? Private registry needs imagePullSecrets? Node network policy allows registry access?"
+  },
+  {
+    num: 45, cat: "k8s",
+    q: "ConfigMap or Secret change not picked up by running pods. Why?",
+    steps: ["Understand: pods don't auto-restart on CM/secret change","For env vars: must restart pod to pick up changes","For volume mounts: eventually consistent (kubelet refresh interval)","Use Reloader controller for auto-restart","Force restart: kubectl rollout restart","Or use immutable configmaps with new name per change"],
+    cmds: `# Restart to pick up env var changes:\nkubectl rollout restart deploy/<name> -n <ns>\n# Reloader (if installed):\n# Annotation on deployment:\n# annotations:\n#   reloader.stakater.com/auto: \"true\"\n# Check if mounted as volume (auto-updates eventually):\nkubectl exec -it <pod> -- cat /etc/config/<key>`,
+    tip: "Env vars from ConfigMap: restart required. Volume mounts: update within ~1 min (kubelet sync period). Immutable secrets/CMs prevent accidental changes."
+  },
+  {
+    num: 46, cat: "k8s",
+    q: "Kubernetes cluster upgrade strategy — how do you do it safely?",
+    steps: ["Backup etcd before upgrade","Upgrade control plane first (one minor version at a time)","Upgrade kubelet/kubectl on control plane nodes","Drain and upgrade worker nodes one by one","Test workloads after each node","Upgrade kube-proxy, CNI, CoreDNS versions too"],
+    cmds: `# Backup etcd:\nETCDCTL_API=3 etcdctl snapshot save /backup/etcd-snapshot.db\n# kubeadm upgrade:\nkubeadm upgrade plan\nkubeadm upgrade apply v1.28.0\n# Upgrade node:\nkubectl drain <node> --ignore-daemonsets\napt-get update && apt-get install -y kubelet=1.28.0-00 kubectl=1.28.0-00\nkubectl uncordon <node>`,
+    tip: "Never skip minor versions (1.25 → 1.27 is invalid). Check deprecation API changelog. Test on staging first. Upgrade during low-traffic window."
+  },
+  {
+    num: 47, cat: "k8s",
+    q: "Too many restarts on a pod — how do you set up proper liveness probe?",
+    steps: ["Understand what liveness tests","Set appropriate initialDelaySeconds (app startup time)","Set failureThreshold high enough (don't be too sensitive)","Use /health/live endpoint that's truly lightweight","Don't make liveness check DB/external — only self-health","Tune periodSeconds based on app restart recovery time"],
+    cmds: `# Conservative liveness probe:\n# livenessProbe:\n#   httpGet:\n#     path: /healthz\n#     port: 8080\n#   initialDelaySeconds: 60\n#   periodSeconds: 15\n#   failureThreshold: 3\n#   timeoutSeconds: 5\n\n# Check restart count:\nkubectl get pod <name> -o jsonpath='{.status.containerStatuses[0].restartCount}'`,
+    tip: "If liveness probe hits DB, DB issues = cascading pod restarts. Liveness = can the process recover on its own? Readiness = should it get traffic?"
+  },
+  {
+    num: 48, cat: "k8s",
+    q: "Resource quota exceeded — pods can't be created. How to handle?",
+    steps: ["Check namespace quota: kubectl describe quota","Identify which resource is exhausted","Review pod resource requests (set too high?)","Request quota increase from cluster admin","Clean up unused resources","Use LimitRange to set defaults"],
+    cmds: `kubectl get resourcequota -n <ns>\nkubectl describe resourcequota -n <ns>\n# Check actual usage:\nkubectl top pods -n <ns>\n# Create LimitRange for defaults:\n# apiVersion: v1\n# kind: LimitRange\n# metadata:\n#   name: default-limits\n# spec:\n#   limits:\n#   - default:\n#       cpu: 500m\n#       memory: 256Mi\n#     type: Container`,
+    tip: "LimitRange sets default requests/limits when not specified. ResourceQuota caps total namespace usage. Use both together to prevent runaway resource usage."
+  },
+  {
+    num: 49, cat: "k8s",
+    q: "How do you implement Pod Disruption Budget (PDB) and when is it critical?",
+    steps: ["Define minimum available or max unavailable pods","Apply PDB before any cluster maintenance","PDB prevents voluntary disruption below threshold","Test that draining honors PDB","Critical for stateful apps and quorum-based systems"],
+    cmds: `# PDB: keep at least 2 pods running:\napiVersion: policy/v1\nkind: PodDisruptionBudget\nmetadata:\n  name: app-pdb\nspec:\n  minAvailable: 2\n  selector:\n    matchLabels:\n      app: myapp\n\nkubectl get pdb -n <ns>\nkubectl describe pdb <name> -n <ns>`,
+    tip: "Without PDB, draining 2 nodes simultaneously could take down all replicas. PDB also blocks involuntary disruptions if evictions would violate it."
+  },
+  {
+    num: 50, cat: "k8s",
+    q: "Cluster autoscaler is not adding nodes even though pods are pending. Why?",
+    steps: ["Check autoscaler logs","Verify node group has scale-up capacity","Check if pod tolerations/affinity prevents any existing node type","Check expander strategy","Verify IAM permissions for autoscaler","Check cooldown period"],
+    cmds: `kubectl logs -n kube-system -l app=cluster-autoscaler | grep -i scale\nkubectl describe cm cluster-autoscaler-status -n kube-system\n# Check why pod isn't scheduled:\nkubectl describe pod <pending-pod> | grep -A10 Events`,
+    tip: "Autoscaler won't scale if: pod has affinity that no node group satisfies, pod has local PVC, pod is DaemonSet, or node group is at max. Check autoscaler logs for exact reason."
+  },
+
+  // ═══════════════════════════════════════════
+  // MORE DEBUGGING
+  // ═══════════════════════════════════════════
+  {
+    num: 51, cat: "debug",
+    q: "Memory leak in a containerized application. How do you detect and fix?",
+    steps: ["Watch memory over time: kubectl top pod -w","Check if memory usage grows and never decreases","Profile the app (heap dump, memory profiler)","Look for unclosed connections, event listener accumulation","Add memory limit to trigger OOMKill and get core dump","Fix leak: close resources, clear caches, fix circular refs"],
+    cmds: `# Watch memory:\nwatch -n5 kubectl top pod <pod> -n <ns>\n# Node.js heap dump:\nkubectl exec -it <pod> -- kill -USR2 1  # if heapdump configured\n# Java heap dump:\nkubectl exec -it <pod> -- jmap -dump:format=b,file=/tmp/heap.hprof <pid>\nkubectl cp <pod>:/tmp/heap.hprof ./heap.hprof`,
+    tip: "True leak = memory grows unboundedly and never GCs. Use --max-old-space-size for Node.js to trigger GC sooner. Java: enable GC logging to confirm."
+  },
+  {
+    num: 52, cat: "debug",
+    q: "Certificate expired — TLS handshake failures. Emergency fix?",
+    steps: ["Confirm expiry: openssl s_client or check cert","If cert-manager: check certificate resource","Force renewal: kubectl delete certificate or annotate","If manual: generate new cert and update secret","Update ingress/LB with new cert","Verify renewal and set up alerts for expiry"],
+    cmds: `# Check cert expiry:\necho | openssl s_client -connect <host>:443 2>/dev/null | openssl x509 -noout -dates\n# Check cert-manager:\nkubectl get certificate -n <ns>\nkubectl describe certificate <name> -n <ns>\n# Force renewal:\nkubectl delete secret <tls-secret> -n <ns>  # cert-manager will recreate\n# Or:\nkubectl annotate certificate <name> cert-manager.io/issuer-kind=ClusterIssuer`,
+    tip: "Set up Prometheus alerts for certificate expiry > 30 days. cert-manager auto-renews at 2/3 of certificate lifetime. Check CertificateRequest resources for errors."
+  },
+  {
+    num: 53, cat: "debug",
+    q: "Golang application goroutine leak. How do you detect?",
+    steps: ["Expose pprof endpoint","Check goroutine count over time","Take goroutine dump with pprof","Identify which goroutines are stuck","Look for missing context cancellation","Fix: use context, proper select with done channel"],
+    cmds: `# Enable pprof in app:\n# import _ \"net/http/pprof\"\n\n# Check goroutine count:\ncurl http://localhost:6060/debug/pprof/goroutine?debug=1 | head -50\n# Full goroutine dump:\ngo tool pprof http://localhost:6060/debug/pprof/goroutine\n# CPU profile:\ngo tool pprof http://localhost:6060/debug/pprof/profile?seconds=30`,
+    tip: "Goroutine count should be stable under constant load. Growing goroutines = leak. Common cause: goroutine blocked on channel receive with no sender, HTTP calls without timeout."
+  },
+  {
+    num: 54, cat: "debug",
+    q: "kubectl exec hangs and won't connect to the pod. Why?",
+    steps: ["Check pod is actually Running","kubectl exec uses API server -> kubelet tunnel","Check kubelet health on the node","Check node firewall/security group (port 10250)","Try kubectl attach instead","Check kube-apiserver to node network"],
+    cmds: `kubectl get pod <name> -o wide  # check node\nkubectl get node <node> -o wide\n# Test kubelet port:\ncurl -k https://<node-ip>:10250/healthz\n# Check from master to node:\ntelnet <node-ip> 10250`,
+    tip: "kubectl exec goes: kubectl → API Server → kubelet (10250) → container. Any break in this chain = hang. Check security groups/firewalls between control plane and worker nodes."
+  },
+  {
+    num: 55, cat: "debug",
+    q: "Pod is running but not receiving any requests — suddenly dead from traffic perspective.",
+    steps: ["Check if pod is Ready: kubectl get pod","Check readiness probe status","Verify pod labels match service selector","Check if NetworkPolicy is blocking","Look at endpoints object for the service","Check if pod recently failed readiness and was removed from LB"],
+    cmds: `kubectl get pod <name> -n <ns>  # READY column should be 1/1\nkubectl describe pod <name> | grep -A10 Conditions\nkubectl get endpoints <svc-name> -n <ns>  # pod IP should be here\nkubectl get pod <name> --show-labels\nkubectl get svc <name> -n <ns> -o yaml | grep selector`,
+    tip: "A pod not in Endpoints = readiness failing or selector mismatch. If pod is 0/1 Ready, it's removed from service. Fix: fix the readiness probe or app startup."
+  },
+
+  // ═══════════════════════════════════════════
+  // MORE PERFORMANCE
+  // ═══════════════════════════════════════════
+  {
+    num: 56, cat: "perf",
+    q: "Redis cache hit rate dropped — how does this impact the app and what do you do?",
+    steps: ["Check Redis INFO stats for hit/miss ratio","Look for recent key expiry changes","Check if Redis restarted and cache is cold","Look for memory eviction policy triggering","Add cache warming on deploy","Investigate if key patterns changed"],
+    cmds: `# Redis stats:\nredis-cli INFO stats | grep keyspace\nredis-cli INFO keyspace\nredis-cli INFO memory | grep used_memory\n# Hit rate:\n# keyspace_hits / (keyspace_hits + keyspace_misses)\nredis-cli MONITOR | head -20  # watch live commands\nredis-cli INFO all`,
+    tip: "Low hit rate = cache is cold, maxmemory eviction is purging keys, or TTL too short. Check eviction policy: allkeys-lru is aggressive. Use volatile-lru if only some keys are cache."
+  },
+  {
+    num: 57, cat: "perf",
+    q: "Java application with frequent GC pauses causing latency spikes. How to tune?",
+    steps: ["Enable GC logging: -Xlog:gc*","Identify GC type (G1, ZGC, Parallel)","Check heap size vs live data ratio","Tune -Xms -Xmx and region sizes","Consider switching to ZGC/Shenandoah for low latency","Reduce object allocation rate in code"],
+    cmds: `java -Xms2g -Xmx4g \\\n  -XX:+UseG1GC \\\n  -XX:MaxGCPauseMillis=200 \\\n  -Xlog:gc*:file=/tmp/gc.log:time,uptime:filecount=5,filesize=20m \\\n  -jar app.jar\n\n# Analyze GC log:\ngcviewer /tmp/gc.log\n# Or: gceasy.io (upload GC log online)`,
+    tip: "G1GC: general purpose, good default. ZGC/Shenandoah: sub-millisecond pause, better for latency-sensitive. Always set Xms=Xmx in containers to avoid heap resizing."
+  },
+  {
+    num: 58, cat: "perf",
+    q: "API Gateway is the throughput bottleneck. How do you scale it?",
+    steps: ["Identify API GW CPU/memory saturation","Scale horizontally (more replicas)","Enable connection reuse / keep-alive","Add response caching at GW layer","Use upstream circuit breaker","Consider moving to L7 LB (Envoy/NGINX) for more control"],
+    cmds: `kubectl scale deploy <api-gw> --replicas=10 -n <ns>\n# NGINX config for keepalive:\n# upstream backend {\n#   server backend:8080;\n#   keepalive 32;\n# }\n# Check connection pool:\nkubectl exec -it <gw-pod> -- ss -s`,
+    tip: "API GW horizontal scaling needs session affinity consideration. If GW holds state, you need sticky sessions or externalize state to Redis."
+  },
+
+  // ═══════════════════════════════════════════
+  // NETWORK DEEP DIVE
+  // ═══════════════════════════════════════════
+  {
+    num: 59, cat: "network",
+    q: "High packet loss between services. How do you diagnose?",
+    steps: ["Ping with packet loss stats: ping -c 100","Use mtr for hop-by-hop analysis","Check NIC errors: ethtool -S","Check for MTU mismatch: ping with large packet","Check for network saturation on node","Look for CNI errors in logs"],
+    cmds: `ping -c 100 -i 0.1 <target-ip>\nmtr <target-ip> --report\nethtool -S <interface> | grep -i error\n# MTU test:\nping -c 3 -M do -s 1472 <target-ip>  # 1472 = 1500 - 28 header\n# Check NIC:\nip link show\nnetstat -s | grep -i error`,
+    tip: "MTU mismatch is sneaky — small packets work fine, large ones get dropped silently (if DF bit set) or fragmented. VXLAN adds 50 bytes overhead, so MTU inside = 1450."
+  },
+  {
+    num: 60, cat: "network",
+    q: "Connection timeouts to external service but curl works fine. Why?",
+    steps: ["Check if connection pooling is configured","Verify timeout settings on client side","Check if idle connections expire at firewall","Add keep-alive or reduce pool timeout","Check DNS TTL — cached stale IP?","Verify egress NetworkPolicy is not restrictive"],
+    cmds: `# Test with exact same params as app:\ncurl -v --max-time 10 https://external-service.com\n# Check firewall state timeout:\n# Most firewalls: 30-300s idle timeout\n# Fix: set socket keepalive:\n# TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_KEEPCNT\n# In K8s pod:\nkubectl exec -it <pod> -- cat /proc/sys/net/ipv4/tcp_keepalive_time`,
+    tip: "AWS NAT Gateway drops idle connections after 350s. If your DB connection pool has connections idling > 350s, next use times out. Fix: enable TCP keepalive or set pool maxIdleTime < 300s."
+  },
+  {
+    num: 61, cat: "network",
+    q: "What's the difference between ClusterIP, NodePort, LoadBalancer, and ExternalName?",
+    steps: ["ClusterIP: only reachable inside cluster (default)","NodePort: exposes on each node IP + static port (30000-32767)","LoadBalancer: provisions cloud LB, routes to NodePort","ExternalName: DNS CNAME alias to external service","Headless: clusterIP: None, returns pod IPs directly"],
+    cmds: `kubectl expose deploy <name> --type=ClusterIP --port=80 --target-port=8080\nkubectl expose deploy <name> --type=NodePort --port=80\nkubectl expose deploy <name> --type=LoadBalancer --port=80\n# Headless service:\n# spec:\n#   clusterIP: None\n\n# Check all types:\nkubectl get svc -A`,
+    tip: "LoadBalancer = NodePort + ClusterIP + cloud LB. Each layer is built on the previous. NodePort should be avoided in prod (range limited, exposes all nodes)."
+  },
+
+  // ═══════════════════════════════════════════
+  // SECURITY
+  // ═══════════════════════════════════════════
+  {
+    num: 62, cat: "k8s",
+    q: "How do you prevent privilege escalation in Kubernetes?",
+    steps: ["Use Pod Security Standards (restricted profile)","Set allowPrivilegeEscalation: false","Set readOnlyRootFilesystem: true","Set runAsNonRoot: true","Drop all capabilities, add only needed ones","Use OPA/Gatekeeper for policy enforcement"],
+    cmds: `# securityContext best practice:\n# securityContext:\n#   runAsNonRoot: true\n#   runAsUser: 1001\n#   allowPrivilegeEscalation: false\n#   readOnlyRootFilesystem: true\n#   capabilities:\n#     drop: [\"ALL\"]\n\n# Check Pod Security Standards:\nkubectl label namespace <ns> pod-security.kubernetes.io/enforce=restricted`,
+    tip: "Pod Security Admission (K8s 1.25+) replaced PodSecurityPolicy. Use namespace labels to enforce: privileged, baseline, or restricted."
+  },
+  {
+    num: 63, cat: "docker",
+    q: "Docker image has critical CVEs. How do you handle it in production?",
+    steps: ["Scan image: trivy image <name>","Identify base image with CVE","Update base image to patched version","Rebuild and redeploy","Set up automated scanning in CI","Block deployment of images with critical CVEs","Track CVEs in your image registry (ECR, GCR, etc.)"],
+    cmds: `# Trivy scan:\ntrivy image <image>:<tag>\ntrivy image --severity CRITICAL,HIGH <image>:<tag>\n# Snyk:\nsnyk container test <image>:<tag>\n# Docker Scout:\ndocker scout cves <image>:<tag>\n# In CI (block on critical):\ntrivy image --exit-code 1 --severity CRITICAL <image>`,
+    tip: "Use distroless or scratch base images to eliminate CVEs from OS packages. Update base images weekly. Automate scanning with Trivy in CI — fail pipeline on CRITICAL."
+  },
+  {
+    num: 64, cat: "debug",
+    q: "kubectl is slow — commands take 5-10 seconds to respond. Why?",
+    steps: ["Check API server metrics","Look at etcd latency","Check kubeconfig — correct context and server?","Check network latency to API server","Look at API server audit logs for slow requests","Check if any controllers are flooding the API"],
+    cmds: `# Benchmark kubectl:\ntime kubectl get nodes\ntime kubectl get pods -n kube-system\n# Check API server latency:\nkubectl get --raw /metrics | grep apiserver_request_duration_seconds | grep quantile`,
+    tip: "slow kubectl usually = high API server load from controllers, large etcd operations, or network latency. Check API server CPU and etcd disk I/O."
+  },
+  {
+    num: 65, cat: "k8s",
+    q: "How do you implement Pod affinity and anti-affinity? When do you use each?",
+    steps: ["Affinity: schedule pod near other pods (cache near app)","Anti-affinity: spread pods across nodes/zones (HA)","requiredDuringScheduling: hard rule (pod won't schedule if violated)","preferredDuringScheduling: soft rule (best effort)","Use topologyKey: kubernetes.io/hostname for node spread","Use failure-domain.beta.kubernetes.io/zone for zone spread"],
+    cmds: `# Anti-affinity: spread across nodes:\n# affinity:\n#   podAntiAffinity:\n#     requiredDuringSchedulingIgnoredDuringExecution:\n#     - labelSelector:\n#         matchLabels:\n#           app: myapp\n#       topologyKey: kubernetes.io/hostname\n\n# Verify spread:\nkubectl get pods -o wide | awk '{print $7}' | sort | uniq -c`,
+    tip: "required = deployment fails if can't satisfy. preferred = tries but still schedules. Use required anti-affinity for HA apps where co-location is unacceptable."
+  },
+
+  // Continuing to reach 100 questions...
+  {
+    num: 66, cat: "k8s",
+    q: "Statefulset pod not starting after node failure. What do you do?",
+    steps: ["Check pod status: kubectl get pod","StatefulSet pods have sticky identity — stuck waiting for PVC","If node is permanently gone, force delete the pod","Confirm PVC is available","Reattach or reprovision storage if needed"],
+    cmds: `kubectl get statefulset <name> -n <ns>\nkubectl get pod <pod> -n <ns>\n# Force delete stuck pod:\nkubectl delete pod <pod> --force --grace-period=0 -n <ns>\n# Check PVC:\nkubectl get pvc -n <ns>`,
+    tip: "StatefulSet pods are NOT rescheduled like Deployment pods. They wait for their exact PVC. Force delete after confirming node is gone permanently."
+  },
+  {
+    num: 67, cat: "debug",
+    q: "How do you trace a slow HTTP request across microservices?",
+    steps: ["Ensure distributed tracing is instrumented (OpenTelemetry)","Check Jaeger/Zipkin/X-Ray for trace","Look at span durations — find the slow span","Correlate trace ID from logs","If no tracing: add timing logs and correlate by request ID","Use service mesh (Istio) for automatic L7 tracing"],
+    cmds: `# OpenTelemetry Node.js auto-instrument:\n# node --require @opentelemetry/auto-instrumentations-node/register app.js\n\n# Istio tracing:\nkubectl apply -f istio-tracing.yaml\n# Check Jaeger:\nkubectl port-forward -n istio-system svc/jaeger 16686:16686`,
+    tip: "Pass trace context headers (traceparent, X-B3-TraceId) between services. Without propagation, each service starts a new trace and you lose the full picture."
+  },
+  {
+    num: 68, cat: "network",
+    q: "Service mesh (Istio) sidecar injection not working. How to debug?",
+    steps: ["Check namespace has injection label","Verify MutatingWebhookConfiguration exists","Check istiod is running","Look at pod annotations for injection","Check if pod was created before label","Check Istio version compatibility"],
+    cmds: `kubectl get namespace <ns> --show-labels | grep istio-injection\nkubectl label namespace <ns> istio-injection=enabled\nkubectl get mutatingwebhookconfiguration istio-sidecar-injector\nkubectl get pods -n istio-system\n# Check existing pod (won't inject after creation):\nkubectl get pod <pod> -o jsonpath='{.spec.containers[*].name}'`,
+    tip: "Sidecar injection happens at pod creation via webhook. Existing pods need restart after enabling injection. Check for sidecar.istio.io/inject: 'false' annotation on pod."
+  },
+  {
+    num: 69, cat: "ci",
+    q: "Blue-Green deployment — how do you implement and switch traffic?",
+    steps: ["Run both blue and green deployments","Service points to blue (current)","Deploy green with new version","Run smoke tests on green directly","Switch service selector from blue to green","Keep blue running for quick rollback","Delete blue after confidence"],
+    cmds: `# Blue deployment running, deploy green:\nkubectl apply -f deployment-green.yaml\n# Test green directly:\nkubectl port-forward deploy/app-green 8080:8080\ncurl localhost:8080/health\n# Switch service:\nkubectl patch service <svc> -p '{\"spec\":{\"selector\":{\"version\":\"green\"}}}'\n# Rollback = switch back:\nkubectl patch service <svc> -p '{\"spec\":{\"selector\":{\"version\":\"blue\"}}}'`,
+    tip: "Blue-green = instant cutover + instant rollback. Canary = gradual. Blue-green requires 2x resource cost temporarily. Watch DB migration compatibility."
+  },
+  {
+    num: 70, cat: "perf",
+    q: "How do you implement rate limiting in Kubernetes?",
+    steps: ["Use NGINX Ingress annotations for basic rate limiting","Use Envoy rate limit service for advanced","Implement in API Gateway (Kong, Ambassador)","Add app-level rate limiting (express-rate-limit)","Use Redis for distributed rate limiting","Apply per-user vs per-IP vs per-endpoint limits"],
+    cmds: `# NGINX Ingress rate limiting:\n# annotations:\n#   nginx.ingress.kubernetes.io/limit-rps: \"10\"\n#   nginx.ingress.kubernetes.io/limit-connections: \"5\"\n\n# Istio rate limiting:\nkubectl apply -f ratelimit-envoyfilter.yaml\n\n# Test rate limiting:\nfor i in {1..20}; do curl -s -o /dev/null -w \"%{http_code}\\n\" https://api.example.com/endpoint; done`,
+    tip: "Rate limiting protects against DDoS and abusive clients. Always implement at the edge (ingress/API GW), not just in app code. Use 429 status code with Retry-After header."
+  },
+
+  // Fill to 100 with mix of categories
+  {num: 71, cat: "k8s", q: "What is a DaemonSet and when should you use it?", steps: ["DaemonSet ensures exactly one pod per node","Use for: log collectors, monitoring agents, CNI plugins","New nodes automatically get the pod","Can use nodeSelector/affinity to limit to specific nodes","DaemonSet pods are not killed during node drain unless toleration set","Check pods with: kubectl get ds"], cmds: "kubectl get daemonset -A\nkubectl describe ds <name> -n <ns>\nkubectl rollout status ds/<name> -n <ns>", tip: "DaemonSets are ideal for infrastructure concerns (logging, monitoring, network). They tolerate NoSchedule by default for critical system daemons."},
+  {num: 72, cat: "docker", q: "What is Docker BuildKit and why should you enable it?", steps: ["BuildKit = next-gen Docker build engine","Parallel layer builds (faster)","Better caching with cache mounts","Build secrets (not stored in layers)","SSH agent forwarding for private repos","Inline cache support for CI"], cmds: "DOCKER_BUILDKIT=1 docker build .\n# Or in daemon.json:\n# { \"features\": { \"buildkit\": true } }\n# Syntax directive:\n# syntax=docker/dockerfile:1.5", tip: "BuildKit is default in Docker 23+. For older versions, set DOCKER_BUILDKIT=1. RUN --mount=type=cache is the biggest win for Node.js/pip builds."},
+  {num: 73, cat: "perf", q: "How do you set up Horizontal vs Vertical Pod Autoscaling?", steps: ["HPA: scales replica count based on CPU/memory/custom metrics","VPA: adjusts container resource requests/limits","Use HPA for stateless apps (scale out)","Use VPA for stateful or singleton pods (right-size)","HPA + VPA can conflict — use VPA updateMode: Off for recommendations only","KEDA: scale on custom metrics (queue depth, Kafka lag)"], cmds: "kubectl autoscale deploy <name> --min=2 --max=20 --cpu-percent=70\nkubectl get hpa -n <ns>\n# VPA:\nkubectl get vpa -n <ns>\nkubectl describe vpa <name>", tip: "HPA won't scale past maxReplicas. KEDA is the modern choice for event-driven scaling (SQS, Kafka, Prometheus metrics). Combine KEDA + cluster autoscaler for full elastic scale."},
+  {num: 74, cat: "debug", q: "How do you debug a Kubernetes Operator that's not reconciling?", steps: ["Check operator pod logs: kubectl logs","Look for reconcile errors in logs","Verify CRD is installed: kubectl get crd","Check RBAC for operator's service account","Check the custom resource status subresource","Enable debug logging on the operator"], cmds: "kubectl get pods -n <operator-ns>\nkubectl logs deploy/<operator> -n <operator-ns> | grep -i error\nkubectl get crd | grep <group>\nkubectl describe <custom-resource> <name> -n <ns>\nkubectl get <custom-resource> <name> -o yaml | grep -A10 status", tip: "Operator reconcile loop errors are usually RBAC (can't read/write resources), CRD version mismatch, or panic in reconcile function. Enable verbose logging first."},
+  {num: 75, cat: "network", q: "How do you expose a service outside the cluster without a cloud LoadBalancer?", steps: ["Use NodePort for direct node IP access","Use MetalLB for bare-metal LB IP allocation","Use Ingress with NodePort service behind it","Use Nginx/HAProxy on a dedicated node as edge","Use Cloudflare Tunnel or similar for no-ingress exposure","Use ExternalDNS to manage DNS records"], cmds: "# MetalLB:\nkubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml\n# IPAddressPool + L2Advertisement config\n\n# NodePort:\nkubectl expose deploy <name> --type=NodePort --port=80\nkubectl get svc <name>  # check NodePort value", tip: "MetalLB is the standard for on-prem/bare-metal. L2 mode = ARP-based, easy setup. BGP mode = true LB with multiple paths, requires BGP router."},
+  {num: 76, cat: "storage", q: "How do you backup and restore Kubernetes persistent volumes?", steps: ["Use Velero for cluster-level backup (PV + objects)","For DB: take application-level dumps, don't rely on PV copy","Volume snapshots via CSI driver","Velero with Restic for filesystem backup","Test restore regularly (DR drills)","Store backups in different region/account"], cmds: "# Velero backup:\nvelero backup create <name> --include-namespaces <ns>\nvelero backup describe <name>\nvelero restore create --from-backup <name>\n# Volume snapshot:\nkubectl get volumesnapshot -n <ns>", tip: "PV backup without app quiescing can be corrupt for DBs. Always use application-consistent backups for DBs (pg_dump, mysqldump) then back up the file. Velero is not a substitute for DB backups."},
+  {num: 77, cat: "k8s", q: "How do you manage multiple Kubernetes clusters?", steps: ["Use kubeconfig contexts: kubectl config use-context","kubectx/kubens for quick switching","Use ArgoCD/Flux for multi-cluster GitOps","Terraform for cluster lifecycle management","Cluster API for K8s-native cluster management","Use centralized monitoring across clusters (Thanos)"], cmds: "kubectl config get-contexts\nkubectl config use-context <context-name>\n# kubectx:\nkubectx <context>\nkubens <namespace>\n# ArgoCD multi-cluster:\nkubectl config view --raw > /tmp/kubeconfig\nargocd cluster add <context>", tip: "Avoid running kubectl with wrong cluster context in prod. Use kubectx + kubens aliases. Color-code your terminal prompt by cluster (PS1 with kube context)."},
+  {num: 78, cat: "ci", q: "GitOps with ArgoCD — how do you set it up and what problems does it solve?", steps: ["ArgoCD = K8s controller that syncs cluster state from Git","Install ArgoCD in cluster","Point Application CR to Git repo + path","ArgoCD detects drift and can auto-sync","Rollback = revert Git commit","Audit trail = Git history"], cmds: "# Install ArgoCD:\nkubectl create namespace argocd\nkubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml\n# Create Application:\nargocd app create myapp \\\n  --repo https://github.com/org/repo.git \\\n  --path k8s/ \\\n  --dest-server https://kubernetes.default.svc \\\n  --dest-namespace default\nargocd app sync myapp", tip: "GitOps = Git as the single source of truth. No kubectl apply in CI. CI builds + pushes image, updates image tag in Git, ArgoCD deploys. Full audit trail via Git."},
+  {num: 79, cat: "debug", q: "How do you handle a thundering herd problem after a deployment?", steps: ["Stagger pod startup with PodDisruptionBudget","Use readiness probes to delay traffic","Add jitter to cache warm-up","Pre-warm caches before cutover","Use rate limiting to shed load during startup","Consider using progressive traffic shifting"], cmds: "# Add startup delay/jitter in app:\n# sleep((Math.random() * 10))  # 0-10s jitter\n\n# K8s: use startupProbe to delay readiness:\n# startupProbe:\n#   httpGet:\n#     path: /ready\n#   failureThreshold: 30\n#   periodSeconds: 10", tip: "Thundering herd: all new pods start simultaneously, hit cold cache, flood DB. Fix: stagger startup, pre-warm cache, add circuit breaker, exponential backoff on errors."},
+  {num: 80, cat: "perf", q: "Kafka consumer lag is growing — how do you solve it?", steps: ["Check consumer group lag: kafka-consumer-groups","Identify slow consumers","Scale consumer instances (add partitions first if needed)","Check for processing bottlenecks","Optimize consumer batch size","Check for poison pill messages blocking partition"], cmds: "# Check consumer lag:\nkafka-consumer-groups.sh --bootstrap-server <broker>:9092 --describe --group <group>\n# Add partitions:\nkafka-topics.sh --alter --topic <topic> --partitions 12 \\\n  --bootstrap-server <broker>:9092\n# KEDA autoscale on lag:\n# trigger: kafka, lagThreshold: 100", tip: "Partitions = max parallelism. Can't reduce partitions, only increase. Consumers = min(consumers, partitions). If lag grows, add partitions then scale consumers. Check if one partition has a bad message."},
+  {num: 81, cat: "k8s", q: "What are init containers and how are they useful?", steps: ["Init containers run to completion before app containers start","Sequential: each init must complete before next","Use for: wait for DB ready, download configs, set permissions","Share volumes with main containers","Can have different image than main container","Failure = pod restarts (all inits re-run)"], cmds: "# waitForDB init container:\n# initContainers:\n# - name: wait-for-db\n#   image: busybox\n#   command: ['sh', '-c', 'until nc -z db-svc 5432; do sleep 2; done']\n\nkubectl describe pod <name> | grep -A5 'Init Containers'", tip: "Init containers solve the 'app starts before dependency' problem elegantly. Much cleaner than sleep in entrypoint. Failures show up in init container logs."},
+  {num: 82, cat: "network", q: "Explain Kubernetes service discovery and how pods find each other.", steps: ["K8s creates DNS records for every service","Format: <svc>.<ns>.svc.cluster.local","Pods can use short name if in same namespace","Headless services: DNS returns pod IPs","Environment variables: K8s injects SVC_HOST, SVC_PORT","Search domains in /etc/resolv.conf allow short names"], cmds: "# Test DNS:\nkubectl exec -it <pod> -- nslookup kubernetes.default\nkubectl exec -it <pod> -- cat /etc/resolv.conf\n# Full qualified name:\nnslookup <svc>.<ns>.svc.cluster.local\n# Short name (same namespace):\nnslookup <svc>", tip: "Use full FQDNs in cross-namespace communication. Short names only resolve within the same namespace search domain. Headless + StatefulSet = stable DNS per pod."},
+  {num: 83, cat: "debug", q: "How do you do a post-mortem for a production incident?", steps: ["Write timeline of events (factual, no blame)","Identify root cause (5 Whys technique)","Document contributing factors","Write action items with owners and deadlines","Share with team (blameless culture)","Track action items to completion","Update runbooks and alerts"], cmds: "# 5 Whys example:\n# 1. Why did service go down? Pod OOMKilled\n# 2. Why OOMKilled? Memory limit too low\n# 3. Why limit too low? Never profiled real usage\n# 4. Why no profiling? No performance testing\n# 5. Why no perf testing? Not in deployment checklist\n# Action: Add perf testing + memory profiling to checklist", tip: "Blameless = find process/system failures, not person failures. If you blame someone, they hide future mistakes. Focus on: what conditions allowed this to happen?"},
+  {num: 84, cat: "storage", q: "How do you configure log rotation for containers to prevent disk full?", steps: ["Set Docker log driver options: max-size, max-file","Configure per-container in compose or K8s","Use log aggregation (Loki, ELK) and disable local logging","Monitor /var/lib/docker disk usage","Set up alerting before disk hits 80%","Consider using journald log driver"], cmds: "# Docker daemon.json:\n# {\n#   \"log-driver\": \"json-file\",\n#   \"log-opts\": {\n#     \"max-size\": \"100m\",\n#     \"max-file\": \"3\"\n#   }\n# }\n\n# Per container in compose:\n# logging:\n#   driver: json-file\n#   options:\n#     max-size: '50m'\n#     max-file: '5'", tip: "Default Docker logging has NO rotation limit. On long-running containers, logs can fill the entire disk. Always set max-size in daemon.json or per container."},
+  {num: 85, cat: "k8s", q: "How does Kubernetes handle secrets — what are the security concerns?", steps: ["Secrets stored in etcd (base64 encoded, NOT encrypted by default)","Enable etcd encryption at rest","Use sealed-secrets or external-secrets operator","RBAC: restrict who can read secrets","Prefer secret stores: Vault, AWS SM, GCP SM","Audit: who accessed secrets (K8s audit log)"], cmds: "# Enable etcd encryption:\n# /etc/kubernetes/encryption-config.yaml\n# Create ExternalSecret:\nkubectl get externalsecret -n <ns>\n# SealedSecret:\nkubeseal --format yaml < secret.yaml > sealed-secret.yaml\n# Check who can read secrets:\nkubectl auth can-i get secrets -n <ns> --as <user>", tip: "kubectl get secret -o yaml shows base64, not encrypted. Anyone with RBAC access to secrets sees them. Use external-secrets with Vault/AWS SM for production."},
+  {num: 86, cat: "ci", q: "How do you implement database migrations safely in CI/CD?", steps: ["Run migrations as separate Job before app update","Use backwards-compatible migrations (expand/contract pattern)","Test rollback of migration","Never drop columns until old code is gone","Use migration tools: Flyway, Liquibase, golang-migrate","Lock mechanism to prevent concurrent migrations"], cmds: "# K8s migration Job:\n# kind: Job\n# spec:\n#   template:\n#     spec:\n#       containers:\n#       - name: migrate\n#         image: app:v2\n#         command: ['./migrate', 'up']\n#       restartPolicy: Never\n\nkubectl wait --for=condition=complete job/migrate --timeout=120s", tip: "Expand/Contract: Step 1: add new column (backwards compatible). Step 2: deploy code using new column. Step 3: remove old column. Never do all in one deploy."},
+  {num: 87, cat: "perf", q: "How do you reduce Docker image size significantly?", steps: ["Use alpine or distroless base","Multi-stage builds (copy only artifacts)","Remove dev dependencies after build","Use .dockerignore to exclude test files, docs","Minimize layers: combine RUN commands","Remove package manager cache in same RUN layer"], cmds: "# Combine RUN to reduce layers:\n# RUN apt-get update && \\\n#     apt-get install -y curl && \\\n#     apt-get clean && \\\n#     rm -rf /var/lib/apt/lists/*\n\n# Analyze with dive:\ndocker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive <image>", tip: "Biggest wins: 1) multi-stage (1GB → 100MB), 2) alpine base (300MB → 50MB), 3) no dev deps, 4) .dockerignore. Aim for <100MB for most apps."},
+  {num: 88, cat: "debug", q: "How do you handle stuck Kubernetes namespaces that won't delete?", steps: ["Check what's still in the namespace","Delete all resources manually","Check for finalizers blocking deletion","Remove finalizers: kubectl patch","Check for CRDs with resources","Force-remove namespace finalizer via API"], cmds: "kubectl get all -n <stuck-ns>\nkubectl api-resources --verbs=list -o name | xargs -I{} kubectl get {} -n <ns> 2>/dev/null\n# Remove namespace finalizer:\nkubectl get namespace <ns> -o json | jq '.spec.finalizers = []' | kubectl replace --raw /api/v1/namespaces/<ns>/finalize -f -", tip: "Stuck namespaces = resources with finalizers preventing deletion. Common culprits: Istio resources, Velero backups, custom CRDs. Find and remove finalizers."},
+  {num: 89, cat: "network", q: "How do you implement egress control in Kubernetes (restrict outbound traffic)?", steps: ["Default: pods can reach anything","NetworkPolicy egress rules restrict outbound","Allow only needed external IPs/CIDRs","Use Istio ServiceEntry for service mesh egress","Consider egress gateway for centralized control","Audit egress with network flow logs"], cmds: "# Deny all egress, allow only DNS + specific CIDR:\n# spec:\n#   podSelector:\n#     matchLabels:\n#       app: restricted\n#   policyTypes: [Egress]\n#   egress:\n#   - to: [{namespaceSelector: {}}]  # cluster DNS\n#     ports: [{port: 53, protocol: UDP}]\n#   - to: [{ipBlock: {cidr: '10.0.0.0/8'}}]", tip: "Egress NetworkPolicy only works if your CNI supports it (Calico, Cilium, Weave). Flannel doesn't. Cilium has much richer egress control including FQDN-based policies."},
+  {num: 90, cat: "k8s", q: "Explain Kubernetes control plane components and what happens if each fails.", steps: ["API Server: all requests go through it. Failure = no kubectl, no scheduling","etcd: all cluster state. Failure = cluster frozen, no changes","Scheduler: assigns pods to nodes. Failure = new pods pending forever (existing fine)","Controller Manager: reconciliation loops. Failure = no self-healing (existing pods ok)","Cloud Controller: LB/volume provisioning. Failure = no new LBs/PVs"], cmds: "kubectl get componentstatuses\nkubectl get pods -n kube-system\n# Check each component:\nkubectl logs -n kube-system kube-apiserver-<node>\nkubectl logs -n kube-system kube-scheduler-<node>\nkubectl logs -n kube-system kube-controller-manager-<node>", tip: "API server and etcd are the most critical. Run odd number (3,5) of etcd nodes for quorum. API server can be multiple but needs load balancer in front."},
+  {num: 91, cat: "debug", q: "How do you debug when only some users are experiencing errors (not all)?", steps: ["Check if traffic is hitting specific pods (uneven distribution)","Check if errors are by user-agent, region, or account type","Add per-request logging with user context","Check A/B test or feature flag configurations","Look for DB row-level issues (specific user's data)","Check if affected users share infrastructure (same shard/node)"], cmds: "# Check pod-level error rates:\nfor pod in $(kubectl get pods -n <ns> -l app=<name> -o name); do\n  echo \"$pod: $(kubectl logs $pod --since=5m | grep -c ERROR)\"\ndone\n# If using Prometheus:\n# sum by(pod) (rate(http_requests_total{status=~'5.*'}[5m]))", tip: "Uneven errors across pods = pod-specific issue (state, bad config). Errors for specific users = data issue or feature flag. Use request tracing with user context."},
+  {num: 92, cat: "storage", q: "How do you run a database in Kubernetes — what are the tradeoffs?", steps: ["StatefulSet for ordered, stable pod identity","Persistent volumes for data","Headless service for stable DNS per pod","Use operator (CloudNativePG, MySQL Operator) for Day 2 ops","Consider: managed DB (RDS, Cloud SQL) vs self-managed","Backups, failover, replication: much harder than stateless apps"], cmds: "kubectl get statefulsets -A\nkubectl get pvc -n <db-ns>\n# CloudNativePG:\nkubectl get cluster -n <ns>\nkubectl get pods -n <ns> -l cnpg.io/cluster=<name>\n# Check replica lag:\nkubectl exec -it <replica-pod> -- psql -U postgres -c 'SELECT * FROM pg_stat_replication;'", tip: "Managed DB > K8s DB for most teams. Run DB in K8s only if: you need full control, on-prem, or using a mature operator. If you do, use StatefulSet + operator, never Deployment."},
+  {num: 93, cat: "ci", q: "How do you manage Helm chart upgrades safely?", steps: ["Always use --dry-run first","Use helm diff plugin to see changes","Take backup/snapshot before upgrade","Test in lower environment first","Use atomic flag for automatic rollback on failure","Keep upgrade history: helm history"], cmds: "helm upgrade --dry-run --debug <release> ./chart -f values.yaml\nhelm diff upgrade <release> ./chart -f values.yaml\nhelm upgrade --atomic --timeout 5m <release> ./chart -f values.yaml\nhelm history <release>\nhelm rollback <release> <revision>", tip: "helm upgrade --atomic = rolls back automatically on failure. Always check helm diff before apply in prod. Store values files in Git, not local only."},
+  {num: 94, cat: "perf", q: "How do you optimize a containerized Node.js app for production performance?", steps: ["Set NODE_ENV=production (disables dev overhead)","Use cluster module or PM2 to use all CPU cores","Set --max-old-space-size appropriately","Enable keep-alive for HTTP connections","Use compression middleware","Implement proper connection pooling for DB"], cmds: "# Dockerfile production:\n# ENV NODE_ENV=production\n# CMD [\"node\", \"--max-old-space-size=512\", \"dist/index.js\"]\n\n# Cluster mode:\n# const cluster = require('cluster');\n# const numCPUs = require('os').cpus().length;\n# if (cluster.isMaster) {\n#   for (let i = 0; i < numCPUs; i++) cluster.fork();\n# }", tip: "Node.js is single-threaded per process. A 4-vCPU container with cluster = 4 workers = 4x throughput. Set worker count = (CPU - 1) to leave room for OS."},
+  {num: 95, cat: "k8s", q: "What is Kubernetes Finalizer and how can it cause issues?", steps: ["Finalizer = lifecycle hook that delays deletion","K8s sets deletionTimestamp but waits for finalizer removal","Controller must remove finalizer after cleanup","If controller is gone, resource is stuck forever","Remove manually: kubectl patch to empty finalizers","Avoid finalizers if possible for simple resources"], cmds: "kubectl get <resource> <name> -o yaml | grep finalizers\n# Remove finalizer manually:\nkubectl patch <resource> <name> -p '{\"metadata\":{\"finalizers\":[]}}' --type=merge\n# Or edit:\nkubectl edit <resource> <name>  # remove finalizers list", tip: "Finalizers are critical for cleanup (PV deletion, external resource cleanup) but dangerous if controller crashes. Always implement finalizer removal logic with idempotent cleanup."},
+  {num: 96, cat: "network", q: "How do you troubleshoot high connection refused errors between services?", steps: ["Check if target service is up and endpoints populated","Test port directly: telnet or nc -zv","Check if app is listening on right port/interface","Verify service port matches containerPort","Check for firewall/security group","Look for too many connections (ulimit)"], cmds: "kubectl exec -it <pod> -- nc -zv <target-svc> <port>\nkubectl exec -it <pod> -- ss -tlnp\nkubectl get svc <name> -o yaml | grep -E 'port|targetPort'\nkubectl get endpoints <name>\n# Check listen:\nkubectl exec -it <target-pod> -- ss -tlnp | grep <port>", tip: "Connection refused = port not open. Connection timeout = port open but no response (firewall, overload). These have different root causes — distinguish them first."},
+  {num: 97, cat: "debug", q: "How do you detect and prevent configuration drift in Kubernetes?", steps: ["Use GitOps (ArgoCD/Flux) to detect drift automatically","kubectl diff to compare live vs file","ArgoCD shows OutOfSync resources","Use OPA/Gatekeeper to prevent invalid configs","Audit changes: kubectl audit logs","Treat cluster config as immutable — always deploy from Git"], cmds: "# Check drift with ArgoCD:\nargocd app get <app> | grep 'Sync Status'\n# kubectl diff:\nkubectl diff -f k8s/\n# OPA Gatekeeper:\nkubectl get constraints\nkubectl get constrainttemplate", tip: "Drift = someone ran kubectl apply manually bypassing Git. GitOps auto-corrects drift (if autoSync enabled). Audit logs tell you who drifted. Use RBAC to prevent direct kubectl in prod."},
+  {num: 98, cat: "perf", q: "How do you load test a Kubernetes service and analyze results?", steps: ["Use k6, Vegeta, or Locust for load generation","Start with small load, ramp up","Monitor pods: kubectl top during test","Watch HPA scale-up behavior","Check error rates and p99 latency","Identify the bottleneck (CPU, memory, DB, network)"], cmds: "# k6 load test:\nk6 run script.js\n# Vegeta:\necho 'GET https://api.example.com/endpoint' | vegeta attack -rate=100 -duration=60s | vegeta report\n# Watch during test:\nwatch -n2 kubectl top pods -n <ns>\nwatch -n2 kubectl get hpa -n <ns>", tip: "Always load test in a prod-like environment (same resource limits, same data volume). Staging with 10x fewer replicas gives wrong results. Test until the system breaks to find capacity."},
+  {num: 99, cat: "k8s", q: "How do you implement Kubernetes multi-tenancy safely?", steps: ["Namespace per tenant for isolation","RBAC: bind tenant to their namespace only","NetworkPolicy: deny cross-namespace traffic","ResourceQuota + LimitRange per namespace","Node selectors or dedicated nodes for full isolation","Consider vcluster for stronger isolation"], cmds: "# Namespace per tenant with quota:\nkubectl create namespace tenant-a\nkubectl create resourcequota tenant-quota --hard=cpu=4,memory=8Gi,pods=20 -n tenant-a\n# RBAC:\nkubectl create rolebinding tenant-a-admin --clusterrole=admin --user=tenant-a-user -n tenant-a\n# Network isolation:\nkubectl apply -f deny-from-other-namespaces.yaml", tip: "Soft multi-tenancy (namespace isolation) = suitable for trusted internal teams. Hard multi-tenancy (separate clusters or vcluster) = required for untrusted external tenants."},
+  {num: 100, cat: "debug", hot: true, q: "You're on-call and get woken at 3am — P0 production outage. Walk through your response.", steps: ["Don't panic. Open laptop, check monitoring first","Acknowledge the alert (stop alarm escalation)","Identify blast radius: what's affected, how many users","Quick win: is there a recent deployment? Rollback now.","If no rollback option: gather data (logs, metrics, traces)","Communicate status every 15 mins to stakeholders","Mitigate > Investigate. Restore service first.","Document everything in real-time for post-mortem","After: write post-mortem, implement preventions"], cmds: "# P0 quick triage:\nkubectl get pods -A | grep -v Running | grep -v Completed\nkubectl get events -A --sort-by=.lastTimestamp | tail -20\nkubectl top nodes\nkubectl rollout history deploy/<last-deployed> -n <ns>\n# Rollback if deployment was recent:\nkubectl rollout undo deploy/<name> -n <ns>\n# Check logs:\nkubectl logs -n <ns> -l app=<name> --since=30m | grep -i 'error\\|fatal\\|panic'", tip: "3am rule: rollback first, understand later. A 2-hour debug session costs more than a 5-minute rollback. Document the timeline as you go — your future self will thank you."}
+];
+
+// Render
+function getTagHTML(cat, hot) {
+  const tagMap = {k8s:'tag-k8s',docker:'tag-docker',debug:'tag-debug',perf:'tag-perf',network:'tag-network',storage:'tag-storage',ci:'tag-ci'};
+  const labelMap = {k8s:'K8s',docker:'Docker',debug:'Debug',perf:'Perf',network:'Network',storage:'Storage',ci:'CI/CD'};
+  let html = `<span class="tag ${tagMap[cat]}">${labelMap[cat]}</span>`;
+  if (hot) html += `<span class="tag tag-hot">🔥 HOT</span>`;
+  return html;
+}
+
+function formatCmds(cmds) {
+  if (!cmds) return '';
+  return cmds.split('\n').map(line => {
+    if (line.startsWith('#')) return `<span class="cmd-comment">${line}</span>`;
+    return `<span class="cmd-cmd">${line}</span>`;
+  }).join('\n');
+}
+
+function renderCards() {
+  const main = document.getElementById('mainContent');
+  const cats = ['k8s','docker','debug','perf','network','storage','ci'];
+  const catLabels = {k8s:'☸ Kubernetes',docker:'🐳 Docker',debug:'🔥 Debugging & Troubleshooting',perf:'⚡ Performance',network:'🌐 Networking',storage:'💾 Storage',ci:'🚀 CI/CD'};
+  const catColors = {k8s:getComputedStyle(document.documentElement).getPropertyValue('--blue'),docker:'#60a5fa',debug:'var(--red)',perf:'var(--yellow)',network:'var(--purple)',storage:'var(--green)',ci:'#34d399'};
+
+  cats.forEach(cat => {
+    const catQs = questions.filter(q => q.cat === cat);
+    const section = document.createElement('div');
+    section.className = 'category-section';
+    section.dataset.cat = cat;
+
+    section.innerHTML = `<div class="category-header">
+      <div class="category-icon" style="background:${catColors[cat]}22; color:${catColors[cat]};font-size:18px">${catLabels[cat].split(' ')[0]}</div>
+      <div class="category-title">${catLabels[cat].substring(catLabels[cat].indexOf(' ')+1)}</div>
+      <div class="category-count">${catQs.length} questions</div>
+    </div>`;
+
+    catQs.forEach(q => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      card.dataset.cat = q.cat;
+      card.dataset.num = q.num;
+      card.dataset.q = q.q.toLowerCase();
+
+      const stepsHTML = q.steps ? `<div class="answer-section"><div class="ans-label">📋 Steps</div><ul class="steps">${q.steps.map((s,i)=>`<li><span class="step-num">${i+1}.</span><span>${s}</span></li>`).join('')}</ul></div>` : '';
+      const cmdsHTML = q.cmds ? `<div class="answer-section"><div class="ans-label">💻 Commands</div><div class="cmd-block">${formatCmds(q.cmds)}</div></div>` : '';
+      const tipHTML = q.tip ? `<div class="tip-box"><strong>💡 Interview Tip:</strong> ${q.tip}</div>` : '';
+
+      card.innerHTML = `<div class="q-header">
+        <div class="q-num">#${String(q.num).padStart(2,'0')}</div>
+        <div class="q-text">${q.q}</div>
+        <div class="q-tags">${getTagHTML(q.cat, q.hot)}</div>
+        <div class="q-toggle">▼</div>
+      </div>
+      <div class="q-answer">${stepsHTML}${cmdsHTML}${tipHTML}</div>`;
+
+      card.querySelector('.q-header').addEventListener('click', () => {
+        card.classList.toggle('open');
+      });
+
+      section.appendChild(card);
+    });
+
+    main.appendChild(section);
+  });
+}
+
+// Filter + Search
+let currentCat = 'all';
+let currentSearch = '';
+
+function updateVisibility() {
+  let visible = 0;
+  document.querySelectorAll('.q-card').forEach(card => {
+    const catMatch = currentCat === 'all' || card.dataset.cat === currentCat;
+    const searchMatch = !currentSearch || card.dataset.q.includes(currentSearch.toLowerCase());
+    if (catMatch && searchMatch) { card.classList.remove('hidden'); visible++; }
+    else { card.classList.add('hidden'); card.classList.remove('open'); }
+  });
+
+  // Hide empty sections
+  document.querySelectorAll('.category-section').forEach(sec => {
+    const hasVisible = sec.querySelectorAll('.q-card:not(.hidden)').length > 0;
+    sec.style.display = hasVisible ? '' : 'none';
+  });
+
+  document.getElementById('resultsCount').textContent = `Showing ${visible} of 100 questions`;
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = btn.dataset.cat;
+    updateVisibility();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  currentSearch = e.target.value;
+  updateVisibility();
+});
+
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('pgbar').style.width = pct + '%';
+  document.getElementById('backTop').classList.toggle('visible', h.scrollTop > 500);
+});
+
+renderCards();
+</script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terraform — Windows & Linux Setup Guide</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Barlow:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #0f0f14;
+    --surf:   #17171f;
+    --surf2:  #1e1e28;
+    --border: #2d2d3d;
+    --tf:     #7b42bc;
+    --tf2:    #5c2d91;
+    --win:    #00adef;
+    --linux:  #fcc624;
+    --green:  #4caf50;
+    --red:    #f44336;
+    --cyan:   #00bcd4;
+    --text:   #e0e0e8;
+    --muted:  #6b6b80;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; line-height: 1.65; }
+
+  .hero {
+    background: linear-gradient(150deg, #0f0f14 0%, #15102a 50%, #0f0f14 100%);
+    border-bottom: 1px solid var(--border); padding: 54px 0 38px; position: relative; overflow: hidden;
+  }
+  .hero::before { content:''; position:absolute; top:-60px; right:-60px; width:350px; height:350px; background:radial-gradient(circle, rgba(123,66,188,0.1) 0%, transparent 70%); }
+  .hero::after  { content:''; position:absolute; bottom:-60px; left:-60px; width:300px; height:300px; background:radial-gradient(circle, rgba(0,188,212,0.07) 0%, transparent 70%); }
+  .badge-hero {
+    display:inline-flex; align-items:center; gap:7px;
+    background:rgba(123,66,188,0.12); border:1px solid rgba(123,66,188,0.28); color:var(--tf);
+    padding:4px 14px; border-radius:100px;
+    font-size:0.72rem; font-family:'Fira Code',monospace; letter-spacing:1.2px; margin-bottom:18px;
+  }
+  .hero h1 {
+    font-size:clamp(1.8rem,4vw,2.9rem); font-weight:800; line-height:1.1;
+    background:linear-gradient(120deg,#fff 0%,var(--tf) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:12px;
+  }
+  .hero p { color:var(--muted); font-size:.97rem; max-width:560px; }
+  .os-chips { display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+  .oschip { display:inline-flex; align-items:center; gap:7px; padding:5px 14px; border-radius:100px; font-family:'Fira Code',monospace; font-size:.76rem; font-weight:600; border:1px solid; }
+  .win-chip { background:rgba(0,173,239,.1); border-color:rgba(0,173,239,.3); color:var(--win); }
+  .lin-chip { background:rgba(252,198,36,.1); border-color:rgba(252,198,36,.3); color:var(--linux); }
+  .tf-chip  { background:rgba(123,66,188,.1); border-color:rgba(123,66,188,.3); color:var(--tf); }
+
+  .section { padding:44px 0 0; }
+  .sec-hdr { display:flex; align-items:center; gap:13px; margin-bottom:22px; }
+  .snum { width:38px; height:38px; border-radius:9px; flex-shrink:0; background:linear-gradient(135deg,var(--tf2),var(--tf)); display:flex; align-items:center; justify-content:center; font-family:'Fira Code',monospace; font-weight:700; font-size:.95rem; color:#fff; }
+  .stitle { font-size:1.28rem; font-weight:700; color:#fff; }
+  .ssub { color:var(--muted); font-size:.82rem; margin-top:2px; }
+
+  .cdk { background:var(--surf); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .chdr { background:var(--surf2); border-bottom:1px solid var(--border); padding:10px 16px; display:flex; align-items:center; gap:7px; font-family:'Fira Code',monospace; font-size:.76rem; color:var(--muted); }
+  .dot{width:9px;height:9px;border-radius:50%;} .dr{background:#f44336;} .dy{background:#ff9800;} .dg{background:#4caf50;}
+
+  .otabs{display:flex;gap:0;margin-bottom:-1px;}
+  .otab{padding:7px 18px;font-size:.78rem;font-family:'Fira Code',monospace;cursor:pointer;border:1px solid transparent;border-radius:8px 8px 0 0;color:var(--muted);background:transparent;transition:all .15s;}
+  .otab.active{background:var(--surf2);border-color:var(--border);border-bottom-color:var(--surf2);color:var(--tf);}
+  .tpane{display:none;} .tpane.active{display:block;}
+
+  pre{margin:0;padding:16px 18px;font-family:'Fira Code',monospace;font-size:.8rem;line-height:1.85;overflow-x:auto;background:transparent!important;color:var(--text);}
+  .cmd{color:var(--tf);} .cmt{color:var(--muted);font-style:italic;}
+  .str{color:var(--green);} .kw{color:var(--cyan);}
+  .hi{color:#fff;font-weight:700;} .win{color:var(--win);font-weight:600;}
+  .lin{color:var(--linux);font-weight:600;} .ok{color:var(--green);} .err{color:var(--red);}
+  .bw{border-left:3px solid var(--win)!important;}
+  .bl{border-left:3px solid var(--linux)!important;}
+
+  .tip{background:rgba(123,66,188,.06);border:1px solid rgba(123,66,188,.2);border-left:3px solid var(--tf);border-radius:10px;padding:12px 16px;font-size:.86rem;display:flex;gap:10px;align-items:flex-start;}
+  .warn{background:rgba(244,67,54,.06);border:1px solid rgba(244,67,54,.2);border-left:3px solid var(--red);border-radius:10px;padding:12px 16px;font-size:.86rem;display:flex;gap:10px;align-items:flex-start;}
+  .ai{font-size:1rem;flex-shrink:0;margin-top:2px;}
+
+  .ref-table{width:100%;border-collapse:collapse;}
+  .ref-table th{background:var(--surf2);color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;padding:10px 14px;font-family:'Fira Code',monospace;border-bottom:1px solid var(--border);text-align:left;}
+  .ref-table td{padding:10px 14px;font-size:.8rem;font-family:'Fira Code',monospace;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;}
+  .ref-table tr:last-child td{border-bottom:none;}
+  .ref-table tr:hover td{background:rgba(255,255,255,.02);}
+
+  .cpybtn{margin-left:auto;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);font-size:.68rem;padding:2px 9px;border-radius:5px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .15s;}
+  .cpybtn:hover{background:rgba(123,66,188,.1);color:var(--tf);border-color:var(--tf);}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:44px 0 0;}
+  footer{margin-top:56px;border-top:1px solid var(--border);padding:24px 0;color:var(--muted);font-size:.78rem;text-align:center;}
+  ::-webkit-scrollbar{width:5px;height:5px;} ::-webkit-scrollbar-track{background:var(--bg);} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <div class="badge-hero"><i class="bi bi-box-seam-fill"></i> TERRAFORM · SETUP GUIDE</div>
+    <h1>Terraform Setup<br>Windows & Linux</h1>
+    <p>Install Terraform, configure AWS provider, write your first infra code, and run plan/apply — complete end to end.</p>
+    <div class="os-chips">
+      <span class="oschip win-chip"><i class="bi bi-windows"></i> Windows</span>
+      <span class="oschip lin-chip"><i class="bi bi-ubuntu"></i> Linux</span>
+      <span class="oschip tf-chip"><i class="bi bi-box-seam"></i> Terraform v1.x</span>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-4">
+
+<!-- STEP 1: INSTALL TERRAFORM -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">1</div>
+    <div><div class="stitle">Install Terraform</div><div class="ssub">One-time install — pick your OS</div></div>
+  </div>
+  <div class="otabs" id="ot1">
+    <button class="otab active" onclick="sw('t1win','ot1',this)"><i class="bi bi-windows"></i> Windows</button>
+    <button class="otab" onclick="sw('t1lin','ot1',this)"><i class="bi bi-ubuntu"></i> Linux</button>
+  </div>
+  <div class="cdk" style="border-radius:0 12px 12px 12px">
+    <div id="t1win" class="tpane active">
+      <div class="chdr bw"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="win">Windows — PowerShell / winget</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Option 1: winget (recommended)</span>
+<span class="cmd">winget install</span> HashiCorp.Terraform
+
+<span class="cmt"># Option 2: Chocolatey</span>
+<span class="cmd">choco install</span> terraform
+
+<span class="cmt"># Option 3: Manual download</span>
+<span class="cmt"># Go to: https://developer.hashicorp.com/terraform/downloads</span>
+<span class="cmt"># Download Windows AMD64 zip → extract → add folder to PATH</span>
+
+<span class="cmt"># Add to PATH manually if needed (PowerShell):</span>
+<span class="cmd">$env:PATH</span> += <span class="str">";C:\terraform"</span>
+
+<span class="cmt"># Verify (open new terminal)</span>
+<span class="cmd">terraform</span> version
+<span class="cmt"># should show: Terraform v1.x.x on windows_amd64</span></pre>
+    </div>
+    <div id="t1lin" class="tpane">
+      <div class="chdr bl"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="lin">Linux — apt / manual</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Option 1: via HashiCorp apt repo (Ubuntu/Debian)</span>
+<span class="cmd">wget</span> -O- https://apt.releases.hashicorp.com/gpg | \
+  sudo gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg
+
+<span class="cmd">echo</span> "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] \
+  https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+  sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+<span class="cmd">sudo apt update</span> && <span class="cmd">sudo apt install</span> terraform
+
+<span class="cmt"># Option 2: Manual download (any Linux)</span>
+<span class="cmd">wget</span> https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip
+<span class="cmd">unzip</span> terraform_1.7.5_linux_amd64.zip
+<span class="cmd">sudo mv</span> terraform /usr/local/bin/
+
+<span class="cmt"># Verify</span>
+<span class="cmd">terraform</span> version
+<span class="cmt"># should show: Terraform v1.x.x on linux_amd64</span></pre>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 2: FOLDER STRUCTURE -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">2</div>
+    <div><div class="stitle">Project Folder Structure</div><div class="ssub">Recommended layout for a Terraform project</div></div>
+  </div>
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span>recommended structure</span></div>
+    <pre><span class="ok">my-terraform-project/</span>
+├── <span class="hi">main.tf</span>          <span class="cmt">← main resources go here</span>
+├── <span class="hi">provider.tf</span>      <span class="cmt">← AWS provider config</span>
+├── <span class="hi">variables.tf</span>     <span class="cmt">← input variables</span>
+├── <span class="hi">outputs.tf</span>       <span class="cmt">← output values</span>
+├── <span class="hi">terraform.tfvars</span> <span class="cmt">← variable values (don't commit!)</span>
+└── <span class="hi">.terraform/</span>      <span class="cmt">← auto-created on init (don't touch)</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 3: PROVIDER CONFIG -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">3</div>
+    <div><div class="stitle">Configure AWS Provider</div><div class="ssub">provider.tf — default + secondary (from your notes)</div></div>
+  </div>
+  <div class="cdk mb-3">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>provider.tf</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="kw">terraform</span> {
+  required_providers {
+    aws = {
+      source  = <span class="str">"hashicorp/aws"</span>
+      version = <span class="str">"~> 5.0"</span>
+    }
+  }
+}
+
+<span class="cmt"># Default provider — uses [default] from ~/.aws/credentials</span>
+<span class="kw">provider</span> <span class="str">"aws"</span> {
+  region = <span class="str">"us-east-1"</span>
+  <span class="cmt"># profile = "default"  ← optional, default is used automatically</span>
+}
+
+<span class="cmt"># Secondary provider — uses [secondary] from ~/.aws/credentials</span>
+<span class="kw">provider</span> <span class="str">"aws"</span> {
+  alias   = <span class="str">"secondary"</span>
+  region  = <span class="str">"us-east-2"</span>
+  profile = <span class="str">"secondary"</span>
+}</pre>
+  </div>
+
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>main.tf — use both providers in resources</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># S3 bucket in default account (us-east-1)</span>
+<span class="kw">resource</span> <span class="str">"aws_s3_bucket"</span> <span class="str">"main"</span> {
+  bucket = <span class="str">"my-main-bucket-12345"</span>
+}
+
+<span class="cmt"># S3 bucket in secondary account (us-east-2)</span>
+<span class="kw">resource</span> <span class="str">"aws_s3_bucket"</span> <span class="str">"backup"</span> {
+  provider = <span class="hi">aws.secondary</span>
+  bucket   = <span class="str">"my-backup-bucket-12345"</span>
+}
+
+<span class="cmt"># EC2 instance in default account</span>
+<span class="kw">resource</span> <span class="str">"aws_instance"</span> <span class="str">"web"</span> {
+  ami           = <span class="str">"ami-0c55b159cbfafe1f0"</span>
+  instance_type = <span class="str">"t2.micro"</span>
+  tags = {
+    Name = <span class="str">"web-server"</span>
+  }
+}</pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 4: VARIABLES -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">4</div>
+    <div><div class="stitle">Variables & tfvars</div><div class="ssub">Keep sensitive values out of code</div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>variables.tf — define variables</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="kw">variable</span> <span class="str">"region"</span> {
+  description = <span class="str">"AWS Region"</span>
+  type        = string
+  default     = <span class="str">"us-east-1"</span>
+}
+
+<span class="kw">variable</span> <span class="str">"environment"</span> {
+  description = <span class="str">"Environment name"</span>
+  type        = string
+}
+
+<span class="kw">variable</span> <span class="str">"bucket_name"</span> {
+  description = <span class="str">"S3 bucket name"</span>
+  type        = string
+}</pre>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>terraform.tfvars — actual values</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># ⚠️ Add terraform.tfvars to .gitignore!</span>
+
+environment = <span class="str">"production"</span>
+bucket_name = <span class="str">"my-app-bucket-prod"</span>
+region      = <span class="str">"ap-south-1"</span>
+
+<span class="cmt"># Use variables in main.tf like:</span>
+<span class="cmt"># resource "aws_s3_bucket" "x" {</span>
+<span class="cmt">#   bucket = var.bucket_name</span>
+<span class="cmt"># }</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 5: COMMANDS -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">5</div>
+    <div><div class="stitle">Core Terraform Commands</div><div class="ssub">Same commands on Windows & Linux — run inside project folder</div></div>
+  </div>
+
+  <div class="cdk mb-3">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — daily workflow commands</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># ── Step 1: Initialize project (run once, or after adding providers)</span>
+<span class="cmd">terraform init</span>
+<span class="cmt"># downloads provider plugins into .terraform/</span>
+
+<span class="cmt"># ── Step 2: Format code (auto-fix indentation)</span>
+<span class="cmd">terraform fmt</span>
+
+<span class="cmt"># ── Step 3: Validate syntax</span>
+<span class="cmd">terraform validate</span>
+
+<span class="cmt"># ── Step 4: Preview what will be created/changed/destroyed</span>
+<span class="cmd">terraform plan</span>
+<span class="cmt"># shows: + create, ~ update, - destroy</span>
+
+<span class="cmt"># ── Step 5: Apply changes (creates real infrastructure)</span>
+<span class="cmd">terraform apply</span>
+<span class="cmt"># type "yes" when prompted</span>
+
+<span class="cmt"># Apply without confirmation prompt</span>
+<span class="cmd">terraform apply</span> -auto-approve
+
+<span class="cmt"># ── Step 6: See current state</span>
+<span class="cmd">terraform show</span>
+<span class="cmd">terraform state list</span>
+
+<span class="cmt"># ── Step 7: Destroy everything</span>
+<span class="cmd">terraform destroy</span>
+<span class="cmt"># type "yes" when prompted</span></pre>
+  </div>
+
+  <div class="warn">
+    <span class="ai" style="color:var(--red)"><i class="bi bi-exclamation-triangle-fill"></i></span>
+    <span><strong>terraform apply</strong> creates REAL AWS resources that cost money. Always run <code>terraform plan</code> first to review what will be created. Use <code>terraform destroy</code> when done testing.</span>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 6: STATE FILE & BACKEND -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">6</div>
+    <div><div class="stitle">State File & Remote Backend</div><div class="ssub">Store state in S3 so team can share it</div></div>
+  </div>
+
+  <div class="cdk mb-3">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>backend.tf — remote state in S3</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="kw">terraform</span> {
+  backend <span class="str">"s3"</span> {
+    bucket         = <span class="str">"my-terraform-state-bucket"</span>
+    key            = <span class="str">"prod/terraform.tfstate"</span>
+    region         = <span class="str">"us-east-1"</span>
+    profile        = <span class="str">"default"</span>
+    encrypt        = true
+    dynamodb_table = <span class="str">"terraform-state-lock"</span>  <span class="cmt">← optional, prevents concurrent apply</span>
+  }
+}
+
+<span class="cmt"># After adding backend, re-run:</span>
+<span class="cmd">terraform init</span>
+<span class="cmt"># it will ask to migrate local state to S3 — type "yes"</span></pre>
+  </div>
+
+  <div class="tip">
+    <span class="ai" style="color:var(--tf)"><i class="bi bi-lightbulb-fill"></i></span>
+    <span>Never commit <code>terraform.tfstate</code> to git. Use S3 backend for team projects. Add <code>*.tfstate</code> and <code>*.tfvars</code> to your <code>.gitignore</code>.</span>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 7: WORKSPACES -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">7</div>
+    <div><div class="stitle">Workspaces — Dev / Staging / Prod</div><div class="ssub">Manage multiple environments with one codebase</div></div>
+  </div>
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — workspace commands</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># Create workspaces</span>
+<span class="cmd">terraform workspace new</span> dev
+<span class="cmd">terraform workspace new</span> staging
+<span class="cmd">terraform workspace new</span> prod
+
+<span class="cmt"># List workspaces</span>
+<span class="cmd">terraform workspace list</span>
+<span class="cmt"># shows: * default  dev  staging  prod</span>
+
+<span class="cmt"># Switch workspace</span>
+<span class="cmd">terraform workspace select</span> dev
+<span class="cmd">terraform apply</span>   <span class="cmt">← deploys to dev</span>
+
+<span class="cmd">terraform workspace select</span> prod
+<span class="cmd">terraform apply</span>   <span class="cmt">← deploys to prod</span>
+
+<span class="cmt"># Use workspace name in resources</span>
+<span class="cmt"># resource "aws_s3_bucket" "x" {</span>
+<span class="cmt">#   bucket = "my-app-${terraform.workspace}"  ← dev / prod</span>
+<span class="cmt"># }</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- REFERENCE -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum"><i class="bi bi-table"></i></div>
+    <div><div class="stitle">Quick Reference</div></div>
+  </div>
+  <div class="cdk">
+    <table class="ref-table">
+      <thead><tr><th>Command</th><th>What it does</th><th>When</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--tf)">terraform init</td><td>Downloads providers</td><td style="color:var(--green)">Once / after adding provider</td></tr>
+        <tr><td style="color:var(--tf)">terraform fmt</td><td>Auto-formats .tf files</td><td style="color:var(--green)">Before commit</td></tr>
+        <tr><td style="color:var(--tf)">terraform validate</td><td>Checks syntax errors</td><td style="color:var(--green)">Before plan</td></tr>
+        <tr><td style="color:var(--tf)">terraform plan</td><td>Preview changes — no real action</td><td style="color:var(--cyan)">Always before apply</td></tr>
+        <tr><td style="color:var(--tf)">terraform apply</td><td>Creates / updates real infra</td><td style="color:var(--cyan)">When ready</td></tr>
+        <tr><td style="color:var(--tf)">terraform destroy</td><td>Deletes all managed resources</td><td style="color:var(--red)">Careful!</td></tr>
+        <tr><td style="color:var(--tf)">terraform state list</td><td>Shows managed resources</td><td style="color:var(--cyan)">Anytime</td></tr>
+        <tr><td style="color:var(--tf)">terraform output</td><td>Shows output values</td><td style="color:var(--cyan)">After apply</td></tr>
+        <tr><td style="color:var(--tf)">terraform workspace select X</td><td>Switch to environment X</td><td style="color:var(--cyan)">Before deploy</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+<footer><div class="container"><span style="color:var(--tf);font-family:'Fira Code',monospace;font-weight:700">Terraform</span> · Windows & Linux · AWS Provider · Multiple Profiles</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function sw(id,grp,btn){
+  const tabs=document.getElementById(grp);
+  tabs.parentElement.querySelectorAll('.tpane').forEach(p=>p.classList.remove('active'));
+  tabs.querySelectorAll('.otab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active'); btn.classList.add('active');
+}
+function cp(btn){
+  const pre=btn.closest('.cdk').querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='copied!';btn.style.color='var(--green)';
+    setTimeout(()=>{btn.textContent='copy';btn.style.color='';},2000);
+  });
+}
+</script>
+</body>
+</html>

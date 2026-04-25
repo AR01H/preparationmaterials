@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node Shared Modules — Complete Setup Guide</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181b22;
+    --border: #23272f;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --node16: #3b82f6;
+    --node18: #a855f7;
+    --node22: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0a0c10 0%, #0f1520 50%, #0a0c10 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 0 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: -120px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; right: -80px;
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 600px;
+  }
+
+  /* ── PROJECT PILLS ── */
+  .project-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .pill-16 { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: var(--node16); }
+  .pill-18 { background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.3); color: var(--node18); }
+  .pill-22 { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--node22); }
+  .pill-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  /* ── SECTION ── */
+  .section { padding: 48px 0 0; }
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+  }
+  .step-num {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700; font-size: 1rem;
+    color: #fff; flex-shrink: 0;
+  }
+  .section-title { font-size: 1.4rem; font-weight: 700; color: #fff; }
+  .section-sub { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+
+  /* ── CARDS ── */
+  .card-dark {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .card-header-dark {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem; color: var(--muted);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ef4444; }
+  .dot-y { background: #f59e0b; }
+  .dot-g { background: #22c55e; }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    background: transparent !important;
+    margin: 0; padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    color: var(--text);
+  }
+  .cmd { color: var(--accent); }
+  .cmt { color: var(--muted); font-style: italic; }
+  .str { color: var(--green); }
+  .kw  { color: var(--node18); }
+  .num { color: var(--accent3); }
+  .hi  { color: #fff; font-weight: 600; }
+
+  /* ── FOLDER TREE ── */
+  .tree {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 2;
+    padding: 18px 20px;
+  }
+  .tree-dir  { color: var(--accent); font-weight: 600; }
+  .tree-file { color: var(--text); }
+  .tree-note { color: var(--muted); font-style: italic; }
+  .tree-del  { color: var(--red); text-decoration: line-through; }
+  .tree-ok   { color: var(--green); }
+
+  /* ── PROJECT GRID ── */
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+    height: 100%;
+  }
+  .project-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .project-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem; font-weight: 700;
+    color: #fff; margin-bottom: 8px;
+  }
+  .project-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; font-weight: 600;
+    padding: 3px 10px; border-radius: 100px;
+    display: inline-block; margin-bottom: 12px;
+  }
+  .b16 { background: rgba(59,130,246,0.15); color: var(--node16); }
+  .b18 { background: rgba(168,85,247,0.15); color: var(--node18); }
+  .b22 { background: rgba(245,158,11,0.15); color: var(--node22); }
+
+  .project-files { list-style: none; padding: 0; }
+  .project-files li {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--muted);
+  }
+  .project-files li:last-child { border-bottom: none; }
+  .project-files li .bi { font-size: 0.75rem; }
+  .f-keep { color: var(--green); }
+  .f-del  { color: var(--red); }
+  .f-add  { color: var(--accent3); }
+
+  /* ── ALERT BOXES ── */
+  .alert-tip {
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.88rem;
+    color: var(--text);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .alert-warn {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-left: 3px solid var(--accent3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.88rem;
+    color: var(--text);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── FLOW STEPS ── */
+  .flow {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .flow-item {
+    display: flex; gap: 16px; position: relative;
+  }
+  .flow-line {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .flow-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; font-weight: 700; color: var(--accent);
+    flex-shrink: 0; z-index: 1;
+  }
+  .flow-connector {
+    width: 2px; flex: 1; min-height: 28px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    margin: 4px 0;
+    opacity: 0.3;
+  }
+  .flow-content {
+    padding-bottom: 28px; flex: 1;
+  }
+  .flow-title {
+    font-weight: 700; color: #fff; font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  .flow-desc {
+    color: var(--muted); font-size: 0.85rem;
+  }
+  .flow-cmd {
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 6px;
+    padding: 6px 12px;
+    display: inline-block;
+  }
+
+  /* ── TABLE ── */
+  .ref-table { width: 100%; border-collapse: collapse; }
+  .ref-table th {
+    background: var(--surface2);
+    color: var(--muted); font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 12px 16px; text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    border-bottom: 1px solid var(--border);
+  }
+  .ref-table td {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-family: 'JetBrains Mono', monospace;
+    vertical-align: top;
+  }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-path { color: var(--accent3); }
+  .td-what { color: var(--text); }
+  .td-once { color: var(--green); font-size: 0.75rem; }
+
+  /* ── TABS ── */
+  .os-tabs { display: flex; gap: 0; margin-bottom: -1px; }
+  .os-tab {
+    padding: 8px 20px;
+    font-size: 0.82rem; font-family: 'JetBrains Mono', monospace;
+    cursor: pointer; border: 1px solid transparent;
+    border-radius: 8px 8px 0 0; color: var(--muted);
+    background: transparent; transition: all 0.15s;
+  }
+  .os-tab.active {
+    background: var(--surface2);
+    border-color: var(--border);
+    border-bottom-color: var(--surface2);
+    color: var(--accent);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0 0;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 60px;
+    border-top: 1px solid var(--border);
+    padding: 28px 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  /* ── COPY BTN ── */
+  .copy-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.15s;
+    margin-left: auto;
+  }
+  .copy-btn:hover { background: rgba(0,229,255,0.1); color: var(--accent); border-color: var(--accent); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-badge"><i class="bi bi-share-fill"></i> SHARED NODE_MODULES SETUP</div>
+    <h1>One Shared node_modules<br>for All Your Projects</h1>
+    <p>Complete end-to-end guide — NVM install, shared folder setup, custom files, and daily usage. Path configured <strong>inside each project's code</strong> — no environment variables, no system setup needed.</p>
+
+    <div class="project-pills">
+      <span class="pill pill-16"><span class="pill-dot"></span>shop-app — Node 16</span>
+      <span class="pill pill-16"><span class="pill-dot"></span>dashboard-app — Node 16</span>
+      <span class="pill pill-18"><span class="pill-dot"></span>admin-panel — Node 18</span>
+      <span class="pill pill-22"><span class="pill-dot"></span>landing-page — Node 22</span>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+<!-- ═══════════════════════════════ STEP 1: FOLDER STRUCTURE ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="step-num">1</div>
+    <div>
+      <div class="section-title">Folder Structure — What to Create</div>
+      <div class="section-sub">Create shared_modules folder once — path is referenced inside each project, not in env</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card-dark h-100">
+        <div class="card-header-dark">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span>Shared Modules Folder</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <div class="tree">
+          <pre><code>
+            <span class="tree-dir">~/shared_modules/</span>
+            ├── <span class="tree-dir">node16/</span>
+            │   ├── package.json          <span class="tree-note">← npm init creates this</span>
+            │   └── <span class="tree-dir">node_modules/</span>
+            │       ├── <span class="tree-dir">react/</span>           <span class="tree-note">← installed packages</span>
+            │       ├── <span class="tree-dir">react-dom/</span>
+            │       ├── <span class="tree-dir">axios/</span>
+            │       └── <span class="tree-dir">my-utils/</span>        <span class="tree-note">← YOUR custom file</span>
+            │           ├── package.json
+            │           └── index.js
+            ├── <span class="tree-dir">node18/</span>
+            │   ├── package.json
+            │   └── <span class="tree-dir">node_modules/</span>
+            │       ├── <span class="tree-dir">react/</span>
+            │       ├── <span class="tree-dir">react-dom/</span>
+            │       └── <span class="tree-dir">my-utils/</span>
+            └── <span class="tree-dir">node22/</span>
+                ├── package.json
+                └── <span class="tree-dir">node_modules/</span>
+                    ├── <span class="tree-dir">react/</span>
+                    ├── <span class="tree-dir">react-dom/</span>
+                    └── <span class="tree-dir">my-utils/</span>
+          </code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card-dark h-100">
+        <div class="card-header-dark">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span>Your 4 Projects — After Setup</span>
+        </div>
+        <div class="tree">
+          <pre><code> 
+            <span class="tree-dir">~/projects/</span>
+            ├── <span class="tree-dir">shop-app/</span>
+            │   ├── <span class="tree-ok">.nvmrc</span>           <span class="tree-note">← add this (contains "16")</span>
+            │   ├── <span class="tree-ok">package.json</span>     <span class="tree-note">← keep, no changes</span>
+            │   ├── <span class="tree-ok">src/</span>
+            │   └── <span class="tree-del">node_modules/</span>    <span class="tree-note">← DELETE this</span>
+            ├── <span class="tree-dir">dashboard-app/</span>
+            │   ├── <span class="tree-ok">.nvmrc</span>           <span class="tree-note">← "16"</span>
+            │   ├── <span class="tree-ok">package.json</span>
+            │   └── <span class="tree-del">node_modules/</span>
+            ├── <span class="tree-dir">admin-panel/</span>
+            │   ├── <span class="tree-ok">.nvmrc</span>           <span class="tree-note">← "18"</span>
+            │   ├── <span class="tree-ok">package.json</span>
+            │   └── <span class="tree-del">node_modules/</span>
+            └── <span class="tree-dir">landing-page/</span>
+                ├── <span class="tree-ok">.nvmrc</span>           <span class="tree-note">← "22"</span>
+                ├── <span class="tree-ok">package.json</span>
+                └── <span class="tree-del">node_modules/</span>
+          </code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <div class="card-dark">
+      <div class="card-header-dark">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span>terminal — create shared folders</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Run this once — creates all shared folders</span>
+<span class="cmd">mkdir -p</span> ~/shared_modules/node16/node_modules
+<span class="cmd">mkdir -p</span> ~/shared_modules/node18/node_modules
+<span class="cmd">mkdir -p</span> ~/shared_modules/node22/node_modules
+
+<span class="cmt"># Verify folders are created</span>
+<span class="cmd">ls</span> ~/shared_modules/</pre>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════ STEP 2: NVM INSTALL ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="step-num">2</div>
+    <div>
+      <div class="section-title">Install NVM + All Node Versions</div>
+      <div class="section-sub">NVM lets you switch between Node 16 / 18 / 22 anytime</div>
+    </div>
+  </div>
+
+  <div class="os-tabs" id="os-tabs">
+    <button class="os-tab active" onclick="switchTab('mac')"><i class="bi bi-apple"></i> Mac / Linux</button>
+    <button class="os-tab" onclick="switchTab('win')"><i class="bi bi-windows"></i> Windows</button>
+  </div>
+
+  <div class="card-dark" style="border-radius: 0 14px 14px 14px;">
+    <div id="tab-mac" class="tab-content active">
+      <div class="card-header-dark">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span>terminal — Mac / Linux</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Step 2a — Install NVM</span>
+<span class="cmd">curl</span> -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+<span class="cmt"># Step 2b — Reload terminal config</span>
+<span class="cmd">source</span> ~/.zshrc
+<span class="cmt"># OR if using bash:</span>
+<span class="cmd">source</span> ~/.bashrc
+
+<span class="cmt"># Step 2c — Install all 3 Node versions</span>
+<span class="cmd">nvm install</span> <span class="num">16</span>
+<span class="cmd">nvm install</span> <span class="num">18</span>
+<span class="cmd">nvm install</span> <span class="num">22</span>
+
+<span class="cmt"># Step 2d — Verify all installed</span>
+<span class="cmd">nvm list</span>
+<span class="cmt"># should show →  v16.x.x  v18.x.x  v22.x.x</span></pre>
+    </div>
+    <div id="tab-win" class="tab-content">
+      <div class="card-header-dark">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span>cmd / powershell — Windows</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Step 2a — Download nvm-windows installer from:</span>
+<span class="str">https://github.com/coreybutler/nvm-windows/releases</span>
+<span class="cmt"># → download nvm-setup.exe → run it</span>
+
+<span class="cmt"># Step 2b — Open NEW cmd window, then install Node versions</span>
+<span class="cmd">nvm install</span> <span class="num">16</span>
+<span class="cmd">nvm install</span> <span class="num">18</span>
+<span class="cmd">nvm install</span> <span class="num">22</span>
+
+<span class="cmt"># Step 2c — Verify</span>
+<span class="cmd">nvm list</span>
+
+<span class="cmt"># Step 2d — Set NODE_PATH in System Environment Variables</span>
+<span class="cmt"># Go to: Control Panel → System → Advanced → Environment Variables</span>
+<span class="cmt"># Add new variable:</span>
+<span class="hi">Variable name:  NODE_PATH</span>
+<span class="hi">Variable value: C:\Users\YOU\shared_modules\node16\node_modules</span>
+<span class="cmt"># (change per project when switching)</span></pre>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════ STEP 3: INSTALL PACKAGES ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="step-num">3</div>
+    <div>
+      <div class="section-title">Install npm Packages into Each Shared Folder</div>
+      <div class="section-sub">Do this once per Node version — covers all your projects</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-header-dark" style="border-left: 3px solid var(--node16);">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span style="color:var(--node16)">Node 16 — shop-app, dashboard-app</span>
+        </div>
+        <pre><span class="cmd">nvm use</span> <span class="num">16</span>
+<span class="cmd">cd</span> ~/shared_modules/node16
+
+<span class="cmd">npm init</span> -y
+
+<span class="cmd">npm install</span> \
+  react \
+  react-dom \
+  react-scripts \
+  axios \
+  lodash \
+  react-router-dom
+
+<span class="cmt"># add any other packages
+# your node16 projects need</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-header-dark" style="border-left: 3px solid var(--node18);">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span style="color:var(--node18)">Node 18 — admin-panel</span>
+        </div>
+        <pre><span class="cmd">nvm use</span> <span class="num">18</span>
+<span class="cmd">cd</span> ~/shared_modules/node18
+
+<span class="cmd">npm init</span> -y
+
+<span class="cmd">npm install</span> \
+  react \
+  react-dom \
+  react-scripts \
+  axios \
+  lodash \
+  react-router-dom
+
+<span class="cmt"># add any other packages
+# your node18 projects need</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-header-dark" style="border-left: 3px solid var(--node22);">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span style="color:var(--node22)">Node 22 — landing-page</span>
+        </div>
+        <pre><span class="cmd">nvm use</span> <span class="num">22</span>
+<span class="cmd">cd</span> ~/shared_modules/node22
+
+<span class="cmd">npm init</span> -y
+
+<span class="cmd">npm install</span> \
+  react \
+  react-dom \
+  react-scripts \
+  axios \
+  lodash \
+  react-router-dom
+
+<span class="cmt"># add any other packages
+# your node22 projects need</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════ STEP 4: CUSTOM FILE ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="step-num">4</div>
+    <div>
+      <div class="section-title">Add Your Own Custom File (my-utils)</div>
+      <div class="section-sub">Drop your own shared functions — use like any npm package in all projects</div>
+    </div>
+  </div>
+
+  <div class="alert-tip mb-3">
+    <span class="alert-icon" style="color:var(--accent)"><i class="bi bi-lightbulb-fill"></i></span>
+    <span>Create <code>my-utils</code> folder inside each shared <code>node_modules</code>. Then just <code>import from 'my-utils'</code> in any project — no path needed!</span>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-header-dark">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span>terminal — create folders</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># create my-utils in all 3</span>
+<span class="cmd">mkdir</span> ~/shared_modules/node16\
+  /node_modules/my-utils
+
+<span class="cmd">mkdir</span> ~/shared_modules/node18\
+  /node_modules/my-utils
+
+<span class="cmd">mkdir</span> ~/shared_modules/node22\
+  /node_modules/my-utils</pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-header-dark">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span>my-utils/package.json</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre>{
+  <span class="str">"name"</span>: <span class="str">"my-utils"</span>,
+  <span class="str">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="str">"main"</span>: <span class="str">"index.js"</span>
+}
+
+<span class="cmt"># Copy this file into:</span>
+<span class="cmt"># node16/node_modules/my-utils/</span>
+<span class="cmt"># node18/node_modules/my-utils/</span>
+<span class="cmt"># node22/node_modules/my-utils/</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-header-dark">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span>my-utils/index.js</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt">// Shared constants</span>
+<span class="kw">export const</span> API_URL =
+  <span class="str">"https://api.mycompany.com"</span>;
+
+<span class="cmt">// Shared utility functions</span>
+<span class="kw">export const</span> formatDate = (d) =>
+  <span class="kw">new</span> Date(d).toLocaleDateString();
+
+<span class="kw">export const</span> formatCurrency = (n) =>
+  <span class="str">"₹"</span> + n.toLocaleString(<span class="str">"en-IN"</span>);
+
+<span class="kw">export const</span> isEmpty = (v) =>
+  v === <span class="kw">null</span> || v === <span class="str">""</span>;</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <div class="card-dark">
+      <div class="card-header-dark">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span>How to import in ANY project — no path, no install</span>
+      </div>
+      <pre><span class="cmt">// shop-app/src/App.js  OR  admin-panel/src/App.js — same import everywhere</span>
+<span class="kw">import</span> { API_URL, formatDate, formatCurrency } <span class="kw">from</span> <span class="str">'my-utils'</span>;
+<span class="kw">import</span> axios <span class="kw">from</span> <span class="str">'axios'</span>;      <span class="cmt">// from shared</span>
+<span class="kw">import</span> React <span class="kw">from</span> <span class="str">'react'</span>;      <span class="cmt">// from shared</span>
+
+<span class="cmt">// Use directly</span>
+console.log(formatDate(<span class="kw">new</span> Date()));   <span class="cmt">// 4/19/2026</span>
+console.log(formatCurrency(<span class="num">49999</span>));    <span class="cmt">// ₹49,999</span>
+console.log(API_URL);                   <span class="cmt">// https://api.mycompany.com</span></pre>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════ STEP 5: PATH INSIDE PROJECT — 2 WAYS ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="step-num">5</div>
+    <div>
+      <div class="section-title">Set NODE_PATH Inside Project — Pick ONE Way</div>
+      <div class="section-sub">Both ways keep the path inside your project code. Choose whichever fits you — then stick to it.</div>
+    </div>
+  </div>
+
+  <!-- WAY SELECTOR -->
+  <div style="display:flex; align-items:stretch; gap:0; margin-bottom:28px; border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+    <button id="btn-way1" onclick="selectWay(1)"
+      style="flex:1; padding:20px 16px; background:rgba(0,229,255,0.08); border:none; border-right:1px solid var(--border); cursor:pointer; transition:all 0.2s; text-align:left;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <span style="background:var(--accent); color:#000; font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:100px;">WAY 1</span>
+        <span style="color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:0.82rem; font-weight:700;">cross-env in package.json</span>
+      </div>
+      <div style="color:var(--muted); font-size:0.82rem; line-height:1.6;">Path is written directly in <code style="color:var(--accent3)">package.json</code> scripts. No extra files. Any developer clones → runs → works instantly.</div>
+      <div style="margin-top:10px; font-size:0.75rem; color:var(--green);">✅ Best for teams &amp; shared repos</div>
+    </button>
+    <div style="display:flex; align-items:center; justify-content:center; padding:0 18px; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:0.9rem; font-weight:700; background:var(--surface2);">OR</div>
+    <button id="btn-way2" onclick="selectWay(2)"
+      style="flex:1; padding:20px 16px; background:transparent; border:none; cursor:pointer; transition:all 0.2s; text-align:left;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <span style="background:var(--accent2); color:#fff; font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:100px;">WAY 2</span>
+        <span style="color:var(--node18); font-family:'JetBrains Mono',monospace; font-size:0.82rem; font-weight:700;">.env file in project root</span>
+      </div>
+      <div style="color:var(--muted); font-size:0.82rem; line-height:1.6;">Path is in a <code style="color:var(--accent3)">.env</code> file inside the project. <code>package.json</code> stays clean. Easy to change path without touching scripts.</div>
+      <div style="margin-top:10px; font-size:0.75rem; color:var(--node18);">✅ Best for solo / local-only projects</div>
+    </button>
+  </div>
+
+  <!-- ══ WAY 1 CONTENT ══ -->
+  <div id="way1-content">
+
+    <div class="alert-tip mb-3">
+      <span class="alert-icon" style="color:var(--accent)"><i class="bi bi-1-circle-fill"></i></span>
+      <span><strong>Way 1 — cross-env in package.json:</strong> You add <code>cross-env NODE_PATH=../shared_modules/nodeXX/node_modules</code> before every script command. <code>cross-env</code> is the only package installed locally — it sets the path at runtime before Node starts.</span>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-lg-6">
+        <div class="card-dark h-100">
+          <div class="card-header-dark" style="border-left: 3px solid var(--node16);">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span style="color:var(--node16)">shop-app/package.json — Node 16</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre>{
+  <span class="str">"name"</span>: <span class="str">"shop-app"</span>,
+  <span class="str">"scripts"</span>: {
+    <span class="str">"start"</span>: <span class="str">"cross-env NODE_PATH=../shared_modules/node16/node_modules react-scripts start"</span>,
+    <span class="str">"build"</span>: <span class="str">"cross-env NODE_PATH=../shared_modules/node16/node_modules react-scripts build"</span>,
+    <span class="str">"test"</span>:  <span class="str">"cross-env NODE_PATH=../shared_modules/node16/node_modules react-scripts test"</span>
+  },
+  <span class="str">"devDependencies"</span>: {
+    <span class="str">"cross-env"</span>: <span class="str">"^7.0.3"</span>   <span class="cmt">← only this one local install</span>
+  }
+}
+
+<span class="cmt"># dashboard-app/package.json → same, node16
+# admin-panel/package.json  → same, node18
+# landing-page/package.json → same, node22</span></pre>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card-dark h-100">
+          <div class="card-header-dark">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span>terminal — install cross-env in each project</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="cmt"># Run once per project — installs cross-env locally</span>
+<span class="cmd">cd</span> ~/projects/shop-app     &amp;&amp; <span class="cmd">npm install</span> --save-dev cross-env
+<span class="cmd">cd</span> ~/projects/dashboard-app &amp;&amp; <span class="cmd">npm install</span> --save-dev cross-env
+<span class="cmd">cd</span> ~/projects/admin-panel   &amp;&amp; <span class="cmd">npm install</span> --save-dev cross-env
+<span class="cmd">cd</span> ~/projects/landing-page  &amp;&amp; <span class="cmd">npm install</span> --save-dev cross-env
+
+<span class="cmt"># That's it. Now just run as normal:</span>
+<span class="cmd">npm start</span>      <span class="cmt">✅ NODE_PATH injected automatically before start</span>
+<span class="cmd">npm run build</span>  <span class="cmt">✅ same for build</span>
+<span class="cmd">npm test</span>       <span class="cmt">✅ same for test</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card-dark h-100">
+          <div class="card-header-dark">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span>Relative vs Absolute path in the script</span>
+          </div>
+          <pre><span class="cmt"># Relative (recommended — projects &amp; shared_modules side by side)</span>
+<span class="hi">NODE_PATH=../shared_modules/node16/node_modules</span>
+
+<span class="cmt"># Absolute — Mac/Linux (if folder is somewhere else)</span>
+<span class="hi">NODE_PATH=/home/yourname/shared_modules/node16/node_modules</span>
+
+<span class="cmt"># Absolute — Windows</span>
+<span class="hi">NODE_PATH=C:/Users/YourName/shared_modules/node16/node_modules</span></pre>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-dark h-100">
+          <div class="card-header-dark">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span>jsconfig.json — VS Code IntelliSense (add to each project)</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="cmt">// shop-app/jsconfig.json</span>
+{
+  <span class="str">"compilerOptions"</span>: {
+    <span class="str">"baseUrl"</span>: <span class="str">"."</span>,
+    <span class="str">"paths"</span>: {
+      <span class="str">"my-utils"</span>: [<span class="str">"../shared_modules/node16/node_modules/my-utils"</span>],
+      <span class="str">"*"</span>: [<span class="str">"../shared_modules/node16/node_modules/*"</span>]
+    }
+  }
+}
+<span class="cmt">// Gives autocomplete + go-to-definition in VS Code</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 alert-warn">
+      <span class="alert-icon" style="color:var(--accent3)"><i class="bi bi-exclamation-triangle-fill"></i></span>
+      <span><strong>Path is relative to where you run npm.</strong> If <code>projects/</code> and <code>shared_modules/</code> are both under <code>~/</code>, then <code>../shared_modules/node16/node_modules</code> always resolves correctly. If your layout is different, switch to an absolute path.</span>
+    </div>
+  </div>
+
+  <!-- ══ WAY 2 CONTENT ══ -->
+  <div id="way2-content" style="display:none;">
+
+    <div class="alert-tip mb-3">
+      <span class="alert-icon" style="color:var(--node18)"><i class="bi bi-2-circle-fill"></i></span>
+      <span><strong>Way 2 — .env file in project root:</strong> You create a <code>.env</code> file inside each project with <code>NODE_PATH=</code> set. <code>react-scripts</code> (Create React App) automatically reads <code>.env</code> before starting. No <code>cross-env</code>, no changes to <code>package.json</code> scripts at all.</span>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-lg-4">
+        <div class="card-dark h-100">
+          <div class="card-header-dark" style="border-left: 3px solid var(--node16);">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span style="color:var(--node16)">shop-app/.env &amp; dashboard-app/.env</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="cmt"># shop-app/.env</span>
+<span class="hi">NODE_PATH=../shared_modules/node16/node_modules</span>
+
+<span class="cmt"># That's the entire file — one line only.
+# react-scripts reads this automatically
+# before npm start / build / test.</span></pre>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card-dark h-100">
+          <div class="card-header-dark" style="border-left: 3px solid var(--node18);">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span style="color:var(--node18)">admin-panel/.env</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="cmt"># admin-panel/.env</span>
+<span class="hi">NODE_PATH=../shared_modules/node18/node_modules</span>
+
+<span class="cmt"># landing-page/.env</span>
+<span class="hi">NODE_PATH=../shared_modules/node22/node_modules</span></pre>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card-dark h-100">
+          <div class="card-header-dark">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span>package.json — stays completely clean</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre>{
+  <span class="str">"name"</span>: <span class="str">"shop-app"</span>,
+  <span class="str">"scripts"</span>: {
+    <span class="str">"start"</span>: <span class="str">"react-scripts start"</span>,
+    <span class="str">"build"</span>: <span class="str">"react-scripts build"</span>,
+    <span class="str">"test"</span>:  <span class="str">"react-scripts test"</span>
+  }
+}
+<span class="cmt">// No cross-env, no NODE_PATH here.
+// It's all in .env — package.json untouched.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-dark mb-3">
+      <div class="card-header-dark">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span>terminal — create .env files for all 4 projects at once</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Create .env file in each project — one command per project</span>
+<span class="cmd">echo</span> <span class="str">"NODE_PATH=../shared_modules/node16/node_modules"</span> > ~/projects/shop-app/.env
+<span class="cmd">echo</span> <span class="str">"NODE_PATH=../shared_modules/node16/node_modules"</span> > ~/projects/dashboard-app/.env
+<span class="cmd">echo</span> <span class="str">"NODE_PATH=../shared_modules/node18/node_modules"</span> > ~/projects/admin-panel/.env
+<span class="cmd">echo</span> <span class="str">"NODE_PATH=../shared_modules/node22/node_modules"</span> > ~/projects/landing-page/.env
+
+<span class="cmt"># Verify:</span>
+<span class="cmd">cat</span> ~/projects/shop-app/.env
+<span class="cmt"># → NODE_PATH=../shared_modules/node16/node_modules  ✅</span>
+
+<span class="cmt"># Now just run as usual — .env is picked up automatically:</span>
+<span class="cmd">npm start</span>      <span class="cmt">✅</span>
+<span class="cmd">npm run build</span>  <span class="cmt">✅</span></pre>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card-dark h-100">
+          <div class="card-header-dark">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span>Relative vs Absolute path in .env</span>
+          </div>
+          <pre><span class="cmt"># Relative (recommended — projects &amp; shared_modules side by side)</span>
+<span class="hi">NODE_PATH=../shared_modules/node16/node_modules</span>
+
+<span class="cmt"># Absolute — Mac/Linux (if folder is somewhere else)</span>
+<span class="hi">NODE_PATH=/home/yourname/shared_modules/node16/node_modules</span>
+
+<span class="cmt"># Absolute — Windows</span>
+<span class="hi">NODE_PATH=C:/Users/YourName/shared_modules/node16/node_modules</span></pre>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-dark h-100">
+          <div class="card-header-dark">
+            <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+            <span>jsconfig.json — VS Code IntelliSense (add to each project)</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="cmt">// shop-app/jsconfig.json</span>
+{
+  <span class="str">"compilerOptions"</span>: {
+    <span class="str">"baseUrl"</span>: <span class="str">"."</span>,
+    <span class="str">"paths"</span>: {
+      <span class="str">"my-utils"</span>: [<span class="str">"../shared_modules/node16/node_modules/my-utils"</span>],
+      <span class="str">"*"</span>: [<span class="str">"../shared_modules/node16/node_modules/*"</span>]
+    }
+  }
+}
+<span class="cmt">// Gives autocomplete + go-to-definition in VS Code</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 alert-warn">
+      <span class="alert-icon" style="color:var(--accent3)"><i class="bi bi-exclamation-triangle-fill"></i></span>
+      <span><strong>Works only with react-scripts (Create React App).</strong> If you use Vite, Next.js, or plain Node — use Way 1 (cross-env) instead, as those tools don't auto-read <code>.env</code> for <code>NODE_PATH</code>. Also add <code>.env</code> to <code>.gitignore</code> if the path is machine-specific.</span>
+    </div>
+  </div>
+
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════ STEP 6: NVMRC + DELETE ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="step-num">6</div>
+    <div>
+      <div class="section-title">Add .nvmrc to Projects + Delete Local node_modules</div>
+      <div class="section-sub">One file per project tells NVM which Node version to use — path is already set in package.json scripts</div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-3 col-md-6">
+      <div class="project-card">
+        <div class="project-name"><i class="bi bi-folder2-open me-2" style="color:var(--node16)"></i>shop-app</div>
+        <span class="project-badge b16">Node 16</span>
+        <ul class="project-files">
+          <li><i class="bi bi-file-earmark-text f-add"></i>.nvmrc <span class="text-muted ms-auto">→ "16"</span></li>
+          <li><i class="bi bi-check-circle f-keep"></i>package.json <span class="text-muted ms-auto">keep</span></li>
+          <li><i class="bi bi-check-circle f-keep"></i>src/ <span class="text-muted ms-auto">keep</span></li>
+          <li><i class="bi bi-x-circle f-del"></i>node_modules/ <span class="text-muted ms-auto">delete</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="project-card">
+        <div class="project-name"><i class="bi bi-folder2-open me-2" style="color:var(--node16)"></i>dashboard-app</div>
+        <span class="project-badge b16">Node 16</span>
+        <ul class="project-files">
+          <li><i class="bi bi-file-earmark-text f-add"></i>.nvmrc <span class="text-muted ms-auto">→ "16"</span></li>
+          <li><i class="bi bi-check-circle f-keep"></i>package.json <span class="text-muted ms-auto">keep</span></li>
+          <li><i class="bi bi-check-circle f-keep"></i>src/ <span class="text-muted ms-auto">keep</span></li>
+          <li><i class="bi bi-x-circle f-del"></i>node_modules/ <span class="text-muted ms-auto">delete</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="project-card">
+        <div class="project-name"><i class="bi bi-folder2-open me-2" style="color:var(--node18)"></i>admin-panel</div>
+        <span class="project-badge b18">Node 18</span>
+        <ul class="project-files">
+          <li><i class="bi bi-file-earmark-text f-add"></i>.nvmrc <span class="text-muted ms-auto">→ "18"</span></li>
+          <li><i class="bi bi-check-circle f-keep"></i>package.json <span class="text-muted ms-auto">keep</span></li>
+          <li><i class="bi bi-check-circle f-keep"></i>src/ <span class="text-muted ms-auto">keep</span></li>
+          <li><i class="bi bi-x-circle f-del"></i>node_modules/ <span class="text-muted ms-auto">delete</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="project-card">
+        <div class="project-name"><i class="bi bi-folder2-open me-2" style="color:var(--node22)"></i>landing-page</div>
+        <span class="project-badge b22">Node 22</span>
+        <ul class="project-files">
+          <li><i class="bi bi-file-earmark-text f-add"></i>.nvmrc <span class="text-muted ms-auto">→ "22"</span></li>
+          <li><i class="bi bi-check-circle f-keep"></i>package.json <span class="text-muted ms-auto">keep</span></li>
+          <li><i class="bi bi-check-circle f-keep"></i>src/ <span class="text-muted ms-auto">keep</span></li>
+          <li><i class="bi bi-x-circle f-del"></i>node_modules/ <span class="text-muted ms-auto">delete</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-dark">
+    <div class="card-header-dark">
+      <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+      <span>terminal — run these commands for all 4 projects</span>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Add .nvmrc to each project (tells nvm which node version to use)</span>
+<span class="cmd">echo</span> <span class="str">"16"</span> > ~/projects/shop-app/.nvmrc
+<span class="cmd">echo</span> <span class="str">"16"</span> > ~/projects/dashboard-app/.nvmrc
+<span class="cmd">echo</span> <span class="str">"18"</span> > ~/projects/admin-panel/.nvmrc
+<span class="cmd">echo</span> <span class="str">"22"</span> > ~/projects/landing-page/.nvmrc
+
+<span class="cmt"># Delete local node_modules from all 4 projects</span>
+<span class="cmt"># (NODE_PATH in package.json scripts handles resolution now)</span>
+<span class="cmd">rm -rf</span> ~/projects/shop-app/node_modules
+<span class="cmd">rm -rf</span> ~/projects/dashboard-app/node_modules
+<span class="cmd">rm -rf</span> ~/projects/admin-panel/node_modules
+<span class="cmd">rm -rf</span> ~/projects/landing-page/node_modules
+
+<span class="cmt"># Keep only cross-env in node_modules (needed for package.json scripts)</span>
+<span class="cmt"># Already installed in Step 5 — nothing to reinstall</span></pre>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════ STEP 7: DAILY USAGE ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="step-num">7</div>
+    <div>
+      <div class="section-title">Daily Usage — How to Work</div>
+      <div class="section-sub">This is what you do every day from now on</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card-dark h-100">
+        <div class="card-header-dark">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span>terminal — switching between projects</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Working on shop-app (Node 16)</span>
+<span class="cmd">cd</span> ~/projects/shop-app
+<span class="cmd">nvm use</span>        <span class="cmt"># reads .nvmrc → switches to node 16</span>
+<span class="cmd">npm start</span>
+<span class="cmt"># cross-env sets NODE_PATH → ../shared_modules/node16/node_modules</span>
+<span class="cmt">✅ works!</span>
+
+<span class="cmt"># Switch to admin-panel (Node 18)</span>
+<span class="cmd">cd</span> ~/projects/admin-panel
+<span class="cmd">nvm use</span>        <span class="cmt"># reads .nvmrc → switches to node 18</span>
+<span class="cmd">npm start</span>
+<span class="cmt"># cross-env sets NODE_PATH → ../shared_modules/node18/node_modules</span>
+<span class="cmt">✅ works!</span>
+
+<span class="cmt"># Switch to landing-page (Node 22)</span>
+<span class="cmd">cd</span> ~/projects/landing-page
+<span class="cmd">nvm use</span>        <span class="cmt"># reads .nvmrc → switches to node 22</span>
+<span class="cmd">npm start</span>
+<span class="cmt"># cross-env sets NODE_PATH → ../shared_modules/node22/node_modules</span>
+<span class="cmt">✅ works!</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card-dark h-100">
+        <div class="card-header-dark">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span>Adding a new package later</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Need to add a new package?
+# Install into shared folder, NOT in project</span>
+
+<span class="cmt"># Example: add moment.js for node16 projects</span>
+<span class="cmd">nvm use</span> <span class="num">16</span>
+<span class="cmd">cd</span> ~/shared_modules/node16
+<span class="cmd">npm install</span> moment
+
+<span class="cmt"># Now ALL node16 projects can use it.
+# Their package.json already points here via NODE_PATH.
+# In shop-app or dashboard-app:</span>
+<span class="kw">import</span> moment <span class="kw">from</span> <span class="str">'moment'</span>;   <span class="cmt">✅</span>
+
+<span class="cmt"># Update my-utils? Just edit the file:</span>
+<span class="cmd">nano</span> ~/shared_modules/node16\
+  /node_modules/my-utils/index.js
+<span class="cmt"># All projects get the update instantly —
+# no reinstall, no restart needed!</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3 alert-warn">
+    <span class="alert-icon" style="color:var(--accent3)"><i class="bi bi-exclamation-triangle-fill"></i></span>
+    <span><strong>Never run <code>npm install &lt;package&gt;</code> inside a project folder.</strong> Always install into <code>~/shared_modules/nodeXX/</code>. The only thing installed locally in each project is <code>cross-env</code> (devDependency) which is what reads the path from package.json.</span>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════ QUICK REFERENCE TABLE ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="step-num"><i class="bi bi-table"></i></div>
+    <div>
+      <div class="section-title">Quick Reference</div>
+      <div class="section-sub">Everything at a glance — save this page!</div>
+    </div>
+  </div>
+
+  <div class="card-dark">
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>What</th>
+          <th>Where / Command</th>
+          <th>Done Once?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-what">Create shared folders</td>
+          <td class="td-path">mkdir -p ~/shared_modules/node16/node_modules</td>
+          <td class="td-once">✅ Once</td>
+        </tr>
+        <tr>
+          <td class="td-what">Install NVM</td>
+          <td class="td-path">curl -o- https://...nvm.sh | bash</td>
+          <td class="td-once">✅ Once</td>
+        </tr>
+        <tr>
+          <td class="td-what">Install Node versions</td>
+          <td class="td-path">nvm install 16 / 18 / 22</td>
+          <td class="td-once">✅ Once</td>
+        </tr>
+        <tr>
+          <td class="td-what">Install npm packages</td>
+          <td class="td-path">cd ~/shared_modules/node16 → npm install react...</td>
+          <td class="td-once">✅ Once per version</td>
+        </tr>
+        <tr>
+          <td class="td-what">Add custom my-utils</td>
+          <td class="td-path">~/shared_modules/node16/node_modules/my-utils/</td>
+          <td class="td-once">✅ Once per version</td>
+        </tr>
+        <tr>
+          <td class="td-what" style="color:var(--accent)">Way 1 — cross-env in package.json</td>
+          <td class="td-path">Add cross-env NODE_PATH=../shared_modules/nodeXX/node_modules in scripts + npm install --save-dev cross-env</td>
+          <td class="td-once">✅ Once per project</td>
+        </tr>
+        <tr>
+          <td class="td-what" style="color:var(--node18)">Way 2 — .env file (CRA only)</td>
+          <td class="td-path">echo "NODE_PATH=../shared_modules/node16/node_modules" > .env</td>
+          <td class="td-once">✅ Once per project</td>
+        </tr>
+        <tr>
+          <td class="td-what">Add jsconfig.json</td>
+          <td class="td-path">Add paths mapping to ../shared_modules/nodeXX in jsconfig.json</td>
+          <td class="td-once">✅ Once per project</td>
+        </tr>
+        <tr>
+          <td class="td-what">Add .nvmrc to project</td>
+          <td class="td-path">echo "16" > ~/projects/shop-app/.nvmrc</td>
+          <td class="td-once">✅ Once per project</td>
+        </tr>
+        <tr>
+          <td class="td-what">Delete project node_modules</td>
+          <td class="td-path">rm -rf ~/projects/shop-app/node_modules</td>
+          <td class="td-once">✅ Once per project</td>
+        </tr>
+        <tr>
+          <td class="td-what">Start any project</td>
+          <td class="td-path">cd ~/projects/shop-app → nvm use → npm start</td>
+          <td class="td-once">🔁 Daily</td>
+        </tr>
+        <tr>
+          <td class="td-what">Add new package later</td>
+          <td class="td-path">cd ~/shared_modules/node16 → npm install &lt;pkg&gt;</td>
+          <td class="td-once">🔁 When needed</td>
+        </tr>
+        <tr>
+          <td class="td-what">Update my-utils</td>
+          <td class="td-path">Edit ~/shared_modules/node16/node_modules/my-utils/index.js</td>
+          <td class="td-once">🔁 When needed</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+<footer>
+  <div class="container">
+    <span style="color:var(--accent); font-family:'JetBrains Mono',monospace; font-weight:700">NODE_PATH</span>
+    <span class="mx-2" style="color:var(--border)">|</span>
+    Shared node_modules across 50 projects
+    <span class="mx-2" style="color:var(--border)">|</span>
+    Node 16 · 18 · 22
+  </div>
+</footer>
+
+</div><!-- /container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function selectWay(way) {
+    var w1c = document.getElementById('way1-content');
+    var w2c = document.getElementById('way2-content');
+    var b1  = document.getElementById('btn-way1');
+    var b2  = document.getElementById('btn-way2');
+    if (way === 1) {
+      w1c.style.display = 'block';
+      w2c.style.display = 'none';
+      b1.style.background = 'rgba(0,229,255,0.08)';
+      b1.style.borderRight = '1px solid var(--border)';
+      b2.style.background = 'transparent';
+    } else {
+      w1c.style.display = 'none';
+      w2c.style.display = 'block';
+      b2.style.background = 'rgba(124,58,237,0.08)';
+      b1.style.background = 'transparent';
+    }
+  }
+
+  function switchTab(os) {
+    document.querySelectorAll('.os-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + os).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.card-dark').querySelector('pre');
+    if (!pre) return;
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'copied!';
+      btn.style.color = 'var(--green)';
+      setTimeout(() => { btn.textContent = 'copy'; btn.style.color = ''; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>

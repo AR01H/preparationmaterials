@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker — Windows & Linux Setup Guide</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #060a10;
+    --surf:   #0d1520;
+    --surf2:  #121c2b;
+    --border: #1e2d42;
+    --docker: #0db7ed;
+    --docker2:#0a8ab5;
+    --win:    #00adef;
+    --linux:  #fcc624;
+    --green:  #00c853;
+    --red:    #ff3d57;
+    --orange: #ff6d00;
+    --text:   #cdd9e8;
+    --muted:  #536678;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;line-height:1.65;}
+
+  .hero{background:linear-gradient(150deg,#060a10 0%,#091525 55%,#060a10 100%);border-bottom:1px solid var(--border);padding:54px 0 38px;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:380px;height:380px;background:radial-gradient(circle,rgba(13,183,237,0.09) 0%,transparent 70%);}
+  .hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(0,200,83,0.06) 0%,transparent 70%);}
+  .badge-hero{display:inline-flex;align-items:center;gap:7px;background:rgba(13,183,237,0.1);border:1px solid rgba(13,183,237,0.25);color:var(--docker);padding:4px 14px;border-radius:100px;font-size:.72rem;font-family:'Roboto Mono',monospace;letter-spacing:1.2px;margin-bottom:18px;}
+  .hero h1{font-size:clamp(1.8rem,4vw,2.9rem);font-weight:800;line-height:1.1;background:linear-gradient(120deg,#fff 0%,var(--docker) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;}
+  .hero p{color:var(--muted);font-size:.97rem;max-width:560px;}
+  .os-chips{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+  .oschip{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:100px;font-family:'Roboto Mono',monospace;font-size:.76rem;font-weight:600;border:1px solid;}
+  .win-chip{background:rgba(0,173,239,.1);border-color:rgba(0,173,239,.3);color:var(--win);}
+  .lin-chip{background:rgba(252,198,36,.1);border-color:rgba(252,198,36,.3);color:var(--linux);}
+  .dk-chip{background:rgba(13,183,237,.1);border-color:rgba(13,183,237,.3);color:var(--docker);}
+
+  .section{padding:44px 0 0;}
+  .sec-hdr{display:flex;align-items:center;gap:13px;margin-bottom:22px;}
+  .snum{width:38px;height:38px;border-radius:9px;flex-shrink:0;background:linear-gradient(135deg,var(--docker2),var(--docker));display:flex;align-items:center;justify-content:center;font-family:'Roboto Mono',monospace;font-weight:700;font-size:.95rem;color:#000;}
+  .stitle{font-size:1.28rem;font-weight:700;color:#fff;}
+  .ssub{color:var(--muted);font-size:.82rem;margin-top:2px;}
+
+  .cdk{background:var(--surf);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .chdr{background:var(--surf2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:7px;font-family:'Roboto Mono',monospace;font-size:.76rem;color:var(--muted);}
+  .dot{width:9px;height:9px;border-radius:50%;}.dr{background:var(--red);}.dy{background:var(--orange);}.dg{background:var(--green);}
+
+  .otabs{display:flex;gap:0;margin-bottom:-1px;}
+  .otab{padding:7px 18px;font-size:.78rem;font-family:'Roboto Mono',monospace;cursor:pointer;border:1px solid transparent;border-radius:8px 8px 0 0;color:var(--muted);background:transparent;transition:all .15s;}
+  .otab.active{background:var(--surf2);border-color:var(--border);border-bottom-color:var(--surf2);color:var(--docker);}
+  .tpane{display:none;}.tpane.active{display:block;}
+
+  pre{margin:0;padding:16px 18px;font-family:'Roboto Mono',monospace;font-size:.8rem;line-height:1.85;overflow-x:auto;background:transparent!important;color:var(--text);}
+  .cmd{color:var(--docker);}.cmt{color:var(--muted);font-style:italic;}
+  .str{color:var(--green);}.kw{color:var(--orange);}
+  .hi{color:#fff;font-weight:700;}.win{color:var(--win);font-weight:600;}
+  .lin{color:var(--linux);font-weight:600;}.ok{color:var(--green);}.err{color:var(--red);}
+  .bw{border-left:3px solid var(--win)!important;}
+  .bl{border-left:3px solid var(--linux)!important;}
+
+  .tip{background:rgba(13,183,237,.06);border:1px solid rgba(13,183,237,.2);border-left:3px solid var(--docker);border-radius:10px;padding:12px 16px;font-size:.86rem;display:flex;gap:10px;align-items:flex-start;}
+  .warn{background:rgba(255,61,87,.06);border:1px solid rgba(255,61,87,.2);border-left:3px solid var(--red);border-radius:10px;padding:12px 16px;font-size:.86rem;display:flex;gap:10px;align-items:flex-start;}
+  .ai{font-size:1rem;flex-shrink:0;margin-top:2px;}
+
+  .ref-table{width:100%;border-collapse:collapse;}
+  .ref-table th{background:var(--surf2);color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;padding:10px 14px;font-family:'Roboto Mono',monospace;border-bottom:1px solid var(--border);text-align:left;}
+  .ref-table td{padding:10px 14px;font-size:.8rem;font-family:'Roboto Mono',monospace;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;}
+  .ref-table tr:last-child td{border-bottom:none;}
+  .ref-table tr:hover td{background:rgba(255,255,255,.02);}
+
+  .cpybtn{margin-left:auto;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);font-size:.68rem;padding:2px 9px;border-radius:5px;cursor:pointer;font-family:'Roboto Mono',monospace;transition:all .15s;}
+  .cpybtn:hover{background:rgba(13,183,237,.1);color:var(--docker);border-color:var(--docker);}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:44px 0 0;}
+  footer{margin-top:56px;border-top:1px solid var(--border);padding:24px 0;color:var(--muted);font-size:.78rem;text-align:center;}
+  ::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <div class="badge-hero"><i class="bi bi-boxes"></i> DOCKER · SETUP GUIDE</div>
+    <h1>Docker Setup<br>Windows & Linux</h1>
+    <p>Install Docker, write Dockerfile, build images, run containers, use Docker Compose — complete end to end guide.</p>
+    <div class="os-chips">
+      <span class="oschip win-chip"><i class="bi bi-windows"></i> Windows</span>
+      <span class="oschip lin-chip"><i class="bi bi-ubuntu"></i> Linux</span>
+      <span class="oschip dk-chip"><i class="bi bi-box-seam"></i> Docker Engine</span>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-4">
+
+<!-- STEP 1: INSTALL -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">1</div>
+    <div><div class="stitle">Install Docker</div><div class="ssub">One-time install — pick your OS</div></div>
+  </div>
+  <div class="otabs" id="ot1">
+    <button class="otab active" onclick="sw('t1win','ot1',this)"><i class="bi bi-windows"></i> Windows</button>
+    <button class="otab" onclick="sw('t1lin','ot1',this)"><i class="bi bi-ubuntu"></i> Linux</button>
+  </div>
+  <div class="cdk" style="border-radius:0 12px 12px 12px">
+    <div id="t1win" class="tpane active">
+      <div class="chdr bw"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="win">Windows — Docker Desktop</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Step 1: Enable WSL2 (required) — open PowerShell as Admin</span>
+<span class="cmd">wsl --install</span>
+<span class="cmt"># restart computer after this</span>
+
+<span class="cmt"># Step 2: Download Docker Desktop</span>
+<span class="cmt"># https://docs.docker.com/desktop/install/windows-install/</span>
+<span class="cmt"># Double-click installer → follow steps</span>
+
+<span class="cmt"># Step 3: Verify (open new terminal)</span>
+<span class="cmd">docker</span> --version
+<span class="cmd">docker</span> ps
+<span class="cmt"># should show: Docker version 24.x.x</span>
+
+<span class="cmt"># Also works via winget:</span>
+<span class="cmd">winget install</span> Docker.DockerDesktop</pre>
+    </div>
+    <div id="t1lin" class="tpane">
+      <div class="chdr bl"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="lin">Linux — Docker Engine (Ubuntu/Debian)</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Step 1: Remove old versions</span>
+<span class="cmd">sudo apt remove</span> docker docker-engine docker.io containerd runc
+
+<span class="cmt"># Step 2: Install via official script (easiest)</span>
+<span class="cmd">curl</span> -fsSL https://get.docker.com | sh
+
+<span class="cmt"># Step 3: Add your user to docker group (no sudo needed)</span>
+<span class="cmd">sudo usermod</span> -aG docker $USER
+<span class="cmt"># log out and log back in after this</span>
+
+<span class="cmt"># Step 4: Start Docker service</span>
+<span class="cmd">sudo systemctl enable</span> docker
+<span class="cmd">sudo systemctl start</span> docker
+
+<span class="cmt"># Step 5: Verify</span>
+<span class="cmd">docker</span> --version
+<span class="cmd">docker run</span> hello-world   <span class="cmt">← runs test container</span></pre>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 2: DOCKERFILE -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">2</div>
+    <div><div class="stitle">Write a Dockerfile</div><div class="ssub">Recipe for building your app image — same on Windows & Linux</div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>Dockerfile — Node.js app</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Base image</span>
+<span class="kw">FROM</span> node:18-alpine
+
+<span class="cmt"># Set working directory inside container</span>
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Copy package files first (layer caching)</span>
+<span class="kw">COPY</span> package*.json ./
+
+<span class="cmt"># Install dependencies</span>
+<span class="kw">RUN</span> npm install --production
+
+<span class="cmt"># Copy rest of the code</span>
+<span class="kw">COPY</span> . .
+
+<span class="cmt"># Expose port</span>
+<span class="kw">EXPOSE</span> 3000
+
+<span class="cmt"># Command to start app</span>
+<span class="kw">CMD</span> ["node", "index.js"]</pre>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>Dockerfile — Python/React app</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Python app</span>
+<span class="kw">FROM</span> python:3.11-slim
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install -r requirements.txt
+<span class="kw">COPY</span> . .
+<span class="kw">EXPOSE</span> 8000
+<span class="kw">CMD</span> ["python", "app.py"]
+
+<span class="cmt"># ── React app (multi-stage build) ──</span>
+<span class="kw">FROM</span> node:18-alpine <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm install
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> npm run build
+
+<span class="kw">FROM</span> nginx:alpine
+<span class="kw">COPY --from=</span>builder /app/build /usr/share/nginx/html
+<span class="kw">EXPOSE</span> 80</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 3: BUILD & RUN -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">3</div>
+    <div><div class="stitle">Build Image & Run Container</div><div class="ssub">Same commands on Windows & Linux</div></div>
+  </div>
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — build, run, manage containers</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># ── Build image ───────────────────────────────</span>
+<span class="cmd">docker build</span> -t my-app .
+<span class="cmd">docker build</span> -t my-app:v1.0 .     <span class="cmt">← with version tag</span>
+
+<span class="cmt"># ── Run container ─────────────────────────────</span>
+<span class="cmd">docker run</span> my-app                  <span class="cmt">← runs in foreground</span>
+<span class="cmd">docker run</span> -d my-app               <span class="cmt">← runs in background (detached)</span>
+<span class="cmd">docker run</span> -d -p 3000:3000 my-app  <span class="cmt">← maps host:container port</span>
+<span class="cmd">docker run</span> -d -p 3000:3000 --name mycontainer my-app
+
+<span class="cmt"># ── Manage containers ─────────────────────────</span>
+<span class="cmd">docker ps</span>                <span class="cmt">← list running containers</span>
+<span class="cmd">docker ps -a</span>             <span class="cmt">← list all (including stopped)</span>
+<span class="cmd">docker stop</span> mycontainer
+<span class="cmd">docker start</span> mycontainer
+<span class="cmd">docker rm</span> mycontainer    <span class="cmt">← delete container</span>
+<span class="cmd">docker logs</span> mycontainer  <span class="cmt">← see logs</span>
+<span class="cmd">docker logs -f</span> mycontainer  <span class="cmt">← follow logs live</span>
+
+<span class="cmt"># ── Enter running container shell ─────────────</span>
+<span class="cmd">docker exec</span> -it mycontainer sh    <span class="cmt">← alpine images</span>
+<span class="cmd">docker exec</span> -it mycontainer bash  <span class="cmt">← ubuntu-based images</span>
+
+<span class="cmt"># ── Manage images ─────────────────────────────</span>
+<span class="cmd">docker images</span>            <span class="cmt">← list all images</span>
+<span class="cmd">docker rmi</span> my-app        <span class="cmt">← delete image</span>
+<span class="cmd">docker system prune</span>      <span class="cmt">← remove all unused (images + containers)</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 4: VOLUMES & ENV -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">4</div>
+    <div><div class="stitle">Volumes & Environment Variables</div><div class="ssub">Persist data and pass config to containers</div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>Volumes — persist data</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Mount local folder into container</span>
+<span class="cmd">docker run</span> -d \
+  -v /home/user/data:/app/data \
+  my-app
+
+<span class="cmt"># Windows path (PowerShell)</span>
+<span class="cmd">docker run</span> -d `
+  -v C:\Users\YOU\data:/app/data `
+  my-app
+
+<span class="cmt"># Named volume (Docker manages it)</span>
+<span class="cmd">docker volume create</span> mydata
+<span class="cmd">docker run</span> -d -v mydata:/app/data my-app
+
+<span class="cmt"># List volumes</span>
+<span class="cmd">docker volume ls</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>Environment variables</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Pass env vars at runtime</span>
+<span class="cmd">docker run</span> -d \
+  -e NODE_ENV=production \
+  -e DB_HOST=localhost \
+  -e DB_PASS=secret \
+  my-app
+
+<span class="cmt"># Load from .env file</span>
+<span class="cmd">docker run</span> -d --env-file .env my-app
+
+<span class="cmt"># .env file contents:</span>
+NODE_ENV=production
+DB_HOST=localhost
+DB_PORT=5432
+DB_PASS=secret</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 5: DOCKER COMPOSE -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">5</div>
+    <div><div class="stitle">Docker Compose — Run Multiple Containers</div><div class="ssub">App + DB + Redis together — same on Windows & Linux</div></div>
+  </div>
+  <div class="cdk mb-3">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>docker-compose.yml — full stack example</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">services</span>:
+
+  <span class="cmt"># Your Node.js app</span>
+  <span class="hi">app</span>:
+    build: .
+    ports:
+      - <span class="str">"3000:3000"</span>
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    volumes:
+      - .:/app                    <span class="cmt">← live reload during dev</span>
+    depends_on:
+      - db
+      - redis
+
+  <span class="cmt"># PostgreSQL database</span>
+  <span class="hi">db</span>:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: myapp
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - <span class="str">"5432:5432"</span>
+
+  <span class="cmt"># Redis cache</span>
+  <span class="hi">redis</span>:
+    image: redis:7-alpine
+    ports:
+      - <span class="str">"6379:6379"</span>
+
+<span class="kw">volumes</span>:
+  pgdata:   <span class="cmt">← named volume for DB persistence</span></pre>
+  </div>
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — docker compose commands</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># Start all services (builds if needed)</span>
+<span class="cmd">docker compose up</span>
+<span class="cmd">docker compose up</span> -d        <span class="cmt">← background</span>
+<span class="cmd">docker compose up</span> --build   <span class="cmt">← force rebuild images</span>
+
+<span class="cmt"># Stop all services</span>
+<span class="cmd">docker compose down</span>
+<span class="cmd">docker compose down</span> -v      <span class="cmt">← also delete volumes</span>
+
+<span class="cmt"># View logs</span>
+<span class="cmd">docker compose logs</span>
+<span class="cmd">docker compose logs -f app</span>  <span class="cmt">← follow specific service</span>
+
+<span class="cmt"># Run command in a service</span>
+<span class="cmd">docker compose exec</span> app bash
+<span class="cmd">docker compose exec</span> db psql -U admin myapp</pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 6: PUSH TO REGISTRY -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">6</div>
+    <div><div class="stitle">Push Image to Docker Hub / ECR</div><div class="ssub">Share your image or deploy to cloud</div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>Docker Hub</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Login to Docker Hub</span>
+<span class="cmd">docker login</span>
+
+<span class="cmt"># Tag image with your username</span>
+<span class="cmd">docker tag</span> my-app \
+  yourusername/my-app:latest
+
+<span class="cmt"># Push</span>
+<span class="cmd">docker push</span> yourusername/my-app:latest
+
+<span class="cmt"># Pull anywhere</span>
+<span class="cmd">docker pull</span> yourusername/my-app:latest</pre>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>AWS ECR (Elastic Container Registry)</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Login to ECR</span>
+<span class="cmd">aws ecr get-login-password</span> \
+  --region us-east-1 | \
+<span class="cmd">docker login</span> --username AWS \
+  --password-stdin \
+  123456789.dkr.ecr.us-east-1.amazonaws.com
+
+<span class="cmt"># Tag and push</span>
+<span class="cmd">docker tag</span> my-app:latest \
+  123456789.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
+
+<span class="cmd">docker push</span> \
+  123456789.dkr.ecr.us-east-1.amazonaws.com/my-app:latest</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- REFERENCE -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum"><i class="bi bi-table"></i></div>
+    <div><div class="stitle">Quick Reference</div></div>
+  </div>
+  <div class="cdk">
+    <table class="ref-table">
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--docker)">docker build -t name .</td><td>Build image from Dockerfile</td></tr>
+        <tr><td style="color:var(--docker)">docker run -d -p 3000:3000 name</td><td>Run container in background, map port</td></tr>
+        <tr><td style="color:var(--docker)">docker ps</td><td>List running containers</td></tr>
+        <tr><td style="color:var(--docker)">docker ps -a</td><td>List all containers (including stopped)</td></tr>
+        <tr><td style="color:var(--docker)">docker logs -f name</td><td>Follow container logs live</td></tr>
+        <tr><td style="color:var(--docker)">docker exec -it name bash</td><td>Enter container shell</td></tr>
+        <tr><td style="color:var(--docker)">docker stop / start / rm</td><td>Stop / Start / Delete container</td></tr>
+        <tr><td style="color:var(--docker)">docker images</td><td>List all images</td></tr>
+        <tr><td style="color:var(--docker)">docker system prune</td><td>Remove all unused resources</td></tr>
+        <tr><td style="color:var(--docker)">docker compose up -d</td><td>Start all services in background</td></tr>
+        <tr><td style="color:var(--docker)">docker compose down</td><td>Stop all services</td></tr>
+        <tr><td style="color:var(--docker)">docker compose logs -f</td><td>Follow all service logs</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+<footer><div class="container"><span style="color:var(--docker);font-family:'Roboto Mono',monospace;font-weight:700">Docker</span> · Windows & Linux · Build · Run · Compose</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function sw(id,grp,btn){
+  const tabs=document.getElementById(grp);
+  tabs.parentElement.querySelectorAll('.tpane').forEach(p=>p.classList.remove('active'));
+  tabs.querySelectorAll('.otab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
+}
+function cp(btn){
+  const pre=btn.closest('.cdk').querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='copied!';btn.style.color='var(--green)';
+    setTimeout(()=>{btn.textContent='copy';btn.style.color='';},2000);
+  });
+}
+</script>
+</body>
+</html>

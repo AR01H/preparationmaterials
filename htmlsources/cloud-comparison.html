@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Platform Comparison: AWS vs Azure vs GCP vs On-Premises</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --aws: #FF9900;
+    --aws-dark: #232F3E;
+    --azure: #0078D4;
+    --azure-dark: #003b6f;
+    --gcp: #4285F4;
+    --gcp-dark: #1a56cc;
+    --onprem: #2ECC71;
+    --onprem-dark: #1a7a44;
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1f2937;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: rgba(255,255,255,0.07);
+    --card-bg: rgba(255,255,255,0.04);
+    --font: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.7;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0a0e1a 0%, #0d1b36 50%, #0a0e1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 0 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255,153,0,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(66,133,244,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,153,0,0.12);
+    border: 1px solid rgba(255,153,0,0.3);
+    color: var(--aws);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .hero h1 span { color: var(--aws); }
+  .hero p { color: var(--muted); font-size: 1.1rem; max-width: 600px; }
+
+  /* PLATFORM CARDS */
+  .platform-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .pill-aws    { background: rgba(255,153,0,0.15);  color: var(--aws);    border: 1px solid rgba(255,153,0,0.3); }
+  .pill-azure  { background: rgba(0,120,212,0.15);  color: #4db4ff;       border: 1px solid rgba(0,120,212,0.3); }
+  .pill-gcp    { background: rgba(66,133,244,0.15); color: #7aadff;       border: 1px solid rgba(66,133,244,0.3); }
+  .pill-onprem { background: rgba(46,204,113,0.15); color: var(--onprem); border: 1px solid rgba(46,204,113,0.3); }
+
+  /* SECTIONS */
+  section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .section-subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 48px; }
+
+  /* CARDS */
+  .cloud-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    height: 100%;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .cloud-card:hover { transform: translateY(-4px); }
+  .cloud-card.aws    { border-top: 3px solid var(--aws); }
+  .cloud-card.azure  { border-top: 3px solid var(--azure); }
+  .cloud-card.gcp    { border-top: 3px solid var(--gcp); }
+  .cloud-card.onprem { border-top: 3px solid var(--onprem); }
+
+  .cloud-card .card-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+  }
+  .cloud-card.aws    .card-icon { background: rgba(255,153,0,0.15);  color: var(--aws); }
+  .cloud-card.azure  .card-icon { background: rgba(0,120,212,0.15);  color: #4db4ff; }
+  .cloud-card.gcp    .card-icon { background: rgba(66,133,244,0.15); color: #7aadff; }
+  .cloud-card.onprem .card-icon { background: rgba(46,204,113,0.15); color: var(--onprem); }
+
+  .cloud-card h4 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+  .cloud-card .tagline { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+  /* SERVICE TABLE */
+  .service-table { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
+  .service-table table { width: 100%; border-collapse: collapse; }
+  .service-table thead { background: rgba(255,255,255,0.05); }
+  .service-table th, .service-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  .service-table th { font-weight: 700; font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .service-table tr:last-child td { border-bottom: none; }
+  .service-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .service-table .category { color: var(--muted); font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .service-table .svc-aws    { color: var(--aws); font-family: var(--mono); font-size: 0.82rem; }
+  .service-table .svc-azure  { color: #4db4ff;    font-family: var(--mono); font-size: 0.82rem; }
+  .service-table .svc-gcp    { color: #7aadff;    font-family: var(--mono); font-size: 0.82rem; }
+  .service-table .svc-onprem { color: var(--onprem); font-family: var(--mono); font-size: 0.82rem; }
+
+  /* USE CASE CARDS */
+  .usecase-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .usecase-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+  }
+  .usecase-card h5 { font-size: 1.05rem; font-weight: 700; margin: 0; }
+  .usecase-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 14px; }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: #0d1117;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin-top: 12px;
+  }
+  .code-block .comment { color: #6b7280; }
+  .code-block .keyword { color: #f97316; }
+  .code-block .string  { color: #86efac; }
+  .code-block .func    { color: #60a5fa; }
+  .code-block .var     { color: #e2e8f0; }
+  .code-bar {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 12px;
+  }
+  .code-bar span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .code-bar .r { background: #ef4444; }
+  .code-bar .y { background: #f59e0b; }
+  .code-bar .g { background: #22c55e; }
+  .code-bar .label { color: var(--muted); font-size: 0.75rem; margin-left: 8px; }
+
+  /* DECISION MATRIX */
+  .decision-table { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
+  .decision-table table { width: 100%; border-collapse: collapse; }
+  .decision-table th, .decision-table td { padding: 14px 16px; text-align: center; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .decision-table th { font-weight: 700; font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); background: rgba(255,255,255,0.04); }
+  .decision-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+  .decision-table tr:last-child td { border-bottom: none; }
+  .score-5 { color: #22c55e; font-weight: 700; }
+  .score-4 { color: #86efac; font-weight: 600; }
+  .score-3 { color: #fbbf24; font-weight: 600; }
+  .score-2 { color: #f97316; }
+  .score-1 { color: #ef4444; }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin: 3px 2px;
+    font-family: var(--mono);
+  }
+
+  /* E2E FLOW */
+  .flow-step {
+    display: flex; gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem;
+    margin-top: 2px;
+  }
+  .flow-num.aws    { background: rgba(255,153,0,0.2);  color: var(--aws); }
+  .flow-num.azure  { background: rgba(0,120,212,0.2);  color: #4db4ff; }
+  .flow-num.gcp    { background: rgba(66,133,244,0.2); color: #7aadff; }
+  .flow-num.onprem { background: rgba(46,204,113,0.2); color: var(--onprem); }
+  .flow-num.multi  { background: rgba(255,255,255,0.08); color: var(--text); }
+  .flow-content h6 { font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; }
+  .flow-content p  { color: var(--muted); font-size: 0.85rem; margin: 0; }
+
+  /* PRICING */
+  .pricing-note {
+    background: rgba(255,153,0,0.06);
+    border: 1px solid rgba(255,153,0,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 0.87rem;
+    color: var(--muted);
+    margin-top: 20px;
+  }
+  .pricing-note strong { color: var(--aws); }
+
+  /* NAV */
+  .sticky-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,26,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+  }
+  .sticky-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .sticky-nav a:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+
+  /* ACCORDION */
+  .accordion-button {
+    background: var(--card-bg) !important;
+    color: var(--text) !important;
+    font-weight: 600;
+    border: none;
+    font-family: var(--font);
+  }
+  .accordion-button:not(.collapsed) {
+    background: rgba(255,153,0,0.08) !important;
+    color: var(--aws) !important;
+    box-shadow: none;
+  }
+  .accordion-button::after {
+    filter: invert(1) brightness(0.5);
+  }
+  .accordion-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border) !important;
+    margin-bottom: 8px;
+    border-radius: 10px !important;
+    overflow: hidden;
+  }
+  .accordion-body { background: rgba(0,0,0,0.2); color: var(--muted); font-size: 0.9rem; }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* MISC */
+  .badge-custom {
+    font-size: 0.7rem; font-weight: 600;
+    padding: 4px 10px; border-radius: 6px;
+  }
+  .badge-aws    { background: rgba(255,153,0,0.2);  color: var(--aws); }
+  .badge-azure  { background: rgba(0,120,212,0.2);  color: #4db4ff; }
+  .badge-gcp    { background: rgba(66,133,244,0.2); color: #7aadff; }
+  .badge-onprem { background: rgba(46,204,113,0.2); color: var(--onprem); }
+
+  .pros-cons { list-style: none; padding: 0; margin: 0; }
+  .pros-cons li { padding: 4px 0; font-size: 0.87rem; display: flex; align-items: flex-start; gap: 8px; }
+  .pros-cons li.pro::before  { content: '✓'; color: #22c55e; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .pros-cons li.con::before  { content: '✗'; color: #ef4444; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(255,153,0,0.05), rgba(66,133,244,0.05));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+
+  @media(max-width:768px){
+    .hero { padding: 50px 0 40px; }
+    section { padding: 40px 0; }
+    .service-table th, .service-table td { padding: 10px 12px; font-size: 0.78rem; }
+    .sticky-nav .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between">
+      <span style="font-weight:700;font-size:0.9rem;">☁️ Cloud Comparison</span>
+      <div class="nav-links d-flex gap-1 flex-wrap">
+        <a href="#overview">Overview</a>
+        <a href="#services">Services</a>
+        <a href="#usecases">Use Cases</a>
+        <a href="#practical">Practical</a>
+        <a href="#e2e">End-to-End</a>
+        <a href="#decision">Decision</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="container">
+    <div class="hero-badge">☁️ Complete Cloud Guide 2024</div>
+    <h1>AWS vs Azure vs GCP<br>vs <span>On-Premises</span></h1>
+    <p class="mb-4">A complete end-to-end comparison covering use cases, services, practical commands, real-world architectures, and when to use what.</p>
+    <div class="d-flex flex-wrap gap-2">
+      <span class="platform-pill pill-aws"><i class="fab fa-aws"></i> AWS</span>
+      <span class="platform-pill pill-azure"><i class="fab fa-microsoft"></i> Azure</span>
+      <span class="platform-pill pill-gcp"><i class="fab fa-google"></i> GCP</span>
+      <span class="platform-pill pill-onprem"><i class="fas fa-server"></i> On-Premises</span>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="container">
+    <div class="section-label">Platform Overview</div>
+    <h2 class="section-title">What Each Platform Offers</h2>
+    <p class="section-subtitle">Understand the core identity, strengths, and market position of each platform before choosing.</p>
+
+    <div class="row g-4">
+      <!-- AWS -->
+      <div class="col-lg-3 col-md-6">
+        <div class="cloud-card aws h-100">
+          <div class="card-icon"><i class="fab fa-aws"></i></div>
+          <h4>Amazon Web Services</h4>
+          <div class="tagline">The Pioneer — Broadest Service Catalog</div>
+          <p style="font-size:0.87rem;color:var(--muted)">Launched 2006. Market leader with 200+ services. Best ecosystem, community, and third-party integrations. Dominant in startups and enterprises.</p>
+          <div class="mt-3">
+            <div class="fw-bold" style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Best For</div>
+            <span class="tag">Startups</span><span class="tag">E-commerce</span><span class="tag">Serverless</span><span class="tag">Big Data</span><span class="tag">IoT</span>
+          </div>
+          <div class="mt-3 pt-3" style="border-top:1px solid var(--border)">
+            <div class="d-flex justify-content-between" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Market Share</span>
+              <span style="color:var(--aws);font-weight:700;">~33%</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Regions</span>
+              <span style="font-weight:600;">33+</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Services</span>
+              <span style="font-weight:600;">200+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Azure -->
+      <div class="col-lg-3 col-md-6">
+        <div class="cloud-card azure h-100">
+          <div class="card-icon"><i class="fab fa-microsoft"></i></div>
+          <h4>Microsoft Azure</h4>
+          <div class="tagline">The Enterprise Choice — Microsoft Ecosystem</div>
+          <p style="font-size:0.87rem;color:var(--muted)">Launched 2010. Deep Microsoft integration (Office 365, Active Directory, Windows). Dominant in enterprises running Microsoft stack.</p>
+          <div class="mt-3">
+            <div class="fw-bold" style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Best For</div>
+            <span class="tag">Enterprise</span><span class="tag">.NET Apps</span><span class="tag">Hybrid Cloud</span><span class="tag">Windows</span><span class="tag">DevOps</span>
+          </div>
+          <div class="mt-3 pt-3" style="border-top:1px solid var(--border)">
+            <div class="d-flex justify-content-between" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Market Share</span>
+              <span style="color:#4db4ff;font-weight:700;">~23%</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Regions</span>
+              <span style="font-weight:600;">60+</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Services</span>
+              <span style="font-weight:600;">200+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GCP -->
+      <div class="col-lg-3 col-md-6">
+        <div class="cloud-card gcp h-100">
+          <div class="card-icon"><i class="fab fa-google"></i></div>
+          <h4>Google Cloud Platform</h4>
+          <div class="tagline">The Innovator — AI/ML & Data Analytics</div>
+          <p style="font-size:0.87rem;color:var(--muted)">Launched 2008. Unmatched in AI/ML (TensorFlow, Vertex AI), Big Data (BigQuery), and Kubernetes (invented it). Developer-friendly.</p>
+          <div class="mt-3">
+            <div class="fw-bold" style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Best For</div>
+            <span class="tag">AI/ML</span><span class="tag">BigQuery</span><span class="tag">Kubernetes</span><span class="tag">Analytics</span><span class="tag">Startups</span>
+          </div>
+          <div class="mt-3 pt-3" style="border-top:1px solid var(--border)">
+            <div class="d-flex justify-content-between" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Market Share</span>
+              <span style="color:#7aadff;font-weight:700;">~11%</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Regions</span>
+              <span style="font-weight:600;">40+</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Services</span>
+              <span style="font-weight:600;">150+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- On-Prem -->
+      <div class="col-lg-3 col-md-6">
+        <div class="cloud-card onprem h-100">
+          <div class="card-icon"><i class="fas fa-server"></i></div>
+          <h4>On-Premises</h4>
+          <div class="tagline">Full Control — Your Data Center</div>
+          <p style="font-size:0.87rem;color:var(--muted)">Your own hardware & infrastructure. Full data sovereignty, predictable costs at scale, meets strict compliance requirements. High upfront capex.</p>
+          <div class="mt-3">
+            <div class="fw-bold" style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Best For</div>
+            <span class="tag">Banking</span><span class="tag">Healthcare</span><span class="tag">Government</span><span class="tag">Defence</span><span class="tag">Compliance</span>
+          </div>
+          <div class="mt-3 pt-3" style="border-top:1px solid var(--border)">
+            <div class="d-flex justify-content-between" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Cost Model</span>
+              <span style="color:var(--onprem);font-weight:700;">CapEx</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Data Control</span>
+              <span style="font-weight:600;">100%</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+              <span style="color:var(--muted)">Scalability</span>
+              <span style="font-weight:600;">Limited</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES COMPARISON -->
+<section id="services">
+  <div class="container">
+    <div class="section-label">Service Mapping</div>
+    <h2 class="section-title">Equivalent Services Across Platforms</h2>
+    <p class="section-subtitle">Find the equivalent service for the same category across AWS, Azure, GCP, and On-Prem tooling.</p>
+
+    <div class="service-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>🟠 AWS</th>
+            <th>🔵 Azure</th>
+            <th>🔵 GCP</th>
+            <th>🟢 On-Premises</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="5" class="py-2 px-4" style="background:rgba(255,255,255,0.03);font-size:0.75rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">COMPUTE</td></tr>
+          <tr>
+            <td class="category">Virtual Machines</td>
+            <td class="svc-aws">EC2</td>
+            <td class="svc-azure">Azure VMs</td>
+            <td class="svc-gcp">Compute Engine</td>
+            <td class="svc-onprem">VMware / KVM / Bare Metal</td>
+          </tr>
+          <tr>
+            <td class="category">Serverless Functions</td>
+            <td class="svc-aws">Lambda</td>
+            <td class="svc-azure">Azure Functions</td>
+            <td class="svc-gcp">Cloud Functions</td>
+            <td class="svc-onprem">OpenFaaS / Knative</td>
+          </tr>
+          <tr>
+            <td class="category">Containers (CaaS)</td>
+            <td class="svc-aws">ECS / Fargate</td>
+            <td class="svc-azure">ACI / AKS</td>
+            <td class="svc-gcp">Cloud Run / GKE</td>
+            <td class="svc-onprem">Kubernetes / Docker Swarm</td>
+          </tr>
+          <tr>
+            <td class="category">Kubernetes (Managed)</td>
+            <td class="svc-aws">EKS</td>
+            <td class="svc-azure">AKS</td>
+            <td class="svc-gcp">GKE</td>
+            <td class="svc-onprem">Rancher / OpenShift</td>
+          </tr>
+          <tr><td colspan="5" class="py-2 px-4" style="background:rgba(255,255,255,0.03);font-size:0.75rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">STORAGE</td></tr>
+          <tr>
+            <td class="category">Object Storage</td>
+            <td class="svc-aws">S3</td>
+            <td class="svc-azure">Azure Blob Storage</td>
+            <td class="svc-gcp">Cloud Storage (GCS)</td>
+            <td class="svc-onprem">MinIO / Ceph / Swift</td>
+          </tr>
+          <tr>
+            <td class="category">Block Storage</td>
+            <td class="svc-aws">EBS</td>
+            <td class="svc-azure">Azure Disk Storage</td>
+            <td class="svc-gcp">Persistent Disk</td>
+            <td class="svc-onprem">SAN / iSCSI / LVM</td>
+          </tr>
+          <tr>
+            <td class="category">File Storage / NFS</td>
+            <td class="svc-aws">EFS</td>
+            <td class="svc-azure">Azure Files</td>
+            <td class="svc-gcp">Filestore</td>
+            <td class="svc-onprem">NFS / Samba / GlusterFS</td>
+          </tr>
+          <tr><td colspan="5" class="py-2 px-4" style="background:rgba(255,255,255,0.03);font-size:0.75rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">DATABASES</td></tr>
+          <tr>
+            <td class="category">Relational (RDBMS)</td>
+            <td class="svc-aws">RDS / Aurora</td>
+            <td class="svc-azure">Azure SQL / PostgreSQL</td>
+            <td class="svc-gcp">Cloud SQL / AlloyDB</td>
+            <td class="svc-onprem">MySQL / PostgreSQL / MSSQL</td>
+          </tr>
+          <tr>
+            <td class="category">NoSQL / Document</td>
+            <td class="svc-aws">DynamoDB</td>
+            <td class="svc-azure">Cosmos DB</td>
+            <td class="svc-gcp">Firestore / Bigtable</td>
+            <td class="svc-onprem">MongoDB / Cassandra / CouchDB</td>
+          </tr>
+          <tr>
+            <td class="category">In-Memory Cache</td>
+            <td class="svc-aws">ElastiCache (Redis)</td>
+            <td class="svc-azure">Azure Cache for Redis</td>
+            <td class="svc-gcp">Memorystore</td>
+            <td class="svc-onprem">Redis / Memcached</td>
+          </tr>
+          <tr>
+            <td class="category">Data Warehouse</td>
+            <td class="svc-aws">Redshift</td>
+            <td class="svc-azure">Synapse Analytics</td>
+            <td class="svc-gcp">BigQuery</td>
+            <td class="svc-onprem">Snowflake / ClickHouse / Hive</td>
+          </tr>
+          <tr><td colspan="5" class="py-2 px-4" style="background:rgba(255,255,255,0.03);font-size:0.75rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">NETWORKING</td></tr>
+          <tr>
+            <td class="category">Virtual Network / VPC</td>
+            <td class="svc-aws">VPC</td>
+            <td class="svc-azure">Virtual Network (VNet)</td>
+            <td class="svc-gcp">VPC</td>
+            <td class="svc-onprem">VLAN / SDN / pfSense</td>
+          </tr>
+          <tr>
+            <td class="category">Load Balancer</td>
+            <td class="svc-aws">ALB / NLB / ELB</td>
+            <td class="svc-azure">Azure Load Balancer / App GW</td>
+            <td class="svc-gcp">Cloud Load Balancing</td>
+            <td class="svc-onprem">Nginx / HAProxy / F5</td>
+          </tr>
+          <tr>
+            <td class="category">CDN</td>
+            <td class="svc-aws">CloudFront</td>
+            <td class="svc-azure">Azure CDN / Front Door</td>
+            <td class="svc-gcp">Cloud CDN</td>
+            <td class="svc-onprem">Varnish / Nginx Cache</td>
+          </tr>
+          <tr>
+            <td class="category">DNS</td>
+            <td class="svc-aws">Route 53</td>
+            <td class="svc-azure">Azure DNS</td>
+            <td class="svc-gcp">Cloud DNS</td>
+            <td class="svc-onprem">BIND / CoreDNS / PowerDNS</td>
+          </tr>
+          <tr><td colspan="5" class="py-2 px-4" style="background:rgba(255,255,255,0.03);font-size:0.75rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">AI / ML / ANALYTICS</td></tr>
+          <tr>
+            <td class="category">ML Platform</td>
+            <td class="svc-aws">SageMaker</td>
+            <td class="svc-azure">Azure ML Studio</td>
+            <td class="svc-gcp">Vertex AI</td>
+            <td class="svc-onprem">MLflow / Kubeflow / Seldon</td>
+          </tr>
+          <tr>
+            <td class="category">AI APIs (Vision/NLP)</td>
+            <td class="svc-aws">Rekognition / Comprehend</td>
+            <td class="svc-azure">Cognitive Services</td>
+            <td class="svc-gcp">Vision AI / Natural Language</td>
+            <td class="svc-onprem">Hugging Face / Ollama</td>
+          </tr>
+          <tr>
+            <td class="category">Data Pipeline / ETL</td>
+            <td class="svc-aws">Glue / EMR</td>
+            <td class="svc-azure">Data Factory / Databricks</td>
+            <td class="svc-gcp">Dataflow / Dataproc</td>
+            <td class="svc-onprem">Apache Spark / Airflow / Flink</td>
+          </tr>
+          <tr><td colspan="5" class="py-2 px-4" style="background:rgba(255,255,255,0.03);font-size:0.75rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">DEVOPS & MONITORING</td></tr>
+          <tr>
+            <td class="category">CI/CD</td>
+            <td class="svc-aws">CodePipeline / CodeBuild</td>
+            <td class="svc-azure">Azure DevOps / Pipelines</td>
+            <td class="svc-gcp">Cloud Build</td>
+            <td class="svc-onprem">Jenkins / GitLab CI / Tekton</td>
+          </tr>
+          <tr>
+            <td class="category">Infrastructure as Code</td>
+            <td class="svc-aws">CloudFormation / CDK</td>
+            <td class="svc-azure">ARM Templates / Bicep</td>
+            <td class="svc-gcp">Deployment Manager</td>
+            <td class="svc-onprem">Terraform / Ansible / Pulumi</td>
+          </tr>
+          <tr>
+            <td class="category">Monitoring / Logging</td>
+            <td class="svc-aws">CloudWatch</td>
+            <td class="svc-azure">Azure Monitor / Log Analytics</td>
+            <td class="svc-gcp">Cloud Monitoring / Logging</td>
+            <td class="svc-onprem">Prometheus / Grafana / ELK Stack</td>
+          </tr>
+          <tr>
+            <td class="category">Message Queue</td>
+            <td class="svc-aws">SQS / SNS / Kinesis</td>
+            <td class="svc-azure">Service Bus / Event Hubs</td>
+            <td class="svc-gcp">Pub/Sub</td>
+            <td class="svc-onprem">RabbitMQ / Kafka / ActiveMQ</td>
+          </tr>
+          <tr><td colspan="5" class="py-2 px-4" style="background:rgba(255,255,255,0.03);font-size:0.75rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">SECURITY & IDENTITY</td></tr>
+          <tr>
+            <td class="category">IAM / Access Control</td>
+            <td class="svc-aws">IAM / Cognito</td>
+            <td class="svc-azure">Azure Active Directory</td>
+            <td class="svc-gcp">Cloud IAM / Identity Platform</td>
+            <td class="svc-onprem">LDAP / Keycloak / FreeIPA</td>
+          </tr>
+          <tr>
+            <td class="category">Secrets Management</td>
+            <td class="svc-aws">Secrets Manager / KMS</td>
+            <td class="svc-azure">Key Vault</td>
+            <td class="svc-gcp">Secret Manager / Cloud KMS</td>
+            <td class="svc-onprem">HashiCorp Vault / CyberArk</td>
+          </tr>
+          <tr>
+            <td class="category">WAF / DDoS Protection</td>
+            <td class="svc-aws">AWS WAF / Shield</td>
+            <td class="svc-azure">Azure WAF / DDoS Protection</td>
+            <td class="svc-gcp">Cloud Armor</td>
+            <td class="svc-onprem">ModSecurity / pfSense / Snort</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section id="usecases">
+  <div class="container">
+    <div class="section-label">Real-World Use Cases</div>
+    <h2 class="section-title">When to Use Which Platform</h2>
+    <p class="section-subtitle">Industry-specific use cases with recommended platform choices and rationale.</p>
+
+    <div class="row g-4">
+      <!-- E-commerce -->
+      <div class="col-12">
+        <div class="usecase-card">
+          <div class="usecase-header">
+            <h5>🛍️ E-Commerce Platform (e.g., Amazon-like store)</h5>
+            <span class="badge-custom badge-aws">Recommended: AWS</span>
+          </div>
+          <p>High traffic variability, need for CDN, search, recommendation engines, payment processing, and inventory management.</p>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div style="background:rgba(255,153,0,0.06);border:1px solid rgba(255,153,0,0.2);border-radius:10px;padding:14px;">
+                <div class="mb-2"><span class="badge-custom badge-aws">AWS Stack</span></div>
+                <small style="color:var(--muted);">EC2 Auto Scaling → ALB → RDS Aurora → ElastiCache → CloudFront → S3 → SQS → Lambda</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div style="background:rgba(0,120,212,0.06);border:1px solid rgba(0,120,212,0.2);border-radius:10px;padding:14px;">
+                <div class="mb-2"><span class="badge-custom badge-azure">Azure Alternative</span></div>
+                <small style="color:var(--muted);">App Service → Azure SQL → Redis Cache → Azure CDN → Service Bus → Functions</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div style="background:rgba(46,204,113,0.06);border:1px solid rgba(46,204,113,0.2);border-radius:10px;padding:14px;">
+                <div class="mb-2"><span class="badge-custom badge-onprem">On-Prem (Hybrid)</span></div>
+                <small style="color:var(--muted);">Use On-Prem for payment data/PCI, burst to cloud for seasonal traffic spikes</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banking -->
+      <div class="col-12">
+        <div class="usecase-card">
+          <div class="usecase-header">
+            <h5>🏦 Banking & Financial Services</h5>
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="badge-custom badge-onprem">Preferred: On-Premises</span>
+              <span class="badge-custom badge-azure">Alt: Azure</span>
+            </div>
+          </div>
+          <p>Strict data sovereignty, regulatory compliance (RBI, SEBI, Basel), real-time transaction processing, fraud detection, and auditability.</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <ul class="pros-cons">
+                <li class="pro">On-Prem: Full data sovereignty, predictable latency, compliance</li>
+                <li class="pro">Azure: Best for hybrid — on-prem SWIFT connected to Azure analytics</li>
+                <li class="pro">AWS GovCloud: For US-regulated financial institutions</li>
+                <li class="con">Avoid: Single-cloud for all sensitive data (vendor lock-in risk)</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <div class="code-block">
+                <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Architecture Pattern</span></div>
+                <span class="comment"># Core Banking → On-Prem</span><br>
+                <span class="var">Core Transactions:</span> <span class="string">IBM Z / Oracle Exadata (On-Prem)</span><br>
+                <span class="var">Analytics/Reports:</span> <span class="string">Azure Synapse (Cloud)</span><br>
+                <span class="var">Customer Portal:</span>  <span class="string">Azure App Service</span><br>
+                <span class="var">Fraud Detection:</span>  <span class="string">GCP Vertex AI (ML)</span><br>
+                <span class="var">DR Site:</span>          <span class="string">Azure / AWS Secondary Region</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Healthcare -->
+      <div class="col-12">
+        <div class="usecase-card">
+          <div class="usecase-header">
+            <h5>🏥 Healthcare & Hospital Systems</h5>
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="badge-custom badge-azure">Recommended: Azure</span>
+              <span class="badge-custom badge-aws">Alt: AWS</span>
+            </div>
+          </div>
+          <p>HIPAA compliance, EHR systems, medical imaging AI, patient portals, telemedicine, and clinical data analytics.</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <ul class="pros-cons">
+                <li class="pro">Azure: HIPAA BAA available, Azure Health Data Services (FHIR)</li>
+                <li class="pro">AWS: HealthLake, Comprehend Medical for NLP on clinical notes</li>
+                <li class="pro">GCP: Healthcare API for FHIR/DICOM, AutoML for diagnostics</li>
+                <li class="con">On-Prem: Required for patient-identifiable data in many countries</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <div class="code-block">
+                <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Healthcare Stack</span></div>
+                <span class="comment"># Patient Data (FHIR)</span><br>
+                <span class="var">EHR Storage:</span> <span class="string">Azure Health Data Services</span><br>
+                <span class="var">DICOM Imaging:</span><span class="string">GCP Healthcare API</span><br>
+                <span class="var">AI Diagnosis:</span> <span class="string">AWS Rekognition + SageMaker</span><br>
+                <span class="var">Telemedicine:</span> <span class="string">Azure Communication Services</span><br>
+                <span class="var">PHI Storage:</span>  <span class="string">On-Prem (encrypted)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI/ML Startup -->
+      <div class="col-12">
+        <div class="usecase-card">
+          <div class="usecase-header">
+            <h5>🤖 AI/ML Startup</h5>
+            <span class="badge-custom badge-gcp">Recommended: GCP</span>
+          </div>
+          <p>Model training at scale, experiment tracking, serving predictions at low latency, data pipelines, and cost-efficient GPU compute.</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <ul class="pros-cons">
+                <li class="pro">GCP: TPU access, Vertex AI, BigQuery ML, best Kubernetes (GKE)</li>
+                <li class="pro">AWS: SageMaker best for MLOps, Trainium/Inferentia chips</li>
+                <li class="pro">Azure: OpenAI partnership, Azure ML, GPU VMs</li>
+                <li class="con">On-Prem: Only if you have large GPU farm already</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <div class="code-block">
+                <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">ML Pipeline</span></div>
+                <span class="comment"># GCP ML Architecture</span><br>
+                <span class="var">Data Ingestion:</span>  <span class="string">Pub/Sub → Dataflow</span><br>
+                <span class="var">Feature Store:</span>   <span class="string">Vertex AI Feature Store</span><br>
+                <span class="var">Training:</span>        <span class="string">Vertex AI Training (TPU v4)</span><br>
+                <span class="var">Experiment Track:</span><span class="string">Vertex AI Experiments</span><br>
+                <span class="var">Serving:</span>         <span class="string">Vertex AI Prediction (REST)</span><br>
+                <span class="var">Monitoring:</span>      <span class="string">Vertex AI Model Monitoring</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Government -->
+      <div class="col-12">
+        <div class="usecase-card">
+          <div class="usecase-header">
+            <h5>🏛️ Government & Defence</h5>
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="badge-custom badge-onprem">Preferred: On-Premises</span>
+              <span class="badge-custom badge-aws">Alt: AWS GovCloud</span>
+            </div>
+          </div>
+          <p>National data sovereignty, classified workloads, citizen data, e-governance portals, and national ID systems.</p>
+          <ul class="pros-cons mt-2">
+            <li class="pro">On-Prem: Mandatory for classified/secret data (NIC in India, DSCC)</li>
+            <li class="pro">AWS GovCloud: FedRAMP, DoD IL4/IL5/IL6 compliance (US)</li>
+            <li class="pro">Azure Government: DoD Impact Level 5, CJIS, ITAR compliance</li>
+            <li class="con">Public cloud: Never for Top Secret / eyes-only classified data</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRACTICAL COMMANDS -->
+<section id="practical">
+  <div class="container">
+    <div class="section-label">Practical Commands & Code</div>
+    <h2 class="section-title">Hands-On: Real CLI Commands & Scripts</h2>
+    <p class="section-subtitle">Copy-paste ready commands for common tasks across all platforms.</p>
+
+    <!-- Bootstrap Accordion -->
+    <div class="accordion" id="practicalAccordion">
+
+      <!-- AWS -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#awsPractical">
+            <span class="me-2" style="color:var(--aws)">🟠</span> AWS CLI — Practical Commands
+          </button>
+        </h2>
+        <div id="awsPractical" class="accordion-collapse collapse show" data-bs-parent="#practicalAccordion">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">AWS CLI Setup & EC2</span></div>
+                  <span class="comment"># Configure AWS CLI</span><br>
+                  <span class="func">aws configure</span><br>
+                  <span class="comment"># AWS Access Key ID / Secret / Region / Format</span><br><br>
+                  <span class="comment"># Launch EC2 instance</span><br>
+                  <span class="func">aws ec2 run-instances</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--image-id</span> ami-0c55b159cbfafe1f0 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--instance-type</span> t3.micro \<br>
+                  &nbsp;&nbsp;<span class="keyword">--key-name</span> my-keypair \<br>
+                  &nbsp;&nbsp;<span class="keyword">--security-group-ids</span> sg-xxxxxx \<br>
+                  &nbsp;&nbsp;<span class="keyword">--subnet-id</span> subnet-xxxxxx \<br>
+                  &nbsp;&nbsp;<span class="keyword">--count</span> 1<br><br>
+                  <span class="comment"># List running instances</span><br>
+                  <span class="func">aws ec2 describe-instances</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--filters</span> <span class="string">"Name=instance-state-name,Values=running"</span><br><br>
+                  <span class="comment"># Stop / Start / Terminate EC2</span><br>
+                  <span class="func">aws ec2 stop-instances</span> <span class="keyword">--instance-ids</span> i-xxxxxxxx<br>
+                  <span class="func">aws ec2 start-instances</span> <span class="keyword">--instance-ids</span> i-xxxxxxxx<br>
+                  <span class="func">aws ec2 terminate-instances</span> <span class="keyword">--instance-ids</span> i-xxxxxxxx
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">AWS S3 & Lambda</span></div>
+                  <span class="comment"># S3 Operations</span><br>
+                  <span class="func">aws s3 mb</span> s3://my-bucket-name<br>
+                  <span class="func">aws s3 cp</span> ./file.txt s3://my-bucket/<br>
+                  <span class="func">aws s3 sync</span> ./local-dir s3://my-bucket/backup/<br>
+                  <span class="func">aws s3 ls</span> s3://my-bucket/<br>
+                  <span class="func">aws s3 rm</span> s3://my-bucket/file.txt<br><br>
+                  <span class="comment"># Lambda: Deploy a function</span><br>
+                  <span class="func">zip</span> function.zip lambda_function.py<br>
+                  <span class="func">aws lambda create-function</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--function-name</span> MyLambda \<br>
+                  &nbsp;&nbsp;<span class="keyword">--runtime</span> python3.11 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--role</span> arn:aws:iam::XXXX:role/lambda-role \<br>
+                  &nbsp;&nbsp;<span class="keyword">--handler</span> lambda_function.lambda_handler \<br>
+                  &nbsp;&nbsp;<span class="keyword">--zip-file</span> fileb://function.zip<br><br>
+                  <span class="comment"># Invoke Lambda</span><br>
+                  <span class="func">aws lambda invoke</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--function-name</span> MyLambda \<br>
+                  &nbsp;&nbsp;<span class="keyword">--payload</span> <span class="string">'{"key":"value"}'</span> output.txt
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">AWS RDS & EKS</span></div>
+                  <span class="comment"># Create RDS MySQL instance</span><br>
+                  <span class="func">aws rds create-db-instance</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--db-instance-identifier</span> mydb \<br>
+                  &nbsp;&nbsp;<span class="keyword">--db-instance-class</span> db.t3.micro \<br>
+                  &nbsp;&nbsp;<span class="keyword">--engine</span> mysql \<br>
+                  &nbsp;&nbsp;<span class="keyword">--master-username</span> admin \<br>
+                  &nbsp;&nbsp;<span class="keyword">--master-user-password</span> SecurePass123 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--allocated-storage</span> 20<br><br>
+                  <span class="comment"># EKS cluster setup</span><br>
+                  <span class="func">eksctl create cluster</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> my-cluster \<br>
+                  &nbsp;&nbsp;<span class="keyword">--region</span> us-east-1 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--nodegroup-name</span> workers \<br>
+                  &nbsp;&nbsp;<span class="keyword">--node-type</span> t3.medium \<br>
+                  &nbsp;&nbsp;<span class="keyword">--nodes</span> 3<br><br>
+                  <span class="comment"># Update kubeconfig for EKS</span><br>
+                  <span class="func">aws eks update-kubeconfig</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> my-cluster \<br>
+                  &nbsp;&nbsp;<span class="keyword">--region</span> us-east-1
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">AWS CloudFormation (IaC)</span></div>
+                  <span class="comment"># Deploy CloudFormation stack</span><br>
+                  <span class="func">aws cloudformation create-stack</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--stack-name</span> MyStack \<br>
+                  &nbsp;&nbsp;<span class="keyword">--template-body</span> file://template.yaml \<br>
+                  &nbsp;&nbsp;<span class="keyword">--parameters</span> <span class="string">ParameterKey=Env,ParameterValue=prod</span><br><br>
+                  <span class="comment"># template.yaml snippet</span><br>
+                  <span class="var">Resources:</span><br>
+                  &nbsp;&nbsp;<span class="var">MyBucket:</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">Type:</span> <span class="string">AWS::S3::Bucket</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">Properties:</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">BucketName:</span> <span class="string">my-prod-bucket</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">VersioningConfiguration:</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">Status:</span> <span class="string">Enabled</span><br><br>
+                  <span class="comment"># Update / Delete stack</span><br>
+                  <span class="func">aws cloudformation update-stack</span> <span class="keyword">--stack-name</span> MyStack <span class="keyword">--template-body</span> file://template.yaml<br>
+                  <span class="func">aws cloudformation delete-stack</span> <span class="keyword">--stack-name</span> MyStack
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Azure -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#azurePractical">
+            <span class="me-2" style="color:#4db4ff">🔵</span> Azure CLI — Practical Commands
+          </button>
+        </h2>
+        <div id="azurePractical" class="accordion-collapse collapse" data-bs-parent="#practicalAccordion">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Azure CLI Setup & VMs</span></div>
+                  <span class="comment"># Login to Azure</span><br>
+                  <span class="func">az login</span><br>
+                  <span class="func">az account set</span> <span class="keyword">--subscription</span> <span class="string">"My Subscription"</span><br><br>
+                  <span class="comment"># Create Resource Group</span><br>
+                  <span class="func">az group create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> MyResourceGroup \<br>
+                  &nbsp;&nbsp;<span class="keyword">--location</span> eastus<br><br>
+                  <span class="comment"># Create Virtual Machine</span><br>
+                  <span class="func">az vm create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--resource-group</span> MyResourceGroup \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> MyVM \<br>
+                  &nbsp;&nbsp;<span class="keyword">--image</span> UbuntuLTS \<br>
+                  &nbsp;&nbsp;<span class="keyword">--admin-username</span> azureuser \<br>
+                  &nbsp;&nbsp;<span class="keyword">--generate-ssh-keys</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--size</span> Standard_B2s<br><br>
+                  <span class="comment"># Open port 80</span><br>
+                  <span class="func">az vm open-port</span> <span class="keyword">--port</span> 80 <span class="keyword">--resource-group</span> MyResourceGroup <span class="keyword">--name</span> MyVM
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Azure Storage & AKS</span></div>
+                  <span class="comment"># Create Storage Account</span><br>
+                  <span class="func">az storage account create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> mystorageaccount \<br>
+                  &nbsp;&nbsp;<span class="keyword">--resource-group</span> MyResourceGroup \<br>
+                  &nbsp;&nbsp;<span class="keyword">--sku</span> Standard_LRS<br><br>
+                  <span class="comment"># Upload blob</span><br>
+                  <span class="func">az storage blob upload</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--account-name</span> mystorageaccount \<br>
+                  &nbsp;&nbsp;<span class="keyword">--container-name</span> mycontainer \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> myfile.txt \<br>
+                  &nbsp;&nbsp;<span class="keyword">--file</span> ./myfile.txt<br><br>
+                  <span class="comment"># Create AKS cluster</span><br>
+                  <span class="func">az aks create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--resource-group</span> MyResourceGroup \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> MyAKSCluster \<br>
+                  &nbsp;&nbsp;<span class="keyword">--node-count</span> 3 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--enable-addons</span> monitoring \<br>
+                  &nbsp;&nbsp;<span class="keyword">--generate-ssh-keys</span><br><br>
+                  <span class="comment"># Get credentials</span><br>
+                  <span class="func">az aks get-credentials</span> <span class="keyword">--resource-group</span> MyResourceGroup <span class="keyword">--name</span> MyAKSCluster
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Azure Functions & App Service</span></div>
+                  <span class="comment"># Create Function App</span><br>
+                  <span class="func">az functionapp create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--resource-group</span> MyResourceGroup \<br>
+                  &nbsp;&nbsp;<span class="keyword">--consumption-plan-location</span> eastus \<br>
+                  &nbsp;&nbsp;<span class="keyword">--runtime</span> python \<br>
+                  &nbsp;&nbsp;<span class="keyword">--runtime-version</span> 3.11 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--functions-version</span> 4 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> MyFunctionApp \<br>
+                  &nbsp;&nbsp;<span class="keyword">--storage-account</span> mystorageaccount<br><br>
+                  <span class="comment"># Create App Service Plan + Web App</span><br>
+                  <span class="func">az appservice plan create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--name</span> MyPlan <span class="keyword">--resource-group</span> MyResourceGroup \<br>
+                  &nbsp;&nbsp;<span class="keyword">--sku</span> B1 <span class="keyword">--is-linux</span><br>
+                  <span class="func">az webapp create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--resource-group</span> MyResourceGroup \<br>
+                  &nbsp;&nbsp;<span class="keyword">--plan</span> MyPlan <span class="keyword">--name</span> MyWebApp \<br>
+                  &nbsp;&nbsp;<span class="keyword">--runtime</span> <span class="string">"PYTHON|3.11"</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Azure Bicep (IaC)</span></div>
+                  <span class="comment">// main.bicep — Deploy a storage account</span><br>
+                  <span class="keyword">param</span> <span class="var">location</span> <span class="string">string</span> = <span class="string">'eastus'</span><br>
+                  <span class="keyword">param</span> <span class="var">storageName</span> <span class="string">string</span><br><br>
+                  <span class="keyword">resource</span> <span class="func">storageAccount</span> <span class="string">'Microsoft.Storage/storageAccounts@2022-09-01'</span> = {<br>
+                  &nbsp;&nbsp;<span class="var">name:</span> storageName<br>
+                  &nbsp;&nbsp;<span class="var">location:</span> location<br>
+                  &nbsp;&nbsp;<span class="var">sku:</span> { <span class="var">name:</span> <span class="string">'Standard_LRS'</span> }<br>
+                  &nbsp;&nbsp;<span class="var">kind:</span> <span class="string">'StorageV2'</span><br>
+                  }<br><br>
+                  <span class="comment"># Deploy Bicep</span><br>
+                  <span class="func">az deployment group create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--resource-group</span> MyResourceGroup \<br>
+                  &nbsp;&nbsp;<span class="keyword">--template-file</span> main.bicep \<br>
+                  &nbsp;&nbsp;<span class="keyword">--parameters</span> storageName=mystorage2024
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GCP -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gcpPractical">
+            <span class="me-2" style="color:#7aadff">🔵</span> GCP CLI (gcloud) — Practical Commands
+          </button>
+        </h2>
+        <div id="gcpPractical" class="accordion-collapse collapse" data-bs-parent="#practicalAccordion">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">GCP Setup & Compute Engine</span></div>
+                  <span class="comment"># Init and login</span><br>
+                  <span class="func">gcloud init</span><br>
+                  <span class="func">gcloud auth login</span><br>
+                  <span class="func">gcloud config set project</span> my-project-id<br><br>
+                  <span class="comment"># Create VM instance</span><br>
+                  <span class="func">gcloud compute instances create</span> my-vm \<br>
+                  &nbsp;&nbsp;<span class="keyword">--zone</span>=us-central1-a \<br>
+                  &nbsp;&nbsp;<span class="keyword">--machine-type</span>=e2-micro \<br>
+                  &nbsp;&nbsp;<span class="keyword">--image-family</span>=ubuntu-2204-lts \<br>
+                  &nbsp;&nbsp;<span class="keyword">--image-project</span>=ubuntu-os-cloud \<br>
+                  &nbsp;&nbsp;<span class="keyword">--boot-disk-size</span>=20GB<br><br>
+                  <span class="comment"># SSH into instance</span><br>
+                  <span class="func">gcloud compute ssh</span> my-vm <span class="keyword">--zone</span>=us-central1-a<br><br>
+                  <span class="comment"># List VMs</span><br>
+                  <span class="func">gcloud compute instances list</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">GCP Cloud Storage & BigQuery</span></div>
+                  <span class="comment"># Cloud Storage (GCS)</span><br>
+                  <span class="func">gsutil mb</span> gs://my-bucket-name<br>
+                  <span class="func">gsutil cp</span> ./file.txt gs://my-bucket/<br>
+                  <span class="func">gsutil ls</span> gs://my-bucket/<br>
+                  <span class="func">gsutil rm</span> gs://my-bucket/file.txt<br><br>
+                  <span class="comment"># BigQuery — Create dataset & table</span><br>
+                  <span class="func">bq mk</span> my_dataset<br>
+                  <span class="func">bq load</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--autodetect</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--source_format</span>=CSV \<br>
+                  &nbsp;&nbsp;my_dataset.my_table \<br>
+                  &nbsp;&nbsp;gs://my-bucket/data.csv<br><br>
+                  <span class="comment"># Run BigQuery SQL query</span><br>
+                  <span class="func">bq query</span> <span class="keyword">--use_legacy_sql</span>=false \<br>
+                  &nbsp;&nbsp;<span class="string">'SELECT * FROM `my_dataset.my_table` LIMIT 10'</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">GKE & Cloud Run</span></div>
+                  <span class="comment"># Create GKE cluster</span><br>
+                  <span class="func">gcloud container clusters create</span> my-cluster \<br>
+                  &nbsp;&nbsp;<span class="keyword">--zone</span>=us-central1-a \<br>
+                  &nbsp;&nbsp;<span class="keyword">--num-nodes</span>=3 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--machine-type</span>=e2-medium<br><br>
+                  <span class="comment"># Get credentials</span><br>
+                  <span class="func">gcloud container clusters get-credentials</span> my-cluster \<br>
+                  &nbsp;&nbsp;<span class="keyword">--zone</span>=us-central1-a<br><br>
+                  <span class="comment"># Cloud Run — Deploy container</span><br>
+                  <span class="func">gcloud run deploy</span> my-service \<br>
+                  &nbsp;&nbsp;<span class="keyword">--image</span>=gcr.io/my-project/my-image:latest \<br>
+                  &nbsp;&nbsp;<span class="keyword">--platform</span>=managed \<br>
+                  &nbsp;&nbsp;<span class="keyword">--region</span>=us-central1 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--allow-unauthenticated</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--port</span>=8080
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Vertex AI Training</span></div>
+                  <span class="comment"># Submit custom training job</span><br>
+                  <span class="func">gcloud ai custom-jobs create</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--region</span>=us-central1 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--display-name</span>=my-training-job \<br>
+                  &nbsp;&nbsp;<span class="keyword">--config</span>=config.yaml<br><br>
+                  <span class="comment"># config.yaml</span><br>
+                  <span class="var">workerPoolSpecs:</span><br>
+                  &nbsp;&nbsp;- <span class="var">machineSpec:</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">machineType:</span> <span class="string">n1-standard-8</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">acceleratorType:</span> <span class="string">NVIDIA_TESLA_T4</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">acceleratorCount:</span> <span class="string">1</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">replicaCount:</span> <span class="string">1</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">containerSpec:</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">imageUri:</span> <span class="string">gcr.io/myproject/trainer:v1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- On-Prem -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#onpremPractical">
+            <span class="me-2" style="color:var(--onprem)">🟢</span> On-Premises — Practical Commands (Linux + K8s + Terraform)
+          </button>
+        </h2>
+        <div id="onpremPractical" class="accordion-collapse collapse" data-bs-parent="#practicalAccordion">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Linux Server Setup</span></div>
+                  <span class="comment"># Initial server hardening</span><br>
+                  <span class="func">apt update</span> && <span class="func">apt upgrade</span> -y<br>
+                  <span class="func">ufw enable</span><br>
+                  <span class="func">ufw allow</span> 22/tcp<br>
+                  <span class="func">ufw allow</span> 80/tcp<br>
+                  <span class="func">ufw allow</span> 443/tcp<br><br>
+                  <span class="comment"># Create user & disable root SSH</span><br>
+                  <span class="func">adduser</span> devops<br>
+                  <span class="func">usermod</span> -aG sudo devops<br>
+                  <span class="func">sed -i</span> <span class="string">'s/PermitRootLogin yes/PermitRootLogin no/'</span> /etc/ssh/sshd_config<br>
+                  <span class="func">systemctl restart</span> sshd<br><br>
+                  <span class="comment"># Install Docker</span><br>
+                  <span class="func">curl</span> -fsSL https://get.docker.com | <span class="func">bash</span><br>
+                  <span class="func">systemctl enable</span> --now docker<br>
+                  <span class="func">usermod</span> -aG docker devops
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">On-Prem Kubernetes (kubeadm)</span></div>
+                  <span class="comment"># Install kubeadm, kubelet, kubectl</span><br>
+                  <span class="func">apt install</span> -y kubelet kubeadm kubectl<br>
+                  <span class="func">apt-mark hold</span> kubelet kubeadm kubectl<br><br>
+                  <span class="comment"># Init control plane</span><br>
+                  <span class="func">kubeadm init</span> \<br>
+                  &nbsp;&nbsp;<span class="keyword">--pod-network-cidr</span>=10.244.0.0/16 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--apiserver-advertise-address</span>=192.168.1.10<br><br>
+                  <span class="comment"># Setup kubectl config</span><br>
+                  <span class="func">mkdir</span> -p $HOME/.kube<br>
+                  <span class="func">cp</span> /etc/kubernetes/admin.conf $HOME/.kube/config<br><br>
+                  <span class="comment"># Install Flannel CNI</span><br>
+                  <span class="func">kubectl apply</span> -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml<br><br>
+                  <span class="comment"># Join worker node</span><br>
+                  <span class="func">kubeadm join</span> 192.168.1.10:6443 \<br>
+                  &nbsp;&nbsp;<span class="keyword">--token</span> xxxxx \<br>
+                  &nbsp;&nbsp;<span class="keyword">--discovery-token-ca-cert-hash</span> sha256:xxxxx
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">Terraform (Multi-Cloud IaC)</span></div>
+                  <span class="comment"># main.tf — AWS + Azure together</span><br>
+                  <span class="keyword">terraform {</span><br>
+                  &nbsp;&nbsp;<span class="var">required_providers {</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="func">aws</span>   = { <span class="var">source</span> = <span class="string">"hashicorp/aws"</span> }<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="func">azurerm</span> = { <span class="var">source</span> = <span class="string">"hashicorp/azurerm"</span> }<br>
+                  &nbsp;&nbsp;}<br>
+                  }<br><br>
+                  <span class="keyword">resource</span> <span class="string">"aws_s3_bucket"</span> <span class="string">"backup"</span> {<br>
+                  &nbsp;&nbsp;<span class="var">bucket</span> = <span class="string">"my-onprem-backup"</span><br>
+                  }<br><br>
+                  <span class="keyword">resource</span> <span class="string">"azurerm_resource_group"</span> <span class="string">"rg"</span> {<br>
+                  &nbsp;&nbsp;<span class="var">name</span>     = <span class="string">"onprem-rg"</span><br>
+                  &nbsp;&nbsp;<span class="var">location</span> = <span class="string">"East US"</span><br>
+                  }<br><br>
+                  <span class="comment"># Commands</span><br>
+                  <span class="func">terraform init</span><br>
+                  <span class="func">terraform plan</span><br>
+                  <span class="func">terraform apply</span> -auto-approve<br>
+                  <span class="func">terraform destroy</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="code-block">
+                  <div class="code-bar"><span class="r"></span><span class="y"></span><span class="g"></span><span class="label">HashiCorp Vault (Secrets)</span></div>
+                  <span class="comment"># Start Vault dev server</span><br>
+                  <span class="func">vault server</span> -dev<br>
+                  <span class="func">export</span> VAULT_ADDR=<span class="string">'http://127.0.0.1:8200'</span><br>
+                  <span class="func">export</span> VAULT_TOKEN=<span class="string">'your-root-token'</span><br><br>
+                  <span class="comment"># Write a secret</span><br>
+                  <span class="func">vault kv put</span> secret/myapp \<br>
+                  &nbsp;&nbsp;db_password=<span class="string">"S3cureP@ss!"</span> \<br>
+                  &nbsp;&nbsp;api_key=<span class="string">"abc123xyz"</span><br><br>
+                  <span class="comment"># Read a secret</span><br>
+                  <span class="func">vault kv get</span> secret/myapp<br>
+                  <span class="func">vault kv get</span> -field=db_password secret/myapp<br><br>
+                  <span class="comment"># Enable AppRole auth</span><br>
+                  <span class="func">vault auth enable</span> approle<br>
+                  <span class="func">vault write</span> auth/approle/role/my-role \<br>
+                  &nbsp;&nbsp;policies=<span class="string">"default"</span> ttl=<span class="string">"1h"</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- end accordion -->
+  </div>
+</section>
+
+<!-- END-TO-END ARCHITECTURES -->
+<section id="e2e">
+  <div class="container">
+    <div class="section-label">End-to-End Architectures</div>
+    <h2 class="section-title">Real-World End-to-End Scenarios</h2>
+    <p class="section-subtitle">Complete architecture walkthroughs for common real-world applications, from request to response.</p>
+
+    <!-- Tabs -->
+    <ul class="nav nav-pills mb-4 flex-wrap gap-2" id="e2eTabs">
+      <li class="nav-item">
+        <button class="nav-link active" style="background:rgba(255,153,0,0.15);color:var(--aws);border:1px solid rgba(255,153,0,0.3);" data-bs-toggle="pill" data-bs-target="#e2eEcommerce">🛍️ E-Commerce on AWS</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" style="background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border);" data-bs-toggle="pill" data-bs-target="#e2eML">🤖 ML Pipeline on GCP</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" style="background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border);" data-bs-toggle="pill" data-bs-target="#e2eEnterprise">🏢 Enterprise App on Azure</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" style="background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border);" data-bs-toggle="pill" data-bs-target="#e2eHybrid">🔀 Hybrid Cloud Architecture</button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+
+      <!-- E-Commerce -->
+      <div class="tab-pane fade show active" id="e2eEcommerce">
+        <div class="highlight-box mb-4">
+          <strong>Scenario:</strong> A fashion e-commerce platform handling 10,000 concurrent users, with product search, cart, orders, payments, and recommendations.
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">1</div>
+          <div class="flow-content">
+            <h6>DNS & CDN Layer</h6>
+            <p><strong>Route 53</strong> routes traffic → <strong>CloudFront</strong> serves static assets (images, CSS, JS) from S3 edge locations globally with &lt;20ms latency. SSL terminated at CloudFront.</p>
+            <div class="code-block mt-2">
+              <span class="comment"># CloudFront distribution config (CDK)</span><br>
+              <span class="var">distribution</span> = CloudFrontWebDistribution(<span class="keyword">self</span>, <span class="string">"EcomCDN"</span>,<br>
+              &nbsp;&nbsp;origin_configs=[SourceConfiguration(s3_origin_source=S3OriginConfig(s3_bucket_source=bucket),<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;behaviors=[Behavior(is_default_behavior=<span class="string">True</span>, compress=<span class="string">True</span>)])]<br>
+              )
+            </div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">2</div>
+          <div class="flow-content">
+            <h6>Load Balancer & Auto Scaling</h6>
+            <p><strong>Application Load Balancer (ALB)</strong> distributes traffic to <strong>EC2 Auto Scaling Group</strong> (min:2, max:20 instances). Target Tracking policy based on CPU &gt; 60%.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">3</div>
+          <div class="flow-content">
+            <h6>Application Layer (Microservices)</h6>
+            <p>Containerized services on <strong>ECS Fargate</strong>: Product Service, User Service, Cart Service, Order Service. Each has its own task definition. API Gateway for external APIs.</p>
+            <div class="code-block mt-2">
+              <span class="comment"># ECS Task Definition (simplified)</span><br>
+              <span class="var">task_definition</span> = FargateTaskDefinition(stack, <span class="string">"ProductService"</span>,<br>
+              &nbsp;&nbsp;cpu=<span class="string">512</span>, memory_limit_mib=<span class="string">1024</span><br>
+              )<br>
+              <span class="var">task_definition</span>.add_container(<span class="string">"ProductAPI"</span>,<br>
+              &nbsp;&nbsp;image=ContainerImage.from_ecr_repository(repo),<br>
+              &nbsp;&nbsp;port_mappings=[PortMapping(container_port=<span class="string">8080</span>)]<br>
+              )
+            </div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">4</div>
+          <div class="flow-content">
+            <h6>Caching Layer</h6>
+            <p><strong>ElastiCache Redis</strong> caches: product listings (TTL: 5min), user sessions (TTL: 24hr), cart data (TTL: 1hr). Cache hit rate target: &gt;85%</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">5</div>
+          <div class="flow-content">
+            <h6>Database Layer</h6>
+            <p><strong>Aurora MySQL</strong> (Multi-AZ) for orders/users/products. Read replicas for reporting queries. <strong>DynamoDB</strong> for sessions and cart (single-digit ms latency).</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">6</div>
+          <div class="flow-content">
+            <h6>Event-Driven Order Processing</h6>
+            <p>Order placed → <strong>SQS queue</strong> → <strong>Lambda</strong> processes order → <strong>SNS</strong> sends notifications (SMS/email via SES) → <strong>EventBridge</strong> triggers fulfilment workflow</p>
+            <div class="code-block mt-2">
+              <span class="comment"># Lambda function for order processing</span><br>
+              <span class="keyword">import</span> boto3, json<br>
+              <span class="keyword">def</span> <span class="func">lambda_handler</span>(event, context):<br>
+              &nbsp;&nbsp;<span class="keyword">for</span> record <span class="keyword">in</span> event[<span class="string">'Records'</span>]:<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;order = json.loads(record[<span class="string">'body'</span>])<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;process_order(order[<span class="string">'order_id'</span>])<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;send_confirmation_email(order[<span class="string">'email'</span>])<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;update_inventory(order[<span class="string">'items'</span>])
+            </div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">7</div>
+          <div class="flow-content">
+            <h6>ML Recommendations</h6>
+            <p><strong>Amazon Personalize</strong> provides real-time product recommendations. User behavior logged to S3 → Glue ETL → Redshift for analytics → QuickSight dashboards.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">8</div>
+          <div class="flow-content">
+            <h6>Monitoring & Alerting</h6>
+            <p><strong>CloudWatch</strong> metrics, dashboards, alarms. X-Ray for distributed tracing. PagerDuty integration for on-call alerts. Cost anomaly detection enabled.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ML Pipeline -->
+      <div class="tab-pane fade" id="e2eML">
+        <div class="highlight-box mb-4">
+          <strong>Scenario:</strong> A fraud detection ML system that processes 50,000 transactions/sec in real-time, trains models weekly, and serves predictions with &lt;10ms latency.
+        </div>
+        <div class="flow-step">
+          <div class="flow-num gcp">1</div>
+          <div class="flow-content">
+            <h6>Data Ingestion</h6>
+            <p>Transaction data streams into <strong>Cloud Pub/Sub</strong> (Kafka equivalent). Topics: raw-transactions, enriched-transactions. 50k msg/sec throughput, 7-day retention.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num gcp">2</div>
+          <div class="flow-content">
+            <h6>Stream Processing</h6>
+            <p><strong>Dataflow</strong> (Apache Beam) reads from Pub/Sub, enriches with user profile data from Bigtable, computes features (rolling averages, velocity checks), writes to BigQuery and Bigtable.</p>
+            <div class="code-block mt-2">
+              <span class="comment"># Apache Beam pipeline (Python)</span><br>
+              <span class="keyword">with</span> beam.Pipeline(options=options) <span class="keyword">as</span> p:<br>
+              &nbsp;&nbsp;transactions = (<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;p | <span class="string">'ReadPubSub'</span> >> beam.io.ReadFromPubSub(topic=TOPIC)<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="string">'ParseJSON'</span>   >> beam.Map(json.loads)<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="string">'EnrichData'</span>  >> beam.Map(enrich_with_profile)<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="string">'ComputeFeats'</span> >> beam.Map(compute_features)<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="string">'WriteBigQuery'</span> >> WriteToBigQuery(TABLE)<br>
+              &nbsp;&nbsp;)
+            </div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num gcp">3</div>
+          <div class="flow-content">
+            <h6>Feature Store</h6>
+            <p><strong>Vertex AI Feature Store</strong> stores precomputed features (last 30 transactions, spending patterns, device fingerprints). Online serving via gRPC with &lt;5ms P99.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num gcp">4</div>
+          <div class="flow-content">
+            <h6>Model Training</h6>
+            <p>Weekly retraining on <strong>Vertex AI Training</strong> with NVIDIA T4 GPUs. XGBoost + Neural Network ensemble. MLflow for experiment tracking. Training data in BigQuery.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num gcp">5</div>
+          <div class="flow-content">
+            <h6>Model Registry & Deployment</h6>
+            <p><strong>Vertex AI Model Registry</strong> → canary deploy (5% traffic) → A/B test 1 week → full rollout. Model served via <strong>Vertex AI Prediction</strong> endpoints (auto-scaling).</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num gcp">6</div>
+          <div class="flow-content">
+            <h6>Real-Time Scoring</h6>
+            <p>Transaction API calls Vertex AI endpoint → prediction returned in &lt;10ms → if fraud probability &gt; 0.85, block transaction and alert via Pub/Sub → case management system.</p>
+            <div class="code-block mt-2">
+              <span class="comment"># Real-time fraud prediction</span><br>
+              <span class="keyword">from</span> google.cloud <span class="keyword">import</span> aiplatform<br>
+              <span class="func">endpoint</span> = aiplatform.Endpoint(<span class="string">"projects/myproject/locations/us-central1/endpoints/123"</span>)<br>
+              <span class="var">prediction</span> = endpoint.predict(instances=[transaction_features])<br>
+              <span class="var">fraud_prob</span> = prediction.predictions[<span class="string">0</span>][<span class="string">'fraud_probability'</span>]<br>
+              <span class="keyword">if</span> fraud_prob > <span class="string">0.85</span>:<br>
+              &nbsp;&nbsp;<span class="func">block_transaction</span>(transaction_id)<br>
+              &nbsp;&nbsp;<span class="func">publish_alert</span>(pubsub_client, transaction)
+            </div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num gcp">7</div>
+          <div class="flow-content">
+            <h6>Model Monitoring & Analytics</h6>
+            <p><strong>Vertex AI Model Monitoring</strong> detects data drift. All predictions + outcomes logged to BigQuery. <strong>Looker Studio</strong> dashboards for fraud analysts. Feedback loop for retraining.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enterprise Azure -->
+      <div class="tab-pane fade" id="e2eEnterprise">
+        <div class="highlight-box mb-4">
+          <strong>Scenario:</strong> A 10,000-employee enterprise migrating their on-premises HR & ERP system to Azure, maintaining Active Directory integration and compliance.
+        </div>
+        <div class="flow-step">
+          <div class="flow-num azure">1</div>
+          <div class="flow-content">
+            <h6>Identity & Access (Azure AD)</h6>
+            <p><strong>Azure Active Directory</strong> synced with on-prem AD via <strong>Azure AD Connect</strong>. Single Sign-On (SSO) across all apps. Multi-Factor Authentication enforced. Conditional Access policies.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num azure">2</div>
+          <div class="flow-content">
+            <h6>Hub-Spoke Network</h6>
+            <p><strong>Azure Virtual WAN</strong> connects 50 office branches. Hub VNet with Azure Firewall. Spoke VNets per business unit (HR, Finance, IT). ExpressRoute for on-prem DC connectivity.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num azure">3</div>
+          <div class="flow-content">
+            <h6>Application Layer</h6>
+            <p><strong>Azure Kubernetes Service (AKS)</strong> hosts microservices. <strong>Azure App Service</strong> for .NET web apps. <strong>Azure API Management</strong> for internal API gateway with rate limiting.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num azure">4</div>
+          <div class="flow-content">
+            <h6>Data Layer</h6>
+            <p><strong>Azure SQL Managed Instance</strong> for ERP database (full SQL Server compatibility). <strong>Azure Cosmos DB</strong> for session data. <strong>Azure Data Lake</strong> for HR analytics raw data.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num azure">5</div>
+          <div class="flow-content">
+            <h6>Integration & Workflows</h6>
+            <p><strong>Azure Logic Apps</strong> for business process automation (approval workflows, HR onboarding). <strong>Azure Service Bus</strong> for reliable message delivery between ERP modules.</p>
+            <div class="code-block mt-2">
+              <span class="comment"># Logic App trigger (ARM Template snippet)</span><br>
+              <span class="string">"triggers"</span>: {<br>
+              &nbsp;&nbsp;<span class="string">"When_employee_joins"</span>: {<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"type"</span>: <span class="string">"ServiceBusTrigger"</span>,<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"inputs"</span>: {<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"connection"</span>: { <span class="string">"name"</span>: <span class="string">"@{parameters('servicebus_conn')}"</span> },<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"queue"</span>: <span class="string">"new-employee-events"</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+              &nbsp;&nbsp;}<br>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num azure">6</div>
+          <div class="flow-content">
+            <h6>Security & Compliance</h6>
+            <p><strong>Azure Security Center / Defender for Cloud</strong> with CSPM. <strong>Azure Key Vault</strong> for secrets/certificates. <strong>Microsoft Sentinel</strong> (SIEM) for threat detection. ISO 27001 compliance dashboard.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num azure">7</div>
+          <div class="flow-content">
+            <h6>DevOps & CI/CD</h6>
+            <p><strong>Azure DevOps</strong> pipelines deploy to AKS. Git repos with branch policies, PR reviews. Artifact registry for container images. Blue-green deployments with automated rollback.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hybrid -->
+      <div class="tab-pane fade" id="e2eHybrid">
+        <div class="highlight-box mb-4">
+          <strong>Scenario:</strong> A bank keeps core banking on-premises for regulatory compliance but uses multiple clouds for analytics, customer apps, and AI — true multi-cloud hybrid architecture.
+        </div>
+        <div class="flow-step">
+          <div class="flow-num onprem">1</div>
+          <div class="flow-content">
+            <h6>Core Banking (On-Premises)</h6>
+            <p>Core banking system on <strong>IBM Z / Oracle Exadata</strong> in private DC. SWIFT messaging on-prem. All account data and transaction records stay on-prem. Air-gapped from internet.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num multi">2</div>
+          <div class="flow-content">
+            <h6>Secure Connectivity</h6>
+            <p><strong>AWS Direct Connect</strong> + <strong>Azure ExpressRoute</strong> private lines (not internet). SD-WAN for branch offices. <strong>HashiCorp Vault</strong> for secrets management across environments.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num azure">3</div>
+          <div class="flow-content">
+            <h6>Customer Mobile & Web App (Azure)</h6>
+            <p><strong>Azure App Service</strong> hosts customer-facing banking app. <strong>Azure API Management</strong> proxies to on-prem core banking via private link. <strong>Azure AD B2C</strong> for customer authentication.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num gcp">4</div>
+          <div class="flow-content">
+            <h6>Analytics & Fraud (GCP)</h6>
+            <p>Anonymized transaction data replicated to <strong>BigQuery</strong> for analytics. <strong>Vertex AI</strong> for fraud detection models. Risk scoring API called in real-time. GDPR-compliant data masking.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num aws">5</div>
+          <div class="flow-content">
+            <h6>Backup & DR (AWS)</h6>
+            <p>Encrypted database backups to <strong>AWS S3 Glacier</strong>. Disaster recovery site on AWS with RTO &lt; 4 hours, RPO &lt; 1 hour. <strong>AWS Backup</strong> for cross-region replication.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num multi">6</div>
+          <div class="flow-content">
+            <h6>Unified Observability</h6>
+            <p><strong>Datadog / Dynatrace</strong> spans all environments. On-prem: <strong>Prometheus + Grafana</strong>. Cloud: native tools + unified dashboards. Single pane of glass for SRE team.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DECISION MATRIX -->
+<section id="decision">
+  <div class="container">
+    <div class="section-label">Decision Guide</div>
+    <h2 class="section-title">When to Choose Which Platform</h2>
+    <p class="section-subtitle">Score comparison (1–5 scale) across critical dimensions to help you decide.</p>
+
+    <div class="decision-table mb-4">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left;">Criteria</th>
+            <th>🟠 AWS</th>
+            <th>🔵 Azure</th>
+            <th>🔵 GCP</th>
+            <th>🟢 On-Prem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Ease of Getting Started</td><td class="score-4">4</td><td class="score-3">3</td><td class="score-5">5</td><td class="score-1">1</td></tr>
+          <tr><td>Service Breadth & Maturity</td><td class="score-5">5</td><td class="score-4">4</td><td class="score-3">3</td><td class="score-3">3</td></tr>
+          <tr><td>Enterprise/Microsoft Integration</td><td class="score-3">3</td><td class="score-5">5</td><td class="score-2">2</td><td class="score-3">3</td></tr>
+          <tr><td>AI/ML Capabilities</td><td class="score-4">4</td><td class="score-4">4</td><td class="score-5">5</td><td class="score-2">2</td></tr>
+          <tr><td>Kubernetes & Containers</td><td class="score-4">4</td><td class="score-4">4</td><td class="score-5">5</td><td class="score-3">3</td></tr>
+          <tr><td>Data Sovereignty / Control</td><td class="score-2">2</td><td class="score-2">2</td><td class="score-2">2</td><td class="score-5">5</td></tr>
+          <tr><td>Regulatory Compliance (GDPR/HIPAA)</td><td class="score-4">4</td><td class="score-5">5</td><td class="score-3">3</td><td class="score-5">5</td></tr>
+          <tr><td>Cost at Scale (Predictability)</td><td class="score-3">3</td><td class="score-3">3</td><td class="score-4">4</td><td class="score-5">5</td></tr>
+          <tr><td>Global Coverage / Regions</td><td class="score-5">5</td><td class="score-5">5</td><td class="score-4">4</td><td class="score-1">1</td></tr>
+          <tr><td>Hybrid Cloud Support</td><td class="score-3">3</td><td class="score-5">5</td><td class="score-3">3</td><td class="score-4">4</td></tr>
+          <tr><td>Developer Experience</td><td class="score-4">4</td><td class="score-3">3</td><td class="score-5">5</td><td class="score-2">2</td></tr>
+          <tr><td>Community & Ecosystem</td><td class="score-5">5</td><td class="score-4">4</td><td class="score-4">4</td><td class="score-3">3</td></tr>
+          <tr><td>Latency (for on-site users)</td><td class="score-3">3</td><td class="score-3">3</td><td class="score-3">3</td><td class="score-5">5</td></tr>
+          <tr><td>Internet Dependency</td><td class="score-1">1</td><td class="score-1">1</td><td class="score-1">1</td><td class="score-5">5</td></tr>
+          <tr style="background:rgba(255,255,255,0.04);">
+            <td><strong>TOTAL</strong></td>
+            <td class="score-4"><strong>50</strong></td>
+            <td class="score-4"><strong>51</strong></td>
+            <td class="score-4"><strong>49</strong></td>
+            <td class="score-4"><strong>47</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pricing-note">
+      <strong>⚠️ Important:</strong> These scores are general guidelines. Your ideal choice depends on your specific stack, team expertise, compliance requirements, and budget. Most enterprise architectures use 2–3 platforms simultaneously (multi-cloud + hybrid). Evaluate with a PoC before committing.
+    </div>
+
+    <!-- Quick Decision Guide -->
+    <div class="row g-3 mt-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="cloud-card aws text-center p-4">
+          <div class="card-icon mx-auto"><i class="fab fa-aws"></i></div>
+          <h5 style="color:var(--aws)">Choose AWS If...</h5>
+          <ul class="list-unstyled mt-3" style="font-size:0.85rem;color:var(--muted);text-align:left;">
+            <li class="mb-2">✅ You're a startup needing fast scaling</li>
+            <li class="mb-2">✅ You need the widest service selection</li>
+            <li class="mb-2">✅ Team has AWS certifications</li>
+            <li class="mb-2">✅ Building serverless-first architecture</li>
+            <li class="mb-2">✅ E-commerce, media, gaming apps</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="cloud-card azure text-center p-4">
+          <div class="card-icon mx-auto"><i class="fab fa-microsoft"></i></div>
+          <h5 style="color:#4db4ff">Choose Azure If...</h5>
+          <ul class="list-unstyled mt-3" style="font-size:0.85rem;color:var(--muted);text-align:left;">
+            <li class="mb-2">✅ You use Office 365 / M365 stack</li>
+            <li class="mb-2">✅ Enterprise with Active Directory</li>
+            <li class="mb-2">✅ .NET / Windows apps</li>
+            <li class="mb-2">✅ Need hybrid cloud with on-prem</li>
+            <li class="mb-2">✅ Strong compliance requirements</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="cloud-card gcp text-center p-4">
+          <div class="card-icon mx-auto"><i class="fab fa-google"></i></div>
+          <h5 style="color:#7aadff">Choose GCP If...</h5>
+          <ul class="list-unstyled mt-3" style="font-size:0.85rem;color:var(--muted);text-align:left;">
+            <li class="mb-2">✅ AI/ML is your core product</li>
+            <li class="mb-2">✅ Massive data analytics (BigQuery)</li>
+            <li class="mb-2">✅ Kubernetes-native architecture</li>
+            <li class="mb-2">✅ Already use G Suite / Google Workspace</li>
+            <li class="mb-2">✅ Need best-in-class data pipeline</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="cloud-card onprem text-center p-4">
+          <div class="card-icon mx-auto"><i class="fas fa-server"></i></div>
+          <h5 style="color:var(--onprem)">Choose On-Prem If...</h5>
+          <ul class="list-unstyled mt-3" style="font-size:0.85rem;color:var(--muted);text-align:left;">
+            <li class="mb-2">✅ Government / defence workloads</li>
+            <li class="mb-2">✅ Classified / top-secret data</li>
+            <li class="mb-2">✅ Very predictable, stable workloads</li>
+            <li class="mb-2">✅ Strict data residency laws</li>
+            <li class="mb-2">✅ Already have large DC investment</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <p class="section-subtitle">Common doubts when evaluating cloud platforms, answered directly.</p>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="accordion" id="faqLeft">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                Is AWS always the safest default choice?
+              </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqLeft">
+              <div class="accordion-body">
+                AWS is the most mature and has the largest ecosystem, but it's not always the best choice. Azure wins for Microsoft-heavy enterprises. GCP wins for AI/ML and BigQuery-heavy workloads. Evaluate based on your team's expertise, existing investments, and specific use case — not just popularity.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                Is multi-cloud or single cloud better?
+              </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqLeft">
+              <div class="accordion-body">
+                Single cloud is simpler and cheaper to operate initially. Multi-cloud reduces vendor lock-in and lets you use best-of-breed services (e.g., GCP for BigQuery + AWS for everything else). The complexity overhead of multi-cloud is real — only pursue it if you have clear business reasons.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                Which is cheapest: AWS, Azure, GCP, or On-Prem?
+              </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqLeft">
+              <div class="accordion-body">
+                GCP is generally slightly cheaper for compute and offers sustained use discounts automatically. AWS and Azure are comparable. On-Prem has high upfront CapEx but low OpEx at scale (breaks even vs cloud at ~3-5 years for stable workloads). Committed Use Discounts (CUDs/Reserved Instances) on any cloud can save 40-70%.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                What certifications should I pursue?
+              </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqLeft">
+              <div class="accordion-body">
+                Start with: <strong>AWS Cloud Practitioner</strong> (foundational) → <strong>AWS Solutions Architect Associate</strong> (most in-demand). For Azure: <strong>AZ-900</strong> → <strong>AZ-104</strong> → <strong>AZ-305</strong>. For GCP: <strong>Associate Cloud Engineer</strong> → <strong>Professional Cloud Architect</strong>. Multi-cloud: <strong>Terraform Associate</strong> is platform-agnostic and very valuable.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="accordion" id="faqRight">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                How do I handle data compliance (GDPR, HIPAA, RBI)?
+              </button>
+            </h2>
+            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqRight">
+              <div class="accordion-body">
+                All major clouds offer compliance certifications. For GDPR: use EU regions and configure Data Processing Agreements. For HIPAA: sign BAA with AWS/Azure/GCP. For RBI (India): use Mumbai regions; some data requires on-prem under RBI guidelines. Always consult legal counsel for specific compliance requirements — cloud certifications don't automatically make your app compliant.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
+                Can I migrate from on-prem to cloud easily?
+              </button>
+            </h2>
+            <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqRight">
+              <div class="accordion-body">
+                Use the 6Rs strategy: Rehost (lift-and-shift), Replatform (lift-tinker-shift), Repurchase (move to SaaS), Refactor (redesign), Retire (decommission), Retain (keep on-prem). Most migrations start with Rehost for speed. Use <strong>AWS Migration Hub</strong>, <strong>Azure Migrate</strong>, or <strong>GCP Migrate</strong> tools for assessment and migration.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7">
+                What is FinOps and why does it matter?
+              </button>
+            </h2>
+            <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#faqRight">
+              <div class="accordion-body">
+                FinOps is cloud financial management — the practice of optimizing cloud spend. Cloud costs can spiral without visibility. Use: <strong>AWS Cost Explorer</strong>, <strong>Azure Cost Management</strong>, or <strong>GCP Billing</strong>. Key practices: right-size instances, use spot/preemptible VMs for batch jobs, set budget alerts, tag all resources, use savings plans. Typical optimization: 30-40% savings.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq8">
+                How do I ensure high availability on cloud?
+              </button>
+            </h2>
+            <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#faqRight">
+              <div class="accordion-body">
+                Deploy across multiple Availability Zones (AZs) within a region — this handles 99.99% of outages. For 99.999% (five nines), deploy Multi-Region with active-active or active-passive setup. Use: Auto Scaling, Load Balancers, Multi-AZ databases, S3/GCS (11 nines durability). Design for failure: implement circuit breakers, retries with exponential backoff, and chaos engineering.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="mb-3">
+      <span class="platform-pill pill-aws me-2"><i class="fab fa-aws"></i> AWS</span>
+      <span class="platform-pill pill-azure me-2"><i class="fab fa-microsoft"></i> Azure</span>
+      <span class="platform-pill pill-gcp me-2"><i class="fab fa-google"></i> GCP</span>
+      <span class="platform-pill pill-onprem"><i class="fas fa-server"></i> On-Prem</span>
+    </div>
+    <p class="mb-1"><strong>Cloud Comparison Guide</strong> — Complete Reference 2024</p>
+    <p style="font-size:0.78rem;color:#4b5563;">For educational purposes. Prices and services change — always verify with official documentation.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Highlight active nav based on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.sticky-nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.getAttribute('id');
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--text)' : '';
+      a.style.background = a.getAttribute('href') === '#' + current ? 'rgba(255,255,255,0.06)' : '';
+    });
+  });
+
+  // Smooth tab button styling
+  document.querySelectorAll('[data-bs-toggle="pill"]').forEach(btn => {
+    btn.addEventListener('shown.bs.tab', function() {
+      document.querySelectorAll('[data-bs-toggle="pill"]').forEach(b => {
+        b.style.background = 'rgba(255,255,255,0.05)';
+        b.style.color = 'var(--muted)';
+        b.style.border = '1px solid var(--border)';
+      });
+      this.style.background = 'rgba(255,153,0,0.15)';
+      this.style.color = 'var(--aws)';
+      this.style.border = '1px solid rgba(255,153,0,0.3)';
+    });
+  });
+</script>
+</body>
+</html>

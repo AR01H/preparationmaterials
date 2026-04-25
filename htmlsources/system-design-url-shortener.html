@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design: URL Shortener — End to End</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@300;400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a26;
+    --border: #2a2a3a;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #a855f7;
+    --accent4: #22c55e;
+    --text: #e8e8f0;
+    --text-muted: #8888a8;
+    --text-dim: #555570;
+    --yellow: #fbbf24;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ─── SIDEBAR NAV ─── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    z-index: 100;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .sidebar-logo .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .sidebar-logo h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .nav-section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0 24px 8px;
+    margin-top: 16px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(0,229,255,0.04);
+  }
+
+  .nav-item .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    width: 20px;
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  .main {
+    margin-left: 260px;
+    padding: 0;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 80px 80px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: 30%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 6vw, 80px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+  }
+
+  .hero-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    letter-spacing: -0.5px;
+  }
+
+  .hero-desc {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 600px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    padding: 80px 80px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    padding-top: 6px;
+    white-space: nowrap;
+  }
+
+  .section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -1px;
+  }
+
+  .section h2 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .section-intro {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 680px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+  }
+
+  /* ─── REQUIREMENTS BOX ─── */
+  .req-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .req-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .req-card h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .req-card h3.func { color: var(--accent); }
+  .req-card h3.nonfunc { color: var(--accent2); }
+  .req-card h3.cap { color: var(--accent3); }
+  .req-card h3.api-h { color: var(--accent4); }
+
+  .req-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .req-item::before {
+    content: '→';
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ─── DIAGRAMS ─── */
+  .diagram-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    margin: 32px 0;
+    overflow-x: auto;
+  }
+
+  .diagram-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .diagram-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── ARCH DIAGRAM ─── */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .arch-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .arch-box {
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    position: relative;
+    min-width: 110px;
+  }
+
+  .arch-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .arch-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px;
+  }
+
+  .arch-arrow .line {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--text-dim), var(--accent));
+    position: relative;
+  }
+
+  .arch-arrow .line::after {
+    content: '▶';
+    position: absolute;
+    right: -8px;
+    top: -7px;
+    color: var(--accent);
+    font-size: 10px;
+  }
+
+  .arch-arrow small {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  .color-client { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); color: var(--accent); }
+  .color-lb { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: var(--yellow); }
+  .color-api { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: var(--blue); }
+  .color-cache { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+  .color-db { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--accent4); }
+  .color-queue { background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.3); color: var(--accent3); }
+  .color-analytics { background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.3); color: var(--accent2); }
+
+  /* ─── TWO FLOW ─── */
+  .two-flow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .flow-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .flow-card h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .step-blue { background: rgba(59,130,246,0.2); color: var(--blue); border: 1px solid rgba(59,130,246,0.4); }
+  .step-green { background: rgba(34,197,94,0.2); color: var(--accent4); border: 1px solid rgba(34,197,94,0.4); }
+
+  .step-content {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding-top: 3px;
+  }
+
+  .step-content strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* ─── CODE BLOCK ─── */
+  .code-block {
+    background: #050508;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 20px 0;
+  }
+
+  .code-block .c-comment { color: #4a4a6a; }
+  .code-block .c-keyword { color: #c084fc; }
+  .code-block .c-string { color: #86efac; }
+  .code-block .c-type { color: #67e8f9; }
+  .code-block .c-fn { color: #fbbf24; }
+  .code-block .c-num { color: #fb923c; }
+  .code-block .c-punct { color: #64748b; }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .code-filename {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-left: auto;
+  }
+
+  /* ─── DB SCHEMA ─── */
+  .schema-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .schema-table {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .schema-table-header {
+    background: var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .schema-table-header h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .schema-table-header span {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .schema-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    gap: 12px;
+  }
+
+  .schema-row:last-child { border-bottom: none; }
+
+  .schema-field {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pk-badge {
+    font-size: 9px;
+    background: rgba(251,191,36,0.15);
+    color: var(--yellow);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 3px;
+    padding: 1px 5px;
+    letter-spacing: 1px;
+  }
+
+  .fk-badge {
+    font-size: 9px;
+    background: rgba(168,85,247,0.15);
+    color: var(--accent3);
+    border: 1px solid rgba(168,85,247,0.3);
+    border-radius: 3px;
+    padding: 1px 5px;
+    letter-spacing: 1px;
+  }
+
+  .schema-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent3);
+    white-space: nowrap;
+  }
+
+  /* ─── ALGO BOX ─── */
+  .algo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .algo-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .algo-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .algo-card.base62::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .algo-card.md5::before { background: linear-gradient(90deg, var(--yellow), transparent); }
+  .algo-card.snow::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+  .algo-card.counter::before { background: linear-gradient(90deg, var(--accent4), transparent); }
+
+  .algo-card h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .algo-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .badge-rec { background: rgba(34,197,94,0.15); color: var(--accent4); border: 1px solid rgba(34,197,94,0.3); }
+  .badge-ok { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .badge-avoid { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+
+  .algo-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .algo-pros-cons {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .pros, .cons {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .pros-label { color: var(--accent4); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; margin-bottom: 4px; }
+  .cons-label { color: var(--red); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; margin-bottom: 4px; }
+  .pros li, .cons li { list-style: none; color: var(--text-muted); padding-left: 12px; position: relative; }
+  .pros li::before { content: '+'; position: absolute; left: 0; color: var(--accent4); }
+  .cons li::before { content: '–'; position: absolute; left: 0; color: var(--red); }
+
+  /* ─── SCALING SECTION ─── */
+  .scale-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .scale-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .scale-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .scale-card h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .scale-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ─── BOTTLENECK TABLE ─── */
+  .btable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 24px 0;
+  }
+
+  .btable th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .btable td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(42,42,58,0.5);
+    color: var(--text-muted);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  .btable tr:last-child td { border-bottom: none; }
+  .btable tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .btable td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  .severity {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  .sev-high { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .sev-med { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .sev-low { background: rgba(34,197,94,0.15); color: var(--accent4); border: 1px solid rgba(34,197,94,0.3); }
+
+  /* ─── ESTIMATION ─── */
+  .est-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .est-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .est-box h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .est-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(42,42,58,0.5);
+    font-size: 13px;
+  }
+
+  .est-row:last-child { border-bottom: none; }
+  .est-key { color: var(--text-muted); }
+  .est-val { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 600; }
+
+  /* ─── API ENDPOINTS ─── */
+  .api-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .api-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .method {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    text-align: center;
+    border-radius: 4px;
+  }
+
+  .method-post { color: #fbbf24; }
+  .method-get { color: #22c55e; }
+  .method-del { color: #ef4444; }
+
+  .api-endpoint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .api-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .api-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ─── FINAL SUMMARY ─── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .summary-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .summary-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .summary-card h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .summary-card p {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ─── PRINT/FOOTER ─── */
+  .footer {
+    padding: 48px 80px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-left {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .footer-right {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* ─── INLINE TAGS ─── */
+  .tag-inline {
+    display: inline-block;
+    background: rgba(0,229,255,0.08);
+    color: var(--accent);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 1px 7px;
+    vertical-align: middle;
+  }
+
+  .tag-orange {
+    background: rgba(255,107,53,0.1);
+    color: var(--accent2);
+    border-color: rgba(255,107,53,0.25);
+  }
+
+  .tag-purple {
+    background: rgba(168,85,247,0.1);
+    color: var(--accent3);
+    border-color: rgba(168,85,247,0.25);
+  }
+
+  .tag-green {
+    background: rgba(34,197,94,0.1);
+    color: var(--accent4);
+    border-color: rgba(34,197,94,0.25);
+  }
+
+  /* ─── CALLOUT ─── */
+  .callout {
+    background: rgba(0,229,255,0.04);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 18px 22px;
+    margin: 24px 0;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .callout strong { color: var(--accent); }
+
+  .callout-orange {
+    background: rgba(255,107,53,0.04);
+    border-left-color: var(--accent2);
+  }
+
+  .callout-orange strong { color: var(--accent2); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a5a; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { padding: 40px; }
+    .hero { min-height: auto; padding: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="tag">System Design</span>
+    <h2>URL Shortener<br>End-to-End</h2>
+  </div>
+
+  <span class="nav-section-label">Contents</span>
+
+  <a class="nav-item active" href="#intro"><span class="num">00</span> Overview</a>
+  <a class="nav-item" href="#requirements"><span class="num">01</span> Requirements</a>
+  <a class="nav-item" href="#estimation"><span class="num">02</span> Estimation</a>
+  <a class="nav-item" href="#api"><span class="num">03</span> API Design</a>
+  <a class="nav-item" href="#db"><span class="num">04</span> Database Design</a>
+  <a class="nav-item" href="#algorithm"><span class="num">05</span> Short URL Algorithm</a>
+  <a class="nav-item" href="#architecture"><span class="num">06</span> System Architecture</a>
+  <a class="nav-item" href="#flows"><span class="num">07</span> Request Flows</a>
+  <a class="nav-item" href="#caching"><span class="num">08</span> Caching Strategy</a>
+  <a class="nav-item" href="#scaling"><span class="num">09</span> Scaling & HA</a>
+  <a class="nav-item" href="#bottlenecks"><span class="num">10</span> Bottlenecks</a>
+  <a class="nav-item" href="#analytics"><span class="num">11</span> Analytics</a>
+  <a class="nav-item" href="#security"><span class="num">12</span> Security</a>
+  <a class="nav-item" href="#summary"><span class="num">13</span> Summary</a>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+
+  <!-- HERO -->
+  <section class="hero" id="intro">
+    <div class="hero-eyebrow">System Design Document</div>
+    <h1>URL <span>Shortener</span></h1>
+    <div class="hero-subtitle">End-to-End Architecture Guide</div>
+    <p class="hero-desc">
+      A complete, production-ready system design walkthrough for building a URL shortening service
+      like <strong>bit.ly</strong> or <strong>TinyURL</strong> — covering requirements, capacity planning,
+      API design, database schema, algorithm selection, caching, scaling, analytics, and security.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-val">100M</span>
+        <span class="stat-label">URLs / day</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val">10B</span>
+        <span class="stat-label">Redirects / day</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val">7</span>
+        <span class="stat-label">Char short key</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val">99.99%</span>
+        <span class="stat-label">Availability</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 01 REQUIREMENTS ─── -->
+  <section class="section" id="requirements">
+    <div class="section-header">
+      <span class="section-num">01 /</span>
+      <h2>Requirements <em>Gathering</em></h2>
+    </div>
+    <p class="section-intro">
+      Always start by clarifying requirements before jumping into design. Ask the interviewer about
+      scale, features, and constraints. Here we define both functional and non-functional requirements.
+    </p>
+
+    <div class="req-grid">
+      <div class="req-card">
+        <h3 class="func">● Functional Requirements</h3>
+        <div class="req-item">Given a long URL, generate a unique short URL (alias)</div>
+        <div class="req-item">When user visits short URL, redirect to original long URL</div>
+        <div class="req-item">Users can optionally specify a custom short alias</div>
+        <div class="req-item">Short URLs expire after a configurable TTL (default: 5 years)</div>
+        <div class="req-item">Users can delete their own short URLs</div>
+        <div class="req-item">Track click analytics (count, geography, referrer, device)</div>
+      </div>
+
+      <div class="req-card">
+        <h3 class="nonfunc">◆ Non-Functional Requirements</h3>
+        <div class="req-item">Redirect latency must be &lt; 10ms (P99)</div>
+        <div class="req-item">System must be highly available — 99.99% uptime</div>
+        <div class="req-item">Eventual consistency acceptable for analytics</div>
+        <div class="req-item">Short URLs must be unpredictable (not enumerable)</div>
+        <div class="req-item">Support 100M URL creations and 10B redirects per day</div>
+        <div class="req-item">Horizontal scalability with no single point of failure</div>
+      </div>
+
+      <div class="req-card">
+        <h3 class="cap">◈ Capacity Assumptions</h3>
+        <div class="req-item">Read-to-write ratio: 100:1 (reads dominate heavily)</div>
+        <div class="req-item">Average long URL size: 200 bytes</div>
+        <div class="req-item">Short URL key: 7 characters = 62⁷ ≈ 3.5 trillion combinations</div>
+        <div class="req-item">URLs stored for 5 years: ~180 billion total records</div>
+        <div class="req-item">Data storage per URL entry: ~500 bytes</div>
+        <div class="req-item">Total storage: ~90 TB over 5 years</div>
+      </div>
+
+      <div class="req-card">
+        <h3 class="api-h">◉ Out of Scope (v1)</h3>
+        <div class="req-item">User accounts and authentication (simplified to API key)</div>
+        <div class="req-item">A/B testing and link rotation</div>
+        <div class="req-item">QR code generation (can be added later)</div>
+        <div class="req-item">URL preview / screenshot generation</div>
+        <div class="req-item">Bulk URL creation API</div>
+        <div class="req-item">Dashboard UI (assumed external)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 02 ESTIMATION ─── -->
+  <section class="section" id="estimation">
+    <div class="section-header">
+      <span class="section-num">02 /</span>
+      <h2>Capacity <em>Estimation</em></h2>
+    </div>
+    <p class="section-intro">
+      Back-of-the-envelope calculations anchor design decisions — they tell us what technologies
+      we need (cache size, DB throughput, network bandwidth) before writing a single line of code.
+    </p>
+
+    <div class="est-grid">
+      <div class="est-box">
+        <h3>Traffic Estimates</h3>
+        <div class="est-row"><span class="est-key">URL Creations / day</span><span class="est-val">100M</span></div>
+        <div class="est-row"><span class="est-key">URL Creations / second (write QPS)</span><span class="est-val">~1,160</span></div>
+        <div class="est-row"><span class="est-key">Redirects / day</span><span class="est-val">10B</span></div>
+        <div class="est-row"><span class="est-key">Redirects / second (read QPS)</span><span class="est-val">~116,000</span></div>
+        <div class="est-row"><span class="est-key">Peak QPS multiplier</span><span class="est-val">5×</span></div>
+        <div class="est-row"><span class="est-key">Peak Redirects / second</span><span class="est-val">~580,000</span></div>
+      </div>
+
+      <div class="est-box">
+        <h3>Storage Estimates</h3>
+        <div class="est-row"><span class="est-key">URLs stored for 5 years</span><span class="est-val">~180B</span></div>
+        <div class="est-row"><span class="est-key">Storage per record</span><span class="est-val">500 bytes</span></div>
+        <div class="est-row"><span class="est-key">Total raw storage (5 yr)</span><span class="est-val">~90 TB</span></div>
+        <div class="est-row"><span class="est-key">Read bandwidth / sec</span><span class="est-val">~60 GB/s</span></div>
+        <div class="est-row"><span class="est-key">Write bandwidth / sec</span><span class="est-val">~580 MB/s</span></div>
+        <div class="est-row"><span class="est-key">Cache (20% hot data)</span><span class="est-val">~170 GB</span></div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Key Insight:</strong> The 100:1 read-to-write ratio means our system is <em>heavily read-optimized</em>.
+      This drives our caching strategy — the vast majority of traffic should be served from in-memory cache, never touching the database.
+      A well-tuned Redis cluster can absorb 580K+ redirects/sec with sub-millisecond latency.
+    </div>
+  </section>
+
+  <!-- ─── 03 API ─── -->
+  <section class="section" id="api">
+    <div class="section-header">
+      <span class="section-num">03 /</span>
+      <h2>API <em>Design</em></h2>
+    </div>
+    <p class="section-intro">
+      RESTful API endpoints with clear contracts. Authentication via API key in header.
+      Rate limiting applied per API key to prevent abuse.
+    </p>
+
+    <div class="api-list">
+      <div class="api-item">
+        <div class="method method-post">POST</div>
+        <div>
+          <div class="api-endpoint">/api/v1/urls</div>
+          <div class="api-desc">
+            Create a short URL. Body: <span class="tag-inline">long_url</span>, optional <span class="tag-inline">custom_alias</span>, optional <span class="tag-inline">expire_at</span>.
+            Returns <span class="tag-inline">short_url</span>, <span class="tag-inline">short_key</span>, <span class="tag-inline">expires_at</span>.
+          </div>
+        </div>
+        <div class="api-code">201 Created<br>400 Bad Request<br>409 Conflict</div>
+      </div>
+
+      <div class="api-item">
+        <div class="method method-get">GET</div>
+        <div>
+          <div class="api-endpoint">/:short_key</div>
+          <div class="api-desc">
+            Resolve and redirect. Returns HTTP <span class="tag-inline">301</span> (permanent, cached by browser) or
+            <span class="tag-inline">302</span> (temporary, bypasses browser cache — use 302 for analytics accuracy).
+            Decision: <strong>use 302</strong> to ensure every request hits our servers for tracking.
+          </div>
+        </div>
+        <div class="api-code">302 Redirect<br>404 Not Found<br>410 Gone (expired)</div>
+      </div>
+
+      <div class="api-item">
+        <div class="method method-get">GET</div>
+        <div>
+          <div class="api-endpoint">/api/v1/urls/:short_key</div>
+          <div class="api-desc">
+            Get metadata for a URL — original URL, creation time, expiry, click count.
+            Requires ownership via API key.
+          </div>
+        </div>
+        <div class="api-code">200 OK<br>403 Forbidden<br>404 Not Found</div>
+      </div>
+
+      <div class="api-item">
+        <div class="method method-del">DEL</div>
+        <div>
+          <div class="api-endpoint">/api/v1/urls/:short_key</div>
+          <div class="api-desc">
+            Delete a short URL. Requires ownership. Soft-deletes the record and invalidates the cache entry.
+            Future requests return 410 Gone.
+          </div>
+        </div>
+        <div class="api-code">204 No Content<br>403 Forbidden<br>404 Not Found</div>
+      </div>
+
+      <div class="api-item">
+        <div class="method method-get">GET</div>
+        <div>
+          <div class="api-endpoint">/api/v1/urls/:short_key/analytics</div>
+          <div class="api-desc">
+            Click analytics: total clicks, breakdown by date, country, referrer, browser, OS.
+            Data is eventually consistent (up to 30s lag from async pipeline).
+          </div>
+        </div>
+        <div class="api-code">200 OK<br>403 Forbidden<br>404 Not Found</div>
+      </div>
+    </div>
+
+    <div class="callout callout-orange" style="margin-top: 32px;">
+      <strong>301 vs 302 Redirect:</strong> Use <code style="background:rgba(255,107,53,0.1);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:12px;">302 Found</code> even though 301 is more "semantically correct" for permanent redirects.
+      Why? With 301, browsers cache the redirect and never hit our servers again — we lose analytics data.
+      With 302, every redirect hits our servers, enabling accurate tracking.
+    </div>
+  </section>
+
+  <!-- ─── 04 DB ─── -->
+  <section class="section" id="db">
+    <div class="section-header">
+      <span class="section-num">04 /</span>
+      <h2>Database <em>Design</em></h2>
+    </div>
+    <p class="section-intro">
+      Which database? We store ~180B rows over 5 years, need &lt;10ms reads, and have no complex JOIN queries.
+      A NoSQL key-value store or wide-column DB (Cassandra, DynamoDB) suits redirects perfectly.
+      A relational DB handles URL metadata and user data.
+    </p>
+
+    <div class="diagram-box">
+      <div class="diagram-title">Database Schema</div>
+      <div class="schema-grid">
+        <div class="schema-table">
+          <div class="schema-table-header"><h4>urls</h4><span>Primary Store</span></div>
+          <div class="schema-row"><div class="schema-field"><span class="pk-badge">PK</span> short_key</div><div class="schema-type">VARCHAR(10)</div></div>
+          <div class="schema-row"><div class="schema-field">long_url</div><div class="schema-type">TEXT</div></div>
+          <div class="schema-row"><div class="schema-field"><span class="fk-badge">FK</span> user_id</div><div class="schema-type">BIGINT</div></div>
+          <div class="schema-row"><div class="schema-field">created_at</div><div class="schema-type">TIMESTAMP</div></div>
+          <div class="schema-row"><div class="schema-field">expires_at</div><div class="schema-type">TIMESTAMP</div></div>
+          <div class="schema-row"><div class="schema-field">is_deleted</div><div class="schema-type">BOOLEAN</div></div>
+          <div class="schema-row"><div class="schema-field">custom_alias</div><div class="schema-type">BOOLEAN</div></div>
+        </div>
+
+        <div class="schema-table">
+          <div class="schema-table-header"><h4>users</h4><span>Account Data</span></div>
+          <div class="schema-row"><div class="schema-field"><span class="pk-badge">PK</span> user_id</div><div class="schema-type">BIGINT</div></div>
+          <div class="schema-row"><div class="schema-field">email</div><div class="schema-type">VARCHAR(255)</div></div>
+          <div class="schema-row"><div class="schema-field">api_key</div><div class="schema-type">VARCHAR(64)</div></div>
+          <div class="schema-row"><div class="schema-field">plan_type</div><div class="schema-type">ENUM</div></div>
+          <div class="schema-row"><div class="schema-field">rate_limit</div><div class="schema-type">INT</div></div>
+          <div class="schema-row"><div class="schema-field">created_at</div><div class="schema-type">TIMESTAMP</div></div>
+        </div>
+
+        <div class="schema-table">
+          <div class="schema-table-header"><h4>click_events</h4><span>Analytics Store</span></div>
+          <div class="schema-row"><div class="schema-field"><span class="pk-badge">PK</span> event_id</div><div class="schema-type">UUID</div></div>
+          <div class="schema-row"><div class="schema-field"><span class="fk-badge">FK</span> short_key</div><div class="schema-type">VARCHAR(10)</div></div>
+          <div class="schema-row"><div class="schema-field">clicked_at</div><div class="schema-type">TIMESTAMP</div></div>
+          <div class="schema-row"><div class="schema-field">ip_address</div><div class="schema-type">INET</div></div>
+          <div class="schema-row"><div class="schema-field">country_code</div><div class="schema-type">CHAR(2)</div></div>
+          <div class="schema-row"><div class="schema-field">referrer</div><div class="schema-type">TEXT</div></div>
+          <div class="schema-row"><div class="schema-field">user_agent</div><div class="schema-type">TEXT</div></div>
+        </div>
+
+        <div class="schema-table">
+          <div class="schema-table-header"><h4>key_pool</h4><span>Pre-generated Keys</span></div>
+          <div class="schema-row"><div class="schema-field"><span class="pk-badge">PK</span> key_id</div><div class="schema-type">BIGINT</div></div>
+          <div class="schema-row"><div class="schema-field">short_key</div><div class="schema-type">VARCHAR(10)</div></div>
+          <div class="schema-row"><div class="schema-field">is_used</div><div class="schema-type">BOOLEAN</div></div>
+          <div class="schema-row"><div class="schema-field">claimed_at</div><div class="schema-type">TIMESTAMP</div></div>
+          <div style="padding:10px 16px;font-size:11px;color:var(--text-dim)">Index: (is_used, key_id)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Database Selection Strategy:</strong><br>
+      • <span class="tag-inline">urls</span> table → <strong>Cassandra / DynamoDB</strong> — key-value lookups, massive scale, eventual consistency fine<br>
+      • <span class="tag-inline">users</span> table → <strong>PostgreSQL</strong> — ACID needed for billing, strong consistency<br>
+      • <span class="tag-inline">click_events</span> → <strong>ClickHouse / BigQuery</strong> — columnar for analytics aggregations, append-only writes<br>
+      • <span class="tag-inline">key_pool</span> → <strong>MySQL</strong> — small table, needs row-level locking for key reservation
+    </div>
+  </section>
+
+  <!-- ─── 05 ALGORITHM ─── -->
+  <section class="section" id="algorithm">
+    <div class="section-header">
+      <span class="section-num">05 /</span>
+      <h2>Short URL <em>Algorithm</em></h2>
+    </div>
+    <p class="section-intro">
+      The core problem: generate a unique 7-character key for each URL. The choice of algorithm
+      significantly impacts uniqueness guarantees, collision risk, and system complexity.
+    </p>
+
+    <div class="algo-grid">
+      <div class="algo-card base62">
+        <h3 style="color: var(--accent)">Base62 Encoding</h3>
+        <span class="algo-badge badge-rec">★ Recommended</span>
+        <p class="algo-desc">Use a distributed counter (or Snowflake ID) and encode the integer in Base62 [a-z A-Z 0-9]. Counter increments atomically; encode gives a short, predictable-length key.</p>
+        <div class="algo-pros-cons">
+          <div class="pros"><div class="pros-label">Pros</div><li>No collisions guaranteed</li><li>Predictable key length</li><li>Fast encoding O(1)</li></div>
+          <div class="cons"><div class="cons-label">Cons</div><li>Sequential = guessable</li><li>Needs distributed counter</li><li>Counter = SPOF if naive</li></div>
+        </div>
+      </div>
+
+      <div class="algo-card md5">
+        <h3 style="color: var(--yellow)">MD5 / SHA Hash</h3>
+        <span class="algo-badge badge-ok">Acceptable</span>
+        <p class="algo-desc">Hash the long URL, take first 7 chars of hex. Simple but collision risk: birthday paradox kicks in at scale. Duplicate long URLs produce the same hash — good for dedup, bad for tracking.</p>
+        <div class="algo-pros-cons">
+          <div class="pros"><div class="pros-label">Pros</div><li>No counter needed</li><li>Same URL → same key</li><li>Simple to implement</li></div>
+          <div class="cons"><div class="cons-label">Cons</div><li>Collision risk at scale</li><li>Requires collision check</li><li>Can't deduplicate owners</li></div>
+        </div>
+      </div>
+
+      <div class="algo-card snow">
+        <h3 style="color: var(--accent3)">Pre-generated Key Pool</h3>
+        <span class="algo-badge badge-rec">★ Recommended</span>
+        <p class="algo-desc">A Key Generation Service (KGS) pre-generates millions of unique keys offline and stores them in a DB (key_pool). API servers claim keys as needed. Eliminates real-time generation latency.</p>
+        <div class="algo-pros-cons">
+          <div class="pros"><div class="pros-label">Pros</div><li>Fastest at claim time</li><li>Zero collision risk</li><li>Decouples generation</li></div>
+          <div class="cons"><div class="cons-label">Cons</div><li>KGS needs HA setup</li><li>Wasted keys if unused</li><li>Extra DB table needed</li></div>
+        </div>
+      </div>
+
+      <div class="algo-card counter">
+        <h3 style="color: var(--accent4)">Snowflake-style ID</h3>
+        <span class="algo-badge badge-ok">Acceptable</span>
+        <p class="algo-desc">64-bit ID composed of timestamp + datacenter ID + worker ID + sequence. Globally unique without coordination. Encode in Base62 to get a short string. Twitter/Discord use this pattern.</p>
+        <div class="algo-pros-cons">
+          <div class="pros"><div class="pros-label">Pros</div><li>No central counter</li><li>Time-sortable keys</li><li>Works across DCs</li></div>
+          <div class="cons"><div class="cons-label">Cons</div><li>Clock skew issues</li><li>Key reveals timestamp</li><li>Slightly longer key</li></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="diagram-box">
+      <div class="diagram-title">Recommended Approach: Key Generation Service (KGS)</div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#febc2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+          <span class="code-filename">key_generation_service.py</span>
+        </div>
+<span class="c-comment"># ─── Key Generation Service ───────────────────────────────────────</span>
+<span class="c-comment"># Runs as a background job. Generates keys in batches, marks as unused.</span>
+<span class="c-comment"># API servers pull from the pool atomically (row-level lock or Redis SPOP).</span>
+
+<span class="c-keyword">import</span> random, string
+
+CHARS = string.ascii_letters + string.digits  <span class="c-comment"># Base62: 62 chars</span>
+KEY_LENGTH = <span class="c-num">7</span>                             <span class="c-comment"># 62^7 = 3.52 trillion combos</span>
+BATCH_SIZE = <span class="c-num">1_000_000</span>                      <span class="c-comment"># Generate 1M keys per batch</span>
+
+<span class="c-keyword">def</span> <span class="c-fn">generate_unique_key</span>() -> <span class="c-type">str</span>:
+    <span class="c-keyword">return</span> <span class="c-string">''</span>.join(random.choices(CHARS, k=KEY_LENGTH))
+
+<span class="c-keyword">def</span> <span class="c-fn">populate_key_pool</span>(db):
+    keys = {<span class="c-fn">generate_unique_key</span>() <span class="c-keyword">for</span> _ <span class="c-keyword">in</span> <span class="c-fn">range</span>(BATCH_SIZE)}
+    db.<span class="c-fn">bulk_insert</span>(<span class="c-string">"INSERT IGNORE INTO key_pool (short_key) VALUES (?)"</span>, keys)
+
+<span class="c-comment"># ─── API Server: Claim a key ──────────────────────────────────────</span>
+<span class="c-keyword">def</span> <span class="c-fn">claim_key</span>(redis_client) -> <span class="c-type">str</span>:
+    <span class="c-comment"># Redis SPOP is O(1) and atomic - perfect for distributed key claim</span>
+    key = redis_client.<span class="c-fn">spop</span>(<span class="c-string">"available_keys"</span>)
+    <span class="c-keyword">if not</span> key:
+        <span class="c-comment"># Fallback: claim from DB with row lock</span>
+        key = db.<span class="c-fn">query_one</span>(<span class="c-string">"""
+            SELECT short_key FROM key_pool 
+            WHERE is_used = FALSE 
+            LIMIT 1 FOR UPDATE SKIP LOCKED
+        """</span>)
+        db.<span class="c-fn">execute</span>(<span class="c-string">"UPDATE key_pool SET is_used=TRUE WHERE short_key=?"</span>, key)
+    <span class="c-keyword">return</span> key
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 06 ARCHITECTURE ─── -->
+  <section class="section" id="architecture">
+    <div class="section-header">
+      <span class="section-num">06 /</span>
+      <h2>System <em>Architecture</em></h2>
+    </div>
+    <p class="section-intro">
+      A layered architecture with CDN, load balancers, stateless API servers, Redis caching,
+      and separated read/write paths. Every component is horizontally scalable and has no single point of failure.
+    </p>
+
+    <div class="diagram-box">
+      <div class="diagram-title">High-Level Architecture</div>
+
+      <!-- Tier 1: Client -->
+      <div style="margin-bottom: 24px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">TIER 1 — CLIENT LAYER</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div class="arch-box color-client">🌐 Browser / App</div>
+          <div class="arch-box color-client">📱 Mobile Client</div>
+          <div class="arch-box color-client">🤖 API Consumer</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:11px;">
+        <div style="width:2px;height:32px;background:linear-gradient(180deg,var(--text-dim),var(--accent));margin-left:40px;"></div>
+        <span>HTTPS requests routed via DNS</span>
+      </div>
+
+      <!-- Tier 2: CDN + LB -->
+      <div style="margin-bottom: 24px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">TIER 2 — EDGE & LOAD BALANCING</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;">
+          <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow);margin-bottom:6px;">☁️ CDN (CloudFront / Cloudflare)</div>
+            <div style="font-size:12px;color:var(--text-muted)">Caches popular redirects at edge PoPs globally. Reduces latency to &lt;5ms for cached hot links. Only misses reach origin.</div>
+          </div>
+          <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow);margin-bottom:6px;">⚖️ Load Balancer (L7, e.g. NGINX / ALB)</div>
+            <div style="font-size:12px;color:var(--text-muted)">Routes /:short_key to Read Service, /api/v1/* to Write Service. Round-robin with health checks. No state stored here.</div>
+          </div>
+          <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow);margin-bottom:6px;">🛡️ WAF + Rate Limiter</div>
+            <div style="font-size:12px;color:var(--text-muted)">Blocks abusive IPs, enforces per-API-key rate limits (Redis token bucket). Protects against DDoS and enumeration.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:11px;">
+        <div style="width:2px;height:32px;background:linear-gradient(180deg,var(--text-dim),var(--blue));margin-left:40px;"></div>
+        <span>Routed to appropriate microservice</span>
+      </div>
+
+      <!-- Tier 3: App Servers -->
+      <div style="margin-bottom: 24px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">TIER 3 — APPLICATION SERVICES (Stateless, Auto-scaled)</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;">
+          <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue);margin-bottom:6px;">🔍 Read Service (URL Resolver)</div>
+            <div style="font-size:12px;color:var(--text-muted)">Handles /:short_key lookups. Checks Redis → DB. Fires async click event. Issues 302 redirect. Scales to 50+ instances.</div>
+          </div>
+          <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue);margin-bottom:6px;">✏️ Write Service (URL Creator)</div>
+            <div style="font-size:12px;color:var(--text-muted)">Handles URL creation/deletion. Claims key from KGS pool. Writes to DB. Populates cache. 10-20 instances suffice.</div>
+          </div>
+          <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue);margin-bottom:6px;">🔑 Key Generation Service</div>
+            <div style="font-size:12px;color:var(--text-muted)">Background service pre-generating keys. Runs as cron or daemon. Keeps key_pool stocked above 100M keys. 2 instances (primary + standby).</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:11px;">
+        <div style="width:2px;height:32px;background:linear-gradient(180deg,var(--text-dim),var(--red));margin-left:40px;"></div>
+        <span>Cache-aside pattern: check cache first, then DB</span>
+      </div>
+
+      <!-- Tier 4: Storage -->
+      <div style="margin-bottom: 0;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">TIER 4 — DATA STORAGE</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;">
+          <div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red);margin-bottom:6px;">⚡ Redis Cluster (Cache)</div>
+            <div style="font-size:12px;color:var(--text-muted)">Stores short_key → long_url mappings. LRU eviction. 170GB RAM covers top 20% of URLs which handle 80% of traffic. Sub-ms reads.</div>
+          </div>
+          <div style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent4);margin-bottom:6px;">🗄️ Cassandra / DynamoDB (URL Store)</div>
+            <div style="font-size:12px;color:var(--text-muted)">Primary URL store. Sharded by short_key. Handles 100M+ writes/day. Linear horizontal scale. Multi-region replication.</div>
+          </div>
+          <div style="background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent3);margin-bottom:6px;">📨 Kafka (Event Queue)</div>
+            <div style="font-size:12px;color:var(--text-muted)">Click events published here async. Decouples read path from analytics writes. Consumers process & aggregate to ClickHouse.</div>
+          </div>
+          <div style="background:rgba(255,107,53,0.07);border:1px solid rgba(255,107,53,0.2);border-radius:10px;padding:16px 20px;flex:1;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);margin-bottom:6px;">📊 ClickHouse (Analytics)</div>
+            <div style="font-size:12px;color:var(--text-muted)">OLAP columnar store. Receives from Kafka consumers. Powers real-time dashboards and aggregated reports. Petabyte-scale.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 07 FLOWS ─── -->
+  <section class="section" id="flows">
+    <div class="section-header">
+      <span class="section-num">07 /</span>
+      <h2>Request <em>Flows</em></h2>
+    </div>
+    <p class="section-intro">
+      Walking through the exact sequence of operations for the two most critical paths:
+      creating a short URL and resolving a redirect.
+    </p>
+
+    <div class="two-flow">
+      <div class="flow-card">
+        <h4 style="color: var(--blue)">✏️ Write Flow — Create Short URL</h4>
+
+        <div class="flow-step">
+          <div class="step-num step-blue">1</div>
+          <div class="step-content">Client sends <strong>POST /api/v1/urls</strong> with API key + long URL. WAF validates; rate limiter checks quota (Redis token bucket).</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-blue">2</div>
+          <div class="step-content">Write Service validates the URL (syntax, malware check via Google Safe Browsing API). Reject if invalid.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-blue">3</div>
+          <div class="step-content">Check if custom alias provided. If yes, verify uniqueness via DB lookup. Reject with 409 if taken.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-blue">4</div>
+          <div class="step-content">If no custom alias, claim a pre-generated key via <strong>Redis SPOP("available_keys")</strong> — O(1), atomic, no lock contention.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-blue">5</div>
+          <div class="step-content">Write record to <strong>Cassandra</strong> (short_key → long_url, metadata). Async replication to other regions.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-blue">6</div>
+          <div class="step-content">Populate <strong>Redis cache</strong> with the new mapping. Return short URL to client. Total latency: ~50–100ms.</div>
+        </div>
+      </div>
+
+      <div class="flow-card">
+        <h4 style="color: var(--accent4)">🔍 Read Flow — Redirect Resolution</h4>
+
+        <div class="flow-step">
+          <div class="step-num step-green">1</div>
+          <div class="step-content">User visits <strong>https://short.ly/abc1234</strong>. DNS resolves to CDN edge. CDN checks its cache for this key.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-green">2</div>
+          <div class="step-content"><strong>CDN HIT</strong>: Return 302 redirect immediately from edge. Latency &lt;5ms. ~80% of popular URLs served here.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-green">3</div>
+          <div class="step-content"><strong>CDN MISS</strong>: Request forwarded to Load Balancer → Read Service. Check <strong>Redis cluster</strong> for short_key mapping.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-green">4</div>
+          <div class="step-content"><strong>Redis HIT</strong>: Return 302 redirect. Publish click event to <strong>Kafka</strong> asynchronously (non-blocking). Latency &lt;10ms.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-green">5</div>
+          <div class="step-content"><strong>Redis MISS</strong>: Query <strong>Cassandra</strong> by short_key. Populate Redis cache (LRU). Return 302 redirect. Latency ~50ms.</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num step-green">6</div>
+          <div class="step-content"><strong>Not found / expired</strong>: Return 404 or 410. Kafka consumer processes click event, enriches with GeoIP, writes to ClickHouse.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 08 CACHING ─── -->
+  <section class="section" id="caching">
+    <div class="section-header">
+      <span class="section-num">08 /</span>
+      <h2>Caching <em>Strategy</em></h2>
+    </div>
+    <p class="section-intro">
+      Given the 100:1 read-to-write ratio and Pareto distribution of URL popularity, caching is
+      the single most important optimization. We use a multi-layer cache hierarchy.
+    </p>
+
+    <div class="diagram-box">
+      <div class="diagram-title">Cache Hierarchy & Decision Logic</div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#febc2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+          <span class="code-filename">cache_strategy.py</span>
+        </div>
+<span class="c-keyword">async def</span> <span class="c-fn">resolve_url</span>(short_key: <span class="c-type">str</span>) -> <span class="c-type">str</span>:
+    <span class="c-comment"># ── Layer 1: CDN Edge Cache ────────────────────────────────────────</span>
+    <span class="c-comment"># CDN handles this before request reaches our servers (invisible here)</span>
+    <span class="c-comment"># Cache-Control: max-age=3600 for popular links</span>
+
+    <span class="c-comment"># ── Layer 2: In-process LRU Cache (per server) ────────────────────</span>
+    <span class="c-comment"># Each API server keeps a 10K-entry LRU cache for ultra-hot links</span>
+    <span class="c-keyword">if</span> long_url := local_lru.<span class="c-fn">get</span>(short_key):
+        metrics.<span class="c-fn">inc</span>(<span class="c-string">'cache_hit_local'</span>)
+        <span class="c-keyword">return</span> long_url
+
+    <span class="c-comment"># ── Layer 3: Redis Cluster ─────────────────────────────────────────</span>
+    <span class="c-comment"># 170GB Redis across 6 shards. LRU eviction. TTL = URL expiry time.</span>
+    <span class="c-keyword">if</span> long_url := <span class="c-keyword">await</span> redis.<span class="c-fn">get</span>(<span class="c-fn">f</span><span class="c-string">"url:{short_key}"</span>):
+        local_lru.<span class="c-fn">set</span>(short_key, long_url)       <span class="c-comment"># backfill L2</span>
+        metrics.<span class="c-fn">inc</span>(<span class="c-string">'cache_hit_redis'</span>)
+        <span class="c-keyword">return</span> long_url
+
+    <span class="c-comment"># ── Layer 4: Database (Cassandra) ─────────────────────────────────</span>
+    <span class="c-comment"># Last resort. Expected to handle &lt;1% of redirect traffic.</span>
+    record = <span class="c-keyword">await</span> cassandra.<span class="c-fn">get</span>(<span class="c-string">"SELECT long_url,expires_at FROM urls WHERE short_key=?"</span>, short_key)
+
+    <span class="c-keyword">if not</span> record:
+        <span class="c-keyword">raise</span> NotFoundException()
+
+    <span class="c-keyword">if</span> record.expires_at < now():
+        <span class="c-keyword">raise</span> ExpiredException()
+
+    ttl = (record.expires_at - now()).seconds
+    <span class="c-keyword">await</span> redis.<span class="c-fn">setex</span>(<span class="c-fn">f</span><span class="c-string">"url:{short_key}"</span>, ttl, record.long_url)   <span class="c-comment"># populate Redis</span>
+    local_lru.<span class="c-fn">set</span>(short_key, record.long_url)                         <span class="c-comment"># populate L2</span>
+    metrics.<span class="c-fn">inc</span>(<span class="c-string">'cache_miss_db'</span>)
+    <span class="c-keyword">return</span> record.long_url
+
+<span class="c-comment"># ── Cache Invalidation on Delete ──────────────────────────────────</span>
+<span class="c-keyword">async def</span> <span class="c-fn">delete_url</span>(short_key: <span class="c-type">str</span>):
+    <span class="c-keyword">await</span> cassandra.<span class="c-fn">soft_delete</span>(short_key)        <span class="c-comment"># mark is_deleted=True</span>
+    <span class="c-keyword">await</span> redis.<span class="c-fn">delete</span>(<span class="c-fn">f</span><span class="c-string">"url:{short_key}"</span>)        <span class="c-comment"># invalidate Redis</span>
+    <span class="c-keyword">await</span> cdn.<span class="c-fn">purge</span>(short_key)                    <span class="c-comment"># CDN purge API call</span>
+    <span class="c-comment"># Local LRU cache: TTL-based expiry (max 60s stale) — acceptable</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Cache Eviction Policy — LRU with TTL:</strong>
+      Use LRU (Least Recently Used) eviction for Redis. Set TTL equal to URL expiry time so expired URLs auto-evict.
+      20% of URLs typically drive 80% of traffic (Pareto principle), so 170GB of Redis can serve ~80% of all redirect traffic without touching Cassandra.
+    </div>
+  </section>
+
+  <!-- ─── 09 SCALING ─── -->
+  <section class="section" id="scaling">
+    <div class="section-header">
+      <span class="section-num">09 /</span>
+      <h2>Scaling & <em>High Availability</em></h2>
+    </div>
+    <p class="section-intro">
+      Every layer is designed for horizontal scale and fault tolerance.
+      No component is a single point of failure. We target 99.99% availability (52 min downtime/year).
+    </p>
+
+    <div class="scale-grid">
+      <div class="scale-card">
+        <span class="scale-icon">📦</span>
+        <h3>Stateless API Servers</h3>
+        <p>Read and Write services store no local state. Any server can handle any request. Auto-scale based on CPU/RPS metrics. Kubernetes HPA scales from 5 to 200 pods within 60 seconds.</p>
+      </div>
+      <div class="scale-card">
+        <span class="scale-icon">⚡</span>
+        <h3>Redis Cluster Sharding</h3>
+        <p>6 Redis nodes in cluster mode. Keys sharded by hash slot (16384 slots). Each node handles ~30GB. Add nodes to scale. Replicas for each primary ensure cache survives node failures.</p>
+      </div>
+      <div class="scale-card">
+        <span class="scale-icon">🗄️</span>
+        <h3>Cassandra Horizontal Scale</h3>
+        <p>URLs partitioned by short_key using consistent hashing. Replication factor 3. Add nodes seamlessly — data rebalances automatically. Multi-datacenter replication for geo-redundancy.</p>
+      </div>
+      <div class="scale-card">
+        <span class="scale-icon">🌍</span>
+        <h3>Multi-Region Deployment</h3>
+        <p>Active-active in 3 regions (US-East, EU-West, AP-Southeast). Cassandra replicates across regions. Users routed to nearest region via GeoDNS. One region can fail without service interruption.</p>
+      </div>
+      <div class="scale-card">
+        <span class="scale-icon">⚖️</span>
+        <h3>Load Balancer HA</h3>
+        <p>Two NGINX instances in active-passive with keepalived. Virtual IP floats to secondary on failure. L7 load balancer does health checks every 2s. Routes around failed API servers instantly.</p>
+      </div>
+      <div class="scale-card">
+        <span class="scale-icon">🔄</span>
+        <h3>Circuit Breaker Pattern</h3>
+        <p>If DB fails, circuit breaker opens and serves from cache only. Graceful degradation: redirect works even if write service is down. Hystrix / Resilience4j patterns applied per service call.</p>
+      </div>
+      <div class="scale-card">
+        <span class="scale-icon">📨</span>
+        <h3>Kafka Topic Partitioning</h3>
+        <p>click_events topic with 100 partitions. Each partition consumed by one analytics worker — ensures ordering per short_key. Retention: 7 days. Consumers can replay if ClickHouse goes down.</p>
+      </div>
+      <div class="scale-card">
+        <span class="scale-icon">🧹</span>
+        <h3>URL Expiry Cleanup</h3>
+        <p>Batch job runs nightly: scans for expired URLs, marks soft-deleted, removes from Redis. Alternatively, set Cassandra TTL = URL expiry time for auto-deletion. Frees storage progressively.</p>
+      </div>
+      <div class="scale-card">
+        <span class="scale-icon">📊</span>
+        <h3>Monitoring & Alerting</h3>
+        <p>Prometheus + Grafana for metrics. Alert if cache hit rate drops below 95%, redirect P99 exceeds 50ms, or Kafka consumer lag exceeds 100K. PagerDuty on-call rotation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 10 BOTTLENECKS ─── -->
+  <section class="section" id="bottlenecks">
+    <div class="section-header">
+      <span class="section-num">10 /</span>
+      <h2>Bottlenecks & <em>Mitigations</em></h2>
+    </div>
+    <p class="section-intro">
+      Identifying bottlenecks before they happen — and their mitigations — demonstrates
+      systems thinking depth. Here are the most critical failure points.
+    </p>
+
+    <table class="btable">
+      <thead>
+        <tr>
+          <th>Bottleneck</th>
+          <th>Severity</th>
+          <th>Symptom</th>
+          <th>Mitigation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cache stampede</td>
+          <td><span class="severity sev-high">HIGH</span></td>
+          <td>A popular URL expires from Redis. Thousands of requests simultaneously miss cache and hammer the DB, causing overload.</td>
+          <td>Use "lock-based" cache population: first request acquires a Redis lock and fetches from DB; others wait. Or probabilistic early expiration (refresh cache before it expires).</td>
+        </tr>
+        <tr>
+          <td>Key collision</td>
+          <td><span class="severity sev-med">MED</span></td>
+          <td>Two API servers claim the same key from the pool (race condition).</td>
+          <td>Use Redis SPOP (atomic set pop) — only one server can claim a key. DB fallback uses FOR UPDATE SKIP LOCKED. Pre-generated key pool eliminates real-time generation conflicts.</td>
+        </tr>
+        <tr>
+          <td>Hot key in Redis</td>
+          <td><span class="severity sev-high">HIGH</span></td>
+          <td>A viral URL generates 100K+ req/s to a single Redis shard, overwhelming it.</td>
+          <td>Duplicate hot keys across multiple Redis nodes. Read from a random copy. Or use local in-process LRU cache (L2) to absorb per-server hot traffic before Redis.</td>
+        </tr>
+        <tr>
+          <td>Write amplification</td>
+          <td><span class="severity sev-med">MED</span></td>
+          <td>Every redirect fires a Kafka event. At 116K/s, Kafka producers could become a bottleneck.</td>
+          <td>Batch events before publishing (micro-batch every 100ms). Use async non-blocking producers. Kafka is designed for millions of messages/sec — proper batching keeps this safe.</td>
+        </tr>
+        <tr>
+          <td>Cassandra hotspot</td>
+          <td><span class="severity sev-med">MED</span></td>
+          <td>All recent URLs hash to same token range, overloading one node.</td>
+          <td>Short keys are randomly generated (not sequential), so hash distribution is naturally uniform. Murmur3 partitioner ensures even spread across nodes.</td>
+        </tr>
+        <tr>
+          <td>Long URL storage bloat</td>
+          <td><span class="severity sev-low">LOW</span></td>
+          <td>URLs with query params can be 2,000+ bytes, bloating DB and cache.</td>
+          <td>Cap long_url at 2,048 characters (HTTP spec limit). For cache efficiency, store full URL in DB but only cache the first 500 chars as a pointer if needed.</td>
+        </tr>
+        <tr>
+          <td>DNS propagation delay</td>
+          <td><span class="severity sev-low">LOW</span></td>
+          <td>On region failover, GeoDNS change can take 30–60s to propagate, causing brief outage.</td>
+          <td>Use low TTL (30s) for GeoDNS records. Pre-warm secondary region. Use Anycast IP routing for instant failover without DNS changes.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─── 11 ANALYTICS ─── -->
+  <section class="section" id="analytics">
+    <div class="section-header">
+      <span class="section-num">11 /</span>
+      <h2>Analytics <em>Pipeline</em></h2>
+    </div>
+    <p class="section-intro">
+      Analytics must never slow down redirects. We decouple click tracking from the redirect
+      response path entirely using an async event-driven pipeline.
+    </p>
+
+    <div class="diagram-box">
+      <div class="diagram-title">Analytics Data Pipeline</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+
+        <div class="arch-node">
+          <div class="arch-box color-api" style="min-width:120px;text-align:center;">🔍 Read Service</div>
+          <div class="arch-label">Fires event</div>
+        </div>
+
+        <div class="arch-arrow"><div class="line"></div><small>async</small></div>
+
+        <div class="arch-node">
+          <div class="arch-box color-queue" style="min-width:120px;text-align:center;">📨 Kafka</div>
+          <div class="arch-label">click_events topic</div>
+        </div>
+
+        <div class="arch-arrow"><div class="line"></div><small>stream</small></div>
+
+        <div class="arch-node">
+          <div class="arch-box color-lb" style="min-width:120px;text-align:center;">🔧 Flink / Spark</div>
+          <div class="arch-label">Stream processor</div>
+        </div>
+
+        <div class="arch-arrow"><div class="line"></div><small>enriched</small></div>
+
+        <div class="arch-node">
+          <div class="arch-box color-analytics" style="min-width:120px;text-align:center;">📊 ClickHouse</div>
+          <div class="arch-label">OLAP store</div>
+        </div>
+
+        <div class="arch-arrow"><div class="line"></div><small>query</small></div>
+
+        <div class="arch-node">
+          <div class="arch-box color-client" style="min-width:120px;text-align:center;">🖥️ Dashboard API</div>
+          <div class="arch-label">User-facing</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block" style="margin-top:24px;">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#febc2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+        <span class="code-filename">click_event_schema.json</span>
+      </div>
+<span class="c-comment">// Click event published to Kafka on every redirect</span>
+<span class="c-punct">{</span>
+  <span class="c-string">"event_id"</span>: <span class="c-string">"uuid-v4"</span>,
+  <span class="c-string">"short_key"</span>: <span class="c-string">"abc1234"</span>,
+  <span class="c-string">"clicked_at"</span>: <span class="c-string">"2025-04-21T10:32:00.123Z"</span>,
+  <span class="c-string">"ip_hash"</span>: <span class="c-string">"sha256(ip)"</span>,         <span class="c-comment">// hashed for privacy</span>
+  <span class="c-string">"country_code"</span>: <span class="c-string">"IN"</span>,              <span class="c-comment">// from GeoIP lookup (MaxMind)</span>
+  <span class="c-string">"city"</span>: <span class="c-string">"Mumbai"</span>,
+  <span class="c-string">"referrer_domain"</span>: <span class="c-string">"twitter.com"</span>,
+  <span class="c-string">"user_agent_parsed"</span>: <span class="c-punct">{</span>
+    <span class="c-string">"browser"</span>: <span class="c-string">"Chrome"</span>,
+    <span class="c-string">"os"</span>: <span class="c-string">"Android"</span>,
+    <span class="c-string">"device_type"</span>: <span class="c-string">"mobile"</span>
+  <span class="c-punct">}</span>
+<span class="c-punct">}</span>
+
+<span class="c-comment">// Stream processor enriches + aggregates, writes to ClickHouse:</span>
+<span class="c-keyword">SELECT</span> short_key, <span class="c-fn">count</span>(*) clicks, country_code
+<span class="c-keyword">FROM</span> click_events
+<span class="c-keyword">WHERE</span> clicked_at >= now() - <span class="c-fn">INTERVAL</span> <span class="c-num">7</span> DAY
+<span class="c-keyword">GROUP BY</span> short_key, country_code
+<span class="c-keyword">ORDER BY</span> clicks <span class="c-keyword">DESC</span>
+    </div>
+  </section>
+
+  <!-- ─── 12 SECURITY ─── -->
+  <section class="section" id="security">
+    <div class="section-header">
+      <span class="section-num">12 /</span>
+      <h2>Security <em>Considerations</em></h2>
+    </div>
+    <p class="section-intro">
+      URL shorteners are frequently abused for phishing, malware distribution, and spam.
+      Security is not optional — it's a core product feature.
+    </p>
+
+    <div class="req-grid">
+      <div class="req-card">
+        <h3 class="func">● Malicious URL Detection</h3>
+        <div class="req-item">Validate URL format (RFC 3986) before accepting</div>
+        <div class="req-item">Check against Google Safe Browsing API on creation</div>
+        <div class="req-item">Periodic re-scanning of stored URLs (async job)</div>
+        <div class="req-item">If flagged: return 451 Unavailable For Legal Reasons</div>
+        <div class="req-item">Human review queue for borderline cases</div>
+      </div>
+
+      <div class="req-card">
+        <h3 class="nonfunc">◆ Abuse Prevention</h3>
+        <div class="req-item">Rate limiting: 100 URL creations/hour per API key</div>
+        <div class="req-item">CAPTCHA for unauthenticated creation attempts</div>
+        <div class="req-item">IP-based rate limiting as secondary defense</div>
+        <div class="req-item">Key space is random — enumeration is impractical</div>
+        <div class="req-item">WAF rules block known bad actor IP ranges</div>
+      </div>
+
+      <div class="req-card">
+        <h3 class="cap">◈ Data Privacy</h3>
+        <div class="req-item">IP addresses stored as SHA-256 hashes (GDPR)</div>
+        <div class="req-item">User data deletion fully removes all URLs and events</div>
+        <div class="req-item">Analytics data is aggregated, not per-user</div>
+        <div class="req-item">HTTPS enforced everywhere (HSTS headers)</div>
+        <div class="req-item">API keys rotatable without data loss</div>
+      </div>
+
+      <div class="req-card">
+        <h3 class="api-h">◉ Infrastructure Security</h3>
+        <div class="req-item">Cassandra and Redis on private VPC — not public-facing</div>
+        <div class="req-item">API servers in private subnet; only LB is internet-facing</div>
+        <div class="req-item">mTLS between internal microservices</div>
+        <div class="req-item">Secrets managed via Vault / AWS Secrets Manager</div>
+        <div class="req-item">Audit logs of all admin actions stored immutably</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 13 SUMMARY ─── -->
+  <section class="section" id="summary">
+    <div class="section-header">
+      <span class="section-num">13 /</span>
+      <h2>Architecture <em>Summary</em></h2>
+    </div>
+    <p class="section-intro">
+      The complete picture: every design decision flows from our core constraint —
+      a 100:1 read-heavy system that must redirect in under 10ms at global scale.
+    </p>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-icon">🔑</div>
+        <h3>Key Generation</h3>
+        <p>Pre-generated key pool (KGS) with Redis SPOP for atomic, collision-free key claiming</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon">⚡</div>
+        <h3>Caching</h3>
+        <p>3-layer cache: CDN edge + local LRU + Redis cluster serves 99%+ of traffic</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon">🗄️</div>
+        <h3>Storage</h3>
+        <p>Cassandra for URL store (scale-out), PostgreSQL for users, ClickHouse for analytics</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon">📨</div>
+        <h3>Analytics</h3>
+        <p>Kafka async pipeline completely decoupled from redirect path — zero impact on latency</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon">🌍</div>
+        <h3>Global Scale</h3>
+        <p>Multi-region active-active with GeoDNS + Anycast for &lt;5ms latency worldwide</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon">🛡️</div>
+        <h3>Security</h3>
+        <p>Safe Browsing scanning, rate limiting, private VPC, mTLS, GDPR-compliant data handling</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon">♾️</div>
+        <h3>High Availability</h3>
+        <p>No SPOF at any layer. Auto-scaling, circuit breakers, and multi-AZ deployments</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon">📊</div>
+        <h3>Observability</h3>
+        <p>Prometheus metrics, Grafana dashboards, distributed tracing, and PagerDuty alerting</p>
+      </div>
+    </div>
+
+    <div class="diagram-box" style="margin-top: 0;">
+      <div class="diagram-title">Technology Stack Summary</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Compute</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline">Go / Python</span> API Services</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline">Kubernetes</span> Orchestration</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline">NGINX</span> Load Balancer</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline">CloudFront</span> CDN</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Data</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline tag-green">Cassandra</span> URL Store</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline tag-green">Redis</span> Cache Layer</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline tag-green">PostgreSQL</span> User Data</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline tag-green">ClickHouse</span> Analytics</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Messaging & Ops</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline tag-purple">Kafka</span> Event Streaming</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline tag-purple">Flink</span> Stream Processing</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline tag-purple">Prometheus</span> Monitoring</div>
+            <div style="font-size:13px;color:var(--text-muted)"><span class="tag-inline tag-purple">Vault</span> Secrets Management</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:32px;">
+      <strong>Interview Tip:</strong> In a system design interview, always walk through this order: Requirements → Estimation → API Design → Data Model → Algorithm → High-Level Design → Deep Dives (caching, scaling, bottlenecks). This structured approach demonstrates clarity of thinking and ensures you cover all critical areas within the time limit. Always ask clarifying questions before designing!
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      SYSTEM DESIGN GUIDE — URL SHORTENER — END TO END
+    </div>
+    <div class="footer-right">
+      Covers: Requirements · Estimation · API · DB · Algorithm · Architecture · Caching · Scaling · Security
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Active nav highlighting on scroll
+  const sections = document.querySelectorAll('.section, .hero');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === `#${id}`);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

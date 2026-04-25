@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub SSH — 3 Accounts Setup Guide</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0b0d11;
+    --surface:  #12151b;
+    --surface2: #1a1e27;
+    --border:   #242830;
+    --personal: #22c55e;
+    --work:     #3b82f6;
+    --free:     #f59e0b;
+    --accent:   #e879f9;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --red:      #ef4444;
+    --green:    #22c55e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    line-height: 1.65;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(160deg, #0b0d11 0%, #10131c 60%, #0b0d11 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 0 40px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -100px; right: -100px;
+    width: 420px; height: 420px;
+    background: radial-gradient(circle, rgba(232,121,249,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -80px; left: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(232,121,249,0.08);
+    border: 1px solid rgba(232,121,249,0.22);
+    color: var(--accent);
+    padding: 4px 14px; border-radius: 100px;
+    font-size: 0.73rem; font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+    font-weight: 800; line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 14px;
+  }
+  .hero p { color: var(--muted); font-size: 1rem; max-width: 580px; }
+
+  /* Account chips */
+  .acct-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px; border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
+    border: 1px solid;
+  }
+  .chip-p { background: rgba(34,197,94,0.1);  border-color: rgba(34,197,94,0.3);  color: var(--personal); }
+  .chip-w { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: var(--work); }
+  .chip-f { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--free); }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  /* ── SECTION ── */
+  .section { padding: 46px 0 0; }
+  .sec-header { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+  .step-num {
+    width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg, #7c3aed, var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1rem; color: #fff;
+  }
+  .sec-title  { font-size: 1.35rem; font-weight: 700; color: #fff; }
+  .sec-sub    { color: var(--muted); font-size: 0.84rem; margin-top: 2px; }
+
+  /* ── CARD ── */
+  .card-dark {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .card-hdr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 11px 18px;
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; color: var(--muted);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dr { background: #ef4444; }
+  .dy { background: #f59e0b; }
+  .dg { background: #22c55e; }
+
+  /* ── CODE ── */
+  pre {
+    margin: 0; padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.81rem; line-height: 1.85;
+    overflow-x: auto; color: var(--text);
+    background: transparent !important;
+  }
+  .cmd  { color: #e879f9; }
+  .cmt  { color: var(--muted); font-style: italic; }
+  .str  { color: var(--green); }
+  .kw   { color: #60a5fa; }
+  .hi   { color: #fff; font-weight: 700; }
+  .p    { color: var(--personal); font-weight: 600; }
+  .w    { color: var(--work);     font-weight: 600; }
+  .f    { color: var(--free);     font-weight: 600; }
+  .ok   { color: var(--green); }
+  .err  { color: var(--red); }
+
+  /* account-colored left border */
+  .border-p { border-left: 3px solid var(--personal) !important; }
+  .border-w { border-left: 3px solid var(--work)     !important; }
+  .border-f { border-left: 3px solid var(--free)     !important; }
+
+  /* ── ALERT ── */
+  .tip {
+    background: rgba(232,121,249,0.06);
+    border: 1px solid rgba(232,121,249,0.2);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px; padding: 13px 18px;
+    font-size: 0.87rem; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .warn {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-left: 3px solid var(--free);
+    border-radius: 10px; padding: 13px 18px;
+    font-size: 0.87rem; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .ai { font-size: 1.05rem; flex-shrink: 0; margin-top: 2px; }
+
+  /* ── TABLE ── */
+  .ref-table { width: 100%; border-collapse: collapse; }
+  .ref-table th {
+    background: var(--surface2); color: var(--muted);
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px;
+    padding: 11px 16px; text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    border-bottom: 1px solid var(--border);
+  }
+  .ref-table td {
+    padding: 11px 16px; font-size: 0.82rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-family: 'JetBrains Mono', monospace; vertical-align: top;
+  }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── COPY BTN ── */
+  .copy-btn {
+    margin-left: auto; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border); color: var(--muted);
+    font-size: 0.7rem; padding: 3px 10px; border-radius: 6px;
+    cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+  }
+  .copy-btn:hover { background: rgba(232,121,249,0.1); color: var(--accent); border-color: var(--accent); }
+
+  /* ── DIVIDER ── */
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 46px 0 0; }
+
+  /* ── FLOW ── */
+  .flow-row { display: flex; gap: 0; align-items: stretch; flex-wrap: wrap; }
+  .flow-box {
+    flex: 1; min-width: 180px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 16px; text-align: center;
+    position: relative;
+  }
+  .flow-box .fi { font-size: 1.6rem; margin-bottom: 8px; }
+  .flow-box .ft { font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; color: var(--text); }
+  .flow-box .fs { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+  .flow-arrow {
+    display: flex; align-items: center; padding: 0 6px;
+    color: var(--muted); font-size: 1.2rem;
+  }
+
+  /* ── OS TABS ── */
+  .os-tabs { display: flex; gap: 0; margin-bottom: -1px; }
+  .os-tab {
+    padding: 7px 18px; font-size: 0.8rem;
+    font-family: 'JetBrains Mono', monospace; cursor: pointer;
+    border: 1px solid transparent; border-radius: 8px 8px 0 0;
+    color: var(--muted); background: transparent; transition: all 0.15s;
+  }
+  .os-tab.active {
+    background: var(--surface2); border-color: var(--border);
+    border-bottom-color: var(--surface2); color: var(--accent);
+  }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  footer {
+    margin-top: 60px; border-top: 1px solid var(--border);
+    padding: 26px 0; color: var(--muted); font-size: 0.8rem; text-align: center;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ HERO ══════════════════════════ -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-badge"><i class="bi bi-key-fill"></i> SSH · GITHUB · 3 ACCOUNTS</div>
+    <h1>Use 3 GitHub Accounts<br>with SSH — No Conflicts</h1>
+    <p>Complete setup: generate SSH keys, configure <code>~/.ssh/config</code>, and clone/push to the right account per repo — without touching any code.</p>
+    <div class="acct-chips">
+      <span class="chip chip-p"><span class="chip-dot"></span>Personal Account</span>
+      <span class="chip chip-w"><span class="chip-dot"></span>Work Account</span>
+      <span class="chip chip-f"><span class="chip-dot"></span>Freelance Account</span>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-4">
+
+<!-- ══════════════════════════ HOW IT WORKS ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num"><i class="bi bi-diagram-3"></i></div>
+    <div>
+      <div class="sec-title">How It Works — Big Picture</div>
+      <div class="sec-sub">Each GitHub account gets its own SSH key + an alias host in config</div>
+    </div>
+  </div>
+
+  <div class="flow-row g-2 mb-3" style="gap:6px">
+    <div class="flow-box">
+      <div class="fi">🔑</div>
+      <div class="ft">3 SSH Keys</div>
+      <div class="fs">one per account</div>
+    </div>
+    <div class="flow-arrow"><i class="bi bi-arrow-right"></i></div>
+    <div class="flow-box">
+      <div class="fi">📄</div>
+      <div class="ft">~/.ssh/config</div>
+      <div class="fs">maps alias → key</div>
+    </div>
+    <div class="flow-arrow"><i class="bi bi-arrow-right"></i></div>
+    <div class="flow-box">
+      <div class="fi">🐙</div>
+      <div class="ft">GitHub</div>
+      <div class="fs">add public key to each account</div>
+    </div>
+    <div class="flow-arrow"><i class="bi bi-arrow-right"></i></div>
+    <div class="flow-box">
+      <div class="fi">📁</div>
+      <div class="ft">Per Repo</div>
+      <div class="fs">use alias in remote URL</div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="ai" style="color:var(--accent)"><i class="bi bi-lightbulb-fill"></i></span>
+    <span>Instead of <code>git@github.com:user/repo.git</code> you use <code>git@github-personal:user/repo.git</code>. The alias tells SSH which key to use. That's the whole trick!</span>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ STEP 1: CHECK GIT + SSH ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num">1</div>
+    <div>
+      <div class="sec-title">Check Git & SSH are Installed</div>
+      <div class="sec-sub">Run these first — must pass before anything else</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card-dark">
+        <div class="card-hdr">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>terminal — check versions</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmd">git</span> --version
+<span class="cmt"># should show: git version 2.x.x</span>
+
+<span class="cmd">ssh</span> -V
+<span class="cmt"># should show: OpenSSH_x.x</span></pre>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card-dark">
+        <div class="card-hdr">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>if not installed</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Mac</span>
+<span class="cmd">brew install</span> git openssh
+
+<span class="cmt"># Ubuntu / Debian</span>
+<span class="cmd">sudo apt install</span> git openssh-client
+
+<span class="cmt"># Windows — install Git for Windows:</span>
+<span class="str">https://git-scm.com/download/win</span>
+<span class="cmt"># (includes SSH automatically)</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ STEP 2: GENERATE 3 SSH KEYS ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num">2</div>
+    <div>
+      <div class="sec-title">Generate 3 SSH Keys — One Per Account</div>
+      <div class="sec-sub">Run each block separately. Give a unique filename for each key.</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Personal -->
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-p">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--personal)">Personal Account</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Generate key for Personal</span>
+<span class="cmd">ssh-keygen</span> -t rsa -b 4096 \
+  -C <span class="str">"personal@gmail.com"</span> \
+  -f ~/.ssh/<span class="p">id_rsa_personal</span>
+
+<span class="cmt"># When prompted for passphrase:
+# Press Enter (no passphrase) OR
+# type a password for extra security</span>
+
+<span class="cmt"># This creates 2 files:</span>
+~/.ssh/<span class="p">id_rsa_personal</span>      <span class="cmt">← private key (NEVER share)</span>
+~/.ssh/<span class="p">id_rsa_personal.pub</span>  <span class="cmt">← public key (add to GitHub)</span></pre>
+      </div>
+    </div>
+    <!-- Work -->
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-w">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--work)">Work Account</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Generate key for Work</span>
+<span class="cmd">ssh-keygen</span> -t rsa -b 4096 \
+  -C <span class="str">"work@company.com"</span> \
+  -f ~/.ssh/<span class="w">id_rsa_work</span>
+
+<span class="cmt"># When prompted for passphrase:
+# Press Enter (no passphrase) OR
+# type a password for extra security</span>
+
+<span class="cmt"># This creates 2 files:</span>
+~/.ssh/<span class="w">id_rsa_work</span>          <span class="cmt">← private key (NEVER share)</span>
+~/.ssh/<span class="w">id_rsa_work.pub</span>      <span class="cmt">← public key (add to GitHub)</span></pre>
+      </div>
+    </div>
+    <!-- Freelance -->
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-f">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--free)">Freelance Account</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Generate key for Freelance</span>
+<span class="cmd">ssh-keygen</span> -t rsa -b 4096 \
+  -C <span class="str">"freelance@gmail.com"</span> \
+  -f ~/.ssh/<span class="f">id_rsa_freelance</span>
+
+<span class="cmt"># When prompted for passphrase:
+# Press Enter (no passphrase) OR
+# type a password for extra security</span>
+
+<span class="cmt"># This creates 2 files:</span>
+~/.ssh/<span class="f">id_rsa_freelance</span>     <span class="cmt">← private key (NEVER share)</span>
+~/.ssh/<span class="f">id_rsa_freelance.pub</span> <span class="cmt">← public key (add to GitHub)</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <div class="card-dark">
+      <div class="card-hdr">
+        <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>verify — all 6 files should exist in ~/.ssh/</span>
+        <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      </div>
+      <pre><span class="cmd">ls</span> -la ~/.ssh/
+
+<span class="cmt"># You should see:</span>
+<span class="p">id_rsa_personal</span>        <span class="p">id_rsa_personal.pub</span>
+<span class="w">id_rsa_work</span>            <span class="w">id_rsa_work.pub</span>
+<span class="f">id_rsa_freelance</span>       <span class="f">id_rsa_freelance.pub</span></pre>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ STEP 3: ADD PUBLIC KEY TO GITHUB ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num">3</div>
+    <div>
+      <div class="sec-title">Add Public Keys to Each GitHub Account</div>
+      <div class="sec-sub">Copy the .pub key → paste into GitHub Settings. Do this for all 3 accounts.</div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-p">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--personal)">Personal — copy key</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Mac</span>
+<span class="cmd">cat</span> ~/.ssh/<span class="p">id_rsa_personal.pub</span> | pbcopy
+
+<span class="cmt"># Linux</span>
+<span class="cmd">cat</span> ~/.ssh/<span class="p">id_rsa_personal.pub</span> | xclip
+
+<span class="cmt"># Windows</span>
+<span class="cmd">type</span> %USERPROFILE%\.ssh\<span class="p">id_rsa_personal.pub</span> | clip
+
+<span class="cmt"># Now paste into GitHub Personal account</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-w">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--work)">Work — copy key</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Mac</span>
+<span class="cmd">cat</span> ~/.ssh/<span class="w">id_rsa_work.pub</span> | pbcopy
+
+<span class="cmt"># Linux</span>
+<span class="cmd">cat</span> ~/.ssh/<span class="w">id_rsa_work.pub</span> | xclip
+
+<span class="cmt"># Windows</span>
+<span class="cmd">type</span> %USERPROFILE%\.ssh\<span class="w">id_rsa_work.pub</span> | clip
+
+<span class="cmt"># Now paste into GitHub Work account</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-f">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--free)">Freelance — copy key</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Mac</span>
+<span class="cmd">cat</span> ~/.ssh/<span class="f">id_rsa_freelance.pub</span> | pbcopy
+
+<span class="cmt"># Linux</span>
+<span class="cmd">cat</span> ~/.ssh/<span class="f">id_rsa_freelance.pub</span> | xclip
+
+<span class="cmt"># Windows</span>
+<span class="cmd">type</span> %USERPROFILE%\.ssh\<span class="f">id_rsa_freelance.pub</span> | clip
+
+<span class="cmt"># Now paste into GitHub Freelance account</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Where to paste in GitHub -->
+  <div class="card-dark">
+    <div class="card-hdr">
+      <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>Where to paste in GitHub — do this for EACH account</span>
+    </div>
+    <pre><span class="cmt">1. Login to GitHub (the correct account)
+2. Click your profile photo → Settings
+3. Left sidebar → "SSH and GPG keys"
+4. Click "New SSH key"
+5. Title: give it a name like "My Laptop - Personal"
+6. Key type: Authentication Key
+7. Key: paste the copied .pub content here
+8. Click "Add SSH key"
+
+Repeat steps 1-8 for Work account and Freelance account.</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ STEP 4: SSH CONFIG FILE ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num">4</div>
+    <div>
+      <div class="sec-title">Create the SSH Config File</div>
+      <div class="sec-sub">This is the most important file — maps alias hosts to the right key</div>
+    </div>
+  </div>
+
+  <div class="tip mb-3">
+    <span class="ai" style="color:var(--accent)"><i class="bi bi-lightbulb-fill"></i></span>
+    <span>The config file is at <code>~/.ssh/config</code>. If it doesn't exist, create it. Each <strong>Host</strong> block is an alias — e.g. <code>github-personal</code> instead of <code>github.com</code>.</span>
+  </div>
+
+  <div class="os-tabs">
+    <button class="os-tab active" onclick="switchTab('mac4')"><i class="bi bi-terminal"></i> Mac / Linux</button>
+    <button class="os-tab" onclick="switchTab('win4')"><i class="bi bi-windows"></i> Windows</button>
+  </div>
+
+  <div class="card-dark" style="border-radius:0 14px 14px 14px">
+    <div id="mac4" class="tab-pane active">
+      <div class="card-hdr">
+        <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>open config file in editor</span>
+        <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Open (or create) the SSH config file</span>
+<span class="cmd">nano</span> ~/.ssh/config
+<span class="cmt"># OR use VS Code:</span>
+<span class="cmd">code</span> ~/.ssh/config</pre>
+    </div>
+    <div id="win4" class="tab-pane">
+      <div class="card-hdr">
+        <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>open config file — Windows</span>
+        <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Open in Notepad (run in cmd)</span>
+<span class="cmd">notepad</span> %USERPROFILE%\.ssh\config
+<span class="cmt"># OR in VS Code:</span>
+<span class="cmd">code</span> %USERPROFILE%\.ssh\config</pre>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <div class="card-dark">
+      <div class="card-hdr">
+        <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>~/.ssh/config — paste this entire block</span>
+        <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># ─────────────────────────────────────────
+# GitHub SSH — 3 Accounts Config
+# ─────────────────────────────────────────</span>
+
+<span class="cmt"># Personal Account</span>
+<span class="kw">Host</span> <span class="p">github-personal</span>
+    <span class="kw">HostName</span>      github.com
+    <span class="kw">User</span>          git
+    <span class="kw">IdentityFile</span>  ~/.ssh/<span class="p">id_rsa_personal</span>
+    <span class="kw">IdentitiesOnly</span> yes
+
+<span class="cmt"># Work Account</span>
+<span class="kw">Host</span> <span class="w">github-work</span>
+    <span class="kw">HostName</span>      github.com
+    <span class="kw">User</span>          git
+    <span class="kw">IdentityFile</span>  ~/.ssh/<span class="w">id_rsa_work</span>
+    <span class="kw">IdentitiesOnly</span> yes
+
+<span class="cmt"># Freelance Account</span>
+<span class="kw">Host</span> <span class="f">github-freelance</span>
+    <span class="kw">HostName</span>      github.com
+    <span class="kw">User</span>          git
+    <span class="kw">IdentityFile</span>  ~/.ssh/<span class="f">id_rsa_freelance</span>
+    <span class="kw">IdentitiesOnly</span> yes</pre>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <div class="card-dark">
+      <div class="card-hdr">
+        <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>set correct permissions on config file (Mac/Linux only)</span>
+        <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      </div>
+      <pre><span class="cmd">chmod</span> 600 ~/.ssh/config
+<span class="cmd">chmod</span> 600 ~/.ssh/id_rsa_personal
+<span class="cmd">chmod</span> 600 ~/.ssh/id_rsa_work
+<span class="cmd">chmod</span> 600 ~/.ssh/id_rsa_freelance
+<span class="cmt"># SSH refuses to work if permissions are too open</span></pre>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ STEP 5: ADD KEYS TO SSH AGENT ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num">5</div>
+    <div>
+      <div class="sec-title">Add All 3 Keys to SSH Agent</div>
+      <div class="sec-sub">SSH agent holds your keys in memory so you don't re-enter passphrase each time</div>
+    </div>
+  </div>
+
+  <div class="card-dark">
+    <div class="card-hdr">
+      <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — add all keys</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Start SSH agent</span>
+<span class="cmd">eval</span> "$(ssh-agent -s)"
+<span class="cmt"># should print: Agent pid 12345</span>
+
+<span class="cmt"># Add all 3 private keys</span>
+<span class="cmd">ssh-add</span> ~/.ssh/<span class="p">id_rsa_personal</span>
+<span class="cmd">ssh-add</span> ~/.ssh/<span class="w">id_rsa_work</span>
+<span class="cmd">ssh-add</span> ~/.ssh/<span class="f">id_rsa_freelance</span>
+
+<span class="cmt"># Verify all 3 are loaded</span>
+<span class="cmd">ssh-add</span> -l
+<span class="cmt"># should list all 3 keys</span></pre>
+  </div>
+
+  <div class="mt-3 tip">
+    <span class="ai" style="color:var(--accent)"><i class="bi bi-info-circle-fill"></i></span>
+    <span>To make keys persist after restart, add the <code>ssh-add</code> lines to your <code>~/.zshrc</code> or <code>~/.bashrc</code> so they load automatically every time you open a terminal.</span>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ STEP 6: TEST CONNECTION ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num">6</div>
+    <div>
+      <div class="sec-title">Test SSH Connection for All 3 Accounts</div>
+      <div class="sec-sub">Run these — each should greet you with the correct GitHub username</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-p">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--personal)">Test Personal</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmd">ssh</span> -T <span class="p">git@github-personal</span>
+
+<span class="cmt"># Expected output:</span>
+<span class="ok">Hi personal-username!</span>
+<span class="ok">You've successfully authenticated...</span>
+
+<span class="cmt"># If it says "permission denied"
+# check key was added to GitHub</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-w">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--work)">Test Work</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmd">ssh</span> -T <span class="w">git@github-work</span>
+
+<span class="cmt"># Expected output:</span>
+<span class="ok">Hi work-username!</span>
+<span class="ok">You've successfully authenticated...</span>
+
+<span class="cmt"># If it says "permission denied"
+# check key was added to GitHub</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-f">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--free)">Test Freelance</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmd">ssh</span> -T <span class="f">git@github-freelance</span>
+
+<span class="cmt"># Expected output:</span>
+<span class="ok">Hi freelance-username!</span>
+<span class="ok">You've successfully authenticated...</span>
+
+<span class="cmt"># If it says "permission denied"
+# check key was added to GitHub</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ STEP 7: CLONE & PUSH PER REPO ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num">7</div>
+    <div>
+      <div class="sec-title">Clone & Push — Use the Right Account Per Repo</div>
+      <div class="sec-sub">Use the alias host instead of github.com in the remote URL</div>
+    </div>
+  </div>
+
+  <div class="warn mb-3">
+    <span class="ai" style="color:var(--free)"><i class="bi bi-exclamation-triangle-fill"></i></span>
+    <span><strong>Key Rule:</strong> Replace <code>github.com</code> with your alias (<code>github-personal</code>, <code>github-work</code>, <code>github-freelance</code>) in the git remote URL. That's all you change.</span>
+  </div>
+
+  <!-- Clone -->
+  <div class="mb-3">
+    <div class="card-dark">
+      <div class="card-hdr">
+        <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>Cloning a repo — use alias instead of github.com</span>
+        <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># ❌ Normal clone (uses default key — wrong account!)</span>
+<span class="err">git clone git@github.com:personal-user/my-repo.git</span>
+
+<span class="cmt"># ✅ Personal repo — use github-personal alias</span>
+<span class="cmd">git clone</span> git@<span class="p">github-personal</span>:personal-user/my-repo.git
+
+<span class="cmt"># ✅ Work repo — use github-work alias</span>
+<span class="cmd">git clone</span> git@<span class="w">github-work</span>:work-org/work-repo.git
+
+<span class="cmt"># ✅ Freelance repo — use github-freelance alias</span>
+<span class="cmd">git clone</span> git@<span class="f">github-freelance</span>:freelance-user/client-repo.git</pre>
+    </div>
+  </div>
+
+  <!-- Already cloned -->
+  <div class="mb-3">
+    <div class="card-dark">
+      <div class="card-hdr">
+        <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>Already have a repo locally? Update its remote URL</span>
+        <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      </div>
+      <pre><span class="cmt"># Check current remote URL</span>
+<span class="cmd">git remote -v</span>
+
+<span class="cmt"># Update to use correct account alias</span>
+
+<span class="cmt"># For a Personal repo</span>
+<span class="cmd">git remote set-url origin</span> git@<span class="p">github-personal</span>:personal-user/repo.git
+
+<span class="cmt"># For a Work repo</span>
+<span class="cmd">git remote set-url origin</span> git@<span class="w">github-work</span>:work-org/repo.git
+
+<span class="cmt"># For a Freelance repo</span>
+<span class="cmd">git remote set-url origin</span> git@<span class="f">github-freelance</span>:freelance-user/repo.git
+
+<span class="cmt"># Verify it changed</span>
+<span class="cmd">git remote -v</span></pre>
+    </div>
+  </div>
+
+  <!-- Push & Pull -->
+  <div class="card-dark">
+    <div class="card-hdr">
+      <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>Push & Pull — works normally after setting remote URL</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Everything else is normal git — no changes needed</span>
+<span class="cmd">git add</span> .
+<span class="cmd">git commit</span> -m <span class="str">"your message"</span>
+<span class="cmd">git push origin main</span>      <span class="cmt">← uses correct account automatically</span>
+<span class="cmd">git pull origin main</span>      <span class="cmt">← uses correct account automatically</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ STEP 8: SET GIT USER PER REPO ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num">8</div>
+    <div>
+      <div class="sec-title">Set Git Username & Email Per Repo</div>
+      <div class="sec-sub">So commits show the right author name on each GitHub account</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-p">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--personal)">Personal repos</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Run inside the project folder</span>
+<span class="cmd">cd</span> ~/projects/my-personal-repo
+
+<span class="cmd">git config</span> user.name \
+  <span class="str">"Your Personal Name"</span>
+<span class="cmd">git config</span> user.email \
+  <span class="str">"personal@gmail.com"</span>
+
+<span class="cmt"># verify</span>
+<span class="cmd">git config</span> user.email</pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-w">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--work)">Work repos</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Run inside the project folder</span>
+<span class="cmd">cd</span> ~/projects/work-project
+
+<span class="cmd">git config</span> user.name \
+  <span class="str">"Your Work Name"</span>
+<span class="cmd">git config</span> user.email \
+  <span class="str">"work@company.com"</span>
+
+<span class="cmt"># verify</span>
+<span class="cmd">git config</span> user.email</pre>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark h-100">
+        <div class="card-hdr border-f">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span style="color:var(--free)">Freelance repos</span>
+          <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Run inside the project folder</span>
+<span class="cmd">cd</span> ~/projects/client-project
+
+<span class="cmd">git config</span> user.name \
+  <span class="str">"Your Freelance Name"</span>
+<span class="cmd">git config</span> user.email \
+  <span class="str">"freelance@gmail.com"</span>
+
+<span class="cmt"># verify</span>
+<span class="cmd">git config</span> user.email</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ DAILY WORKFLOW ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num"><i class="bi bi-repeat"></i></div>
+    <div>
+      <div class="sec-title">Daily Workflow — Complete Example</div>
+      <div class="sec-sub">Real scenario: working on 3 repos from 3 different accounts in one day</div>
+    </div>
+  </div>
+
+  <div class="card-dark">
+    <div class="card-hdr">
+      <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — switching between accounts naturally</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># ── Morning: work on Personal project ──────────────────</span>
+<span class="cmd">cd</span> ~/projects/my-portfolio
+<span class="cmd">git add</span> .
+<span class="cmd">git commit</span> -m <span class="str">"update about page"</span>
+<span class="cmd">git push origin main</span>
+<span class="cmt"># ✅ pushes using Personal SSH key automatically</span>
+
+<span class="cmt"># ── Afternoon: work on Work project ────────────────────</span>
+<span class="cmd">cd</span> ~/projects/company-dashboard
+<span class="cmd">git pull origin main</span>
+<span class="cmt"># make changes...</span>
+<span class="cmd">git add</span> .
+<span class="cmd">git commit</span> -m <span class="str">"fix login bug"</span>
+<span class="cmd">git push origin main</span>
+<span class="cmt"># ✅ pushes using Work SSH key automatically</span>
+
+<span class="cmt"># ── Evening: work on Freelance project ─────────────────</span>
+<span class="cmd">cd</span> ~/projects/client-ecommerce
+<span class="cmd">git add</span> .
+<span class="cmd">git commit</span> -m <span class="str">"add cart feature"</span>
+<span class="cmd">git push origin main</span>
+<span class="cmt"># ✅ pushes using Freelance SSH key automatically</span>
+
+<span class="cmt"># No login switching. No password prompts. Just works! 🎉</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ══════════════════════════ QUICK REFERENCE TABLE ══════════════════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="step-num"><i class="bi bi-table"></i></div>
+    <div>
+      <div class="sec-title">Quick Reference — Save This!</div>
+      <div class="sec-sub">All important values at a glance</div>
+    </div>
+  </div>
+
+  <div class="card-dark mb-3">
+    <table class="ref-table">
+      <thead>
+        <tr><th>Account</th><th>SSH Key File</th><th>Config Host Alias</th><th>Clone URL Pattern</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--personal)">Personal</td>
+          <td>~/.ssh/id_rsa_personal</td>
+          <td style="color:var(--personal)">github-personal</td>
+          <td>git@github-personal:username/repo.git</td>
+        </tr>
+        <tr>
+          <td style="color:var(--work)">Work</td>
+          <td>~/.ssh/id_rsa_work</td>
+          <td style="color:var(--work)">github-work</td>
+          <td>git@github-work:org/repo.git</td>
+        </tr>
+        <tr>
+          <td style="color:var(--free)">Freelance</td>
+          <td>~/.ssh/id_rsa_freelance</td>
+          <td style="color:var(--free)">github-freelance</td>
+          <td>git@github-freelance:username/repo.git</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-dark">
+    <table class="ref-table">
+      <thead>
+        <tr><th>Task</th><th>Command</th><th>Done Once?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Generate SSH keys</td><td>ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_xxx</td><td style="color:var(--green)">✅ Once</td></tr>
+        <tr><td>Add public key to GitHub</td><td>GitHub → Settings → SSH Keys → New</td><td style="color:var(--green)">✅ Once per account</td></tr>
+        <tr><td>Create ~/.ssh/config</td><td>nano ~/.ssh/config</td><td style="color:var(--green)">✅ Once</td></tr>
+        <tr><td>Set permissions</td><td>chmod 600 ~/.ssh/config</td><td style="color:var(--green)">✅ Once</td></tr>
+        <tr><td>Add keys to agent</td><td>ssh-add ~/.ssh/id_rsa_xxx</td><td style="color:var(--free)">🔁 Each terminal session</td></tr>
+        <tr><td>Test connection</td><td>ssh -T git@github-personal</td><td style="color:var(--green)">✅ Once to verify</td></tr>
+        <tr><td>Clone new repo</td><td>git clone git@github-personal:user/repo.git</td><td style="color:var(--free)">🔁 Per new repo</td></tr>
+        <tr><td>Fix existing repo remote</td><td>git remote set-url origin git@github-work:org/repo.git</td><td style="color:var(--free)">🔁 Once per existing repo</td></tr>
+        <tr><td>Set git user per repo</td><td>git config user.email "work@company.com"</td><td style="color:var(--free)">🔁 Once per repo</td></tr>
+        <tr><td>Push / Pull</td><td>git push origin main (normal)</td><td style="color:var(--free)">🔁 Daily</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    <span style="color:var(--accent); font-family:'JetBrains Mono',monospace; font-weight:700">~/.ssh/config</span>
+    <span class="mx-2" style="color:var(--border)">|</span>
+    3 GitHub Accounts · Personal · Work · Freelance
+    <span class="mx-2" style="color:var(--border)">|</span>
+    No conflicts. No password prompts. ✅
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function switchTab(id) {
+    const parent = document.getElementById(id).closest('.card-dark, .card-dark + div');
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.os-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function copyBlock(btn) {
+    const pre = btn.closest('.card-dark, .card-hdr').parentElement.querySelector('pre');
+    if (!pre) return;
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied!';
+      btn.style.color = 'var(--green)';
+      setTimeout(() => { btn.textContent = 'copy'; btn.style.color = ''; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>

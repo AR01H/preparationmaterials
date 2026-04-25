@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker & Kubernetes — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Clash+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070b14;
+    --surface: #0e1623;
+    --surface2: #151f2e;
+    --surface3: #1a2535;
+    --border: #1e2d42;
+    --border2: #243347;
+
+    /* Docker blue palette */
+    --docker: #1d63ed;
+    --docker-light: #4d8ff0;
+    --docker-glow: rgba(29,99,237,0.2);
+
+    /* K8s purple palette */
+    --k8s: #326ce5;
+    --k8s-alt: #7b61ff;
+    --k8s-glow: rgba(123,97,255,0.2);
+
+    --green: #00d084;
+    --yellow: #f5c518;
+    --red: #ff4757;
+    --orange: #ff6b35;
+    --cyan: #00e5ff;
+
+    --text: #dce8f5;
+    --muted: #5a7a99;
+    --muted2: #7a9ab5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    padding: 70px 40px 50px;
+    text-align: center;
+    overflow: hidden;
+    background: linear-gradient(180deg, #060a12 0%, #070b14 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(29,99,237,0.12) 0%, rgba(123,97,255,0.08) 50%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-split {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+  }
+  .badge-docker {
+    background: rgba(29,99,237,0.15);
+    border: 1px solid rgba(29,99,237,0.5);
+    color: var(--docker-light);
+  }
+  .badge-k8s {
+    background: rgba(123,97,255,0.15);
+    border: 1px solid rgba(123,97,255,0.5);
+    color: #a78fff;
+  }
+  .divider-dot { color: var(--muted); font-size: 1.5rem; }
+
+  .hero h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+  }
+  .hero h1 .docker-color { color: var(--docker-light); }
+  .hero h1 .k8s-color { color: #a78fff; }
+  .hero p {
+    color: var(--muted2);
+    font-size: 1rem;
+    max-width: 580px;
+    margin: 0 auto 32px;
+  }
+
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .toc a {
+    text-decoration: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    border: 1px solid;
+  }
+  .toc a.d {
+    color: var(--docker-light);
+    border-color: rgba(29,99,237,0.35);
+    background: rgba(29,99,237,0.06);
+  }
+  .toc a.k {
+    color: #a78fff;
+    border-color: rgba(123,97,255,0.35);
+    background: rgba(123,97,255,0.06);
+  }
+  .toc a:hover { opacity: 0.8; transform: translateY(-1px); }
+
+  /* ─── LAYOUT ─── */
+  .container {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .part-header {
+    margin-top: 70px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .part-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .part-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 4px;
+  }
+  .part-label.docker { background: rgba(29,99,237,0.2); color: var(--docker-light); border: 1px solid rgba(29,99,237,0.4); }
+  .part-label.k8s { background: rgba(123,97,255,0.2); color: #a78fff; border: 1px solid rgba(123,97,255,0.4); }
+
+  .section { margin-top: 44px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 4px;
+    color: #000;
+  }
+  .sec-num.d { background: var(--docker-light); }
+  .sec-num.k { background: #a78fff; }
+  .sec-num.g { background: var(--green); }
+  .sec-num.o { background: var(--orange); }
+  .section h2 { font-family: 'IBM Plex Mono', monospace; font-size: 1.2rem; font-weight: 700; }
+
+  /* ─── CONCEPT CARDS ─── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .card-stripe.d { background: linear-gradient(90deg, var(--docker), var(--docker-light)); }
+  .card-stripe.k { background: linear-gradient(90deg, var(--k8s), var(--k8s-alt)); }
+  .card-stripe.g { background: var(--green); }
+  .card-stripe.o { background: var(--orange); }
+  .card-stripe.y { background: var(--yellow); }
+  .card-stripe.c { background: var(--cyan); }
+
+  .card-icon { font-size: 1.6rem; margin-bottom: 10px; }
+  .card h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+  .card p { color: var(--muted2); font-size: 12.5px; line-height: 1.6; }
+  .card .def-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: var(--surface3);
+    color: var(--muted2);
+    border: 1px solid var(--border);
+  }
+
+  /* ─── CODE BLOCKS ─── */
+  .code-block {
+    background: #040810;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 18px 0;
+    overflow: hidden;
+  }
+  .code-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 9px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .code-dots .r { background: #ff5f57; }
+  .code-dots .y { background: #ffbd2e; }
+  .code-dots .g { background: #28c940; }
+  .code-fname {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted2);
+    margin-left: 4px;
+  }
+  .code-tag {
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 2px 10px;
+    border-radius: 3px;
+  }
+  .code-tag.d { background: rgba(29,99,237,0.2); color: var(--docker-light); }
+  .code-tag.k { background: rgba(123,97,255,0.2); color: #a78fff; }
+  .code-tag.sh { background: rgba(0,208,132,0.2); color: var(--green); }
+
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.9;
+    color: #c9d8e8;
+  }
+
+  /* syntax */
+  .cmd { color: #79c0ff; }
+  .flag { color: #ffa657; }
+  .arg { color: #a5d6ff; }
+  .str { color: #a5d6ff; }
+  .cmt { color: #3d5a78; font-style: italic; }
+  .kw { color: #ff7b72; }
+  .val { color: #56d364; }
+  .num { color: #ffa657; }
+  .yml-key { color: #d2a8ff; }
+  .yml-val { color: #a5d6ff; }
+  .yml-str { color: #a5d6ff; }
+  .yml-num { color: #ffa657; }
+  .yml-bool { color: #ff7b72; }
+  .yml-cmt { color: #3d5a78; font-style: italic; }
+  .section-sep { color: #3d5a78; }
+
+  /* ─── COMMAND TABLE ─── */
+  .cmd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 18px 0;
+  }
+  .cmd-table th {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 9px 14px;
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 0.5px;
+  }
+  .cmd-table td {
+    border: 1px solid var(--border);
+    padding: 9px 14px;
+    vertical-align: top;
+  }
+  .cmd-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .cmd-table td:first-child {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--docker-light);
+    white-space: nowrap;
+  }
+  .cmd-table.k8s td:first-child { color: #a78fff; }
+  .cmd-table td:nth-child(2) { color: var(--muted2); font-size: 12px; }
+  .cmd-table td:nth-child(3) { color: var(--green); font-size: 11.5px; font-family: 'IBM Plex Mono', monospace; }
+
+  /* ─── INFO BOXES ─── */
+  .info-box {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-left: 3px solid;
+    font-size: 13px;
+  }
+  .info-box.tip { background: rgba(0,208,132,0.07); border-color: var(--green); }
+  .info-box.warn { background: rgba(255,107,53,0.07); border-color: var(--orange); }
+  .info-box.info { background: rgba(29,99,237,0.07); border-color: var(--docker-light); }
+  .info-box.k8s { background: rgba(123,97,255,0.07); border-color: #a78fff; }
+  .info-box .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .info-box.tip .label { color: var(--green); }
+  .info-box.warn .label { color: var(--orange); }
+  .info-box.info .label { color: var(--docker-light); }
+  .info-box.k8s .label { color: #a78fff; }
+
+  /* ─── ARCHITECTURE DIAGRAM ─── */
+  .arch {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+  .arch-title {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+  .arch-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 6px 0;
+    flex-wrap: wrap;
+  }
+  .arch-box {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .arch-box.host { background: var(--surface3); border: 1px solid var(--border2); color: var(--muted2); }
+  .arch-box.engine { background: rgba(29,99,237,0.2); border: 1px solid rgba(29,99,237,0.5); color: var(--docker-light); }
+  .arch-box.container { background: rgba(0,208,132,0.15); border: 1px solid rgba(0,208,132,0.4); color: var(--green); }
+  .arch-box.image { background: rgba(245,197,24,0.15); border: 1px solid rgba(245,197,24,0.4); color: var(--yellow); }
+  .arch-box.volume { background: rgba(255,107,53,0.15); border: 1px solid rgba(255,107,53,0.4); color: var(--orange); }
+  .arch-box.network { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); }
+  .arch-box.node { background: rgba(123,97,255,0.2); border: 1px solid rgba(123,97,255,0.5); color: #a78fff; }
+  .arch-box.pod { background: rgba(29,99,237,0.15); border: 1px solid rgba(29,99,237,0.4); color: var(--docker-light); }
+  .arch-arrow { color: var(--muted); font-size: 1rem; }
+  .arch-group {
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--border2);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+  }
+  .arch-group-label { font-size: 10px; color: var(--muted); margin-bottom: 8px; letter-spacing: 1px; }
+
+  /* ─── USE CASE BLOCKS ─── */
+  .use-case {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 18px 0;
+  }
+  .use-case-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .use-case-icon { font-size: 1.3rem; }
+  .use-case-title { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; }
+  .use-case-subtitle { font-size: 11px; color: var(--muted2); margin-left: auto; font-family: 'IBM Plex Mono', monospace; }
+  .use-case-body { padding: 18px; }
+  .use-case-body p { color: var(--muted2); font-size: 12.5px; margin-bottom: 12px; }
+
+  /* ─── FLOW ─── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 16px 0;
+    row-gap: 8px;
+  }
+  .flow-step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-align: center;
+    min-width: 100px;
+  }
+  .flow-step .icon { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+  .flow-step .label { color: var(--muted2); font-size: 10px; }
+  .flow-arrow { color: var(--muted); padding: 0 6px; font-size: 1.2rem; }
+
+  /* ─── CHEAT CARDS ─── */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .cheat-card-header {
+    padding: 9px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cheat-card-header.d { color: var(--docker-light); background: rgba(29,99,237,0.08); }
+  .cheat-card-header.k { color: #a78fff; background: rgba(123,97,255,0.08); }
+  .cheat-card pre {
+    padding: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.9;
+    overflow-x: auto;
+    color: #c9d8e8;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 28px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .footer span { color: var(--docker-light); }
+  .footer span.k { color: #a78fff; }
+
+  @media (max-width: 600px) {
+    .flow { flex-direction: column; align-items: flex-start; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-split">
+    <span class="hero-badge badge-docker">🐳 DOCKER</span>
+    <span class="divider-dot">+</span>
+    <span class="hero-badge badge-k8s">☸️ KUBERNETES</span>
+  </div>
+  <h1>
+    <span class="docker-color">Container</span> &amp;<br>
+    <span class="k8s-color">Orchestration</span><br>
+    Complete Guide
+  </h1>
+  <p>Commands, definitions, use cases — everything you need for Docker and Kubernetes, end to end.</p>
+  <div class="toc">
+    <a href="#docker-concepts" class="d">Docker Concepts</a>
+    <a href="#dockerfile" class="d">Dockerfile</a>
+    <a href="#docker-commands" class="d">Commands</a>
+    <a href="#compose" class="d">Compose</a>
+    <a href="#docker-usecases" class="d">Docker Use Cases</a>
+    <a href="#k8s-concepts" class="k">K8s Concepts</a>
+    <a href="#k8s-objects" class="k">K8s Objects</a>
+    <a href="#k8s-commands" class="k">kubectl</a>
+    <a href="#k8s-yamls" class="k">YAML Manifests</a>
+    <a href="#k8s-usecases" class="k">K8s Use Cases</a>
+    <a href="#cheatsheet" class="d">Cheat Sheet</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════
+       DOCKER PART
+  ═══════════════════════════════════════ -->
+  <div class="part-header">
+    <div class="part-line"></div>
+    <div class="part-label docker">🐳 DOCKER</div>
+    <div class="part-line"></div>
+  </div>
+
+  <!-- 1. DOCKER CONCEPTS -->
+  <div class="section" id="docker-concepts">
+    <div class="section-header">
+      <span class="sec-num d">D-01</span>
+      <h2>Core Concepts & Definitions</h2>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-stripe d"></div>
+        <div class="card-icon">📦</div>
+        <h3>Image</h3>
+        <p>A read-only template with instructions for creating a container. Built from a Dockerfile, stored in a registry.</p>
+        <span class="def-tag">immutable blueprint</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe g"></div>
+        <div class="card-icon">🟢</div>
+        <h3>Container</h3>
+        <p>A running instance of an image. Isolated process with its own filesystem, network, and process space.</p>
+        <span class="def-tag">image + runtime</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe y"></div>
+        <div class="card-icon">📜</div>
+        <h3>Dockerfile</h3>
+        <p>A text file with sequential instructions to build a Docker image layer by layer. Each instruction = a layer.</p>
+        <span class="def-tag">build recipe</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe o"></div>
+        <div class="card-icon">💾</div>
+        <h3>Volume</h3>
+        <p>Persistent storage that survives container restarts. Managed by Docker, mounted into container paths.</p>
+        <span class="def-tag">persistent data</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe c"></div>
+        <div class="card-icon">🌐</div>
+        <h3>Network</h3>
+        <p>Virtual network connecting containers. Types: bridge (default), host, none, overlay (swarm).</p>
+        <span class="def-tag">container comms</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe d"></div>
+        <div class="card-icon">🏪</div>
+        <h3>Registry</h3>
+        <p>Storage and distribution service for images. Docker Hub is the default public registry.</p>
+        <span class="def-tag">image storage</span>
+      </div>
+    </div>
+
+    <!-- Architecture diagram -->
+    <div class="arch">
+      <div class="arch-title">DOCKER ARCHITECTURE</div>
+      <div class="arch-row">
+        <div class="arch-box host">Host OS</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box engine">Docker Engine</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box image">Image Layer</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box container">Container A</div>
+      </div>
+      <div class="arch-row" style="margin-top:4px;padding-left:200px">
+        <div class="arch-box volume">Volume</div>
+        <div class="arch-arrow">←→</div>
+        <div class="arch-box container">Container B</div>
+        <div class="arch-arrow">←→</div>
+        <div class="arch-box network">Bridge Network</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. DOCKERFILE -->
+  <div class="section" id="dockerfile">
+    <div class="section-header">
+      <span class="sec-num d">D-02</span>
+      <h2>Dockerfile — Instructions & Best Practices</h2>
+    </div>
+
+    <table class="cmd-table">
+      <tr>
+        <th>Instruction</th><th>Definition</th><th>Use case</th>
+      </tr>
+      <tr><td>FROM</td><td>Sets the base image for the build</td><td><code>FROM node:20-alpine</code></td></tr>
+      <tr><td>WORKDIR</td><td>Sets working directory inside container</td><td><code>WORKDIR /app</code></td></tr>
+      <tr><td>COPY</td><td>Copies files from host → container</td><td><code>COPY package*.json ./</code></td></tr>
+      <tr><td>ADD</td><td>Like COPY but also handles URLs and tarballs</td><td><code>ADD archive.tar.gz /opt/</code></td></tr>
+      <tr><td>RUN</td><td>Executes command and creates a new layer</td><td><code>RUN npm install</code></td></tr>
+      <tr><td>CMD</td><td>Default command when container starts (overridable)</td><td><code>CMD ["node", "index.js"]</code></td></tr>
+      <tr><td>ENTRYPOINT</td><td>Main command — not overridden by args</td><td><code>ENTRYPOINT ["python"]</code></td></tr>
+      <tr><td>ENV</td><td>Set environment variables</td><td><code>ENV PORT=3000</code></td></tr>
+      <tr><td>ARG</td><td>Build-time variable (not in final image)</td><td><code>ARG VERSION=1.0</code></td></tr>
+      <tr><td>EXPOSE</td><td>Documents which port the container uses</td><td><code>EXPOSE 3000</code></td></tr>
+      <tr><td>VOLUME</td><td>Creates a mount point for persistent data</td><td><code>VOLUME ["/data"]</code></td></tr>
+      <tr><td>USER</td><td>Sets the user to run subsequent commands</td><td><code>USER node</code></td></tr>
+      <tr><td>HEALTHCHECK</td><td>Command to check if container is healthy</td><td><code>HEALTHCHECK CMD curl -f localhost/health</code></td></tr>
+    </table>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">Dockerfile — Production Node.js (multi-stage)</span>
+        <span class="code-tag d">DOCKERFILE</span>
+      </div>
+      <pre><span class="cmt"># ── Stage 1: Build ───────────────────────────────────────────────</span>
+<span class="kw">FROM</span> <span class="val">node:20-alpine</span> <span class="kw">AS</span> builder
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Copy dependency files first (better layer caching)</span>
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm ci --only=production
+
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> npm run build
+
+<span class="cmt"># ── Stage 2: Runtime (lean final image) ──────────────────────────</span>
+<span class="kw">FROM</span> <span class="val">node:20-alpine</span> <span class="kw">AS</span> runtime
+
+<span class="cmt"># Security: don't run as root</span>
+<span class="kw">RUN</span> addgroup -S appgroup && adduser -S appuser -G appgroup
+<span class="kw">USER</span> appuser
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Copy ONLY what's needed from builder</span>
+<span class="kw">COPY</span> --from=builder /app/dist ./dist
+<span class="kw">COPY</span> --from=builder /app/node_modules ./node_modules
+
+<span class="kw">ENV</span> NODE_ENV=production
+<span class="kw">ENV</span> PORT=3000
+
+<span class="kw">EXPOSE</span> 3000
+
+<span class="kw">HEALTHCHECK</span> --interval=30s --timeout=3s \
+  <span class="kw">CMD</span> wget -qO- http://localhost:3000/health || exit 1
+
+<span class="kw">CMD</span> ["node", "dist/index.js"]</pre>
+    </div>
+
+    <div class="info-box tip">
+      <div class="label">✅ BEST PRACTICES</div>
+      Use <strong>multi-stage builds</strong> to keep final images small. Order layers from least-changed to most-changed (deps before source code) for faster caching. Pin base image versions (<code>node:20.11-alpine3.19</code>, not <code>node:latest</code>).
+    </div>
+  </div>
+
+  <!-- 3. DOCKER COMMANDS -->
+  <div class="section" id="docker-commands">
+    <div class="section-header">
+      <span class="sec-num d">D-03</span>
+      <h2>Essential Docker Commands</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">images</span>
+        <span class="code-tag sh">SHELL</span>
+      </div>
+      <pre><span class="cmt"># ── IMAGE COMMANDS ────────────────────────────────────────────────</span>
+<span class="cmd">docker build</span> <span class="flag">-t</span> <span class="arg">myapp:1.0</span> .             <span class="cmt"># build image from Dockerfile</span>
+<span class="cmd">docker build</span> <span class="flag">-t</span> <span class="arg">myapp:1.0</span> <span class="flag">--no-cache</span> .   <span class="cmt"># force rebuild all layers</span>
+<span class="cmd">docker build</span> <span class="flag">--build-arg</span> <span class="arg">VERSION=2.0</span> .   <span class="cmt"># pass ARG at build time</span>
+<span class="cmd">docker images</span>                              <span class="cmt"># list local images</span>
+<span class="cmd">docker image ls</span>                            <span class="cmt"># same as above</span>
+<span class="cmd">docker pull</span> <span class="arg">nginx:alpine</span>                  <span class="cmt"># pull from registry</span>
+<span class="cmd">docker push</span> <span class="arg">username/myapp:1.0</span>           <span class="cmt"># push to Docker Hub</span>
+<span class="cmd">docker tag</span> <span class="arg">myapp:1.0 username/myapp:1.0</span>   <span class="cmt"># rename / tag image</span>
+<span class="cmd">docker rmi</span> <span class="arg">myapp:1.0</span>                      <span class="cmt"># delete image</span>
+<span class="cmd">docker image prune</span> <span class="flag">-a</span>                     <span class="cmt"># delete all unused images</span>
+<span class="cmd">docker history</span> <span class="arg">myapp:1.0</span>                  <span class="cmt"># view layer history</span>
+<span class="cmd">docker inspect</span> <span class="arg">myapp:1.0</span>                  <span class="cmt"># full image metadata</span>
+<span class="cmd">docker save</span> <span class="arg">myapp:1.0</span> <span class="flag">-o</span> <span class="arg">myapp.tar</span>       <span class="cmt"># export to tar file</span>
+<span class="cmd">docker load</span> <span class="flag">-i</span> <span class="arg">myapp.tar</span>                  <span class="cmt"># import from tar file</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">containers</span>
+        <span class="code-tag sh">SHELL</span>
+      </div>
+      <pre><span class="cmt"># ── CONTAINER LIFECYCLE ───────────────────────────────────────────</span>
+<span class="cmd">docker run</span> <span class="arg">nginx</span>                           <span class="cmt"># run container (foreground)</span>
+<span class="cmd">docker run</span> <span class="flag">-d</span> <span class="arg">nginx</span>                        <span class="cmt"># run detached (background)</span>
+<span class="cmd">docker run</span> <span class="flag">-d -p</span> <span class="arg">8080:80</span> <span class="flag">--name</span> <span class="arg">web nginx</span> <span class="cmt"># with port mapping and name</span>
+<span class="cmd">docker run</span> <span class="flag">-it</span> <span class="arg">ubuntu bash</span>                <span class="cmt"># interactive terminal</span>
+<span class="cmd">docker run</span> <span class="flag">--rm</span> <span class="arg">alpine echo</span> <span class="str">"hello"</span>       <span class="cmt"># auto-remove when done</span>
+<span class="cmd">docker run</span> <span class="flag">-e</span> <span class="arg">ENV=prod</span> <span class="flag">-v</span> <span class="arg">/host:/cont myapp</span> <span class="cmt"># env + volume mount</span>
+<span class="cmd">docker run</span> <span class="flag">--memory</span> <span class="arg">512m --cpus 1</span> <span class="arg">myapp</span>  <span class="cmt"># resource limits</span>
+<span class="cmd">docker run</span> <span class="flag">--network</span> <span class="arg">my-net myapp</span>         <span class="cmt"># join custom network</span>
+
+<span class="cmd">docker ps</span>                                  <span class="cmt"># list running containers</span>
+<span class="cmd">docker ps</span> <span class="flag">-a</span>                               <span class="cmt"># all containers incl. stopped</span>
+<span class="cmd">docker stop</span> <span class="arg">web</span>                            <span class="cmt"># graceful stop (SIGTERM)</span>
+<span class="cmd">docker kill</span> <span class="arg">web</span>                            <span class="cmt"># force stop (SIGKILL)</span>
+<span class="cmd">docker start</span> <span class="arg">web</span>                           <span class="cmt"># start stopped container</span>
+<span class="cmd">docker restart</span> <span class="arg">web</span>                         <span class="cmt"># stop then start</span>
+<span class="cmd">docker rm</span> <span class="arg">web</span>                              <span class="cmt"># delete stopped container</span>
+<span class="cmd">docker rm</span> <span class="flag">-f</span> <span class="arg">web</span>                           <span class="cmt"># force remove running container</span>
+
+<span class="cmt"># ── DEBUGGING ────────────────────────────────────────────────────</span>
+<span class="cmd">docker logs</span> <span class="arg">web</span>                            <span class="cmt"># view stdout logs</span>
+<span class="cmd">docker logs</span> <span class="flag">-f</span> <span class="arg">web</span>                         <span class="cmt"># follow/tail logs</span>
+<span class="cmd">docker logs</span> <span class="flag">--tail</span> <span class="num">100</span> <span class="arg">web</span>                 <span class="cmt"># last 100 lines</span>
+<span class="cmd">docker exec</span> <span class="flag">-it</span> <span class="arg">web bash</span>                  <span class="cmt"># shell into running container</span>
+<span class="cmd">docker exec</span> <span class="arg">web cat /etc/hosts</span>            <span class="cmt"># run single command</span>
+<span class="cmd">docker inspect</span> <span class="arg">web</span>                         <span class="cmt"># full container metadata</span>
+<span class="cmd">docker stats</span>                               <span class="cmt"># live CPU/memory usage</span>
+<span class="cmd">docker top</span> <span class="arg">web</span>                             <span class="cmt"># running processes inside</span>
+<span class="cmd">docker cp</span> <span class="arg">web:/app/log.txt ./log.txt</span>       <span class="cmt"># copy file from container</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">volumes & networks</span>
+        <span class="code-tag sh">SHELL</span>
+      </div>
+      <pre><span class="cmt"># ── VOLUMES ──────────────────────────────────────────────────────</span>
+<span class="cmd">docker volume create</span> <span class="arg">mydata</span>               <span class="cmt"># create named volume</span>
+<span class="cmd">docker volume ls</span>                           <span class="cmt"># list volumes</span>
+<span class="cmd">docker volume inspect</span> <span class="arg">mydata</span>              <span class="cmt"># volume details</span>
+<span class="cmd">docker volume rm</span> <span class="arg">mydata</span>                    <span class="cmt"># delete volume</span>
+<span class="cmd">docker volume prune</span>                        <span class="cmt"># delete all unused volumes</span>
+
+<span class="cmt"># Bind mount (host dir): -v /host/path:/container/path</span>
+<span class="cmd">docker run</span> <span class="flag">-v</span> <span class="arg">$(pwd)/data:/app/data</span> <span class="arg">myapp</span>
+<span class="cmt"># Named volume: -v volumename:/container/path</span>
+<span class="cmd">docker run</span> <span class="flag">-v</span> <span class="arg">mydata:/app/data myapp</span>
+
+<span class="cmt"># ── NETWORKS ─────────────────────────────────────────────────────</span>
+<span class="cmd">docker network create</span> <span class="arg">my-net</span>              <span class="cmt"># create bridge network</span>
+<span class="cmd">docker network ls</span>                          <span class="cmt"># list networks</span>
+<span class="cmd">docker network inspect</span> <span class="arg">my-net</span>             <span class="cmt"># network details</span>
+<span class="cmd">docker network connect</span> <span class="arg">my-net web</span>         <span class="cmt"># add container to network</span>
+<span class="cmd">docker network disconnect</span> <span class="arg">my-net web</span>      <span class="cmt"># remove from network</span>
+<span class="cmd">docker network rm</span> <span class="arg">my-net</span>                   <span class="cmt"># delete network</span>
+
+<span class="cmt"># ── REGISTRY ─────────────────────────────────────────────────────</span>
+<span class="cmd">docker login</span>                               <span class="cmt"># login to Docker Hub</span>
+<span class="cmd">docker login</span> <span class="arg">ghcr.io</span>                       <span class="cmt"># login to GitHub Registry</span>
+<span class="cmd">docker logout</span>                              <span class="cmt"># logout</span>
+<span class="cmd">docker search</span> <span class="arg">nginx</span>                        <span class="cmt"># search Docker Hub</span></pre>
+    </div>
+  </div>
+
+  <!-- 4. DOCKER COMPOSE -->
+  <div class="section" id="compose">
+    <div class="section-header">
+      <span class="sec-num d">D-04</span>
+      <h2>Docker Compose</h2>
+    </div>
+
+    <p style="color:var(--muted2);margin-bottom:16px;"><strong>Docker Compose</strong> — tool to define and run multi-container applications from a single YAML file.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">docker-compose.yml — full stack example</span>
+        <span class="code-tag d">COMPOSE</span>
+      </div>
+      <pre><span class="yml-key">services</span>:
+
+  <span class="yml-key">app</span>:
+    <span class="yml-key">build</span>:
+      <span class="yml-key">context</span>: .
+      <span class="yml-key">dockerfile</span>: <span class="yml-str">Dockerfile</span>
+      <span class="yml-key">target</span>: <span class="yml-str">runtime</span>           <span class="yml-cmt"># multi-stage target</span>
+    <span class="yml-key">image</span>: <span class="yml-str">myapp:latest</span>
+    <span class="yml-key">container_name</span>: <span class="yml-str">api</span>
+    <span class="yml-key">ports</span>:
+      - <span class="yml-str">"3000:3000"</span>
+    <span class="yml-key">environment</span>:
+      - <span class="yml-str">NODE_ENV=production</span>
+      - <span class="yml-str">DB_URL=postgres://user:pass@db:5432/mydb</span>
+    <span class="yml-key">env_file</span>: .env                <span class="yml-cmt"># load from .env file</span>
+    <span class="yml-key">volumes</span>:
+      - <span class="yml-str">./logs:/app/logs</span>         <span class="yml-cmt"># bind mount for logs</span>
+    <span class="yml-key">depends_on</span>:
+      <span class="yml-key">db</span>:
+        <span class="yml-key">condition</span>: <span class="yml-str">service_healthy</span>  <span class="yml-cmt"># wait for DB ready</span>
+    <span class="yml-key">networks</span>:
+      - <span class="yml-str">backend</span>
+    <span class="yml-key">restart</span>: <span class="yml-str">unless-stopped</span>
+    <span class="yml-key">healthcheck</span>:
+      <span class="yml-key">test</span>: [<span class="yml-str">"CMD"</span>, <span class="yml-str">"curl"</span>, <span class="yml-str">"-f"</span>, <span class="yml-str">"http://localhost:3000/health"</span>]
+      <span class="yml-key">interval</span>: <span class="yml-str">30s</span>
+      <span class="yml-key">timeout</span>: <span class="yml-str">10s</span>
+      <span class="yml-key">retries</span>: <span class="yml-num">3</span>
+
+  <span class="yml-key">db</span>:
+    <span class="yml-key">image</span>: <span class="yml-str">postgres:16-alpine</span>
+    <span class="yml-key">environment</span>:
+      <span class="yml-key">POSTGRES_USER</span>: <span class="yml-str">user</span>
+      <span class="yml-key">POSTGRES_PASSWORD</span>: <span class="yml-str">pass</span>
+      <span class="yml-key">POSTGRES_DB</span>: <span class="yml-str">mydb</span>
+    <span class="yml-key">volumes</span>:
+      - <span class="yml-str">pgdata:/var/lib/postgresql/data</span>  <span class="yml-cmt"># named volume → persistent</span>
+    <span class="yml-key">networks</span>:
+      - <span class="yml-str">backend</span>
+    <span class="yml-key">healthcheck</span>:
+      <span class="yml-key">test</span>: [<span class="yml-str">"CMD-SHELL"</span>, <span class="yml-str">"pg_isready -U user"</span>]
+      <span class="yml-key">interval</span>: <span class="yml-str">10s</span>
+      <span class="yml-key">timeout</span>: <span class="yml-str">5s</span>
+      <span class="yml-key">retries</span>: <span class="yml-num">5</span>
+
+  <span class="yml-key">redis</span>:
+    <span class="yml-key">image</span>: <span class="yml-str">redis:7-alpine</span>
+    <span class="yml-key">command</span>: <span class="yml-str">redis-server --appendonly yes</span>
+    <span class="yml-key">volumes</span>:
+      - <span class="yml-str">redisdata:/data</span>
+    <span class="yml-key">networks</span>:
+      - <span class="yml-str">backend</span>
+
+  <span class="yml-key">nginx</span>:
+    <span class="yml-key">image</span>: <span class="yml-str">nginx:alpine</span>
+    <span class="yml-key">ports</span>:
+      - <span class="yml-str">"80:80"</span>
+      - <span class="yml-str">"443:443"</span>
+    <span class="yml-key">volumes</span>:
+      - <span class="yml-str">./nginx.conf:/etc/nginx/nginx.conf:ro</span>
+      - <span class="yml-str">./certs:/etc/nginx/certs:ro</span>
+    <span class="yml-key">depends_on</span>: [<span class="yml-str">app</span>]
+    <span class="yml-key">networks</span>:
+      - <span class="yml-str">backend</span>
+      - <span class="yml-str">frontend</span>
+
+<span class="yml-key">volumes</span>:
+  <span class="yml-key">pgdata</span>:
+  <span class="yml-key">redisdata</span>:
+
+<span class="yml-key">networks</span>:
+  <span class="yml-key">backend</span>:
+    <span class="yml-key">driver</span>: <span class="yml-str">bridge</span>
+  <span class="yml-key">frontend</span>:
+    <span class="yml-key">driver</span>: <span class="yml-str">bridge</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">docker compose commands</span>
+        <span class="code-tag sh">SHELL</span>
+      </div>
+      <pre><span class="cmd">docker compose up</span>                          <span class="cmt"># start all services</span>
+<span class="cmd">docker compose up</span> <span class="flag">-d</span>                       <span class="cmt"># start detached</span>
+<span class="cmd">docker compose up</span> <span class="flag">--build</span>                  <span class="cmt"># rebuild images first</span>
+<span class="cmd">docker compose up</span> <span class="flag">--scale</span> <span class="arg">app=3</span>           <span class="cmt"># scale app to 3 replicas</span>
+<span class="cmd">docker compose down</span>                        <span class="cmt"># stop and remove containers</span>
+<span class="cmd">docker compose down</span> <span class="flag">-v</span>                     <span class="cmt"># also remove volumes</span>
+<span class="cmd">docker compose logs</span> <span class="flag">-f</span> <span class="arg">app</span>                 <span class="cmt"># follow app logs</span>
+<span class="cmd">docker compose exec</span> <span class="arg">app bash</span>              <span class="cmt"># shell into app container</span>
+<span class="cmd">docker compose ps</span>                          <span class="cmt"># status of all services</span>
+<span class="cmd">docker compose restart</span> <span class="arg">app</span>                <span class="cmt"># restart single service</span>
+<span class="cmd">docker compose pull</span>                        <span class="cmt"># pull latest images</span>
+<span class="cmd">docker compose config</span>                      <span class="cmt"># validate & view merged config</span></pre>
+    </div>
+  </div>
+
+  <!-- 5. DOCKER USE CASES -->
+  <div class="section" id="docker-usecases">
+    <div class="section-header">
+      <span class="sec-num g">D-05</span>
+      <h2>Real-World Docker Use Cases</h2>
+    </div>
+
+    <div class="use-case">
+      <div class="use-case-header">
+        <div class="use-case-icon">🧪</div>
+        <div class="use-case-title">Local Dev Environment</div>
+        <div class="use-case-subtitle">USE CASE 1</div>
+      </div>
+      <div class="use-case-body">
+        <p>Run databases and services locally without installing them. Team gets identical environments.</p>
+        <div class="code-block" style="margin:0">
+          <pre><span class="cmt"># Spin up postgres + redis for local dev in seconds</span>
+<span class="cmd">docker compose</span> <span class="flag">-f</span> <span class="arg">docker-compose.dev.yml up -d</span>
+<span class="cmt"># Dev workflow: code on host, services in containers</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="use-case">
+      <div class="use-case-header">
+        <div class="use-case-icon">🚀</div>
+        <div class="use-case-title">CI/CD Pipeline — Build & Push</div>
+        <div class="use-case-subtitle">USE CASE 2</div>
+      </div>
+      <div class="use-case-body">
+        <p>Build images in CI, push to registry, pull in production. Ensures what you test is what you deploy.</p>
+        <div class="code-block" style="margin:0">
+          <pre><span class="cmt"># In GitHub Actions / Jenkins:</span>
+<span class="cmd">docker build</span> <span class="flag">-t</span> <span class="arg">myapp:${{ github.sha }}</span> .
+<span class="cmd">docker push</span> <span class="arg">myapp:${{ github.sha }}</span>
+<span class="cmd">docker tag</span> <span class="arg">myapp:${{ github.sha }} myapp:latest</span>
+<span class="cmd">docker push</span> <span class="arg">myapp:latest</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="use-case">
+      <div class="use-case-header">
+        <div class="use-case-icon">🔒</div>
+        <div class="use-case-title">Isolated Test Runs</div>
+        <div class="use-case-subtitle">USE CASE 3</div>
+      </div>
+      <div class="use-case-body">
+        <p>Run tests in a clean container that gets destroyed after. No state pollution between test runs.</p>
+        <div class="code-block" style="margin:0">
+          <pre><span class="cmd">docker run</span> <span class="flag">--rm</span> <span class="flag">-v</span> <span class="arg">$(pwd):/app</span> <span class="flag">-w</span> <span class="arg">/app node:20</span> npm test
+<span class="cmt"># Container auto-removed after tests finish (--rm)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       KUBERNETES PART
+  ═══════════════════════════════════════ -->
+  <div class="part-header" style="margin-top:80px">
+    <div class="part-line"></div>
+    <div class="part-label k8s">☸️ KUBERNETES</div>
+    <div class="part-line"></div>
+  </div>
+
+  <!-- 6. K8s CONCEPTS -->
+  <div class="section" id="k8s-concepts">
+    <div class="section-header">
+      <span class="sec-num k">K-01</span>
+      <h2>Core Concepts & Definitions</h2>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-stripe k"></div>
+        <div class="card-icon">🏗️</div>
+        <h3>Cluster</h3>
+        <p>A set of machines (nodes) running Kubernetes. Has one control plane and one or more worker nodes.</p>
+        <span class="def-tag">top-level unit</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe d"></div>
+        <div class="card-icon">🖥️</div>
+        <h3>Node</h3>
+        <p>A single worker machine (VM or physical). Runs Pods via the kubelet process and container runtime.</p>
+        <span class="def-tag">worker machine</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe g"></div>
+        <div class="card-icon">🫛</div>
+        <h3>Pod</h3>
+        <p>Smallest deployable unit. Wraps one or more containers that share network and storage on a node.</p>
+        <span class="def-tag">1+ containers</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe o"></div>
+        <div class="card-icon">📋</div>
+        <h3>Deployment</h3>
+        <p>Manages a ReplicaSet to ensure N replicas of your Pod are always running. Handles rolling updates.</p>
+        <span class="def-tag">desired state</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe y"></div>
+        <div class="card-icon">🌐</div>
+        <h3>Service</h3>
+        <p>Stable network endpoint (ClusterIP/NodePort/LoadBalancer) that routes traffic to a set of Pods.</p>
+        <span class="def-tag">pod routing</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe c"></div>
+        <div class="card-icon">📥</div>
+        <h3>Ingress</h3>
+        <p>HTTP/HTTPS routing rules. Exposes services externally via host/path rules, handles TLS termination.</p>
+        <span class="def-tag">L7 routing</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe k"></div>
+        <div class="card-icon">🗺️</div>
+        <h3>ConfigMap</h3>
+        <p>Stores non-sensitive key-value config data. Injected into Pods as env vars or mounted as files.</p>
+        <span class="def-tag">app config</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe d"></div>
+        <div class="card-icon">🔐</div>
+        <h3>Secret</h3>
+        <p>Like ConfigMap but base64-encoded for sensitive data (passwords, tokens, certs). Not encrypted by default.</p>
+        <span class="def-tag">sensitive data</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe g"></div>
+        <div class="card-icon">💾</div>
+        <h3>PersistentVolume</h3>
+        <p>Cluster-level storage resource. PVC (claim) requests storage from a PV on behalf of a Pod.</p>
+        <span class="def-tag">PV + PVC</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe o"></div>
+        <div class="card-icon">📦</div>
+        <h3>Namespace</h3>
+        <p>Virtual cluster within a cluster. Isolates resources between teams/environments (dev, staging, prod).</p>
+        <span class="def-tag">isolation scope</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe y"></div>
+        <div class="card-icon">🔄</div>
+        <h3>StatefulSet</h3>
+        <p>Like Deployment but for stateful apps (DBs). Gives stable identities and ordered pod creation.</p>
+        <span class="def-tag">stateful pods</span>
+      </div>
+      <div class="card">
+        <div class="card-stripe c"></div>
+        <div class="card-icon">⚙️</div>
+        <h3>DaemonSet</h3>
+        <p>Ensures a copy of a Pod runs on every node. Used for log collectors, monitoring agents.</p>
+        <span class="def-tag">per-node pods</span>
+      </div>
+    </div>
+
+    <!-- K8s architecture diagram -->
+    <div class="arch">
+      <div class="arch-title">KUBERNETES CLUSTER ARCHITECTURE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;flex-wrap:wrap">
+        <div class="arch-group">
+          <div class="arch-group-label">CONTROL PLANE</div>
+          <div class="arch-row">
+            <div class="arch-box engine" style="font-size:10px">API Server</div>
+            <div class="arch-arrow">↔</div>
+            <div class="arch-box engine" style="font-size:10px">etcd</div>
+          </div>
+          <div class="arch-row" style="margin-top:8px">
+            <div class="arch-box engine" style="font-size:10px">Scheduler</div>
+            <div class="arch-arrow">+</div>
+            <div class="arch-box engine" style="font-size:10px">Controller Mgr</div>
+          </div>
+        </div>
+        <div class="arch-group">
+          <div class="arch-group-label">WORKER NODE</div>
+          <div class="arch-row">
+            <div class="arch-box node" style="font-size:10px">kubelet</div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-box pod" style="font-size:10px">Pod (containers)</div>
+          </div>
+          <div class="arch-row" style="margin-top:8px">
+            <div class="arch-box network" style="font-size:10px">kube-proxy</div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-box image" style="font-size:10px">Service routing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. K8s YAML OBJECTS -->
+  <div class="section" id="k8s-objects">
+    <div class="section-header">
+      <span class="sec-num k">K-02</span>
+      <h2>Core Object YAML Manifests</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">deployment.yaml</span>
+        <span class="code-tag k">DEPLOYMENT</span>
+      </div>
+      <pre><span class="yml-key">apiVersion</span>: <span class="yml-str">apps/v1</span>
+<span class="yml-key">kind</span>: <span class="yml-str">Deployment</span>
+<span class="yml-key">metadata</span>:
+  <span class="yml-key">name</span>: <span class="yml-str">api-deployment</span>
+  <span class="yml-key">namespace</span>: <span class="yml-str">production</span>
+  <span class="yml-key">labels</span>:
+    <span class="yml-key">app</span>: <span class="yml-str">api</span>
+    <span class="yml-key">version</span>: <span class="yml-str">v1</span>
+<span class="yml-key">spec</span>:
+  <span class="yml-key">replicas</span>: <span class="yml-num">3</span>                   <span class="yml-cmt"># run 3 pods always</span>
+  <span class="yml-key">selector</span>:
+    <span class="yml-key">matchLabels</span>:
+      <span class="yml-key">app</span>: <span class="yml-str">api</span>
+  <span class="yml-key">strategy</span>:
+    <span class="yml-key">type</span>: <span class="yml-str">RollingUpdate</span>
+    <span class="yml-key">rollingUpdate</span>:
+      <span class="yml-key">maxSurge</span>: <span class="yml-num">1</span>               <span class="yml-cmt"># 1 extra pod during update</span>
+      <span class="yml-key">maxUnavailable</span>: <span class="yml-num">0</span>          <span class="yml-cmt"># zero downtime</span>
+  <span class="yml-key">template</span>:
+    <span class="yml-key">metadata</span>:
+      <span class="yml-key">labels</span>:
+        <span class="yml-key">app</span>: <span class="yml-str">api</span>
+    <span class="yml-key">spec</span>:
+      <span class="yml-key">containers</span>:
+        - <span class="yml-key">name</span>: <span class="yml-str">api</span>
+          <span class="yml-key">image</span>: <span class="yml-str">username/myapp:1.0</span>
+          <span class="yml-key">ports</span>:
+            - <span class="yml-key">containerPort</span>: <span class="yml-num">3000</span>
+          <span class="yml-key">env</span>:
+            - <span class="yml-key">name</span>: <span class="yml-str">NODE_ENV</span>
+              <span class="yml-key">value</span>: <span class="yml-str">production</span>
+            - <span class="yml-key">name</span>: <span class="yml-str">DB_PASSWORD</span>
+              <span class="yml-key">valueFrom</span>:
+                <span class="yml-key">secretKeyRef</span>:             <span class="yml-cmt"># from Secret</span>
+                  <span class="yml-key">name</span>: <span class="yml-str">db-secret</span>
+                  <span class="yml-key">key</span>: <span class="yml-str">password</span>
+            - <span class="yml-key">name</span>: <span class="yml-str">APP_CONFIG</span>
+              <span class="yml-key">valueFrom</span>:
+                <span class="yml-key">configMapKeyRef</span>:          <span class="yml-cmt"># from ConfigMap</span>
+                  <span class="yml-key">name</span>: <span class="yml-str">app-config</span>
+                  <span class="yml-key">key</span>: <span class="yml-str">log_level</span>
+          <span class="yml-key">resources</span>:
+            <span class="yml-key">requests</span>:
+              <span class="yml-key">memory</span>: <span class="yml-str">128Mi</span>
+              <span class="yml-key">cpu</span>: <span class="yml-str">100m</span>           <span class="yml-cmt"># 0.1 CPU core</span>
+            <span class="yml-key">limits</span>:
+              <span class="yml-key">memory</span>: <span class="yml-str">512Mi</span>
+              <span class="yml-key">cpu</span>: <span class="yml-str">500m</span>
+          <span class="yml-key">livenessProbe</span>:
+            <span class="yml-key">httpGet</span>:
+              <span class="yml-key">path</span>: /health
+              <span class="yml-key">port</span>: <span class="yml-num">3000</span>
+            <span class="yml-key">initialDelaySeconds</span>: <span class="yml-num">15</span>
+            <span class="yml-key">periodSeconds</span>: <span class="yml-num">20</span>
+          <span class="yml-key">readinessProbe</span>:
+            <span class="yml-key">httpGet</span>:
+              <span class="yml-key">path</span>: /ready
+              <span class="yml-key">port</span>: <span class="yml-num">3000</span>
+            <span class="yml-key">initialDelaySeconds</span>: <span class="yml-num">5</span>
+            <span class="yml-key">periodSeconds</span>: <span class="yml-num">10</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">service.yaml + ingress.yaml</span>
+        <span class="code-tag k">SERVICE / INGRESS</span>
+      </div>
+      <pre><span class="yml-cmt"># ── Service: exposes Pods internally ─────────────────────────────</span>
+<span class="yml-key">apiVersion</span>: <span class="yml-str">v1</span>
+<span class="yml-key">kind</span>: <span class="yml-str">Service</span>
+<span class="yml-key">metadata</span>:
+  <span class="yml-key">name</span>: <span class="yml-str">api-service</span>
+  <span class="yml-key">namespace</span>: <span class="yml-str">production</span>
+<span class="yml-key">spec</span>:
+  <span class="yml-key">selector</span>:
+    <span class="yml-key">app</span>: <span class="yml-str">api</span>               <span class="yml-cmt"># routes to pods with this label</span>
+  <span class="yml-key">ports</span>:
+    - <span class="yml-key">protocol</span>: <span class="yml-str">TCP</span>
+      <span class="yml-key">port</span>: <span class="yml-num">80</span>            <span class="yml-cmt"># service port</span>
+      <span class="yml-key">targetPort</span>: <span class="yml-num">3000</span>   <span class="yml-cmt"># pod/container port</span>
+  <span class="yml-key">type</span>: <span class="yml-str">ClusterIP</span>        <span class="yml-cmt"># ClusterIP | NodePort | LoadBalancer</span>
+
+---
+
+<span class="yml-cmt"># ── Ingress: exposes to internet via nginx ingress controller ──────</span>
+<span class="yml-key">apiVersion</span>: <span class="yml-str">networking.k8s.io/v1</span>
+<span class="yml-key">kind</span>: <span class="yml-str">Ingress</span>
+<span class="yml-key">metadata</span>:
+  <span class="yml-key">name</span>: <span class="yml-str">api-ingress</span>
+  <span class="yml-key">annotations</span>:
+    <span class="yml-key">nginx.ingress.kubernetes.io/rewrite-target</span>: <span class="yml-str">/</span>
+    <span class="yml-key">cert-manager.io/cluster-issuer</span>: <span class="yml-str">letsencrypt</span>
+<span class="yml-key">spec</span>:
+  <span class="yml-key">tls</span>:
+    - <span class="yml-key">hosts</span>: [<span class="yml-str">api.example.com</span>]
+      <span class="yml-key">secretName</span>: <span class="yml-str">api-tls</span>
+  <span class="yml-key">rules</span>:
+    - <span class="yml-key">host</span>: <span class="yml-str">api.example.com</span>
+      <span class="yml-key">http</span>:
+        <span class="yml-key">paths</span>:
+          - <span class="yml-key">path</span>: /
+            <span class="yml-key">pathType</span>: <span class="yml-str">Prefix</span>
+            <span class="yml-key">backend</span>:
+              <span class="yml-key">service</span>:
+                <span class="yml-key">name</span>: <span class="yml-str">api-service</span>
+                <span class="yml-key">port</span>:
+                  <span class="yml-key">number</span>: <span class="yml-num">80</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">configmap.yaml + secret.yaml + hpa.yaml</span>
+        <span class="code-tag k">CONFIG / SECRET / HPA</span>
+      </div>
+      <pre><span class="yml-cmt"># ── ConfigMap ─────────────────────────────────────────────────────</span>
+<span class="yml-key">apiVersion</span>: <span class="yml-str">v1</span>
+<span class="yml-key">kind</span>: <span class="yml-str">ConfigMap</span>
+<span class="yml-key">metadata</span>:
+  <span class="yml-key">name</span>: <span class="yml-str">app-config</span>
+<span class="yml-key">data</span>:
+  <span class="yml-key">log_level</span>: <span class="yml-str">info</span>
+  <span class="yml-key">max_connections</span>: <span class="yml-str">"100"</span>
+  <span class="yml-key">app.conf</span>: |
+    server_timeout = 30
+    enable_tracing = true
+
+---
+
+<span class="yml-cmt"># ── Secret (base64-encoded values) ───────────────────────────────</span>
+<span class="yml-key">apiVersion</span>: <span class="yml-str">v1</span>
+<span class="yml-key">kind</span>: <span class="yml-str">Secret</span>
+<span class="yml-key">metadata</span>:
+  <span class="yml-key">name</span>: <span class="yml-str">db-secret</span>
+<span class="yml-key">type</span>: <span class="yml-str">Opaque</span>
+<span class="yml-key">data</span>:
+  <span class="yml-key">password</span>: <span class="yml-str">cGFzc3dvcmQxMjM=</span>   <span class="yml-cmt"># base64 of "password123"</span>
+  <span class="yml-key">username</span>: <span class="yml-str">YWRtaW4=</span>            <span class="yml-cmt"># base64 of "admin"</span>
+
+---
+
+<span class="yml-cmt"># ── HorizontalPodAutoscaler ───────────────────────────────────────</span>
+<span class="yml-key">apiVersion</span>: <span class="yml-str">autoscaling/v2</span>
+<span class="yml-key">kind</span>: <span class="yml-str">HorizontalPodAutoscaler</span>
+<span class="yml-key">metadata</span>:
+  <span class="yml-key">name</span>: <span class="yml-str">api-hpa</span>
+<span class="yml-key">spec</span>:
+  <span class="yml-key">scaleTargetRef</span>:
+    <span class="yml-key">apiVersion</span>: <span class="yml-str">apps/v1</span>
+    <span class="yml-key">kind</span>: <span class="yml-str">Deployment</span>
+    <span class="yml-key">name</span>: <span class="yml-str">api-deployment</span>
+  <span class="yml-key">minReplicas</span>: <span class="yml-num">2</span>
+  <span class="yml-key">maxReplicas</span>: <span class="yml-num">10</span>
+  <span class="yml-key">metrics</span>:
+    - <span class="yml-key">type</span>: <span class="yml-str">Resource</span>
+      <span class="yml-key">resource</span>:
+        <span class="yml-key">name</span>: <span class="yml-str">cpu</span>
+        <span class="yml-key">target</span>:
+          <span class="yml-key">type</span>: <span class="yml-str">Utilization</span>
+          <span class="yml-key">averageUtilization</span>: <span class="yml-num">70</span>   <span class="yml-cmt"># scale when CPU > 70%</span></pre>
+    </div>
+  </div>
+
+  <!-- 8. kubectl COMMANDS -->
+  <div class="section" id="k8s-commands">
+    <div class="section-header">
+      <span class="sec-num k">K-03</span>
+      <h2>kubectl — Essential Commands</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">cluster & context</span>
+        <span class="code-tag sh">SHELL</span>
+      </div>
+      <pre><span class="cmt"># ── CONTEXT / CLUSTER ─────────────────────────────────────────────</span>
+<span class="cmd">kubectl config get-contexts</span>               <span class="cmt"># list all contexts</span>
+<span class="cmd">kubectl config current-context</span>            <span class="cmt"># show active context</span>
+<span class="cmd">kubectl config use-context</span> <span class="arg">prod-cluster</span>  <span class="cmt"># switch cluster</span>
+<span class="cmd">kubectl cluster-info</span>                      <span class="cmt"># cluster endpoint info</span>
+<span class="cmd">kubectl get nodes</span>                         <span class="cmt"># list all nodes</span>
+<span class="cmd">kubectl get nodes</span> <span class="flag">-o wide</span>                <span class="cmt"># with IPs and OS info</span>
+<span class="cmd">kubectl describe node</span> <span class="arg">node-1</span>             <span class="cmt"># node details / conditions</span>
+<span class="cmd">kubectl top nodes</span>                         <span class="cmt"># CPU/memory usage per node</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">pods & deployments</span>
+        <span class="code-tag sh">SHELL</span>
+      </div>
+      <pre><span class="cmt"># ── PODS ──────────────────────────────────────────────────────────</span>
+<span class="cmd">kubectl get pods</span>                          <span class="cmt"># list pods (default namespace)</span>
+<span class="cmd">kubectl get pods</span> <span class="flag">-n</span> <span class="arg">production</span>           <span class="cmt"># in specific namespace</span>
+<span class="cmd">kubectl get pods</span> <span class="flag">-A</span>                       <span class="cmt"># all namespaces</span>
+<span class="cmd">kubectl get pods</span> <span class="flag">-o wide</span>                 <span class="cmt"># with node and IP</span>
+<span class="cmd">kubectl get pods</span> <span class="flag">-w</span>                       <span class="cmt"># watch live updates</span>
+<span class="cmd">kubectl describe pod</span> <span class="arg">api-pod-xyz</span>         <span class="cmt"># full pod details, events</span>
+<span class="cmd">kubectl logs</span> <span class="arg">api-pod-xyz</span>                  <span class="cmt"># pod logs</span>
+<span class="cmd">kubectl logs</span> <span class="flag">-f</span> <span class="arg">api-pod-xyz</span>              <span class="cmt"># follow logs</span>
+<span class="cmd">kubectl logs</span> <span class="arg">api-pod-xyz</span> <span class="flag">-c</span> <span class="arg">sidecar</span>      <span class="cmt"># specific container in pod</span>
+<span class="cmd">kubectl logs</span> <span class="flag">--previous</span> <span class="arg">api-pod-xyz</span>      <span class="cmt"># logs from crashed pod</span>
+<span class="cmd">kubectl exec</span> <span class="flag">-it</span> <span class="arg">api-pod-xyz -- bash</span>     <span class="cmt"># shell into pod</span>
+<span class="cmd">kubectl exec</span> <span class="arg">api-pod-xyz -- env</span>           <span class="cmt"># run command in pod</span>
+<span class="cmd">kubectl delete pod</span> <span class="arg">api-pod-xyz</span>           <span class="cmt"># delete (deployment re-creates)</span>
+<span class="cmd">kubectl top pods</span>                          <span class="cmt"># CPU/memory per pod</span>
+
+<span class="cmt"># ── DEPLOYMENTS ───────────────────────────────────────────────────</span>
+<span class="cmd">kubectl get deployments</span>                   <span class="cmt"># list deployments</span>
+<span class="cmd">kubectl describe deployment</span> <span class="arg">api</span>          <span class="cmt"># full deployment info</span>
+<span class="cmd">kubectl apply</span> <span class="flag">-f</span> <span class="arg">deployment.yaml</span>          <span class="cmt"># create/update from file</span>
+<span class="cmd">kubectl delete</span> <span class="flag">-f</span> <span class="arg">deployment.yaml</span>         <span class="cmt"># delete from file</span>
+<span class="cmd">kubectl scale deployment</span> <span class="arg">api</span> <span class="flag">--replicas</span><span class="arg">=5</span> <span class="cmt"># scale to 5 pods</span>
+<span class="cmd">kubectl set image deployment/api</span> <span class="arg">api=myapp:2.0</span>  <span class="cmt"># update image</span>
+<span class="cmd">kubectl rollout status deployment/api</span>     <span class="cmt"># watch rollout progress</span>
+<span class="cmd">kubectl rollout history deployment/api</span>    <span class="cmt"># rollout revision history</span>
+<span class="cmd">kubectl rollout undo deployment/api</span>       <span class="cmt"># rollback to previous</span>
+<span class="cmd">kubectl rollout undo deployment/api</span> <span class="flag">--to-revision</span><span class="arg">=2</span> <span class="cmt"># to specific revision</span>
+<span class="cmd">kubectl rollout restart deployment/api</span>    <span class="cmt"># rolling restart</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">services, secrets, configmaps, namespaces</span>
+        <span class="code-tag sh">SHELL</span>
+      </div>
+      <pre><span class="cmt"># ── SERVICES ──────────────────────────────────────────────────────</span>
+<span class="cmd">kubectl get services</span>                      <span class="cmt"># list services</span>
+<span class="cmd">kubectl describe service</span> <span class="arg">api-service</span>     <span class="cmt"># service endpoints</span>
+<span class="cmd">kubectl port-forward svc/api-service</span> <span class="arg">8080:80</span> <span class="cmt"># local port forwarding</span>
+<span class="cmd">kubectl port-forward pod/api-pod-xyz</span> <span class="arg">3000:3000</span> <span class="cmt"># forward pod port</span>
+
+<span class="cmt"># ── CONFIGMAPS & SECRETS ──────────────────────────────────────────</span>
+<span class="cmd">kubectl get configmaps</span>                    <span class="cmt"># list configmaps</span>
+<span class="cmd">kubectl describe configmap</span> <span class="arg">app-config</span>   <span class="cmt"># view configmap data</span>
+<span class="cmd">kubectl create configmap</span> <span class="arg">app-config</span> <span class="flag">--from-file</span><span class="arg">=config/</span>
+<span class="cmd">kubectl create configmap</span> <span class="arg">app-config</span> <span class="flag">--from-literal</span><span class="arg">=key=value</span>
+<span class="cmd">kubectl get secrets</span>                       <span class="cmt"># list secrets</span>
+<span class="cmd">kubectl create secret generic</span> <span class="arg">db-secret</span> <span class="flag">--from-literal</span><span class="arg">=password=abc</span>
+<span class="cmd">kubectl get secret</span> <span class="arg">db-secret</span> <span class="flag">-o</span> <span class="arg">jsonpath='{.data.password}'</span> | base64 -d
+
+<span class="cmt"># ── NAMESPACES ────────────────────────────────────────────────────</span>
+<span class="cmd">kubectl get namespaces</span>                    <span class="cmt"># list namespaces</span>
+<span class="cmd">kubectl create namespace</span> <span class="arg">staging</span>          <span class="cmt"># create namespace</span>
+<span class="cmd">kubectl delete namespace</span> <span class="arg">staging</span>          <span class="cmt"># delete + all resources inside</span>
+<span class="cmd">kubectl</span> <span class="flag">-n</span> <span class="arg">production get all</span>             <span class="cmt"># all resources in namespace</span>
+
+<span class="cmt"># ── GENERAL USEFUL ────────────────────────────────────────────────</span>
+<span class="cmd">kubectl get all</span>                           <span class="cmt"># everything in default ns</span>
+<span class="cmd">kubectl apply</span> <span class="flag">-f</span> <span class="arg">./manifests/</span>             <span class="cmt"># apply entire folder</span>
+<span class="cmd">kubectl diff</span> <span class="flag">-f</span> <span class="arg">deployment.yaml</span>           <span class="cmt"># what will change?</span>
+<span class="cmd">kubectl edit deployment</span> <span class="arg">api</span>              <span class="cmt"># live edit in $EDITOR</span>
+<span class="cmd">kubectl patch deployment api</span> <span class="flag">-p</span> <span class="arg">'{"spec":{"replicas":4}}'</span>
+<span class="cmd">kubectl explain deployment.spec</span>           <span class="cmt"># inline API docs</span>
+<span class="cmd">kubectl api-resources</span>                     <span class="cmt"># list all resource types</span>
+<span class="cmd">kubectl get events</span> <span class="flag">--sort-by</span><span class="arg">='.lastTimestamp'</span> <span class="cmt"># recent events</span></pre>
+    </div>
+  </div>
+
+  <!-- 9. K8s YAMLS -->
+  <div class="section" id="k8s-yamls">
+    <div class="section-header">
+      <span class="sec-num k">K-04</span>
+      <h2>Additional YAML Manifests</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">statefulset.yaml — PostgreSQL</span>
+        <span class="code-tag k">STATEFULSET</span>
+      </div>
+      <pre><span class="yml-key">apiVersion</span>: <span class="yml-str">apps/v1</span>
+<span class="yml-key">kind</span>: <span class="yml-str">StatefulSet</span>
+<span class="yml-key">metadata</span>:
+  <span class="yml-key">name</span>: <span class="yml-str">postgres</span>
+<span class="yml-key">spec</span>:
+  <span class="yml-key">serviceName</span>: <span class="yml-str">postgres</span>        <span class="yml-cmt"># stable DNS: postgres-0.postgres</span>
+  <span class="yml-key">replicas</span>: <span class="yml-num">1</span>
+  <span class="yml-key">selector</span>:
+    <span class="yml-key">matchLabels</span>: { <span class="yml-key">app</span>: <span class="yml-str">postgres</span> }
+  <span class="yml-key">template</span>:
+    <span class="yml-key">metadata</span>:
+      <span class="yml-key">labels</span>: { <span class="yml-key">app</span>: <span class="yml-str">postgres</span> }
+    <span class="yml-key">spec</span>:
+      <span class="yml-key">containers</span>:
+        - <span class="yml-key">name</span>: <span class="yml-str">postgres</span>
+          <span class="yml-key">image</span>: <span class="yml-str">postgres:16</span>
+          <span class="yml-key">env</span>:
+            - <span class="yml-key">name</span>: <span class="yml-str">POSTGRES_PASSWORD</span>
+              <span class="yml-key">valueFrom</span>:
+                <span class="yml-key">secretKeyRef</span>: { <span class="yml-key">name</span>: <span class="yml-str">db-secret</span>, <span class="yml-key">key</span>: <span class="yml-str">password</span> }
+          <span class="yml-key">volumeMounts</span>:
+            - <span class="yml-key">name</span>: <span class="yml-str">pgdata</span>
+              <span class="yml-key">mountPath</span>: <span class="yml-str">/var/lib/postgresql/data</span>
+  <span class="yml-key">volumeClaimTemplates</span>:             <span class="yml-cmt"># auto PVC per pod</span>
+    - <span class="yml-key">metadata</span>: { <span class="yml-key">name</span>: <span class="yml-str">pgdata</span> }
+      <span class="yml-key">spec</span>:
+        <span class="yml-key">accessModes</span>: [<span class="yml-str">ReadWriteOnce</span>]
+        <span class="yml-key">resources</span>:
+          <span class="yml-key">requests</span>: { <span class="yml-key">storage</span>: <span class="yml-str">10Gi</span> }</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="code-fname">cronjob.yaml</span>
+        <span class="code-tag k">CRONJOB</span>
+      </div>
+      <pre><span class="yml-key">apiVersion</span>: <span class="yml-str">batch/v1</span>
+<span class="yml-key">kind</span>: <span class="yml-str">CronJob</span>
+<span class="yml-key">metadata</span>:
+  <span class="yml-key">name</span>: <span class="yml-str">db-backup</span>
+<span class="yml-key">spec</span>:
+  <span class="yml-key">schedule</span>: <span class="yml-str">"0 2 * * *"</span>           <span class="yml-cmt"># every day 2 AM UTC</span>
+  <span class="yml-key">concurrencyPolicy</span>: <span class="yml-str">Forbid</span>       <span class="yml-cmt"># don't overlap runs</span>
+  <span class="yml-key">jobTemplate</span>:
+    <span class="yml-key">spec</span>:
+      <span class="yml-key">template</span>:
+        <span class="yml-key">spec</span>:
+          <span class="yml-key">restartPolicy</span>: <span class="yml-str">OnFailure</span>
+          <span class="yml-key">containers</span>:
+            - <span class="yml-key">name</span>: <span class="yml-str">backup</span>
+              <span class="yml-key">image</span>: <span class="yml-str">postgres:16</span>
+              <span class="yml-key">command</span>: [<span class="yml-str">"/bin/sh"</span>, <span class="yml-str">"-c"</span>]
+              <span class="yml-key">args</span>:
+                - pg_dump $DATABASE_URL | gzip > /backup/db-$(date +%Y%m%d).gz
+              <span class="yml-key">env</span>:
+                - <span class="yml-key">name</span>: <span class="yml-str">DATABASE_URL</span>
+                  <span class="yml-key">valueFrom</span>:
+                    <span class="yml-key">secretKeyRef</span>: { <span class="yml-key">name</span>: <span class="yml-str">db-secret</span>, <span class="yml-key">key</span>: <span class="yml-str">url</span> }</pre>
+    </div>
+  </div>
+
+  <!-- 10. K8s USE CASES -->
+  <div class="section" id="k8s-usecases">
+    <div class="section-header">
+      <span class="sec-num g">K-05</span>
+      <h2>Real-World Kubernetes Use Cases</h2>
+    </div>
+
+    <div class="use-case">
+      <div class="use-case-header">
+        <div class="use-case-icon">🔄</div>
+        <div class="use-case-title">Zero-Downtime Rolling Deploy</div>
+        <div class="use-case-subtitle">USE CASE 1</div>
+      </div>
+      <div class="use-case-body">
+        <p>Update your app image with no downtime. K8s replaces pods one by one, health-checking each before proceeding.</p>
+        <div class="flow">
+          <div class="flow-step"><span class="icon">📦</span>New image<div class="label">pushed to registry</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="icon">⚙️</span>set image<div class="label">kubectl command</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="icon">🫛</span>Pod N+1<div class="label">starts, health check</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="icon">🗑️</span>Pod N<div class="label">terminated</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="icon">✅</span>Done<div class="label">zero downtime</div></div>
+        </div>
+        <div class="code-block" style="margin:0">
+          <pre><span class="cmd">kubectl set image deployment/api</span> <span class="arg">api=myapp:2.0</span>
+<span class="cmd">kubectl rollout status deployment/api</span>  <span class="cmt"># watch progress</span>
+<span class="cmt"># If something's wrong:</span>
+<span class="cmd">kubectl rollout undo deployment/api</span>    <span class="cmt"># instant rollback</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="use-case">
+      <div class="use-case-header">
+        <div class="use-case-icon">📈</div>
+        <div class="use-case-title">Auto-Scaling on Load</div>
+        <div class="use-case-subtitle">USE CASE 2</div>
+      </div>
+      <div class="use-case-body">
+        <p>HPA automatically adds/removes pods based on CPU/memory. Min 2 pods, max 10, scale at 70% CPU.</p>
+        <div class="code-block" style="margin:0">
+          <pre><span class="cmt"># Apply HPA (or use YAML from above)</span>
+<span class="cmd">kubectl autoscale deployment api</span> <span class="flag">--min</span><span class="arg">=2</span> <span class="flag">--max</span><span class="arg">=10</span> <span class="flag">--cpu-percent</span><span class="arg">=70</span>
+<span class="cmd">kubectl get hpa</span>                          <span class="cmt"># watch replicas change</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="use-case">
+      <div class="use-case-header">
+        <div class="use-case-icon">🔍</div>
+        <div class="use-case-title">Debugging a Crashing Pod</div>
+        <div class="use-case-subtitle">USE CASE 3</div>
+      </div>
+      <div class="use-case-body">
+        <p>Standard debugging workflow when a pod shows CrashLoopBackOff or Error status.</p>
+        <div class="code-block" style="margin:0">
+          <pre><span class="cmd">kubectl get pods</span>                         <span class="cmt"># identify crashed pod name</span>
+<span class="cmd">kubectl describe pod</span> <span class="arg">api-xyz</span>             <span class="cmt"># check Events section</span>
+<span class="cmd">kubectl logs</span> <span class="arg">api-xyz</span>                     <span class="cmt"># current logs</span>
+<span class="cmd">kubectl logs</span> <span class="flag">--previous</span> <span class="arg">api-xyz</span>          <span class="cmt"># logs BEFORE crash</span>
+<span class="cmt"># If no shell available, run debug pod alongside:</span>
+<span class="cmd">kubectl debug</span> <span class="flag">-it</span> <span class="arg">api-xyz</span> <span class="flag">--image</span><span class="arg">=busybox --share-processes</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="use-case">
+      <div class="use-case-header">
+        <div class="use-case-icon">🌍</div>
+        <div class="use-case-title">Multi-Environment (Namespaces)</div>
+        <div class="use-case-subtitle">USE CASE 4</div>
+      </div>
+      <div class="use-case-body">
+        <p>Isolate dev / staging / prod in the same cluster using namespaces with different configs.</p>
+        <div class="code-block" style="margin:0">
+          <pre><span class="cmd">kubectl create namespace</span> <span class="arg">staging</span>
+<span class="cmd">kubectl apply</span> <span class="flag">-f</span> <span class="arg">manifests/</span> <span class="flag">-n</span> <span class="arg">staging</span>
+<span class="cmt"># Each namespace gets its own Secrets, ConfigMaps, Services</span>
+<span class="cmd">kubectl get all</span> <span class="flag">-n</span> <span class="arg">staging</span>
+<span class="cmd">kubectl get all</span> <span class="flag">-n</span> <span class="arg">production</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       CHEAT SHEET
+  ═══════════════════════════════════════ -->
+  <div class="part-header" style="margin-top:80px">
+    <div class="part-line"></div>
+    <div class="part-label docker">⚡ QUICK REFERENCE</div>
+    <div class="part-line"></div>
+  </div>
+
+  <div class="section" id="cheatsheet">
+    <div class="section-header">
+      <span class="sec-num o">REF</span>
+      <h2>Cheat Sheet — Docker & Kubernetes</h2>
+    </div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-header d">🐳 Docker — Image lifecycle</div>
+        <pre><span class="cmd">docker build</span> <span class="flag">-t</span> app:1.0 .
+<span class="cmd">docker push</span> user/app:1.0
+<span class="cmd">docker pull</span> nginx:alpine
+<span class="cmd">docker images</span>
+<span class="cmd">docker rmi</span> app:1.0
+<span class="cmd">docker image prune</span> <span class="flag">-a</span></pre>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header d">🐳 Docker — Container lifecycle</div>
+        <pre><span class="cmd">docker run</span> <span class="flag">-d -p</span> 8080:80 nginx
+<span class="cmd">docker ps</span> <span class="flag">-a</span>
+<span class="cmd">docker stop</span> / <span class="cmd">start</span> / <span class="cmd">rm</span> web
+<span class="cmd">docker exec</span> <span class="flag">-it</span> web bash
+<span class="cmd">docker logs</span> <span class="flag">-f</span> web
+<span class="cmd">docker stats</span></pre>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header d">🐳 Docker Compose</div>
+        <pre><span class="cmd">docker compose up</span> <span class="flag">-d --build</span>
+<span class="cmd">docker compose down</span> <span class="flag">-v</span>
+<span class="cmd">docker compose logs</span> <span class="flag">-f</span>
+<span class="cmd">docker compose exec</span> app sh
+<span class="cmd">docker compose scale</span> app=3
+<span class="cmd">docker compose ps</span></pre>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header k">☸️ kubectl — Get resources</div>
+        <pre><span class="cmd">kubectl get</span> pods/svc/deploy/all
+<span class="cmd">kubectl get pods</span> <span class="flag">-n</span> prod <span class="flag">-o wide</span>
+<span class="cmd">kubectl get pods</span> <span class="flag">-A</span>
+<span class="cmd">kubectl describe pod</span> podname
+<span class="cmd">kubectl get events</span>
+<span class="cmd">kubectl top pods/nodes</span></pre>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header k">☸️ kubectl — Apply & Delete</div>
+        <pre><span class="cmd">kubectl apply</span> <span class="flag">-f</span> file.yaml
+<span class="cmd">kubectl apply</span> <span class="flag">-f</span> ./manifests/
+<span class="cmd">kubectl delete</span> <span class="flag">-f</span> file.yaml
+<span class="cmd">kubectl diff</span> <span class="flag">-f</span> file.yaml
+<span class="cmd">kubectl edit deployment</span> api
+<span class="cmd">kubectl explain</span> pod.spec</pre>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header k">☸️ kubectl — Deployments</div>
+        <pre><span class="cmd">kubectl scale</span> deploy api <span class="flag">--replicas</span>=5
+<span class="cmd">kubectl set image</span> deploy/api api=img:v2
+<span class="cmd">kubectl rollout status</span> deploy/api
+<span class="cmd">kubectl rollout history</span> deploy/api
+<span class="cmd">kubectl rollout undo</span> deploy/api
+<span class="cmd">kubectl rollout restart</span> deploy/api</pre>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header k">☸️ kubectl — Debug</div>
+        <pre><span class="cmd">kubectl logs</span> <span class="flag">-f</span> podname
+<span class="cmd">kubectl logs</span> <span class="flag">--previous</span> podname
+<span class="cmd">kubectl exec</span> <span class="flag">-it</span> podname -- bash
+<span class="cmd">kubectl port-forward svc/api</span> 8080:80
+<span class="cmd">kubectl debug</span> <span class="flag">-it</span> pod <span class="flag">--image</span>=busybox
+<span class="cmd">kubectl get events</span> <span class="flag">--sort-by</span>=lastTimestamp</pre>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header k">☸️ Service types explained</div>
+        <pre><span class="yml-cmt">ClusterIP    → internal only (default)</span>
+<span class="yml-cmt">NodePort     → exposed on each node's IP</span>
+<span class="yml-cmt">             → nodeIP:30000-32767</span>
+<span class="yml-cmt">LoadBalancer → cloud LB (AWS/GCP/Azure)</span>
+<span class="yml-cmt">ExternalName → DNS alias to ext. service</span>
+<span class="yml-cmt">Headless     → clusterIP: None (StatefulSet)</span></pre>
+      </div>
+    </div>
+
+    <!-- Probes comparison -->
+    <div style="margin-top:28px">
+      <table class="cmd-table k8s">
+        <tr>
+          <th>Probe Type</th><th>Purpose</th><th>Failure action</th>
+        </tr>
+        <tr>
+          <td>livenessProbe</td>
+          <td>Is the container alive? (not stuck)</td>
+          <td>Restart the container</td>
+        </tr>
+        <tr>
+          <td>readinessProbe</td>
+          <td>Is the container ready to receive traffic?</td>
+          <td>Remove from Service endpoints</td>
+        </tr>
+        <tr>
+          <td>startupProbe</td>
+          <td>Has the app finished starting up?</td>
+          <td>Kill + restart if never passes</td>
+        </tr>
+      </table>
+
+      <table class="cmd-table" style="margin-top:14px">
+        <tr>
+          <th>Docker concept</th><th>Kubernetes equivalent</th>
+        </tr>
+        <tr><td>Container</td><td>Container inside a Pod</td></tr>
+        <tr><td>docker run</td><td>kubectl run / Deployment manifest</td></tr>
+        <tr><td>docker-compose.yml</td><td>Multiple K8s YAML manifests</td></tr>
+        <tr><td>-p 8080:80</td><td>Service (NodePort / LoadBalancer)</td></tr>
+        <tr><td>-v volume:/path</td><td>PersistentVolumeClaim + volumeMount</td></tr>
+        <tr><td>-e ENV=val</td><td>env: in container spec / ConfigMap / Secret</td></tr>
+        <tr><td>--network</td><td>Service DNS (auto-discovery by name)</td></tr>
+        <tr><td>docker logs</td><td>kubectl logs</td></tr>
+        <tr><td>docker exec -it</td><td>kubectl exec -it</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>🐳 Docker</span> + <span class="k">☸️ Kubernetes</span> — End-to-End Reference &nbsp;|&nbsp; Save &amp; use offline anytime
+</div>
+
+</body>
+</html>

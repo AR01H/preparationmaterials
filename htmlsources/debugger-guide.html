@@ -1,0 +1,2406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Debugger Setup Guide</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --teal: #39d353;
+    --yellow: #e3b341;
+    --pink: #f778ba;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    --font-sans: 'Segoe UI', system-ui, sans-serif;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  /* ── TOP NAV ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,17,23,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 52px;
+  }
+  .topbar-logo { font-size: 15px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .topbar-logo span { color: var(--muted); font-weight: 400; }
+  .search-wrap { flex: 1; max-width: 360px; position: relative; }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px 6px 34px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+  .tab-bar { display: flex; gap: 2px; margin-left: auto; }
+  .tab-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: none;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--surface2); }
+  .tab-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(88,166,255,0.08); }
+
+  /* ── LAYOUT ── */
+  .layout { display: flex; min-height: calc(100vh - 52px); }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+    position: sticky;
+    top: 52px;
+    height: calc(100vh - 52px);
+    overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .sidebar-section { margin-bottom: 8px; }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 4px 16px 6px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-item:hover { color: var(--text); background: var(--surface2); }
+  .sidebar-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(88,166,255,0.06); }
+  .sidebar-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── MAIN CONTENT ── */
+  .main { flex: 1; padding: 32px 40px; overflow: hidden; }
+  .section-page { display: none; }
+  .section-page.visible { display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .hero p { color: var(--muted); font-size: 14px; max-width: 600px; line-height: 1.7; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    border: 1px solid;
+  }
+
+  /* ── LANG GRID ── */
+  .lang-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .lang-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .lang-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .lang-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-color, var(--accent));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .lang-card:hover::after { opacity: 1; }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .card-icon { font-size: 22px; }
+  .card-name { font-size: 15px; font-weight: 700; }
+  .card-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── DETAIL VIEW ── */
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .back-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex; align-items: center; gap: 5px;
+    transition: all 0.15s;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--accent); }
+  .detail-title { font-size: 22px; font-weight: 700; }
+
+  /* ── ACCORDION ── */
+  .accordion { margin-bottom: 12px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .accordion-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .accordion-head:hover { background: var(--surface2); }
+  .accordion-title { font-size: 13px; font-weight: 600; flex: 1; }
+  .accordion-arrow { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+  .accordion-body { display: none; padding: 16px; background: var(--bg); }
+  .accordion-body.open { display: block; }
+  .accordion-arrow.open { transform: rotate(90deg); }
+
+  /* ── STEPS ── */
+  .step-list { display: flex; flex-direction: column; gap: 16px; }
+  .step-item { display: flex; gap: 14px; }
+  .step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-content h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .step-content p { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 8px; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #0a0e14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 8px 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-lang { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .copy-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--accent); background: rgba(88,166,255,0.1); }
+  .copy-btn.copied { color: var(--green); }
+  pre {
+    padding: 14px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre;
+  }
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .kw { color: #ff7b72; }
+  .str { color: #a5d6ff; }
+  .cmt { color: #8b949e; font-style: italic; }
+  .fn { color: #d2a8ff; }
+  .num { color: #79c0ff; }
+  .key { color: #ffa657; }
+  .bool { color: #ff7b72; }
+  .hl { background: rgba(88,166,255,0.08); }
+
+  /* ── INFO BOXES ── */
+  .info-box {
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 10px 0;
+    border-left: 3px solid;
+  }
+  .info-box.tip { background: rgba(63,185,80,0.08); border-color: var(--green); color: #7ee787; }
+  .info-box.warn { background: rgba(210,153,34,0.08); border-color: var(--orange); color: #e3b341; }
+  .info-box.note { background: rgba(88,166,255,0.08); border-color: var(--accent); color: #79c0ff; }
+  .info-box strong { font-weight: 600; }
+
+  /* ── MODE TABS ── */
+  .mode-tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+  .mode-tab {
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .mode-tab:hover { color: var(--text); }
+  .mode-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.08); }
+  .mode-panel { display: none; }
+  .mode-panel.active { display: block; }
+
+  /* ── SECTION HEADERS ── */
+  .section-h { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section-h2 { font-size: 14px; font-weight: 600; margin: 16px 0 8px; color: var(--accent); }
+
+  /* ── TABLE ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0; }
+  .data-table th { text-align: left; padding: 7px 10px; background: var(--surface2); border-bottom: 1px solid var(--border); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; }
+  .data-table td { padding: 7px 10px; border-bottom: 1px solid rgba(48,54,61,0.5); vertical-align: top; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table code { font-family: var(--font-mono); background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--accent); }
+
+  /* ── SEARCH HIGHLIGHT ── */
+  .search-hl { background: rgba(227,179,65,0.3); border-radius: 2px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">&#x1F41E; DebugRef <span>— Ultimate Debugger Guide</span></div>
+  <div class="search-wrap">
+    <span class="search-icon">&#x1F50D;</span>
+    <input type="text" id="searchInput" placeholder="Search languages, commands...">
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showView('home')">Home</button>
+    <button class="tab-btn" onclick="showView('vscode')">VS Code</button>
+    <button class="tab-btn" onclick="showView('terminal')">Terminal</button>
+    <button class="tab-btn" onclick="showView('api')">REST API</button>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Quick Jump</div>
+    <div class="sidebar-item active" onclick="showLang('home')"><span class="sidebar-dot" style="background:#58a6ff"></span>Overview</div>
+    <div class="sidebar-item" onclick="showLang('python')"><span class="sidebar-dot" style="background:#3572A5"></span>Python</div>
+    <div class="sidebar-item" onclick="showLang('nodejs')"><span class="sidebar-dot" style="background:#68A063"></span>Node.js</div>
+    <div class="sidebar-item" onclick="showLang('php')"><span class="sidebar-dot" style="background:#777BB4"></span>PHP</div>
+    <div class="sidebar-item" onclick="showLang('java')"><span class="sidebar-dot" style="background:#b07219"></span>Java</div>
+    <div class="sidebar-item" onclick="showLang('react')"><span class="sidebar-dot" style="background:#61DAFB"></span>React</div>
+    <div class="sidebar-item" onclick="showLang('django')"><span class="sidebar-dot" style="background:#092E20"></span>Django</div>
+    <div class="sidebar-item" onclick="showLang('flask')"><span class="sidebar-dot" style="background:#000000"></span>Flask</div>
+    <div class="sidebar-item" onclick="showLang('restapi')"><span class="sidebar-dot" style="background:#FF6C37"></span>REST API</div>
+    <div class="sidebar-item" onclick="showLang('mern')"><span class="sidebar-dot" style="background:#4DB33D"></span>MERN Stack</div>
+    <div class="sidebar-item" onclick="showLang('kafka')"><span class="sidebar-dot" style="background:#D22128"></span>Kafka</div>
+    <div class="sidebar-item" onclick="showLang('golang')"><span class="sidebar-dot" style="background:#00ADD8"></span>Go</div>
+    <div class="sidebar-item" onclick="showLang('csharp')"><span class="sidebar-dot" style="background:#178600"></span>C# / .NET</div>
+    <div class="sidebar-item" onclick="showLang('typescript')"><span class="sidebar-dot" style="background:#2b7489"></span>TypeScript</div>
+    <div class="sidebar-item" onclick="showLang('nextjs')"><span class="sidebar-dot" style="background:#ffffff"></span>Next.js</div>
+    <div class="sidebar-item" onclick="showLang('docker')"><span class="sidebar-dot" style="background:#2496ED"></span>Docker</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainContent">
+
+<!-- ==================== HOME ==================== -->
+<div id="page-home" class="section-page visible">
+  <div class="hero">
+    <h1>&#x1F41E; Ultimate Debugger Setup Guide</h1>
+    <p>Step-by-step debugging instructions for every popular language and framework — covering VS Code, Terminal, API debugging, and CLI arguments. Production-ready configs included.</p>
+    <div class="badge-row">
+      <span class="badge" style="color:#3fb950;border-color:#3fb950">15 Languages</span>
+      <span class="badge" style="color:#58a6ff;border-color:#58a6ff">VS Code</span>
+      <span class="badge" style="color:#d29922;border-color:#d29922">Terminal</span>
+      <span class="badge" style="color:#bc8cff;border-color:#bc8cff">REST API</span>
+      <span class="badge" style="color:#f778ba;border-color:#f778ba">CLI Args</span>
+    </div>
+  </div>
+
+  <div class="section-h">Select a Language / Framework</div>
+  <div class="lang-grid" id="langGrid">
+
+    <div class="lang-card" style="--card-color:#3572A5" onclick="showLang('python')">
+      <div class="card-header"><span class="card-icon">&#x1F40D;</span><div><div class="card-name" style="color:#3572A5">Python</div><div class="card-sub">General Purpose · Scripts · APIs</div></div></div>
+      <div class="card-tags"><span class="tag">debugpy</span><span class="tag">pdb</span><span class="tag">VS Code</span><span class="tag">--no-args</span><span class="tag">--args</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#68A063" onclick="showLang('nodejs')">
+      <div class="card-header"><span class="card-icon">&#x1F7E2;</span><div><div class="card-name" style="color:#68A063">Node.js</div><div class="card-sub">Backend · Express · APIs</div></div></div>
+      <div class="card-tags"><span class="tag">--inspect</span><span class="tag">--inspect-brk</span><span class="tag">Chrome DevTools</span><span class="tag">VS Code</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#777BB4" onclick="showLang('php')">
+      <div class="card-header"><span class="card-icon">&#x1F418;</span><div><div class="card-name" style="color:#777BB4">PHP</div><div class="card-sub">Web · Laravel · Symfony</div></div></div>
+      <div class="card-tags"><span class="tag">Xdebug</span><span class="tag">VS Code</span><span class="tag">phpdbg</span><span class="tag">Terminal</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#b07219" onclick="showLang('java')">
+      <div class="card-header"><span class="card-icon">&#x2615;</span><div><div class="card-name" style="color:#b07219">Java</div><div class="card-sub">Spring Boot · Maven · Gradle</div></div></div>
+      <div class="card-tags"><span class="tag">JDWP</span><span class="tag">jdb</span><span class="tag">VS Code</span><span class="tag">IntelliJ</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#61DAFB" onclick="showLang('react')">
+      <div class="card-header"><span class="card-icon">&#x269B;&#xFE0F;</span><div><div class="card-name" style="color:#61DAFB">React</div><div class="card-sub">Vite · CRA · Browser</div></div></div>
+      <div class="card-tags"><span class="tag">React DevTools</span><span class="tag">VS Code</span><span class="tag">Source Maps</span><span class="tag">Chrome</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#092E20" onclick="showLang('django')">
+      <div class="card-header"><span class="card-icon">&#x1F916;</span><div><div class="card-name" style="color:#44b78b">Django</div><div class="card-sub">Python Web Framework</div></div></div>
+      <div class="card-tags"><span class="tag">debugpy</span><span class="tag">runserver</span><span class="tag">VS Code</span><span class="tag">--noreload</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#e8e8e8" onclick="showLang('flask')">
+      <div class="card-header"><span class="card-icon">&#x1F9EA;</span><div><div class="card-name">Flask</div><div class="card-sub">Micro Framework · Python</div></div></div>
+      <div class="card-tags"><span class="tag">FLASK_DEBUG</span><span class="tag">debugpy</span><span class="tag">VS Code</span><span class="tag">pdb</span><span class="tag">Postman</span><span class="tag">curl</span><span class="tag">CLI args</span><span class="tag">Werkzeug</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#FF6C37" onclick="showLang('restapi')">
+      <div class="card-header"><span class="card-icon">&#x1F30D;</span><div><div class="card-name" style="color:#FF6C37">REST API</div><div class="card-sub">HTTP Debugging · Postman · curl</div></div></div>
+      <div class="card-tags"><span class="tag">curl</span><span class="tag">Postman</span><span class="tag">httpie</span><span class="tag">Insomnia</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#4DB33D" onclick="showLang('mern')">
+      <div class="card-header"><span class="card-icon">&#x1F9F1;</span><div><div class="card-name" style="color:#4DB33D">MERN Stack</div><div class="card-sub">MongoDB · Express · React · Node</div></div></div>
+      <div class="card-tags"><span class="tag">Full Stack</span><span class="tag">concurrently</span><span class="tag">VS Code</span><span class="tag">compound</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#D22128" onclick="showLang('kafka')">
+      <div class="card-header"><span class="card-icon">&#x26A1;</span><div><div class="card-name" style="color:#D22128">Kafka</div><div class="card-sub">Event Streaming · Producer/Consumer</div></div></div>
+      <div class="card-tags"><span class="tag">JVM Debug</span><span class="tag">kcat</span><span class="tag">Terminal</span><span class="tag">VS Code</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#00ADD8" onclick="showLang('golang')">
+      <div class="card-header"><span class="card-icon">&#x1F4E6;</span><div><div class="card-name" style="color:#00ADD8">Go (Golang)</div><div class="card-sub">Microservices · CLI</div></div></div>
+      <div class="card-tags"><span class="tag">Delve</span><span class="tag">dlv</span><span class="tag">VS Code</span><span class="tag">Terminal</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#178600" onclick="showLang('csharp')">
+      <div class="card-header"><span class="card-icon">&#x1F52E;</span><div><div class="card-name" style="color:#178600">C# / .NET</div><div class="card-sub">ASP.NET · Console Apps</div></div></div>
+      <div class="card-tags"><span class="tag">VS Code</span><span class="tag">dotnet</span><span class="tag">OmniSharp</span><span class="tag">launch.json</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#2b7489" onclick="showLang('typescript')">
+      <div class="card-header"><span class="card-icon">&#x1F4DC;</span><div><div class="card-name" style="color:#2b7489">TypeScript</div><div class="card-sub">ts-node · Node.js</div></div></div>
+      <div class="card-tags"><span class="tag">ts-node</span><span class="tag">source maps</span><span class="tag">VS Code</span><span class="tag">tsconfig</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#ffffff" onclick="showLang('nextjs')">
+      <div class="card-header"><span class="card-icon">&#x25B2;</span><div><div class="card-name">Next.js</div><div class="card-sub">SSR · SSG · API Routes</div></div></div>
+      <div class="card-tags"><span class="tag">VS Code</span><span class="tag">Server+Client</span><span class="tag">Chrome</span><span class="tag">9229</span></div>
+    </div>
+
+    <div class="lang-card" style="--card-color:#2496ED" onclick="showLang('docker')">
+      <div class="card-header"><span class="card-icon">&#x1F433;</span><div><div class="card-name" style="color:#2496ED">Docker</div><div class="card-sub">Containerized Debugging</div></div></div>
+      <div class="card-tags"><span class="tag">port mapping</span><span class="tag">VS Code</span><span class="tag">attach</span><span class="tag">compose</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ==================== PYTHON ==================== -->
+<div id="page-python" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F40D; Python Debugger Setup</div>
+  </div>
+
+  <!-- VS CODE -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — launch.json Configuration</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="step-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-content"><h4>Install Python Extension</h4><p>Open VS Code Extensions (Ctrl+Shift+X) and install <strong>ms-python.python</strong> by Microsoft.</p></div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-content"><h4>Create .vscode/launch.json</h4><p>Press F5 or go to Run → Add Configuration → Python. The file is auto-created under .vscode/launch.json</p></div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-content"><h4>Without Arguments (Simple Script)</h4>
+          <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Python: Current File"</span>,
+      <span class="key">"type"</span>: <span class="str">"python"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"program"</span>: <span class="str">"${file}"</span>,
+      <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>,
+      <span class="key">"justMyCode"</span>: <span class="bool">true</span>
+    }
+  ]
+}</pre></div>
+        </div></div>
+        <div class="step-item"><div class="step-num">4</div><div class="step-content"><h4>With Command-Line Arguments</h4>
+          <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json with args</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Python: With Args"</span>,
+      <span class="key">"type"</span>: <span class="str">"python"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/app.py"</span>,
+      <span class="key">"args"</span>: [<span class="str">"--host"</span>, <span class="str">"localhost"</span>, <span class="str">"--port"</span>, <span class="str">"8080"</span>, <span class="str">"--debug"</span>],
+      <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>,
+      <span class="key">"env"</span>: {
+        <span class="key">"PYTHONDONTWRITEBYTECODE"</span>: <span class="str">"1"</span>,
+        <span class="key">"APP_ENV"</span>: <span class="str">"development"</span>
+      },
+      <span class="key">"justMyCode"</span>: <span class="bool">false</span>
+    }
+  ]
+}</pre></div>
+        </div></div>
+        <div class="step-item"><div class="step-num">5</div><div class="step-content"><h4>Attach to Running Process (debugpy)</h4>
+          <div class="info-box note"><strong>Note:</strong> Add this to your Python code first: <code>import debugpy; debugpy.listen(5678); debugpy.wait_for_client()</code></div>
+          <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Attach Mode</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Python: Attach 5678"</span>,
+  <span class="key">"type"</span>: <span class="str">"python"</span>,
+  <span class="key">"request"</span>: <span class="str">"attach"</span>,
+  <span class="key">"connect"</span>: { <span class="key">"host"</span>: <span class="str">"localhost"</span>, <span class="key">"port"</span>: <span class="num">5678</span> },
+  <span class="key">"pathMappings"</span>: [{ <span class="key">"localRoot"</span>: <span class="str">"${workspaceFolder}"</span>, <span class="key">"remoteRoot"</span>: <span class="str">"."</span> }]
+}</pre></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — pdb / debugpy CLI Debugging</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchMode(this,'py-term-1')">pdb (built-in)</button>
+        <button class="mode-tab" onclick="switchMode(this,'py-term-2')">debugpy</button>
+        <button class="mode-tab" onclick="switchMode(this,'py-term-3')">With Args</button>
+      </div>
+      <div id="py-term-1" class="mode-panel active">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Method 1: Run with pdb from terminal</span>
+python -m pdb app.py
+
+<span class="cmt"># Method 2: Add breakpoint inside code</span>
+<span class="cmt"># import pdb; pdb.set_trace()   ← old style</span>
+breakpoint()   <span class="cmt"># Python 3.7+</span>
+
+<span class="cmt"># Then run normally</span>
+python app.py
+
+<span class="cmt"># pdb commands:</span>
+<span class="cmt"># n → next line</span>
+<span class="cmt"># s → step into function</span>
+<span class="cmt"># c → continue</span>
+<span class="cmt"># l → list source</span>
+<span class="cmt"># p var → print variable</span>
+<span class="cmt"># q → quit</span></pre></div>
+      </div>
+      <div id="py-term-2" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — debugpy</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Install debugpy</span>
+pip install debugpy
+
+<span class="cmt"># Run and wait for VS Code to attach</span>
+python -m debugpy --listen 5678 --wait-for-client app.py
+
+<span class="cmt"># Run WITHOUT waiting for client (non-blocking)</span>
+python -m debugpy --listen 5678 app.py</pre></div>
+      </div>
+      <div id="py-term-3" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — pdb with arguments</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># pdb with script arguments</span>
+python -m pdb app.py --host localhost --port 8080
+
+<span class="cmt"># debugpy with arguments</span>
+python -m debugpy --listen 5678 --wait-for-client \
+  app.py --host localhost --port 8080
+
+<span class="cmt"># Parse args in your script</span>
+<span class="kw">import</span> argparse
+parser = argparse.<span class="fn">ArgumentParser</span>()
+parser.<span class="fn">add_argument</span>(<span class="str">'--port'</span>, <span class="fn">type</span>=int, <span class="fn">default</span>=<span class="num">8080</span>)
+args = parser.<span class="fn">parse_args</span>()</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API/MODULE -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#d29922;font-size:16px">&#9670;</span>
+      <span class="accordion-title">Inline API / Module Debugging (debugpy code)</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Python</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="kw">import</span> debugpy
+
+<span class="cmt"># Start debug server on port 5678</span>
+debugpy.<span class="fn">listen</span>((<span class="str">"0.0.0.0"</span>, <span class="num">5678</span>))
+
+<span class="cmt"># Pause until VS Code attaches</span>
+<span class="fn">print</span>(<span class="str">"Waiting for debugger attach..."</span>)
+debugpy.<span class="fn">wait_for_client</span>()
+<span class="fn">print</span>(<span class="str">"Debugger attached!"</span>)
+
+<span class="cmt"># Your code here</span>
+<span class="kw">def</span> <span class="fn">main</span>():
+    x = <span class="num">10</span>
+    y = <span class="num">20</span>
+    breakpoint()   <span class="cmt"># breakpoint here</span>
+    result = x + y
+    <span class="fn">print</span>(result)
+
+<span class="fn">main</span>()</pre></div>
+      <div class="info-box tip">&#x2714; <strong>Tip:</strong> Use <code>PYTHONBREAKPOINT=0</code> env variable in production to disable all breakpoint() calls safely.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== NODE.JS ==================== -->
+<div id="page-nodejs" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F7E2; Node.js Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — launch.json for Node.js</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchMode(this,'nd-vs-1')">No Args</button>
+        <button class="mode-tab" onclick="switchMode(this,'nd-vs-2')">With Args</button>
+        <button class="mode-tab" onclick="switchMode(this,'nd-vs-3')">Attach Mode</button>
+        <button class="mode-tab" onclick="switchMode(this,'nd-vs-4')">Nodemon</button>
+      </div>
+      <div id="nd-vs-1" class="mode-panel active">
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Node: Launch"</span>,
+      <span class="key">"type"</span>: <span class="str">"node"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/index.js"</span>,
+      <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>,
+      <span class="key">"skipFiles"</span>: [<span class="str">"&lt;node_internals&gt;/**"</span>]
+    }
+  ]
+}</pre></div>
+      </div>
+      <div id="nd-vs-2" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — with args</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Node: With Args"</span>,
+  <span class="key">"type"</span>: <span class="str">"node"</span>,
+  <span class="key">"request"</span>: <span class="str">"launch"</span>,
+  <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/server.js"</span>,
+  <span class="key">"args"</span>: [<span class="str">"--port"</span>, <span class="str">"3000"</span>, <span class="str">"--env"</span>, <span class="str">"development"</span>],
+  <span class="key">"env"</span>: { <span class="key">"NODE_ENV"</span>: <span class="str">"development"</span>, <span class="key">"PORT"</span>: <span class="str">"3000"</span> },
+  <span class="key">"envFile"</span>: <span class="str">"${workspaceFolder}/.env"</span>,
+  <span class="key">"skipFiles"</span>: [<span class="str">"&lt;node_internals&gt;/**"</span>],
+  <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>
+}</pre></div>
+      </div>
+      <div id="nd-vs-3" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Attach to port 9229</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Node: Attach"</span>,
+  <span class="key">"type"</span>: <span class="str">"node"</span>,
+  <span class="key">"request"</span>: <span class="str">"attach"</span>,
+  <span class="key">"port"</span>: <span class="num">9229</span>,
+  <span class="key">"address"</span>: <span class="str">"localhost"</span>,
+  <span class="key">"restart"</span>: <span class="bool">true</span>,
+  <span class="key">"skipFiles"</span>: [<span class="str">"&lt;node_internals&gt;/**"</span>]
+}</pre></div>
+      </div>
+      <div id="nd-vs-4" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Nodemon auto-restart</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Node: Nodemon"</span>,
+  <span class="key">"type"</span>: <span class="str">"node"</span>,
+  <span class="key">"request"</span>: <span class="str">"launch"</span>,
+  <span class="key">"runtimeExecutable"</span>: <span class="str">"nodemon"</span>,
+  <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/server.js"</span>,
+  <span class="key">"restart"</span>: <span class="bool">true</span>,
+  <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>,
+  <span class="key">"internalConsoleOptions"</span>: <span class="str">"neverOpen"</span>
+}</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — node --inspect / --inspect-brk</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Start debugger (connects on port 9229)</span>
+node --inspect server.js
+
+<span class="cmt"># Break on first line (wait for debugger)</span>
+node --inspect-brk server.js
+
+<span class="cmt"># Custom port</span>
+node --inspect=0.0.0.0:9229 server.js
+
+<span class="cmt"># With script arguments</span>
+node --inspect server.js --port 3000 --env production
+
+<span class="cmt"># Open Chrome DevTools</span>
+<span class="cmt"># Go to: chrome://inspect → Click "Open dedicated DevTools for Node"</span>
+
+<span class="cmt"># Using npx node-inspect (terminal only)</span>
+node inspect server.js</pre></div>
+      <div class="info-box note"><strong>Chrome DevTools:</strong> Open <code>chrome://inspect</code> in Chrome browser and click "inspect" under Remote Target to use the full GUI debugger.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PHP ==================== -->
+<div id="page-php" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F418; PHP Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Xdebug Setup</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="step-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-content"><h4>Install Xdebug PHP extension</h4>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Ubuntu/Debian</span>
+sudo apt install php-xdebug
+
+<span class="cmt"># macOS with Homebrew</span>
+pecl install xdebug
+
+<span class="cmt"># Windows — download DLL from xdebug.org</span></pre></div>
+        </div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-content"><h4>Configure php.ini</h4>
+          <div class="code-block"><div class="code-header"><span class="code-lang">INI — php.ini</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>[xdebug]
+zend_extension=xdebug
+
+xdebug.mode=debug
+xdebug.start_with_request=yes
+xdebug.client_host=127.0.0.1
+xdebug.client_port=9003
+xdebug.idekey=VSCODE
+xdebug.log=/tmp/xdebug.log</pre></div>
+        </div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-content"><h4>VS Code launch.json</h4>
+          <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"PHP: Listen for Xdebug"</span>,
+      <span class="key">"type"</span>: <span class="str">"php"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"port"</span>: <span class="num">9003</span>
+    },
+    {
+      <span class="key">"name"</span>: <span class="str">"PHP: Launch Script"</span>,
+      <span class="key">"type"</span>: <span class="str">"php"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/script.php"</span>,
+      <span class="key">"args"</span>: [<span class="str">"--input"</span>, <span class="str">"data.json"</span>],
+      <span class="key">"port"</span>: <span class="num">9003</span>,
+      <span class="key">"runtimeArgs"</span>: [<span class="str">"-dxdebug.start_with_request=yes"</span>]
+    }
+  ]
+}</pre></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — phpdbg &amp; CLI Debugging</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Built-in phpdbg debugger</span>
+phpdbg -qrr script.php
+
+<span class="cmt"># With arguments</span>
+phpdbg -qrr script.php -- --input data.json --verbose
+
+<span class="cmt"># Enable Xdebug for single CLI run</span>
+php -dxdebug.mode=debug -dxdebug.start_with_request=yes script.php
+
+<span class="cmt"># phpdbg commands:</span>
+<span class="cmt"># b script.php:10  → breakpoint at line 10</span>
+<span class="cmt"># r               → run</span>
+<span class="cmt"># n               → next</span>
+<span class="cmt"># p $var          → print variable</span>
+<span class="cmt"># q               → quit</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== JAVA ==================== -->
+<div id="page-java" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x2615; Java Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Java Debug Extension</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="info-box note"><strong>Install:</strong> Extension Pack for Java (Microsoft) from VS Code marketplace — includes Debugger for Java.</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Java: Launch App"</span>,
+      <span class="key">"type"</span>: <span class="str">"java"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"mainClass"</span>: <span class="str">"com.example.Main"</span>,
+      <span class="key">"projectName"</span>: <span class="str">"my-project"</span>,
+      <span class="key">"args"</span>: [<span class="str">"--server.port=8080"</span>, <span class="str">"--spring.profiles.active=dev"</span>],
+      <span class="key">"vmArgs"</span>: <span class="str">"-Xmx512m -Dapp.env=development"</span>,
+      <span class="key">"env"</span>: { <span class="key">"JAVA_ENV"</span>: <span class="str">"dev"</span> }
+    },
+    {
+      <span class="key">"name"</span>: <span class="str">"Java: Attach JDWP"</span>,
+      <span class="key">"type"</span>: <span class="str">"java"</span>,
+      <span class="key">"request"</span>: <span class="str">"attach"</span>,
+      <span class="key">"hostName"</span>: <span class="str">"localhost"</span>,
+      <span class="key">"port"</span>: <span class="num">5005</span>
+    }
+  ]
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — JDWP &amp; jdb Debugging</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Compile with debug info</span>
+javac -g Main.java
+
+<span class="cmt"># Run with JDWP debug agent (suspend until debugger attaches)</span>
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 \
+  -jar app.jar
+
+<span class="cmt"># Run WITHOUT suspension (non-blocking)</span>
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \
+  -jar app.jar
+
+<span class="cmt"># With program arguments</span>
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 \
+  -jar app.jar --port 8080 --profile dev
+
+<span class="cmt"># Attach jdb (command-line debugger)</span>
+jdb -attach localhost:5005
+
+<span class="cmt"># Spring Boot debug mode</span>
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug \
+  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== REACT ==================== -->
+<div id="page-react" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x269B;&#xFE0F; React Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Browser Debug with Source Maps</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="info-box note"><strong>Install:</strong> JavaScript Debugger (built-in) extension. Make sure source maps are enabled in your build config.</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Vite/CRA launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"React: Chrome"</span>,
+      <span class="key">"type"</span>: <span class="str">"chrome"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"url"</span>: <span class="str">"http://localhost:5173"</span>,
+      <span class="key">"webRoot"</span>: <span class="str">"${workspaceFolder}/src"</span>,
+      <span class="key">"sourceMapPathOverrides"</span>: {
+        <span class="key">"webpack:///src/*"</span>: <span class="str">"${webRoot}/*"</span>
+      }
+    },
+    {
+      <span class="key">"name"</span>: <span class="str">"React: Attach Chrome"</span>,
+      <span class="key">"type"</span>: <span class="str">"chrome"</span>,
+      <span class="key">"request"</span>: <span class="str">"attach"</span>,
+      <span class="key">"port"</span>: <span class="num">9222</span>,
+      <span class="key">"webRoot"</span>: <span class="str">"${workspaceFolder}/src"</span>
+    }
+  ]
+}</pre></div>
+      <div class="info-box tip"><strong>Vite:</strong> Uses port 5173 by default. CRA uses 3000. Adjust <code>url</code> accordingly.</div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#d29922;font-size:16px">&#9670;</span>
+      <span class="accordion-title">Browser DevTools &amp; React DevTools</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="step-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-content"><h4>Install React DevTools Extension</h4><p>Install <strong>React Developer Tools</strong> from Chrome Web Store or Firefox Add-ons.</p></div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-content"><h4>Use Browser Console Debugging</h4>
+          <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt">// Add debugger statement in JSX/JS</span>
+<span class="kw">const</span> <span class="fn">MyComponent</span> = () => {
+  <span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="num">0</span>);
+  
+  <span class="kw">const</span> <span class="fn">handleClick</span> = () => {
+    debugger; <span class="cmt">// pauses in browser DevTools</span>
+    <span class="fn">setCount</span>(count + <span class="num">1</span>);
+  };
+  
+  <span class="kw">return</span> &lt;<span class="fn">button</span> <span class="fn">onClick</span>={handleClick}&gt;{count}&lt;/<span class="fn">button</span>&gt;;
+};</pre></div>
+        </div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-content"><h4>Start Chrome with Remote Debugging</h4>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># macOS</span>
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222
+
+<span class="cmt"># Linux</span>
+google-chrome --remote-debugging-port=9222
+
+<span class="cmt"># Windows</span>
+chrome.exe --remote-debugging-port=9222</pre></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DJANGO ==================== -->
+<div id="page-django" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F916; Django Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Django Debug Config</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Django: Runserver"</span>,
+      <span class="key">"type"</span>: <span class="str">"python"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/manage.py"</span>,
+      <span class="key">"args"</span>: [<span class="str">"runserver"</span>, <span class="str">"--noreload"</span>],
+      <span class="key">"django"</span>: <span class="bool">true</span>,
+      <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>,
+      <span class="key">"env"</span>: { <span class="key">"DJANGO_SETTINGS_MODULE"</span>: <span class="str">"myproject.settings"</span> }
+    },
+    {
+      <span class="key">"name"</span>: <span class="str">"Django: Custom Port"</span>,
+      <span class="key">"type"</span>: <span class="str">"python"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/manage.py"</span>,
+      <span class="key">"args"</span>: [<span class="str">"runserver"</span>, <span class="str">"0.0.0.0:8080"</span>, <span class="str">"--noreload"</span>],
+      <span class="key">"django"</span>: <span class="bool">true</span>
+    }
+  ]
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — Django Debug Commands</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Run Django dev server (auto-debug mode)</span>
+python manage.py runserver
+
+<span class="cmt"># Custom port</span>
+python manage.py runserver 0.0.0.0:8080
+
+<span class="cmt"># Disable auto-reloader (required for VS Code breakpoints)</span>
+python manage.py runserver --noreload
+
+<span class="cmt"># Run with debugpy for VS Code attach</span>
+python -m debugpy --listen 5678 --wait-for-client \
+  manage.py runserver --noreload
+
+<span class="cmt"># Django shell debug</span>
+python manage.py shell
+
+<span class="cmt"># Run management command with debug</span>
+python -m pdb manage.py my_command --arg1 value1</pre></div>
+      <div class="info-box warn"><strong>Important:</strong> Always use <code>--noreload</code> when debugging with VS Code. The auto-reloader starts a child process which breaks debugger attachment.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FLASK ==================== -->
+<div id="page-flask" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F9EA; Flask Debugger Setup — Complete Guide</div>
+  </div>
+
+  <div class="info-box note" style="margin-bottom:16px"><strong>&#x1F4CB; What's covered:</strong> VS Code launch configs · Terminal commands with &amp; without args · Custom CLI params · Start server + test from Postman · curl / httpie testing · Inline debugger methods · Windows, Mac &amp; Linux</div>
+
+  <!-- ① VS CODE -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — launch.json (all modes)</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchMode(this,'fl-vs-1')">Basic Run</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-vs-2')">With Args</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-vs-3')">Attach (debugpy)</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-vs-4')">Custom Host/Port</button>
+      </div>
+
+      <div id="fl-vs-1" class="mode-panel active">
+        <div class="info-box tip">&#x2714; Basic launch — press <strong>F5</strong> to start Flask with the VS Code debugger attached.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — .vscode/launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Flask: Launch"</span>,
+      <span class="key">"type"</span>: <span class="str">"python"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"module"</span>: <span class="str">"flask"</span>,
+      <span class="key">"args"</span>: [<span class="str">"run"</span>, <span class="str">"--no-debugger"</span>, <span class="str">"--no-reload"</span>],
+      <span class="key">"env"</span>: {
+        <span class="key">"FLASK_APP"</span>: <span class="str">"app.py"</span>,
+        <span class="key">"FLASK_ENV"</span>: <span class="str">"development"</span>,
+        <span class="key">"FLASK_DEBUG"</span>: <span class="str">"1"</span>
+      },
+      <span class="key">"jinja"</span>: <span class="bool">true</span>,
+      <span class="key">"justMyCode"</span>: <span class="bool">false</span>,
+      <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>
+    }
+  ]
+}</pre></div>
+      </div>
+
+      <div id="fl-vs-2" class="mode-panel">
+        <div class="info-box tip">&#x2714; Pass <code>--host</code>, <code>--port</code>, or any custom flag via the <code>"args"</code> array. Your Flask app receives them via <code>sys.argv</code> or <code>argparse</code>.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json with CLI args</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Flask: With Args"</span>,
+  <span class="key">"type"</span>: <span class="str">"python"</span>,
+  <span class="key">"request"</span>: <span class="str">"launch"</span>,
+  <span class="key">"module"</span>: <span class="str">"flask"</span>,
+  <span class="key">"args"</span>: [
+    <span class="str">"run"</span>,
+    <span class="str">"--host"</span>, <span class="str">"0.0.0.0"</span>,
+    <span class="str">"--port"</span>, <span class="str">"5000"</span>,
+    <span class="str">"--no-debugger"</span>,
+    <span class="str">"--no-reload"</span>
+  ],
+  <span class="key">"env"</span>: {
+    <span class="key">"FLASK_APP"</span>: <span class="str">"app.py"</span>,
+    <span class="key">"FLASK_ENV"</span>: <span class="str">"development"</span>,
+    <span class="key">"DATABASE_URL"</span>: <span class="str">"sqlite:///dev.db"</span>,
+    <span class="key">"SECRET_KEY"</span>: <span class="str">"dev-secret"</span>
+  },
+  <span class="key">"envFile"</span>: <span class="str">"${workspaceFolder}/.env"</span>,
+  <span class="key">"jinja"</span>: <span class="bool">true</span>,
+  <span class="key">"justMyCode"</span>: <span class="bool">false</span>,
+  <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>
+}</pre></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Python — app.py reading custom args</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="kw">import</span> argparse
+<span class="kw">from</span> flask <span class="kw">import</span> Flask
+
+app = <span class="fn">Flask</span>(__name__)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    parser = argparse.<span class="fn">ArgumentParser</span>()
+    parser.<span class="fn">add_argument</span>(<span class="str">"--host"</span>, <span class="fn">default</span>=<span class="str">"127.0.0.1"</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--port"</span>, <span class="fn">type</span>=int, <span class="fn">default</span>=<span class="num">5000</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--env"</span>, <span class="fn">default</span>=<span class="str">"development"</span>)
+    args = parser.<span class="fn">parse_args</span>()
+    app.<span class="fn">run</span>(host=args.host, port=args.port, debug=<span class="bool">True</span>)</pre></div>
+      </div>
+
+      <div id="fl-vs-3" class="mode-panel">
+        <div class="info-box note"><strong>Step 1:</strong> Add this to the top of your <code>app.py</code> before <code>app.run()</code>: <code>import debugpy; debugpy.listen(5678); debugpy.wait_for_client()</code></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Attach to running Flask process</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Flask: Attach debugpy"</span>,
+  <span class="key">"type"</span>: <span class="str">"python"</span>,
+  <span class="key">"request"</span>: <span class="str">"attach"</span>,
+  <span class="key">"connect"</span>: {
+    <span class="key">"host"</span>: <span class="str">"localhost"</span>,
+    <span class="key">"port"</span>: <span class="num">5678</span>
+  },
+  <span class="key">"pathMappings"</span>: [
+    {
+      <span class="key">"localRoot"</span>: <span class="str">"${workspaceFolder}"</span>,
+      <span class="key">"remoteRoot"</span>: <span class="str">"."</span>
+    }
+  ],
+  <span class="key">"justMyCode"</span>: <span class="bool">false</span>
+}</pre></div>
+      </div>
+
+      <div id="fl-vs-4" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Custom host, port, env file</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Flask: Custom Port 8080"</span>,
+  <span class="key">"type"</span>: <span class="str">"python"</span>,
+  <span class="key">"request"</span>: <span class="str">"launch"</span>,
+  <span class="key">"module"</span>: <span class="str">"flask"</span>,
+  <span class="key">"args"</span>: [<span class="str">"run"</span>, <span class="str">"--host"</span>, <span class="str">"0.0.0.0"</span>, <span class="str">"--port"</span>, <span class="str">"8080"</span>, <span class="str">"--no-debugger"</span>],
+  <span class="key">"env"</span>: { <span class="key">"FLASK_APP"</span>: <span class="str">"app.py"</span>, <span class="key">"FLASK_DEBUG"</span>: <span class="str">"1"</span> },
+  <span class="key">"envFile"</span>: <span class="str">"${workspaceFolder}/.env"</span>,
+  <span class="key">"jinja"</span>: <span class="bool">true</span>,
+  <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>
+}</pre></div>
+        <div class="info-box tip">&#x2714; Use <code>--host 0.0.0.0</code> to make the server reachable from Postman or other machines on the same network.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② TERMINAL — START SERVER -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — Start Flask Server (all OS)</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchMode(this,'fl-term-mac')">Mac / Linux</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-term-win')">Windows CMD</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-term-ps')">PowerShell</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-term-py')">python app.py</button>
+      </div>
+
+      <div id="fl-term-mac" class="mode-panel active">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — Mac / Linux</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># ── Basic start ──</span>
+export FLASK_APP=app.py
+export FLASK_DEBUG=1
+flask run
+
+<span class="cmt"># ── One-liner (debug ON, port 5000) ──</span>
+FLASK_APP=app.py FLASK_DEBUG=1 flask run --port 5000
+
+<span class="cmt"># ── Custom host so Postman can reach it ──</span>
+FLASK_APP=app.py FLASK_DEBUG=1 flask run --host 0.0.0.0 --port 5000
+
+<span class="cmt"># ── Custom port 8080 ──</span>
+FLASK_APP=app.py FLASK_DEBUG=1 flask run --host 0.0.0.0 --port 8080
+
+<span class="cmt"># ── With debugpy (VS Code can attach on port 5678) ──</span>
+FLASK_APP=app.py python -m debugpy --listen 5678 --wait-for-client \
+  -m flask run --no-debugger --no-reload --port 5000
+
+<span class="cmt"># ── Load .env file automatically (Flask 1.0+) ──</span>
+pip install python-dotenv
+<span class="cmt"># create .env file with FLASK_APP=app.py FLASK_DEBUG=1</span>
+flask run</pre></div>
+      </div>
+
+      <div id="fl-term-win" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">CMD — Windows Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt">REM Basic start</span>
+set FLASK_APP=app.py
+set FLASK_DEBUG=1
+flask run
+
+<span class="cmt">REM Custom port 8080</span>
+set FLASK_APP=app.py
+set FLASK_DEBUG=1
+flask run --host 0.0.0.0 --port 8080
+
+<span class="cmt">REM With debugpy attach support</span>
+set FLASK_APP=app.py
+python -m debugpy --listen 5678 --wait-for-client -m flask run --no-debugger --no-reload</pre></div>
+      </div>
+
+      <div id="fl-term-ps" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">PowerShell — Windows</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Basic start</span>
+$env:FLASK_APP = "app.py"
+$env:FLASK_DEBUG = "1"
+flask run
+
+<span class="cmt"># Custom host and port</span>
+$env:FLASK_APP = "app.py"
+$env:FLASK_DEBUG = "1"
+flask run --host 0.0.0.0 --port 8080
+
+<span class="cmt"># With extra env vars (e.g. DB url)</span>
+$env:FLASK_APP = "app.py"
+$env:FLASK_DEBUG = "1"
+$env:DATABASE_URL = "sqlite:///dev.db"
+flask run --port 5000</pre></div>
+      </div>
+
+      <div id="fl-term-py" class="mode-panel">
+        <div class="info-box note"><strong>Note:</strong> Running via <code>python app.py</code> only works if your file has an <code>if __name__ == "__main__": app.run(...)</code> block.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — python app.py directly</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Simple run</span>
+python app.py
+
+<span class="cmt"># With custom args (your app must parse them)</span>
+python app.py --host 0.0.0.0 --port 5000 --env production
+
+<span class="cmt"># With pdb breakpoint support</span>
+python -m pdb app.py
+
+<span class="cmt"># With debugpy (VS Code attach)</span>
+python -m debugpy --listen 5678 --wait-for-client app.py</pre></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Python — app.py with argparse</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="kw">import</span> argparse
+<span class="kw">from</span> flask <span class="kw">import</span> Flask
+
+app = <span class="fn">Flask</span>(__name__)
+
+<span class="kw">@app.route</span>(<span class="str">"/"</span>)
+<span class="kw">def</span> <span class="fn">index</span>():
+    <span class="kw">return</span> <span class="str">"Hello from Flask!"</span>
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    parser = argparse.<span class="fn">ArgumentParser</span>(description=<span class="str">"Flask Dev Server"</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--host"</span>,  <span class="fn">default</span>=<span class="str">"127.0.0.1"</span>, help=<span class="str">"Host to bind"</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--port"</span>,  <span class="fn">type</span>=int, <span class="fn">default</span>=<span class="num">5000</span>, help=<span class="str">"Port number"</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--debug"</span>, <span class="fn">action</span>=<span class="str">"store_true"</span>, help=<span class="str">"Enable debug mode"</span>)
+    args = parser.<span class="fn">parse_args</span>()
+
+    app.<span class="fn">run</span>(host=args.host, port=args.port, debug=args.debug)
+
+<span class="cmt"># Usage:</span>
+<span class="cmt"># python app.py --host 0.0.0.0 --port 8080 --debug</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ POSTMAN -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#FF6C37;font-size:16px">&#9670;</span>
+      <span class="accordion-title">Postman — Start Server &amp; Test Flask URLs</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="step-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-content"><h4>Start Flask First</h4><p>Run this in your terminal before opening Postman. Use <code>--host 0.0.0.0</code> so Postman can connect.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Bash — start server</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>FLASK_APP=app.py FLASK_DEBUG=1 flask run --host 0.0.0.0 --port 5000
+<span class="cmt"># Server starts at: http://127.0.0.1:5000</span>
+<span class="cmt"># Also accessible at: http://localhost:5000</span></pre></div>
+        </div></div>
+
+        <div class="step-item"><div class="step-num">2</div><div class="step-content"><h4>GET Request with Query Params</h4><p>In Postman: set method to <strong>GET</strong>, enter URL, click <strong>Params</strong> tab and add key-value pairs.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">URL — GET with query params</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>GET http://localhost:5000/api/users?page=1&amp;limit=10&amp;search=alice
+
+<span class="cmt"># Flask route to receive these:</span>
+<span class="kw">from</span> flask <span class="kw">import</span> request
+
+<span class="kw">@app.route</span>(<span class="str">"/api/users"</span>)
+<span class="kw">def</span> <span class="fn">get_users</span>():
+    page   = request.args.<span class="fn">get</span>(<span class="str">"page"</span>,   <span class="num">1</span>,    <span class="fn">type</span>=int)
+    limit  = request.args.<span class="fn">get</span>(<span class="str">"limit"</span>,  <span class="num">10</span>,   <span class="fn">type</span>=int)
+    search = request.args.<span class="fn">get</span>(<span class="str">"search"</span>, <span class="str">""</span>)
+    <span class="kw">return</span> {<span class="str">"page"</span>: page, <span class="str">"limit"</span>: limit, <span class="str">"search"</span>: search}</pre></div>
+        </div></div>
+
+        <div class="step-item"><div class="step-num">3</div><div class="step-content"><h4>POST Request with JSON Body</h4><p>In Postman: method = <strong>POST</strong>, Body tab → <strong>raw</strong> → <strong>JSON</strong>.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Postman Body</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>POST http://localhost:5000/api/users
+Content-Type: application/json
+
+{
+  "name": "Alice",
+  "email": "alice@example.com",
+  "role": "admin"
+}</pre></div>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Python — Flask route for POST</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="kw">from</span> flask <span class="kw">import</span> Flask, request, jsonify
+
+<span class="kw">@app.route</span>(<span class="str">"/api/users"</span>, methods=[<span class="str">"POST"</span>])
+<span class="kw">def</span> <span class="fn">create_user</span>():
+    data = request.<span class="fn">get_json</span>()
+    name  = data.<span class="fn">get</span>(<span class="str">"name"</span>)
+    email = data.<span class="fn">get</span>(<span class="str">"email"</span>)
+    <span class="kw">return</span> <span class="fn">jsonify</span>({<span class="str">"created"</span>: name, <span class="str">"email"</span>: email}), <span class="num">201</span></pre></div>
+        </div></div>
+
+        <div class="step-item"><div class="step-num">4</div><div class="step-content"><h4>POST with Form Data</h4><p>In Postman: Body tab → <strong>form-data</strong> — used when the route expects form fields.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Postman — form-data fields</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>POST http://localhost:5000/login
+<span class="cmt"># Body → form-data:</span>
+username = admin
+password = secret123</pre></div>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Python — Flask form route</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="kw">@app.route</span>(<span class="str">"/login"</span>, methods=[<span class="str">"POST"</span>])
+<span class="kw">def</span> <span class="fn">login</span>():
+    username = request.form.<span class="fn">get</span>(<span class="str">"username"</span>)
+    password = request.form.<span class="fn">get</span>(<span class="str">"password"</span>)
+    <span class="kw">return</span> <span class="fn">jsonify</span>({<span class="str">"user"</span>: username})</pre></div>
+        </div></div>
+
+        <div class="step-item"><div class="step-num">5</div><div class="step-content"><h4>Add Auth Header in Postman</h4><p>Go to <strong>Authorization</strong> tab → Bearer Token, or add manually in <strong>Headers</strong> tab.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Postman Header</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+X-API-Key: your-api-key-here</pre></div>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Python — read headers in Flask</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>token  = request.headers.<span class="fn">get</span>(<span class="str">"Authorization"</span>)
+apikey = request.headers.<span class="fn">get</span>(<span class="str">"X-API-Key"</span>)</pre></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ CURL + HTTPIE -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#d29922;font-size:16px">&#9670;</span>
+      <span class="accordion-title">curl &amp; httpie — Test Flask from Terminal</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchMode(this,'fl-curl-1')">curl</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-curl-2')">httpie</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-curl-3')">Pass Params</button>
+      </div>
+
+      <div id="fl-curl-1" class="mode-panel active">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — curl (start server, then test)</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># 1. Start server in one terminal</span>
+FLASK_APP=app.py FLASK_DEBUG=1 flask run --host 0.0.0.0 --port 5000
+
+<span class="cmt"># 2. In another terminal — test GET</span>
+curl http://localhost:5000/
+
+<span class="cmt"># GET with query params</span>
+curl "http://localhost:5000/api/users?page=1&amp;limit=5"
+
+<span class="cmt"># POST JSON body</span>
+curl -X POST http://localhost:5000/api/users \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Alice", "email": "alice@test.com"}'
+
+<span class="cmt"># POST form data</span>
+curl -X POST http://localhost:5000/login \
+     -d "username=admin&amp;password=secret"
+
+<span class="cmt"># PUT update</span>
+curl -X PUT http://localhost:5000/api/users/1 \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Alice Updated"}'
+
+<span class="cmt"># DELETE</span>
+curl -X DELETE http://localhost:5000/api/users/1
+
+<span class="cmt"># With Bearer token</span>
+curl -H "Authorization: Bearer MY_TOKEN" \
+     http://localhost:5000/api/protected
+
+<span class="cmt"># Verbose (see request + response headers)</span>
+curl -v http://localhost:5000/api/users</pre></div>
+      </div>
+
+      <div id="fl-curl-2" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — httpie (pip install httpie)</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Install httpie</span>
+pip install httpie
+
+<span class="cmt"># GET</span>
+http GET localhost:5000/api/users
+
+<span class="cmt"># GET with query params</span>
+http GET localhost:5000/api/users page==1 limit==5
+
+<span class="cmt"># POST JSON (auto content-type: application/json)</span>
+http POST localhost:5000/api/users name=Alice email=alice@test.com
+
+<span class="cmt"># POST JSON with nested data</span>
+http POST localhost:5000/api/users name=Alice role=admin active:=true
+
+<span class="cmt"># POST form data</span>
+http --form POST localhost:5000/login username=admin password=secret
+
+<span class="cmt"># With Auth header</span>
+http GET localhost:5000/api/protected "Authorization: Bearer TOKEN"
+
+<span class="cmt"># Pretty-print JSON response automatically ↑ httpie does this by default</span></pre></div>
+      </div>
+
+      <div id="fl-curl-3" class="mode-panel">
+        <div class="info-box note"><strong>Passing URL path params</strong> — these come from the route pattern itself, not query string.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — URL path params vs query params</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Path parameter  →  /api/users/42</span>
+curl http://localhost:5000/api/users/42
+
+<span class="cmt"># Query parameter  →  /api/users?id=42</span>
+curl "http://localhost:5000/api/users?id=42"
+
+<span class="cmt"># Multiple query params</span>
+curl "http://localhost:5000/api/search?q=flask&amp;page=2&amp;sort=asc"
+
+<span class="cmt"># Nested JSON body with params</span>
+curl -X POST http://localhost:5000/api/filter \
+     -H "Content-Type: application/json" \
+     -d '{"filters": {"status": "active", "role": "admin"}, "page": 1}'</pre></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Python — Flask routes for path vs query params</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Path param — /api/users/42</span>
+<span class="kw">@app.route</span>(<span class="str">"/api/users/&lt;int:user_id&gt;"</span>)
+<span class="kw">def</span> <span class="fn">get_user</span>(user_id):
+    <span class="kw">return</span> <span class="fn">jsonify</span>({<span class="str">"id"</span>: user_id})
+
+<span class="cmt"># Query param — /api/users?id=42</span>
+<span class="kw">@app.route</span>(<span class="str">"/api/users"</span>)
+<span class="kw">def</span> <span class="fn">search_users</span>():
+    uid = request.args.<span class="fn">get</span>(<span class="str">"id"</span>, <span class="fn">type</span>=int)
+    <span class="kw">return</span> <span class="fn">jsonify</span>({<span class="str">"id"</span>: uid})</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑤ INLINE DEBUGGER METHODS -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#bc8cff;font-size:16px">&#9670;</span>
+      <span class="accordion-title">Inline Debugger Methods — pdb, breakpoint, Werkzeug</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchMode(this,'fl-dbg-1')">breakpoint()</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-dbg-2')">Werkzeug Debugger</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-dbg-3')">debugpy embed</button>
+        <button class="mode-tab" onclick="switchMode(this,'fl-dbg-4')">Logging</button>
+      </div>
+
+      <div id="fl-dbg-1" class="mode-panel active">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Python — pdb / breakpoint()</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="kw">from</span> flask <span class="kw">import</span> Flask, request, jsonify
+<span class="kw">import</span> pdb
+
+app = <span class="fn">Flask</span>(__name__)
+
+<span class="kw">@app.route</span>(<span class="str">"/api/debug-test"</span>, methods=[<span class="str">"POST"</span>])
+<span class="kw">def</span> <span class="fn">debug_test</span>():
+    data = request.<span class="fn">get_json</span>()
+
+    breakpoint()    <span class="cmt"># ← execution pauses here in terminal</span>
+    <span class="cmt"># OR: pdb.set_trace()</span>
+
+    result = data[<span class="str">"value"</span>] * <span class="num">2</span>
+    <span class="kw">return</span> <span class="fn">jsonify</span>({<span class="str">"result"</span>: result})
+
+<span class="cmt"># pdb commands at the prompt:</span>
+<span class="cmt"># n  → next line      s  → step into</span>
+<span class="cmt"># c  → continue       q  → quit</span>
+<span class="cmt"># p data              → print variable</span>
+<span class="cmt"># pp data             → pretty-print</span>
+<span class="cmt"># l  → list source    ll → longer list</span></pre></div>
+        <div class="info-box warn">&#x26A0; <strong>Important:</strong> Flask must be started with <code>--no-reload</code> for <code>breakpoint()</code> to work correctly in terminal: <code>flask run --no-debugger --no-reload</code></div>
+      </div>
+
+      <div id="fl-dbg-2" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Python — Werkzeug interactive debugger</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Enable Werkzeug's browser debugger (shows in the browser on error)</span>
+<span class="kw">from</span> flask <span class="kw">import</span> Flask
+app = <span class="fn">Flask</span>(__name__)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    app.<span class="fn">run</span>(debug=<span class="bool">True</span>)   <span class="cmt"># Werkzeug debugger ON by default</span>
+
+<span class="cmt"># When an exception occurs, visit the URL in browser</span>
+<span class="cmt"># You'll see an interactive console right in the page</span>
+<span class="cmt"># Werkzeug PIN is printed in terminal on startup — use it to unlock</span>
+
+<span class="cmt"># To get the PIN:</span>
+<span class="cmt"># Look for: "Debugger PIN: 123-456-789" in terminal output</span>
+
+<span class="cmt"># Force an error to trigger it:</span>
+<span class="kw">@app.route</span>(<span class="str">"/crash"</span>)
+<span class="kw">def</span> <span class="fn">crash</span>():
+    x = <span class="num">1</span> / <span class="num">0</span>   <span class="cmt"># ZeroDivisionError → opens Werkzeug console in browser</span></pre></div>
+        <div class="info-box tip">&#x2714; The Werkzeug debugger lets you run Python expressions <em>directly in the browser</em> at the point of the error. Great for inspecting variables without restarting.</div>
+      </div>
+
+      <div id="fl-dbg-3" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Python — debugpy embedded (VS Code attach)</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="kw">import</span> debugpy
+<span class="kw">from</span> flask <span class="kw">import</span> Flask
+
+app = <span class="fn">Flask</span>(__name__)
+
+<span class="cmt"># Start debug server — only listen once (guard against reloader)</span>
+<span class="kw">if</span> <span class="kw">not</span> debugpy.<span class="fn">is_client_connected</span>():
+    debugpy.<span class="fn">listen</span>((<span class="str">"0.0.0.0"</span>, <span class="num">5678</span>))
+    <span class="fn">print</span>(<span class="str">"⏳ Waiting for VS Code debugger on port 5678..."</span>)
+    debugpy.<span class="fn">wait_for_client</span>()
+    <span class="fn">print</span>(<span class="str">"✅ Debugger attached!"</span>)
+
+<span class="kw">@app.route</span>(<span class="str">"/"</span>)
+<span class="kw">def</span> <span class="fn">index</span>():
+    <span class="kw">return</span> <span class="str">"Debugger ready"</span>
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    app.<span class="fn">run</span>(host=<span class="str">"0.0.0.0"</span>, port=<span class="num">5000</span>, use_reloader=<span class="bool">False</span>)</pre></div>
+        <div class="info-box tip">&#x2714; After running, attach VS Code using the <strong>"Flask: Attach debugpy"</strong> config from the VS Code tab above. Set breakpoints in your code — they'll be hit when Postman/curl hits the route.</div>
+      </div>
+
+      <div id="fl-dbg-4" class="mode-panel">
+        <div class="code-block"><div class="code-header"><span class="code-lang">Python — structured logging for debugging</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="kw">import</span> logging
+<span class="kw">from</span> flask <span class="kw">import</span> Flask, request
+
+app = <span class="fn">Flask</span>(__name__)
+
+<span class="cmt"># Configure logging</span>
+logging.<span class="fn">basicConfig</span>(
+    level=logging.DEBUG,
+    <span class="fn">format</span>=<span class="str">"%(asctime)s [%(levelname)s] %(name)s: %(message)s"</span>
+)
+logger = logging.<span class="fn">getLogger</span>(__name__)
+
+<span class="kw">@app.route</span>(<span class="str">"/api/users"</span>, methods=[<span class="str">"POST"</span>])
+<span class="kw">def</span> <span class="fn">create_user</span>():
+    data = request.<span class="fn">get_json</span>()
+    logger.<span class="fn">debug</span>(<span class="str">"Received payload: %s"</span>, data)
+
+    <span class="kw">try</span>:
+        result = <span class="fn">process</span>(data)
+        logger.<span class="fn">info</span>(<span class="str">"User created: %s"</span>, result)
+        <span class="kw">return</span> result, <span class="num">201</span>
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        logger.<span class="fn">error</span>(<span class="str">"Error creating user: %s"</span>, e, exc_info=<span class="bool">True</span>)
+        <span class="kw">return</span> {<span class="str">"error"</span>: <span class="fn">str</span>(e)}, <span class="num">500</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ QUICK REFERENCE TABLE -->
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#39d353;font-size:16px">&#9632;</span>
+      <span class="accordion-title">Quick Reference — All Flask Debug Commands</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <table class="data-table">
+        <thead><tr><th>Goal</th><th>Command / Method</th><th>Port</th></tr></thead>
+        <tbody>
+          <tr><td>Basic dev server</td><td><code>FLASK_DEBUG=1 flask run</code></td><td>5000</td></tr>
+          <tr><td>Custom port</td><td><code>flask run --port 8080</code></td><td>8080</td></tr>
+          <tr><td>Allow Postman access</td><td><code>flask run --host 0.0.0.0 --port 5000</code></td><td>5000</td></tr>
+          <tr><td>VS Code breakpoints</td><td><code>flask run --no-debugger --no-reload</code></td><td>5000</td></tr>
+          <tr><td>VS Code attach (debugpy)</td><td><code>python -m debugpy --listen 5678 --wait-for-client -m flask run</code></td><td>5678 / 5000</td></tr>
+          <tr><td>Terminal pdb debugging</td><td><code>flask run --no-reload</code> + <code>breakpoint()</code> in code</td><td>5000</td></tr>
+          <tr><td>Browser inline debugger</td><td><code>app.run(debug=True)</code> — Werkzeug PIN in terminal</td><td>5000</td></tr>
+          <tr><td>Pass CLI args</td><td><code>python app.py --host 0.0.0.0 --port 5000 --debug</code></td><td>custom</td></tr>
+          <tr><td>Windows CMD</td><td><code>set FLASK_DEBUG=1 &amp;&amp; flask run</code></td><td>5000</td></tr>
+          <tr><td>PowerShell</td><td><code>$env:FLASK_DEBUG="1"; flask run</code></td><td>5000</td></tr>
+          <tr><td>curl GET test</td><td><code>curl http://localhost:5000/api/endpoint</code></td><td>—</td></tr>
+          <tr><td>curl POST JSON</td><td><code>curl -X POST -H "Content-Type: application/json" -d '{}' localhost:5000/api</code></td><td>—</td></tr>
+          <tr><td>httpie GET</td><td><code>http GET localhost:5000/api/users</code></td><td>—</td></tr>
+          <tr><td>httpie POST</td><td><code>http POST localhost:5000/api/users name=Alice</code></td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="info-box tip" style="margin-top:12px">&#x2714; <strong>Postman base URL:</strong> <code>http://localhost:5000</code> or <code>http://127.0.0.1:5000</code> — both work the same. Use <code>0.0.0.0</code> only on the server side (bind address), never in the Postman URL.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== REST API ==================== -->
+<div id="page-restapi" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F30D; REST API Debugging</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#FF6C37;font-size:16px">&#9670;</span>
+      <span class="accordion-title">curl — Complete Reference</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash — curl</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># GET request</span>
+curl http://localhost:3000/api/users
+
+<span class="cmt"># GET with headers</span>
+curl -H "Authorization: Bearer TOKEN" \
+     -H "Content-Type: application/json" \
+     http://localhost:3000/api/users
+
+<span class="cmt"># POST with JSON body</span>
+curl -X POST http://localhost:3000/api/users \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Alice", "email": "alice@example.com"}'
+
+<span class="cmt"># PUT request</span>
+curl -X PUT http://localhost:3000/api/users/123 \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Alice Updated"}'
+
+<span class="cmt"># DELETE request</span>
+curl -X DELETE http://localhost:3000/api/users/123 \
+     -H "Authorization: Bearer TOKEN"
+
+<span class="cmt"># Verbose output (shows headers, SSL, etc)</span>
+curl -v http://localhost:3000/api/status
+
+<span class="cmt"># Download response to file</span>
+curl -o response.json http://localhost:3000/api/data
+
+<span class="cmt"># Form data upload</span>
+curl -X POST http://localhost:3000/upload \
+     -F "file=@/path/to/file.pdf" \
+     -F "name=myfile"
+
+<span class="cmt"># Query string parameters</span>
+curl "http://localhost:3000/api/search?q=term&amp;page=1&amp;limit=10"</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">VS Code — REST Client Extension</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="info-box note"><strong>Install:</strong> "REST Client" by Huachao Mao from VS Code marketplace. Create <code>.http</code> files to run API requests directly in editor.</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">HTTP — api-tests.http file</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt">### Variables</span>
+@baseUrl = http://localhost:3000
+@token = your-jwt-token-here
+
+<span class="cmt">### GET all users</span>
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+<span class="cmt">###</span>
+
+<span class="cmt">### POST create user</span>
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "name": "Alice",
+  "email": "alice@example.com",
+  "role": "admin"
+}
+
+<span class="cmt">###</span>
+
+<span class="cmt">### DELETE user</span>
+DELETE {{baseUrl}}/api/users/123
+Authorization: Bearer {{token}}</pre></div>
+      <div class="info-box tip"><strong>Tip:</strong> Click "Send Request" link that appears above each request in VS Code to execute it and see the response in a side panel.</div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#d29922;font-size:16px">&#9670;</span>
+      <span class="accordion-title">HTTPie — Modern CLI Alternative</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash — HTTPie</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Install</span>
+pip install httpie
+
+<span class="cmt"># GET</span>
+http GET localhost:3000/api/users
+
+<span class="cmt"># POST JSON (auto-detected)</span>
+http POST localhost:3000/api/users name=Alice email=alice@example.com
+
+<span class="cmt"># With headers</span>
+http GET localhost:3000/api/users Authorization:"Bearer TOKEN"
+
+<span class="cmt"># Verbose (shows req + res headers)</span>
+http -v GET localhost:3000/api/status</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MERN ==================== -->
+<div id="page-mern" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F9F1; MERN Stack Debugging</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Compound Config (Full Stack)</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="info-box note"><strong>Compound configs</strong> let you debug front-end and back-end simultaneously with a single F5 press.</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"MERN: Express Backend"</span>,
+      <span class="key">"type"</span>: <span class="str">"node"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/server/index.js"</span>,
+      <span class="key">"env"</span>: {
+        <span class="key">"NODE_ENV"</span>: <span class="str">"development"</span>,
+        <span class="key">"MONGO_URI"</span>: <span class="str">"mongodb://localhost:27017/mydb"</span>,
+        <span class="key">"PORT"</span>: <span class="str">"5000"</span>
+      },
+      <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>,
+      <span class="key">"skipFiles"</span>: [<span class="str">"&lt;node_internals&gt;/**"</span>]
+    },
+    {
+      <span class="key">"name"</span>: <span class="str">"MERN: React Frontend"</span>,
+      <span class="key">"type"</span>: <span class="str">"chrome"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"url"</span>: <span class="str">"http://localhost:3000"</span>,
+      <span class="key">"webRoot"</span>: <span class="str">"${workspaceFolder}/client/src"</span>
+    }
+  ],
+  <span class="key">"compounds"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"MERN: Full Stack"</span>,
+      <span class="key">"configurations"</span>: [<span class="str">"MERN: Express Backend"</span>, <span class="str">"MERN: React Frontend"</span>]
+    }
+  ]
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — MERN Development Setup</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Install concurrently to run both servers</span>
+npm install -g concurrently
+
+<span class="cmt"># Root package.json scripts</span>
+<span class="cmt"># "dev": "concurrently \"npm run server\" \"npm run client\""</span>
+<span class="cmt"># "server": "node --inspect server/index.js"</span>
+<span class="cmt"># "client": "cd client && npm start"</span>
+npm run dev
+
+<span class="cmt"># Debug backend separately</span>
+cd server && node --inspect index.js
+
+<span class="cmt"># Start MongoDB (local)</span>
+mongod --dbpath /data/db
+
+<span class="cmt"># MongoDB URI formats</span>
+<span class="cmt"># Local:   mongodb://localhost:27017/dbname</span>
+<span class="cmt"># Atlas:   mongodb+srv://user:pass@cluster.mongodb.net/dbname</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== KAFKA ==================== -->
+<div id="page-kafka" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x26A1; Kafka Debugging</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — Kafka CLI Tools</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Start Zookeeper (required for older Kafka)</span>
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+<span class="cmt"># Start Kafka broker</span>
+bin/kafka-server-start.sh config/server.properties
+
+<span class="cmt"># Create a topic</span>
+bin/kafka-topics.sh --create --topic my-topic \
+  --bootstrap-server localhost:9092 \
+  --partitions 3 --replication-factor 1
+
+<span class="cmt"># List topics</span>
+bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+
+<span class="cmt"># Describe topic</span>
+bin/kafka-topics.sh --describe --topic my-topic \
+  --bootstrap-server localhost:9092
+
+<span class="cmt"># Console Producer (send messages)</span>
+bin/kafka-console-producer.sh --topic my-topic \
+  --bootstrap-server localhost:9092
+
+<span class="cmt"># Console Consumer (read messages from beginning)</span>
+bin/kafka-console-consumer.sh --topic my-topic \
+  --from-beginning --bootstrap-server localhost:9092
+
+<span class="cmt"># Consumer with group</span>
+bin/kafka-console-consumer.sh --topic my-topic \
+  --group my-consumer-group --bootstrap-server localhost:9092
+
+<span class="cmt"># Consumer group status</span>
+bin/kafka-consumer-groups.sh --describe --group my-consumer-group \
+  --bootstrap-server localhost:9092</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Debug Kafka Java App</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Kafka: Debug Producer"</span>,
+  <span class="key">"type"</span>: <span class="str">"java"</span>,
+  <span class="key">"request"</span>: <span class="str">"launch"</span>,
+  <span class="key">"mainClass"</span>: <span class="str">"com.example.KafkaProducer"</span>,
+  <span class="key">"vmArgs"</span>: <span class="str">"-Dlog4j.configuration=file:config/log4j.properties"</span>,
+  <span class="key">"args"</span>: [<span class="str">"--topic"</span>, <span class="str">"my-topic"</span>, <span class="str">"--broker"</span>, <span class="str">"localhost:9092"</span>],
+  <span class="key">"env"</span>: { <span class="key">"KAFKA_BOOTSTRAP_SERVERS"</span>: <span class="str">"localhost:9092"</span> }
+}</pre></div>
+      <div class="info-box note"><strong>kcat (kafkacat):</strong> Install <code>kcat</code> for a powerful CLI alternative: <code>kcat -C -t my-topic -b localhost:9092</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== GOLANG ==================== -->
+<div id="page-golang" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F4E6; Go (Golang) Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Delve Debugger</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="info-box note"><strong>Install:</strong> Go extension by Google (golang.go). Delve is automatically installed.</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Go: Launch"</span>,
+      <span class="key">"type"</span>: <span class="str">"go"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"mode"</span>: <span class="str">"auto"</span>,
+      <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/main.go"</span>,
+      <span class="key">"args"</span>: [<span class="str">"--port"</span>, <span class="str">"8080"</span>, <span class="str">"--config"</span>, <span class="str">"config.yaml"</span>],
+      <span class="key">"env"</span>: { <span class="key">"GO_ENV"</span>: <span class="str">"development"</span> }
+    },
+    {
+      <span class="key">"name"</span>: <span class="str">"Go: Attach"</span>,
+      <span class="key">"type"</span>: <span class="str">"go"</span>,
+      <span class="key">"request"</span>: <span class="str">"attach"</span>,
+      <span class="key">"mode"</span>: <span class="str">"remote"</span>,
+      <span class="key">"remotePath"</span>: <span class="str">"${workspaceFolder}"</span>,
+      <span class="key">"port"</span>: <span class="num">2345</span>,
+      <span class="key">"host"</span>: <span class="str">"localhost"</span>
+    }
+  ]
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — dlv (Delve) Commands</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Install Delve</span>
+go install github.com/go-delve/delve/cmd/dlv@latest
+
+<span class="cmt"># Debug current package</span>
+dlv debug
+
+<span class="cmt"># Debug with arguments</span>
+dlv debug -- --port 8080 --config config.yaml
+
+<span class="cmt"># Debug and listen for remote connections</span>
+dlv debug --headless --listen=:2345 --api-version=2
+
+<span class="cmt"># dlv commands:</span>
+<span class="cmt"># break main.go:20  → set breakpoint</span>
+<span class="cmt"># continue          → run until breakpoint</span>
+<span class="cmt"># next              → next line</span>
+<span class="cmt"># step              → step into</span>
+<span class="cmt"># print varName     → inspect variable</span>
+<span class="cmt"># goroutines        → list all goroutines</span>
+
+<span class="cmt"># Run tests with debugger</span>
+dlv test -- -run TestMyFunction -v</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== C# ==================== -->
+<div id="page-csharp" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F52E; C# / .NET Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — C# Debug Config</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="info-box note"><strong>Install:</strong> C# extension by Microsoft (ms-dotnettools.csharp) with OmniSharp or C# Dev Kit.</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">.NET: Launch</span>,
+      <span class="key">"type"</span>: <span class="str">"coreclr"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"program"</span>: <span class="str">"${workspaceFolder}/bin/Debug/net8.0/MyApp.dll"</span>,
+      <span class="key">"args"</span>: [<span class="str">"--urls"</span>, <span class="str">"http://localhost:5000"</span>],
+      <span class="key">"cwd"</span>: <span class="str">"${workspaceFolder}"</span>,
+      <span class="key">"env"</span>: { <span class="key">"ASPNETCORE_ENVIRONMENT"</span>: <span class="str">"Development"</span> },
+      <span class="key">"console"</span>: <span class="str">"integratedTerminal"</span>
+    },
+    {
+      <span class="key">"name"</span>: <span class="str">".NET: Attach"</span>,
+      <span class="key">"type"</span>: <span class="str">"coreclr"</span>,
+      <span class="key">"request"</span>: <span class="str">"attach"</span>
+    }
+  ]
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — dotnet CLI Debug</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Build in debug mode</span>
+dotnet build --configuration Debug
+
+<span class="cmt"># Run in development</span>
+ASPNETCORE_ENVIRONMENT=Development dotnet run
+
+<span class="cmt"># Run with arguments</span>
+dotnet run -- --urls "http://localhost:5000" --port 5000
+
+<span class="cmt"># Watch mode (auto-rebuild on change)</span>
+dotnet watch run
+
+<span class="cmt"># Run compiled DLL</span>
+dotnet MyApp.dll --urls http://localhost:5000</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TypeScript ==================== -->
+<div id="page-typescript" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F4DC; TypeScript Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — ts-node Debug Config</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"TS: ts-node"</span>,
+      <span class="key">"type"</span>: <span class="str">"node"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"runtimeExecutable"</span>: <span class="str">"node"</span>,
+      <span class="key">"runtimeArgs"</span>: [<span class="str">"-r"</span>, <span class="str">"ts-node/register"</span>],
+      <span class="key">"args"</span>: [<span class="str">"${workspaceFolder}/src/index.ts"</span>],
+      <span class="key">"sourceMaps"</span>: <span class="bool">true</span>,
+      <span class="key">"cwd"</span>: <span class="str">"${workspaceFolder}"</span>,
+      <span class="key">"protocol"</span>: <span class="str">"inspector"</span>,
+      <span class="key">"skipFiles"</span>: [<span class="str">"&lt;node_internals&gt;/**"</span>, <span class="str">"node_modules/**"</span>]
+    }
+  ]
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — ts-node &amp; Compiled Debug</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Install ts-node globally</span>
+npm install -g ts-node typescript
+
+<span class="cmt"># Run TypeScript directly</span>
+ts-node src/index.ts
+
+<span class="cmt"># Debug with Node inspector</span>
+node --inspect -r ts-node/register src/index.ts
+
+<span class="cmt"># Compile then debug</span>
+tsc --sourceMap && node --inspect dist/index.js
+
+<span class="cmt"># With arguments</span>
+ts-node src/server.ts -- --port 3000 --env development
+
+<span class="cmt"># tsconfig.json must have:</span>
+<span class="cmt"># "sourceMap": true</span>
+<span class="cmt"># "outDir": "./dist"</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== NEXT.JS ==================== -->
+<div id="page-nextjs" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x25B2; Next.js Debugger Setup</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Full Stack Next.js Debug</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — launch.json</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"0.2.0"</span>,
+  <span class="key">"configurations"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Next.js: Server"</span>,
+      <span class="key">"type"</span>: <span class="str">"node"</span>,
+      <span class="key">"request"</span>: <span class="str">"attach"</span>,
+      <span class="key">"port"</span>: <span class="num">9229</span>,
+      <span class="key">"skipFiles"</span>: [<span class="str">"&lt;node_internals&gt;/**"</span>],
+      <span class="key">"restart"</span>: <span class="bool">true</span>
+    },
+    {
+      <span class="key">"name"</span>: <span class="str">"Next.js: Client"</span>,
+      <span class="key">"type"</span>: <span class="str">"chrome"</span>,
+      <span class="key">"request"</span>: <span class="str">"launch"</span>,
+      <span class="key">"url"</span>: <span class="str">"http://localhost:3000"</span>
+    }
+  ],
+  <span class="key">"compounds"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"Next.js: Full Stack"</span>,
+      <span class="key">"configurations"</span>: [<span class="str">"Next.js: Server"</span>, <span class="str">"Next.js: Client"</span>]
+    }
+  ]
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — Next.js Debug Start</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Add to package.json scripts:</span>
+<span class="cmt"># "debug": "NODE_OPTIONS='--inspect' next dev"</span>
+npm run debug
+
+<span class="cmt"># Or directly</span>
+NODE_OPTIONS='--inspect' next dev
+
+<span class="cmt"># Custom port</span>
+NODE_OPTIONS='--inspect' next dev -p 3001
+
+<span class="cmt"># Windows PowerShell</span>
+$env:NODE_OPTIONS="--inspect"; next dev</pre></div>
+      <div class="info-box tip"><strong>Tip:</strong> Set the server launch configuration to "attach" mode and start Next.js with <code>--inspect</code>. This lets VS Code attach to both server-side (API routes, SSR) and keep client-side separate in Chrome.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DOCKER ==================== -->
+<div id="page-docker" class="section-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showLang('home')">&#8592; Back</button>
+    <div class="detail-title">&#x1F433; Docker Debugging</div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#3fb950;font-size:16px">&#x27A4;</span>
+      <span class="accordion-title">Terminal — Docker Debug Commands</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre><span class="cmt"># Build image</span>
+docker build -t myapp:debug .
+
+<span class="cmt"># Run with debug port exposed (Node.js)</span>
+docker run -p 3000:3000 -p 9229:9229 myapp:debug \
+  node --inspect=0.0.0.0:9229 server.js
+
+<span class="cmt"># Run container with shell for manual debugging</span>
+docker run -it --entrypoint /bin/sh myapp:debug
+
+<span class="cmt"># Execute command in running container</span>
+docker exec -it container_name /bin/bash
+
+<span class="cmt"># View logs</span>
+docker logs -f container_name
+
+<span class="cmt"># Inspect container</span>
+docker inspect container_name</pre></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <div class="accordion-head" onclick="toggleAccordion(this)">
+      <span style="color:#58a6ff;font-size:16px">&#9881;</span>
+      <span class="accordion-title">VS Code — Remote Container Attach</span>
+      <span class="accordion-arrow">&#9654;</span>
+    </div>
+    <div class="accordion-body">
+      <div class="info-box note"><strong>Install:</strong> Docker extension (ms-azuretools.vscode-docker) and Dev Containers extension.</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Attach to Docker Node.js</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>{
+  <span class="key">"name"</span>: <span class="str">"Docker: Attach Node"</span>,
+  <span class="key">"type"</span>: <span class="str">"node"</span>,
+  <span class="key">"request"</span>: <span class="str">"attach"</span>,
+  <span class="key">"port"</span>: <span class="num">9229</span>,
+  <span class="key">"address"</span>: <span class="str">"localhost"</span>,
+  <span class="key">"localRoot"</span>: <span class="str">"${workspaceFolder}"</span>,
+  <span class="key">"remoteRoot"</span>: <span class="str">"/app"</span>,
+  <span class="key">"restart"</span>: <span class="bool">true</span>,
+  <span class="key">"skipFiles"</span>: [<span class="str">"&lt;node_internals&gt;/**"</span>]
+}</pre></div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Dockerfile — Debug-ready</span><button class="copy-btn" onclick="copyCode(this)">&#x2398; Copy</button></div><pre>FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 3000 9229
+<span class="cmt"># Start with inspect flag</span>
+CMD ["node", "--inspect=0.0.0.0:9229", "server.js"]</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VS CODE TAB ==================== -->
+<div id="page-vscode" class="section-page">
+  <div class="section-h">&#x1F6E0;&#xFE0F; VS Code Debugger — Quick Reference</div>
+
+  <div class="section-h2">Universal Keyboard Shortcuts</div>
+  <table class="data-table">
+    <thead><tr><th>Action</th><th>Windows/Linux</th><th>macOS</th></tr></thead>
+    <tbody>
+      <tr><td>Start / Continue Debug</td><td><code>F5</code></td><td><code>F5</code></td></tr>
+      <tr><td>Step Over</td><td><code>F10</code></td><td><code>F10</code></td></tr>
+      <tr><td>Step Into</td><td><code>F11</code></td><td><code>F11</code></td></tr>
+      <tr><td>Step Out</td><td><code>Shift+F11</code></td><td><code>Shift+F11</code></td></tr>
+      <tr><td>Toggle Breakpoint</td><td><code>F9</code></td><td><code>F9</code></td></tr>
+      <tr><td>Stop Debugging</td><td><code>Shift+F5</code></td><td><code>Shift+F5</code></td></tr>
+      <tr><td>Restart Debug</td><td><code>Ctrl+Shift+F5</code></td><td><code>Cmd+Shift+F5</code></td></tr>
+      <tr><td>Open Debug Panel</td><td><code>Ctrl+Shift+D</code></td><td><code>Cmd+Shift+D</code></td></tr>
+      <tr><td>Debug Console</td><td><code>Ctrl+Shift+Y</code></td><td><code>Cmd+Shift+Y</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-h2" style="margin-top:24px">launch.json Property Reference</div>
+  <table class="data-table">
+    <thead><tr><th>Property</th><th>Description</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>type</code></td><td>Debugger type</td><td><code>node</code>, <code>python</code>, <code>go</code>, <code>java</code></td></tr>
+      <tr><td><code>request</code></td><td>Debug mode</td><td><code>launch</code> or <code>attach</code></td></tr>
+      <tr><td><code>program</code></td><td>Entry file path</td><td><code>${workspaceFolder}/app.js</code></td></tr>
+      <tr><td><code>args</code></td><td>CLI arguments</td><td><code>["--port", "3000"]</code></td></tr>
+      <tr><td><code>env</code></td><td>Environment vars</td><td><code>{"NODE_ENV": "dev"}</code></td></tr>
+      <tr><td><code>envFile</code></td><td>Load .env file</td><td><code>${workspaceFolder}/.env</code></td></tr>
+      <tr><td><code>cwd</code></td><td>Working directory</td><td><code>${workspaceFolder}</code></td></tr>
+      <tr><td><code>port</code></td><td>Attach port</td><td><code>9229</code>, <code>5678</code></td></tr>
+      <tr><td><code>console</code></td><td>Output destination</td><td><code>integratedTerminal</code></td></tr>
+      <tr><td><code>skipFiles</code></td><td>Skip node internals</td><td><code>["&lt;node_internals&gt;/**"]</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box tip" style="margin-top:16px"><strong>&#x2714; Common Variables:</strong> <code>${workspaceFolder}</code> = project root, <code>${file}</code> = current open file, <code>${fileBasenameNoExtension}</code> = filename without extension.</div>
+</div>
+
+<!-- ==================== TERMINAL TAB ==================== -->
+<div id="page-terminal" class="section-page">
+  <div class="section-h">&#x27A4; Terminal Debugging — Command Reference</div>
+
+  <table class="data-table">
+    <thead><tr><th>Language</th><th>Debug Command</th><th>Port</th></tr></thead>
+    <tbody>
+      <tr><td>Python (pdb)</td><td><code>python -m pdb app.py</code></td><td>—</td></tr>
+      <tr><td>Python (debugpy)</td><td><code>python -m debugpy --listen 5678 --wait-for-client app.py</code></td><td>5678</td></tr>
+      <tr><td>Node.js</td><td><code>node --inspect server.js</code></td><td>9229</td></tr>
+      <tr><td>Node.js (break)</td><td><code>node --inspect-brk server.js</code></td><td>9229</td></tr>
+      <tr><td>PHP (phpdbg)</td><td><code>phpdbg -qrr script.php</code></td><td>—</td></tr>
+      <tr><td>PHP (Xdebug)</td><td><code>php -dxdebug.mode=debug script.php</code></td><td>9003</td></tr>
+      <tr><td>Java</td><td><code>java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar app.jar</code></td><td>5005</td></tr>
+      <tr><td>Go</td><td><code>dlv debug -- --args</code></td><td>2345</td></tr>
+      <tr><td>Go (remote)</td><td><code>dlv debug --headless --listen=:2345 --api-version=2</code></td><td>2345</td></tr>
+      <tr><td>Django</td><td><code>python manage.py runserver --noreload</code></td><td>8000</td></tr>
+      <tr><td>Flask (basic)</td><td><code>FLASK_DEBUG=1 flask run</code></td><td>5000</td></tr>
+          <tr><td>Flask (custom port)</td><td><code>FLASK_APP=app.py FLASK_DEBUG=1 flask run --host 0.0.0.0 --port 8080</code></td><td>8080</td></tr>
+          <tr><td>Flask (debugpy attach)</td><td><code>python -m debugpy --listen 5678 --wait-for-client -m flask run --no-debugger --no-reload</code></td><td>5678/5000</td></tr>
+          <tr><td>Flask (CLI args)</td><td><code>python app.py --host 0.0.0.0 --port 5000 --debug</code></td><td>custom</td></tr>
+      <tr><td>.NET</td><td><code>ASPNETCORE_ENVIRONMENT=Development dotnet run</code></td><td>5000</td></tr>
+      <tr><td>TypeScript</td><td><code>node --inspect -r ts-node/register src/index.ts</code></td><td>9229</td></tr>
+      <tr><td>Next.js</td><td><code>NODE_OPTIONS='--inspect' next dev</code></td><td>9229</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== API TAB ==================== -->
+<div id="page-api" class="section-page">
+  <div class="section-h">&#x1F30D; REST API Quick Test Reference</div>
+
+  <table class="data-table">
+    <thead><tr><th>Tool</th><th>Method</th><th>Example Command</th></tr></thead>
+    <tbody>
+      <tr><td>curl</td><td>GET</td><td><code>curl http://localhost:3000/api/users</code></td></tr>
+      <tr><td>curl</td><td>POST</td><td><code>curl -X POST -H "Content-Type: application/json" -d '{"key":"val"}' localhost:3000/api</code></td></tr>
+      <tr><td>curl</td><td>PUT</td><td><code>curl -X PUT localhost:3000/api/1 -d '{"name":"x"}'</code></td></tr>
+      <tr><td>curl</td><td>DELETE</td><td><code>curl -X DELETE localhost:3000/api/1</code></td></tr>
+      <tr><td>curl</td><td>Verbose</td><td><code>curl -v http://localhost:3000/api</code></td></tr>
+      <tr><td>httpie</td><td>GET</td><td><code>http GET localhost:3000/api/users</code></td></tr>
+      <tr><td>httpie</td><td>POST</td><td><code>http POST localhost:3000/api name=Alice</code></td></tr>
+      <tr><td>wget</td><td>GET</td><td><code>wget -qO- http://localhost:3000/api/status</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ── NAVIGATION ──
+let currentLang = 'home';
+let currentView = 'home';
+
+function showLang(lang) {
+  document.querySelectorAll('.section-page').forEach(p => p.classList.remove('visible'));
+  const pg = document.getElementById('page-' + lang);
+  if (pg) pg.classList.add('visible');
+  currentLang = lang;
+
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  const si = document.querySelector('.sidebar-item[onclick="showLang(\'' + lang + '\')"]');
+  if (si) si.classList.add('active');
+}
+
+function showView(view) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  if (view === 'home') {
+    showLang(currentLang === 'home' ? 'home' : currentLang);
+    return;
+  }
+
+  document.querySelectorAll('.section-page').forEach(p => p.classList.remove('visible'));
+  const pg = document.getElementById('page-' + view);
+  if (pg) pg.classList.add('visible');
+  currentView = view;
+}
+
+// ── ACCORDION ──
+function toggleAccordion(head) {
+  const body = head.nextElementSibling;
+  const arrow = head.querySelector('.accordion-arrow');
+  const isOpen = body.classList.contains('open');
+
+  // Close all in same parent
+  const parent = head.closest('.section-page') || document;
+  parent.querySelectorAll('.accordion-body.open').forEach(b => {
+    b.classList.remove('open');
+    const a = b.previousElementSibling.querySelector('.accordion-arrow');
+    if (a) a.classList.remove('open');
+  });
+
+  if (!isOpen) {
+    body.classList.add('open');
+    arrow.classList.add('open');
+  }
+}
+
+// ── MODE TABS ──
+function switchMode(btn, panelId) {
+  const container = btn.closest('.accordion-body');
+  container.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  container.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+// ── COPY CODE ──
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '⎘ Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ── SEARCH ──
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  if (!q) {
+    document.querySelectorAll('.lang-card').forEach(c => c.classList.remove('hidden'));
+    return;
+  }
+
+  // Make sure we're on the home page for filtering
+  if (currentLang !== 'home') {
+    showLang('home');
+  }
+
+  document.querySelectorAll('.lang-card').forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.classList.toggle('hidden', !text.includes(q));
+  });
+});
+
+// Open first accordion on page load for each section
+document.querySelectorAll('.section-page').forEach(pg => {
+  const firstHead = pg.querySelector('.accordion-head');
+  if (firstHead) {
+    const body = firstHead.nextElementSibling;
+    const arrow = firstHead.querySelector('.accordion-arrow');
+    if (body) body.classList.add('open');
+    if (arrow) arrow.classList.add('open');
+  }
+});
+</script>
+</body>
+</html>

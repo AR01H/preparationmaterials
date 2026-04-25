@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Services — How to Create Each One</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #09090f;
+  --bg2: #111118;
+  --bg3: #18181f;
+  --card: #1a1a24;
+  --card-h: #1f1f2c;
+  --border: #2a2a3a;
+  --border2: #353548;
+  --text: #e8e8f0;
+  --muted: #7878a0;
+  --hint: #4a4a68;
+  --orange: #ff8c00;
+  --orange2: #ffa940;
+  --blue: #4dabf7;
+  --green: #51cf66;
+  --purple: #9775fa;
+  --teal: #38d9a9;
+  --pink: #f783ac;
+  --red: #ff6b6b;
+  --yellow: #ffd43b;
+  --code-bg: #0d0d14;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ─────────────────────────────── */
+.site-header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-inner {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 60px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.3px;
+  flex-shrink: 0;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--orange);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.logo span { color: var(--orange); }
+
+.search-bar {
+  flex: 1;
+  max-width: 380px;
+  position: relative;
+}
+.search-bar input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px 8px 36px;
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+}
+.search-bar input:focus { border-color: var(--orange); }
+.search-bar input::placeholder { color: var(--hint); }
+.search-icon {
+  position: absolute;
+  left: 11px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--hint);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.cat-filters {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.cf {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  letter-spacing: .3px;
+  transition: all .15s;
+  font-family: 'Syne', sans-serif;
+}
+.cf:hover { color: var(--text); border-color: var(--border2); }
+.cf.on { background: var(--orange); color: #000; border-color: var(--orange); }
+
+/* ── HERO ────────────────────────────────── */
+.hero {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 48px 32px 40px;
+  text-align: center;
+}
+.hero-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--orange);
+  background: rgba(255,140,0,.1);
+  border: 1px solid rgba(255,140,0,.25);
+  border-radius: 20px;
+  padding: 4px 14px;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-size: clamp(26px, 5vw, 44px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.hero h1 em { color: var(--orange); font-style: normal; }
+.hero p {
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 560px;
+  margin: 0 auto 24px;
+}
+.stat-row {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.stat { text-align: center; }
+.stat-num { font-size: 28px; font-weight: 800; color: var(--orange); }
+.stat-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+/* ── MAIN LAYOUT ────────────────────────── */
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 32px 80px;
+}
+
+.section-group { margin-bottom: 48px; }
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.group-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.group-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.group-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--hint);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── SERVICE CARD ───────────────────────── */
+.svc-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.svc-card:hover { border-color: var(--border2); }
+.svc-card.active { border-color: var(--orange); }
+
+.card-trigger {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+.svc-icon-wrap {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.svc-info { flex: 1; min-width: 0; }
+.svc-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.svc-tagline {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.svc-badges { display: flex; gap: 5px; align-items: center; }
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.badge-free { background: rgba(81,207,102,.12); color: var(--green); border: 1px solid rgba(81,207,102,.25); }
+.badge-paid { background: rgba(255,212,59,.1); color: var(--yellow); border: 1px solid rgba(255,212,59,.2); }
+.card-arrow {
+  color: var(--hint);
+  font-size: 12px;
+  transition: transform .2s;
+  flex-shrink: 0;
+}
+.svc-card.active .card-arrow { transform: rotate(180deg); color: var(--orange); }
+
+/* ── EXPANDED BODY ──────────────────────── */
+.card-body {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.svc-card.active .card-body { display: block; }
+.card-body-inner { padding: 20px 20px 24px; }
+
+.what-is {
+  background: var(--bg3);
+  border-left: 3px solid var(--orange);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── STEPS ──────────────────────────────── */
+.steps-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
+.step-row { display: flex; gap: 12px; }
+.step-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-line {
+  width: 1px;
+  flex: 1;
+  background: var(--border);
+  margin: 4px 0;
+  min-height: 12px;
+}
+.step-row:last-child .step-line { display: none; }
+.step-content { flex: 1; padding-bottom: 16px; }
+.step-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; margin-top: 4px; }
+.step-detail { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.step-detail strong { color: var(--text); font-weight: 600; }
+.step-note {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  background: rgba(255,140,0,.08);
+  border: 1px solid rgba(255,140,0,.2);
+  color: var(--orange2);
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── CODE ───────────────────────────────── */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+.code-fname { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+.copy-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  transition: all .15s;
+}
+.copy-btn:hover { color: var(--text); border-color: var(--border2); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+pre {
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: #c9d1d9;
+}
+.kw { color: #ff79c6; }
+.str { color: #f1fa8c; }
+.cm { color: #555577; font-style: italic; }
+.fn { color: #50fa7b; }
+.val { color: #bd93f9; }
+.ky { color: #8be9fd; }
+.num { color: #ffb86c; }
+
+/* ── TIPS ───────────────────────────────── */
+.tips-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tip-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.tip-head {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+.tip-body { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* ── CONSOLE PATH ───────────────────────── */
+.console-path {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+.path-step { color: var(--muted); }
+.path-arrow { color: var(--hint); }
+.path-step.active-path { color: var(--orange); font-weight: 700; }
+
+/* ── HIDDEN / SEARCH ────────────────────── */
+.svc-card.hidden { display: none; }
+.section-group.empty { display: none; }
+
+/* ── RESPONSIVE ─────────────────────────── */
+@media (max-width: 680px) {
+  .site-header { padding: 0 16px; }
+  .cat-filters { display: none; }
+  .hero { padding: 32px 16px; }
+  .page { padding: 20px 16px 60px; }
+  .tips-grid { grid-template-columns: 1fr; }
+  .stat-row { gap: 20px; }
+}
+
+/* ── SCROLLBAR ──────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">☁</div>
+      AWS <span>Services</span> Guide
+    </div>
+    <div class="search-bar">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search" placeholder="Search services... (e.g. S3, database, auth)" oninput="filterAll()">
+    </div>
+    <div class="cat-filters" id="cat-filters"></div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">End-to-End AWS Project</div>
+  <h1>How to Create <em>Every</em><br>AWS Service — Step by Step</h1>
+  <p>Click any service to see the exact console steps, AWS CLI commands, configuration tips, and best practices.</p>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-num">24</div><div class="stat-label">Services Covered</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-num">100+</div><div class="stat-label">Step-by-Step Instructions</div></div>
+    <div class="stat"><div class="stat-num">FREE</div><div class="stat-label">14 Free Tier Services</div></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="page" id="page"></div>
+
+<script>
+const CATS = {
+  "Networking":  { color: "#4dabf7", dot: "#4dabf7" },
+  "Compute":     { color: "#ffd43b", dot: "#ffd43b" },
+  "Storage":     { color: "#51cf66", dot: "#51cf66" },
+  "Database":    { color: "#f783ac", dot: "#f783ac" },
+  "Auth & Security": { color: "#9775fa", dot: "#9775fa" },
+  "Messaging":   { color: "#38d9a9", dot: "#38d9a9" },
+  "API":         { color: "#ff8c00", dot: "#ff8c00" },
+  "Containers":  { color: "#ff6b6b", dot: "#ff6b6b" },
+  "CI/CD":       { color: "#cc5de8", dot: "#cc5de8" },
+  "Monitoring":  { color: "#74c0fc", dot: "#74c0fc" },
+};
+
+const SERVICES = [
+
+/* ════════════════ NETWORKING ════════════════ */
+{ cat:"Networking", icon:"🏗️", bg:"rgba(77,171,247,.12)", name:"VPC", full:"Virtual Private Cloud", tagline:"Your private network — foundation of everything", free:true,
+  what:"VPC is the very first resource you create. It's your isolated private network in AWS. Every EC2, RDS, Lambda, and ECS resource lives inside it. Think of it as your own data center in the cloud — you control all IP ranges, subnets, routing, and firewalls.",
+  console:["AWS Console","VPC","Your VPCs","Create VPC"],
+  steps:[
+    {t:"Open VPC Console",d:"Search 'VPC' in AWS Console → click <strong>Your VPCs</strong> → click <strong>Create VPC</strong> (top-right orange button).",n:""},
+    {t:"Choose 'VPC and more'",d:"Select the <strong>'VPC and more'</strong> option — this automatically creates subnets, route tables, and internet gateway for you in one click.",n:""},
+    {t:"Set name and CIDR",d:"Name tag auto-generation: <strong>taskapp</strong>. IPv4 CIDR block: <strong>10.0.0.0/16</strong> (gives 65,536 IPs for all your resources).",n:"10.0.0.0/16"},
+    {t:"Choose Availability Zones",d:"Number of AZs: <strong>2</strong> (always use at least 2 for high availability). Number of public subnets: <strong>2</strong>. Number of private subnets: <strong>2</strong>.",n:""},
+    {t:"NAT Gateways",d:"For development: choose <strong>None</strong> to save $32/month. For production: choose <strong>1 per AZ</strong>. NAT allows private subnet resources to reach the internet.",n:""},
+    {t:"VPC Endpoints",d:"Tick <strong>S3 Gateway</strong> endpoint — this allows EC2 and Lambda to access S3 without going through NAT (saves cost and improves speed).",n:"Free — always enable"},
+    {t:"Click Create VPC",d:"AWS creates VPC + 4 subnets + 2 route tables + Internet Gateway + security group all in one shot. Done in ~30 seconds.",n:""},
+  ],
+  cli:`aws ec2 create-vpc \\
+  --cidr-block 10.0.0.0/16 \\
+  --tag-specifications \\
+    'ResourceType=vpc,Tags=[{Key=Name,Value=taskapp-vpc}]'`,
+  tips:[
+    {h:"CIDR Planning",b:"VPC: 10.0.0.0/16. Public subnets: 10.0.1.0/24, 10.0.2.0/24. Private subnets: 10.0.3.0/24, 10.0.4.0/24"},
+    {h:"Security Groups",b:"SGs are stateful — allow inbound port 3000 from ALB SG only. Never open 0.0.0.0/0 except on ALB port 80/443"},
+    {h:"Two AZs = HA",b:"Always deploy across 2 AZs. Single-AZ means a data center failure takes down your whole app"},
+    {h:"VPC Endpoints",b:"Add S3 + DynamoDB gateway endpoints = free. Avoids NAT Gateway data processing charges for those services"},
+  ]
+},
+
+{ cat:"Networking", icon:"⚖️", bg:"rgba(77,171,247,.12)", name:"ALB", full:"Application Load Balancer", tagline:"Layer-7 load balancer for HTTP/HTTPS traffic", free:false,
+  what:"The Application Load Balancer sits in your public subnets and distributes incoming HTTPS traffic across your EC2 instances or ECS tasks. It handles SSL termination (so your backend gets plain HTTP), health checks, path-based routing, and sticky sessions.",
+  console:["EC2","Load Balancers","Create load balancer","Application Load Balancer"],
+  steps:[
+    {t:"Open EC2 → Load Balancers",d:"EC2 Console → left sidebar → <strong>Load Balancers</strong> → <strong>Create load balancer</strong> → choose <strong>Application Load Balancer</strong>.",n:""},
+    {t:"Basic configuration",d:"Name: <strong>taskapp-alb</strong>. Scheme: <strong>Internet-facing</strong>. IP address type: <strong>IPv4</strong>.",n:""},
+    {t:"Network mapping",d:"VPC: select <strong>taskapp-vpc</strong>. Mappings: select both AZs and choose the <strong>public subnets</strong> (not private) in each AZ.",n:""},
+    {t:"Security groups",d:"Create new SG: allow inbound <strong>HTTP port 80</strong> and <strong>HTTPS port 443</strong> from 0.0.0.0/0 (world). Allow outbound all.",n:""},
+    {t:"Listeners and routing",d:"Add listener: HTTPS port 443 → create a Target Group. Target type: <strong>Instances</strong>. Protocol: HTTP. Port: 3000. Health check path: /health.",n:""},
+    {t:"Add HTTP redirect",d:"Add another listener: HTTP port 80 → Action: <strong>Redirect to HTTPS</strong>. This forces all traffic to use HTTPS automatically.",n:""},
+    {t:"Register targets",d:"In the Target Group, register your EC2 instances. ALB will health check them every 30s and only send traffic to healthy ones.",n:""},
+  ],
+  cli:`aws elbv2 create-load-balancer \\
+  --name taskapp-alb \\
+  --subnets subnet-pub1 subnet-pub2 \\
+  --security-groups sg-alb \\
+  --scheme internet-facing \\
+  --type application`,
+  tips:[
+    {h:"SSL on ALB",b:"Terminate SSL at the ALB, not EC2. ALB decrypts and forwards plain HTTP to backend. Attach ACM cert to the 443 listener"},
+    {h:"Health check path",b:"Create GET /health endpoint on your server that returns 200 OK. ALB uses this to detect unhealthy instances"},
+    {h:"Sticky sessions",b:"Enable if your app has server-side sessions. Otherwise keep disabled for better load distribution"},
+    {h:"WAF attachment",b:"Attach AWS WAF to the ALB to block SQL injection, XSS, and DDoS before traffic hits EC2"},
+  ]
+},
+
+{ cat:"Networking", icon:"🔍", bg:"rgba(77,171,247,.12)", name:"Route 53", full:"Route 53 DNS", tagline:"Domain name system — connect your domain to AWS", free:false,
+  what:"Route 53 is AWS's DNS service. It maps your domain name (e.g. taskapp.com) to your AWS resources (CloudFront distribution for frontend, ALB for backend). It also provides health checks and automatic failover.",
+  console:["Route 53","Hosted zones","Create hosted zone"],
+  steps:[
+    {t:"Create Hosted Zone",d:"Route 53 → <strong>Hosted zones</strong> → <strong>Create hosted zone</strong>. Enter your domain (e.g. <strong>taskapp.com</strong>). Type: Public hosted zone.",n:"$0.50/month per zone"},
+    {t:"Update domain nameservers",d:"Route 53 gives you 4 NS records (e.g. ns-1234.awsdns-01.com). Go to your domain registrar (GoDaddy/Namecheap) and replace their nameservers with these 4 AWS nameservers.",n:"Propagation: 5-48 hours"},
+    {t:"Create A record for frontend",d:"In your hosted zone → <strong>Create record</strong>. Record name: www (or leave blank for apex). Type: <strong>A</strong>. Enable <strong>Alias</strong>. Route traffic to: CloudFront distribution.",n:""},
+    {t:"Create A record for API",d:"Create another A record. Name: <strong>api</strong>. Alias → Route to: Application Load Balancer → select your ALB. This maps api.taskapp.com to your backend.",n:""},
+    {t:"Create health checks",d:"Route 53 → Health checks → Create. Enter your ALB DNS name. Path: /health. If it fails, Route 53 can automatically failover to a backup.",n:""},
+  ],
+  cli:`aws route53 create-hosted-zone \\
+  --name taskapp.com \\
+  --caller-reference $(date +%s)
+
+# Create A record aliasing to CloudFront
+aws route53 change-resource-record-sets \\
+  --hosted-zone-id ZONEID \\
+  --change-batch file://dns-record.json`,
+  tips:[
+    {h:"Apex domain",b:"For root domain (taskapp.com without www), use Alias A record — regular CNAME can't point to apex. Route 53 supports it natively"},
+    {h:"TTL strategy",b:"Set low TTL (60s) during initial setup. Once stable, increase to 300-3600s. Lower TTL = faster DNS propagation during changes"},
+    {h:"Latency routing",b:"Use Latency routing policy to send users to the nearest AWS region automatically — great for global apps"},
+    {h:"Failover routing",b:"Set primary record to your main ALB and secondary to a static S3 error page. Route 53 auto-switches if health check fails"},
+  ]
+},
+
+/* ════════════════ COMPUTE ════════════════ */
+{ cat:"Compute", icon:"🖥️", bg:"rgba(255,212,59,.1)", name:"EC2", full:"Elastic Compute Cloud", tagline:"Virtual machines — your main app server", free:true,
+  what:"EC2 gives you virtual servers in the cloud. Your Node.js/Python Express backend runs here. You pick the OS (Amazon Linux 2023), size (t3.micro for Free Tier), and networking. EC2 instances live in your VPC private subnet and receive traffic from the ALB.",
+  console:["EC2","Instances","Launch instances"],
+  steps:[
+    {t:"Open EC2 → Launch Instance",d:"EC2 Console → <strong>Instances</strong> → <strong>Launch instances</strong> (big orange button top-right).",n:""},
+    {t:"Name and AMI",d:"Name: <strong>taskapp-server</strong>. AMI: <strong>Amazon Linux 2023</strong> (free, optimized for AWS, already has AWS CLI). Architecture: x86_64.",n:"Free Tier eligible"},
+    {t:"Instance type",d:"Select <strong>t3.micro</strong> (2 vCPU, 1 GB RAM). Free Tier = 750 hours/month for 12 months. For production consider t3.small or t3.medium.",n:"t3.micro = FREE"},
+    {t:"Key pair",d:"<strong>Create new key pair</strong> → name: taskapp-key → Type: RSA → Format: .pem → Download. Save it somewhere safe. You'll need this to SSH into the instance.",n:""},
+    {t:"Network settings",d:"VPC: taskapp-vpc. Subnet: <strong>private subnet</strong> (not public). Auto-assign public IP: <strong>Disable</strong>. SG: Create new — allow TCP 3000 from ALB SG only.",n:""},
+    {t:"Storage",d:"Root volume: <strong>20 GB gp3</strong> (faster and cheaper than gp2). Tick <strong>Delete on termination</strong> for dev. For prod, uncheck to preserve data if instance is replaced.",n:""},
+    {t:"IAM Instance Profile",d:"Expand Advanced details. IAM instance profile: select <strong>taskapp-ec2-role</strong> (create this first in IAM). This lets EC2 access S3, SQS, Secrets Manager without hardcoded keys.",n:"Critical — never skip"},
+    {t:"User Data script",d:"Paste your bootstrap script in User Data. It runs once on first boot — installs Node.js, fetches secrets from Secrets Manager, clones your repo, and starts the app with PM2.",n:""},
+    {t:"Launch",d:"Click <strong>Launch instance</strong>. Instance starts in ~1 minute. Check Status Checks column — wait for <strong>2/2 checks passed</strong> before testing.",n:""},
+  ],
+  cli:`aws ec2 run-instances \\
+  --image-id ami-0c55b159cbfafe1f0 \\
+  --instance-type t3.micro \\
+  --key-name taskapp-key \\
+  --subnet-id subnet-private-1 \\
+  --security-group-ids sg-ec2 \\
+  --iam-instance-profile Name=taskapp-ec2-role \\
+  --user-data file://userdata.sh \\
+  --block-device-mappings '[{"DeviceName":"/dev/xvda","Ebs":{"VolumeSize":20,"VolumeType":"gp3"}}]' \\
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=taskapp-server}]'`,
+  tips:[
+    {h:"Never use root keys",b:"Attach an IAM Role to EC2 instead of copying AWS access keys. The role auto-rotates credentials every hour"},
+    {h:"Session Manager SSH",b:"Use AWS Systems Manager Session Manager — SSH without port 22 open, no key file needed, all sessions logged to CloudWatch"},
+    {h:"Auto Scaling",b:"Create a Launch Template from your instance, then an Auto Scaling Group: min=1, desired=2, max=5. Scales on CPU > 70%"},
+    {h:"Stop vs Terminate",b:"Stop = instance paused, data preserved, no compute charge. Terminate = deleted forever. Use Stop for dev instances overnight"},
+  ]
+},
+
+{ cat:"Compute", icon:"⚡", bg:"rgba(255,212,59,.1)", name:"Lambda", full:"AWS Lambda", tagline:"Serverless functions — zero server management", free:true,
+  what:"Lambda runs your code without you managing any servers. You pay only when code runs (first 1 million requests free every month forever). Use Lambda for: processing SQS messages, resizing S3 images, sending emails, scheduled jobs, and API Gateway handlers.",
+  console:["Lambda","Functions","Create function"],
+  steps:[
+    {t:"Open Lambda → Create function",d:"Lambda Console → <strong>Functions</strong> → <strong>Create function</strong>. Choose <strong>Author from scratch</strong>.",n:""},
+    {t:"Basic information",d:"Function name: <strong>taskapp-email-worker</strong>. Runtime: <strong>Node.js 20.x</strong>. Architecture: x86_64.",n:""},
+    {t:"Permissions",d:"Execution role: <strong>Create a new role with basic Lambda permissions</strong>. Then go to IAM and add permissions for SES, DynamoDB, SQS to that role.",n:""},
+    {t:"Write the function",d:"In the code editor, write your handler. Export: <strong>exports.handler = async (event) => { ... }</strong>. The event object contains the trigger data (SQS message body, S3 event, etc.).",n:""},
+    {t:"Configure timeout and memory",d:"Configuration → General configuration. Memory: <strong>256 MB</strong>. Timeout: <strong>30 seconds</strong>. Default is only 3 seconds — increase it for any real work.",n:""},
+    {t:"Environment variables",d:"Configuration → Environment variables. Add DB_HOST, REDIS_URL, etc. But prefer <strong>Secrets Manager</strong> — fetch secrets in code, not env vars.",n:""},
+    {t:"Add trigger",d:"Click <strong>Add trigger</strong>. For email worker: choose SQS → select taskapp-tasks queue → Batch size: 10. Lambda polls SQS automatically and invokes handler with messages.",n:""},
+    {t:"Deploy and test",d:"Click <strong>Deploy</strong> after any code change. Then <strong>Test</strong> tab → create test event with sample payload → Run. Check CloudWatch Logs for output.",n:""},
+  ],
+  cli:`# Create Lambda function from zip
+zip -r function.zip index.js node_modules/
+
+aws lambda create-function \\
+  --function-name taskapp-email-worker \\
+  --runtime nodejs20.x \\
+  --zip-file fileb://function.zip \\
+  --handler index.handler \\
+  --role arn:aws:iam::ACCOUNT:role/lambda-role \\
+  --timeout 30 \\
+  --memory-size 256
+
+# Add SQS trigger
+aws lambda create-event-source-mapping \\
+  --function-name taskapp-email-worker \\
+  --event-source-arn arn:aws:sqs:region:ACCOUNT:taskapp-tasks \\
+  --batch-size 10`,
+  tips:[
+    {h:"Cold starts",b:"Lambda has cold start latency (~100-500ms) on first invocation. Use Provisioned Concurrency for latency-sensitive APIs. Keep functions warm with EventBridge scheduled pings"},
+    {h:"Layers",b:"Use Lambda Layers for shared dependencies (node_modules). All functions share one layer — reduces deployment package size dramatically"},
+    {h:"1M free forever",b:"Lambda free tier: 1 million requests + 400,000 GB-seconds compute/month — permanent, not just 12 months. Great for low-traffic workloads"},
+    {h:"Powertools",b:"Use AWS Lambda Powertools for Node.js — gives you structured logging, tracing (X-Ray), and metrics in 3 lines of code"},
+  ]
+},
+
+/* ════════════════ STORAGE ════════════════ */
+{ cat:"Storage", icon:"🪣", bg:"rgba(81,207,102,.1)", name:"S3", full:"Simple Storage Service", tagline:"Object storage for files, frontend, backups", free:true,
+  what:"S3 stores any file (object) inside containers called buckets. This project uses two buckets: one to host the React frontend as a static website, and one to store user-uploaded attachments (accessed via presigned URLs). S3 scales infinitely, charges per GB stored.",
+  console:["S3","Create bucket"],
+  steps:[
+    {t:"Create frontend bucket",d:"S3 → <strong>Create bucket</strong>. Name: <strong>taskapp-frontend-YOURNAME</strong> (globally unique). Region: ap-south-1. Leave all settings at default for now.",n:""},
+    {t:"Disable Block Public Access",d:"In bucket settings → Permissions → Block public access → Edit → <strong>Uncheck all</strong>. Confirm. This allows CloudFront to serve files (but we'll restrict to only CloudFront via bucket policy).",n:""},
+    {t:"Enable static website hosting",d:"Properties tab → Static website hosting → Enable. Index document: <strong>index.html</strong>. Error document: <strong>index.html</strong> (important for React Router).",n:""},
+    {t:"Add bucket policy for CloudFront",d:"Permissions → Bucket policy → paste policy that allows only your CloudFront distribution (OAC) to read objects. Never open to public 0.0.0.0/0 directly.",n:""},
+    {t:"Create uploads bucket",d:"Create another bucket: <strong>taskapp-uploads-YOURNAME</strong>. Keep Block Public Access <strong>ON</strong>. Files accessed only via presigned URLs from your backend.",n:""},
+    {t:"Enable CORS on uploads bucket",d:"Uploads bucket → Permissions → CORS → paste config allowing PUT from your frontend domain. This enables browser direct-upload to S3.",n:""},
+    {t:"Enable versioning (optional)",d:"For uploads bucket: Properties → Bucket Versioning → Enable. Keeps old versions of files — protection against accidental overwrites. Costs more in storage.",n:""},
+    {t:"Deploy frontend",d:"<code>npm run build</code> then <code>aws s3 sync ./build s3://taskapp-frontend-YOURNAME --delete</code>. The --delete flag removes old files not in the new build.",n:""},
+  ],
+  cli:`# Create buckets
+aws s3 mb s3://taskapp-frontend-yourname --region ap-south-1
+aws s3 mb s3://taskapp-uploads-yourname --region ap-south-1
+
+# Deploy frontend build
+npm run build
+aws s3 sync ./build s3://taskapp-frontend-yourname \\
+  --delete \\
+  --cache-control "max-age=86400"
+
+# Upload single file
+aws s3 cp file.pdf s3://taskapp-uploads-yourname/uploads/file.pdf`,
+  tips:[
+    {h:"Lifecycle rules",b:"Add lifecycle rule: move files to S3 Glacier after 90 days (80% cheaper). Delete incomplete multipart uploads after 7 days"},
+    {h:"Presigned URLs",b:"Never expose uploads bucket publicly. Generate presigned PUT URL on backend → frontend uploads directly to S3 → no file goes through your server"},
+    {h:"Transfer Acceleration",b:"Enable S3 Transfer Acceleration for globally distributed users. Files upload through CloudFront edge → S3, much faster than direct upload"},
+    {h:"Event notifications",b:"S3 → Properties → Event notifications → trigger Lambda when files are uploaded. Use for image resizing, virus scanning, processing"},
+  ]
+},
+
+/* ════════════════ DATABASE ════════════════ */
+{ cat:"Database", icon:"🐘", bg:"rgba(247,131,172,.1)", name:"RDS", full:"Relational Database Service — PostgreSQL", tagline:"Managed PostgreSQL — users, tasks, projects", free:true,
+  what:"RDS manages your PostgreSQL database — backups, patches, failover are all automatic. You just use it like a normal Postgres database. The instance runs in your private subnet (not publicly accessible). Your EC2 connects via the private IP.",
+  console:["RDS","Create database"],
+  steps:[
+    {t:"Open RDS → Create database",d:"RDS Console → <strong>Create database</strong>. Method: <strong>Standard create</strong>. Engine: <strong>PostgreSQL</strong>. Version: 16.x (latest).",n:""},
+    {t:"Templates",d:"Template: <strong>Free tier</strong> (for dev). This auto-selects db.t3.micro and disables Multi-AZ. For production select <strong>Production</strong> template.",n:"Free Tier: db.t3.micro"},
+    {t:"Settings",d:"DB instance identifier: <strong>taskapp-db</strong>. Master username: <strong>taskapp_admin</strong>. Master password: Generate and save in <strong>Secrets Manager</strong> (tick the option).",n:""},
+    {t:"Instance configuration",d:"Free Tier auto-selects <strong>db.t3.micro</strong> (2 vCPU, 1 GB RAM). For production: db.t3.small or db.t3.medium.",n:""},
+    {t:"Storage",d:"Allocated storage: <strong>20 GB gp2</strong> (free tier max). Enable <strong>Storage autoscaling</strong> with maximum of 100 GB — auto-grows when 90% full.",n:""},
+    {t:"Connectivity",d:"VPC: taskapp-vpc. DB Subnet Group: create new (select both private subnets). Public access: <strong>No</strong>. VPC Security Group: create new — allow port 5432 from EC2 SG only.",n:"Never public"},
+    {t:"Additional configuration",d:"Initial database name: <strong>taskapp</strong>. Backup retention: <strong>7 days</strong>. Enable <strong>Enhanced monitoring</strong>. Enable <strong>Performance Insights</strong> (free for 7 days retention).",n:""},
+    {t:"Create and connect",d:"Click Create (takes ~5-10 minutes). Once available, copy the <strong>Endpoint</strong> from the console. Store it in Secrets Manager. Connect from EC2 using psql or your ORM.",n:""},
+  ],
+  cli:`aws rds create-db-instance \\
+  --db-instance-identifier taskapp-db \\
+  --db-instance-class db.t3.micro \\
+  --engine postgres \\
+  --engine-version 16.1 \\
+  --master-username taskapp_admin \\
+  --manage-master-user-password \\
+  --allocated-storage 20 \\
+  --vpc-security-group-ids sg-rds \\
+  --db-subnet-group-name taskapp-db-subnet-group \\
+  --backup-retention-period 7 \\
+  --no-publicly-accessible \\
+  --db-name taskapp`,
+  tips:[
+    {h:"Connection pooling",b:"Use PgBouncer or RDS Proxy (adds cost). Without pooling, too many connections to Postgres cause errors. Lambda especially needs RDS Proxy"},
+    {h:"Read replicas",b:"For read-heavy workloads, create a Read Replica. Direct SELECT queries to replica, writes to primary. Eventual consistency of ~1-100ms"},
+    {h:"Parameter groups",b:"Create a custom parameter group. Set: shared_preload_libraries=pg_stat_statements, max_connections=200, work_mem=64MB"},
+    {h:"Snapshots",b:"Manual snapshots survive instance deletion. Automate with AWS Backup. Test restore at least once — untested backups are not backups"},
+  ]
+},
+
+{ cat:"Database", icon:"⚡", bg:"rgba(247,131,172,.1)", name:"DynamoDB", full:"Amazon DynamoDB", tagline:"NoSQL — sessions, notifications, audit logs", free:true,
+  what:"DynamoDB is a fully managed NoSQL database with single-digit millisecond latency at any scale. This project uses it for user sessions, notification history, and activity logs — data that's high-volume, simple structure, and needs to be fast.",
+  console:["DynamoDB","Create table"],
+  steps:[
+    {t:"Open DynamoDB → Create table",d:"DynamoDB Console → <strong>Create table</strong>.",n:""},
+    {t:"Table name and partition key",d:"Table name: <strong>Sessions</strong>. Partition key: <strong>userId</strong> (String). Sort key: <strong>sessionId</strong> (String). Composite key lets you query all sessions for a user.",n:""},
+    {t:"Table settings",d:"Table settings: <strong>Customize settings</strong>. Table class: <strong>DynamoDB Standard</strong>.",n:""},
+    {t:"Read/Write capacity",d:"Capacity mode: <strong>On-demand</strong> (pay-per-use, no capacity planning). Recommended for apps with unpredictable traffic. Switch to Provisioned when load is stable.",n:"Free: 25 GB storage"},
+    {t:"Enable TTL",d:"Additional settings → Time to Live (TTL) → Turn on → Attribute name: <strong>ttl</strong>. Store Unix timestamp in this field. DynamoDB auto-deletes expired items (great for sessions).",n:"TTL = auto-expire rows"},
+    {t:"Enable Point-in-time recovery",d:"Additional settings → Backups → Enable <strong>Point-in-time recovery (PITR)</strong>. Lets you restore table to any second in the last 35 days.",n:""},
+    {t:"Create table",d:"Click Create. Table is ready in seconds. Create secondary tables: <strong>Notifications</strong> (partition: userId, sort: timestamp) and <strong>AuditLog</strong> (partition: userId, sort: eventId).",n:""},
+  ],
+  cli:`aws dynamodb create-table \\
+  --table-name Sessions \\
+  --attribute-definitions \\
+    AttributeName=userId,AttributeType=S \\
+    AttributeName=sessionId,AttributeType=S \\
+  --key-schema \\
+    AttributeName=userId,KeyType=HASH \\
+    AttributeName=sessionId,KeyType=RANGE \\
+  --billing-mode PAY_PER_REQUEST \\
+  --time-to-live-specification \\
+    Enabled=true,AttributeName=ttl \\
+  --point-in-time-recovery-specification \\
+    PointInTimeRecoveryEnabled=true`,
+  tips:[
+    {h:"Access patterns first",b:"Design your table around your access patterns, not your data structure. Ask: what queries will you run? Design keys to support those queries directly"},
+    {h:"Single-table design",b:"Advanced: put multiple entity types in one table using composite sort keys (USER#123, ORDER#456). Reduces cost and latency"},
+    {h:"Global Secondary Index",b:"Add GSI if you need to query by a non-key attribute (e.g. query sessions by email). Max 20 GSIs per table"},
+    {h:"DynamoDB Streams",b:"Enable Streams to trigger Lambda on every insert/update/delete — powerful for audit logs, real-time sync, and search indexing"},
+  ]
+},
+
+{ cat:"Database", icon:"💨", bg:"rgba(247,131,172,.1)", name:"ElastiCache", full:"ElastiCache for Redis", tagline:"In-memory cache — API speed, session store, rate limiting", free:false,
+  what:"ElastiCache runs managed Redis in your VPC. It acts as a high-speed caching layer between your EC2 app and RDS database. Cache hot query results in Redis and skip RDS for repeated requests — reducing DB load by 90% and response time from 50ms to 1ms.",
+  console:["ElastiCache","Redis OSS caches","Create Redis OSS cache"],
+  steps:[
+    {t:"Open ElastiCache → Create cache",d:"ElastiCache Console → <strong>Redis OSS caches</strong> → <strong>Create Redis OSS cache</strong>.",n:""},
+    {t:"Deployment option",d:"Choose <strong>Design your own cache</strong> → <strong>Cluster cache</strong> for single node (dev) or <strong>Clustered</strong> for sharding (production).",n:""},
+    {t:"Cluster info",d:"Name: <strong>taskapp-redis</strong>. Description: App caching layer. Location: <strong>AWS Cloud</strong>.",n:""},
+    {t:"Cluster settings",d:"Engine version: Redis 7.x. Port: <strong>6379</strong>. Node type: <strong>cache.t3.micro</strong> (cheapest, ~$13/month). Number of replicas: 0 for dev, 1 for prod.",n:"cache.t3.micro = ~$13/mo"},
+    {t:"Subnet group",d:"Create new subnet group: <strong>taskapp-cache-subnet</strong>. Select your VPC and choose the <strong>private subnets</strong>.",n:""},
+    {t:"Security",d:"Security groups: create new SG. Allow inbound port 6379 from <strong>EC2 security group only</strong>. Redis must never be publicly accessible.",n:""},
+    {t:"Backup and maintenance",d:"Enable automatic backups (free for 1 backup). Backup retention: 1 day. Maintenance window: choose off-peak hours.",n:""},
+    {t:"Connect from EC2",d:"Use the Primary Endpoint from the console. In your Node.js code: redis.createClient({ url: 'redis://ENDPOINT:6379' }). EC2 and Redis must be in the same VPC.",n:""},
+  ],
+  cli:`aws elasticache create-cache-cluster \\
+  --cache-cluster-id taskapp-redis \\
+  --engine redis \\
+  --engine-version 7.0 \\
+  --cache-node-type cache.t3.micro \\
+  --num-cache-nodes 1 \\
+  --cache-subnet-group-name taskapp-cache-subnet \\
+  --security-group-ids sg-redis`,
+  tips:[
+    {h:"Cache patterns",b:"Cache-aside: app checks Redis first, on miss reads DB and writes to Redis with TTL. Write-through: write to cache + DB simultaneously"},
+    {h:"Key naming",b:"Use namespaced keys: tasks:userId:123, user:profile:456. Easier to purge related keys with SCAN pattern matching"},
+    {h:"TTL strategy",b:"Short TTL (60s) for frequently changing data. Long TTL (1hr) for user profiles. Always invalidate cache on write — stale cache = bugs"},
+    {h:"Redis vs Memcached",b:"Use Redis: supports data structures (lists, sets, sorted sets), persistence, pub/sub, Lua scripting. Memcached: simpler, multi-threaded, for pure caching only"},
+  ]
+},
+
+/* ════════════════ AUTH & SECURITY ════════════════ */
+{ cat:"Auth & Security", icon:"🔑", bg:"rgba(151,117,250,.12)", name:"Cognito", full:"Amazon Cognito", tagline:"User authentication — sign-up, sign-in, JWT tokens", free:true,
+  what:"Cognito handles all user authentication so you don't have to build it. It manages sign-up/sign-in, email verification, password reset, MFA, and OAuth (Google/Facebook login). After login, users get a JWT token they send with every API request. Your backend verifies this token.",
+  console:["Cognito","Create user pool"],
+  steps:[
+    {t:"Open Cognito → Create user pool",d:"Cognito Console → <strong>User pools</strong> → <strong>Create user pool</strong>.",n:"Free: 50,000 MAU"},
+    {t:"Sign-in experience",d:"Cognito user pool sign-in options: tick <strong>Email</strong>. Do NOT tick username (email-only is simpler). Multi-factor authentication: <strong>Optional MFA</strong> with TOTP authenticator.",n:""},
+    {t:"Security requirements",d:"Password minimum length: <strong>8</strong>. Require: uppercase, lowercase, numbers, symbols. User account recovery: <strong>Email only</strong>.",n:""},
+    {t:"Sign-up experience",d:"Self-service sign-up: <strong>Enable</strong>. Required attributes: email, name. Cognito sends verification email automatically.",n:""},
+    {t:"Message delivery",d:"Email provider: <strong>Send email with Cognito</strong> (free, max 50 emails/day for dev). For production, switch to <strong>Amazon SES</strong> (higher limits).",n:""},
+    {t:"App integration",d:"App type: <strong>Single-page application</strong>. App client name: <strong>taskapp-web</strong>. Allowed callback URLs: https://localhost:3000/callback and https://yourdomain.com/callback.",n:""},
+    {t:"Hosted UI (optional)",d:"Enable Cognito Hosted UI for a ready-made login page. Or build your own with Amplify JS library. Recommended: use Amplify library — handles token refresh automatically.",n:""},
+    {t:"Copy Pool ID and Client ID",d:"After creation, note the <strong>User Pool ID</strong> (e.g. ap-south-1_XXXXXXX) and <strong>App Client ID</strong>. Add these to your frontend .env file.",n:""},
+  ],
+  cli:`aws cognito-idp create-user-pool \\
+  --pool-name taskapp-users \\
+  --auto-verified-attributes email \\
+  --mfa-configuration OPTIONAL \\
+  --policies 'PasswordPolicy={MinimumLength=8,RequireUppercase=true,RequireLowercase=true,RequireNumbers=true,RequireSymbols=true}' \\
+  --account-recovery-setting 'RecoveryMechanisms=[{Priority=1,Name=verified_email}]'
+
+# Create App Client
+aws cognito-idp create-user-pool-client \\
+  --user-pool-id ap-south-1_XXXXX \\
+  --client-name taskapp-web \\
+  --no-generate-secret \\
+  --supported-identity-providers COGNITO \\
+  --callback-urls https://yourdomain.com/callback`,
+  tips:[
+    {h:"JWT verification",b:"Backend verifies JWT using Cognito's JWKS endpoint: https://cognito-idp.{region}.amazonaws.com/{userPoolId}/.well-known/jwks.json — use the jsonwebtoken library"},
+    {h:"Amplify library",b:"Use @aws-amplify/auth on frontend — handles sign-in, sign-up, token refresh, and MFA in 5 lines of code. Auto-refreshes tokens 5 minutes before expiry"},
+    {h:"Groups for RBAC",b:"Create Cognito Groups (admin, user, moderator). Lambda trigger adds group claim to JWT. Backend checks claim for authorization"},
+    {h:"Social login",b:"Add Google/Facebook: App integration → Identity providers. Users can sign in with existing accounts. Cognito maps social identity to your user pool"},
+  ]
+},
+
+{ cat:"Auth & Security", icon:"🔐", bg:"rgba(151,117,250,.12)", name:"Secrets Manager", full:"AWS Secrets Manager", tagline:"Store credentials — no hardcoded secrets ever", free:false,
+  what:"Secrets Manager stores database passwords, API keys, JWT secrets, and third-party credentials. EC2 and Lambda fetch secrets at runtime via IAM — no hardcoded credentials in code or environment variables. Secrets can be automatically rotated on a schedule.",
+  console:["Secrets Manager","Store a new secret"],
+  steps:[
+    {t:"Open Secrets Manager → Store a new secret",d:"Secrets Manager Console → <strong>Store a new secret</strong>.",n:"$0.40/secret/month"},
+    {t:"Secret type — DB credentials",d:"Secret type: <strong>Credentials for Amazon RDS database</strong>. Enter username and password. Select your RDS database. Secrets Manager auto-connects rotation to your DB.",n:""},
+    {t:"Secret name and description",d:"Secret name: <strong>taskapp/db</strong>. Description: RDS PostgreSQL credentials. Use / to organize: taskapp/redis, taskapp/jwt-secret, taskapp/ses-smtp.",n:""},
+    {t:"Store other secrets",d:"For non-RDS secrets (JWT secret, API keys): type = <strong>Other type of secret</strong>. Add key-value pairs: { \"jwt_secret\": \"your-super-secret-key\", \"redis_url\": \"redis://...\" }.",n:""},
+    {t:"Enable rotation",d:"For DB secret: enable <strong>Automatic rotation</strong>. Rotation schedule: 30 days. Secrets Manager creates a Lambda that rotates the RDS password and updates the secret — zero downtime.",n:""},
+    {t:"Access from EC2",d:"In your Node.js code: use AWS SDK SecretsManagerClient. No environment variables needed — IAM role gives EC2 permission to GetSecretValue at runtime.",n:""},
+    {t:"Access from Lambda",d:"Same SDK approach. Add secretsmanager:GetSecretValue to Lambda execution role for the specific secret ARN only (least privilege).",n:""},
+  ],
+  cli:`# Store DB secret
+aws secretsmanager create-secret \\
+  --name taskapp/db \\
+  --description "RDS PostgreSQL credentials" \\
+  --secret-string '{"host":"xxx.rds.amazonaws.com","port":5432,"dbname":"taskapp","username":"taskapp_admin","password":"StrongPass123!"}'
+
+# Store API key
+aws secretsmanager create-secret \\
+  --name taskapp/stripe-key \\
+  --secret-string '{"secret_key":"sk_live_xxx"}'
+
+# Fetch in code (Node.js SDK)
+# const client = new SecretsManagerClient({region:"ap-south-1"})
+# const {SecretString} = await client.send(new GetSecretValueCommand({SecretId:"taskapp/db"}))`,
+  tips:[
+    {h:"Cache secrets",b:"Fetch secret once on startup and cache in memory. Re-fetch on rotation (handle SecretsManagerRotationException). AWS SDK has built-in caching client"},
+    {h:"Least privilege",b:"Grant IAM access to specific secret ARNs, not wildcard *. Resource: arn:aws:secretsmanager:region:account:secret:taskapp/db*"},
+    {h:"vs Parameter Store",b:"SSM Parameter Store: free for standard parameters, great for config. Secrets Manager: paid, has auto-rotation, better for actual secrets. Use both"},
+    {h:"Audit with CloudTrail",b:"Every GetSecretValue call is logged in CloudTrail. Set up CloudWatch alarm on unusual access patterns to detect credential theft"},
+  ]
+},
+
+{ cat:"Auth & Security", icon:"🛡️", bg:"rgba(151,117,250,.12)", name:"IAM", full:"Identity and Access Management", tagline:"Who can do what — roles, policies, least privilege", free:true,
+  what:"IAM controls access to every AWS service. Instead of hardcoding AWS keys, you create IAM Roles (identities) and attach Policies (permission documents). EC2, Lambda, and ECS assume roles automatically — no credentials to manage, rotate, or leak.",
+  console:["IAM","Roles","Create role"],
+  steps:[
+    {t:"Create EC2 Role",d:"IAM Console → <strong>Roles</strong> → <strong>Create role</strong>. Trusted entity type: <strong>AWS service</strong>. Use case: <strong>EC2</strong>. This allows EC2 to assume the role.",n:""},
+    {t:"Attach permissions policies",d:"Search and attach: <strong>AmazonSSMManagedInstanceCore</strong> (for Session Manager SSH). Then create custom inline policy for S3, SQS, Secrets Manager access.",n:""},
+    {t:"Write least-privilege policy",d:"Create inline policy. Allow only the specific actions and resources your app needs. Never use AdministratorAccess or FullAccess on production resources.",n:""},
+    {t:"Name and create",d:"Role name: <strong>taskapp-ec2-role</strong>. Click Create. Go to EC2 console → select your instance → Actions → Security → Modify IAM role → attach taskapp-ec2-role.",n:""},
+    {t:"Create Lambda Role",d:"Repeat for Lambda. Trusted entity: Lambda. Attach: AWSLambdaBasicExecutionRole (CloudWatch logs). Then add custom policy for SES, SQS, DynamoDB access.",n:""},
+    {t:"Create ECS Task Role",d:"For ECS containers: create role with trusted entity ECS Tasks. Attach permissions your containers need (S3, SQS). Attach as Task Role in ECS task definition.",n:""},
+    {t:"Test permissions with Policy Simulator",d:"IAM Console → <strong>Policy Simulator</strong>. Select a role, choose a service and action, simulate. Shows exactly what is allowed or denied before deploying.",n:""},
+  ],
+  cli:`# Create EC2 role
+aws iam create-role \\
+  --role-name taskapp-ec2-role \\
+  --assume-role-policy-document '{
+    "Version":"2012-10-17",
+    "Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]
+  }'
+
+# Attach inline policy
+aws iam put-role-policy \\
+  --role-name taskapp-ec2-role \\
+  --policy-name taskapp-ec2-permissions \\
+  --policy-document file://ec2-policy.json
+
+# Create instance profile (required to attach role to EC2)
+aws iam create-instance-profile \\
+  --instance-profile-name taskapp-ec2-role
+aws iam add-role-to-instance-profile \\
+  --instance-profile-name taskapp-ec2-role \\
+  --role-name taskapp-ec2-role`,
+  tips:[
+    {h:"Least privilege always",b:"Start with no permissions and add only what's needed. Never start with AdministratorAccess. Ask: what exact actions does this service need?"},
+    {h:"Resource-level",b:"Restrict to specific resources: s3:GetObject on arn:aws:s3:::taskapp-uploads/* not *. This limits blast radius if credentials are compromised"},
+    {h:"Permission boundaries",b:"Use permission boundaries for delegated admin — a user can create roles but only with permissions within the boundary. Prevents privilege escalation"},
+    {h:"Access Analyzer",b:"Enable IAM Access Analyzer to find resources shared with external accounts (unintended public S3, SQS policies). Shows external access in one dashboard"},
+  ]
+},
+
+{ cat:"Auth & Security", icon:"🧱", bg:"rgba(151,117,250,.12)", name:"WAF", full:"Web Application Firewall", tagline:"Block attacks before they reach your server", free:false,
+  what:"WAF sits in front of CloudFront or ALB and filters HTTP requests before they reach your EC2. It blocks SQL injection, XSS, bad bots, and rate limits requests per IP. AWS provides managed rule groups that are updated by AWS security team automatically.",
+  console:["WAF & Shield","Web ACLs","Create web ACL"],
+  steps:[
+    {t:"Open WAF → Create Web ACL",d:"WAF & Shield Console → <strong>Web ACLs</strong> → <strong>Create web ACL</strong>. For CloudFront: region must be <strong>us-east-1</strong> (global). For ALB: use the ALB's region.",n:""},
+    {t:"Name and resource",d:"Name: <strong>taskapp-waf</strong>. Resource type: <strong>CloudFront distributions</strong> or <strong>Application Load Balancer</strong>. Add associated resources: select your CloudFront distribution.",n:"$5/month + $1/million reqs"},
+    {t:"Add AWS managed rules",d:"Click <strong>Add rules</strong> → <strong>Add managed rule groups</strong>. Add: <strong>AWSManagedRulesCommonRuleSet</strong> (XSS, LFI, RCE). Add: <strong>AWSManagedRulesKnownBadInputsRuleSet</strong> (Log4J, SSRF).",n:""},
+    {t:"Add SQL injection rules",d:"Also add: <strong>AWSManagedRulesSQLiRuleSet</strong>. These rule groups are maintained by AWS security team and updated automatically when new threats emerge.",n:""},
+    {t:"Add rate limiting rule",d:"Add rules → <strong>Add my own rules</strong> → <strong>Rate-based rule</strong>. Name: RateLimit. Rate limit: <strong>2000 requests per 5 minutes</strong> per IP. Action: Block. This blocks brute force and DDoS.",n:""},
+    {t:"Set default action",d:"Default web ACL action for requests that don't match any rule: <strong>Allow</strong>. Rules block bad traffic; everything else passes through.",n:""},
+    {t:"Enable metrics",d:"CloudWatch metrics: enabled. Sampled requests: enabled. These give you visibility into blocked requests and attack patterns in CloudWatch.",n:""},
+  ],
+  cli:`aws wafv2 create-web-acl \\
+  --name taskapp-waf \\
+  --scope CLOUDFRONT \\
+  --region us-east-1 \\
+  --default-action Allow={} \\
+  --rules '[
+    {"Name":"CommonRules","Priority":1,
+     "OverrideAction":{"None":{}},
+     "Statement":{"ManagedRuleGroupStatement":{"VendorName":"AWS","Name":"AWSManagedRulesCommonRuleSet"}},
+     "VisibilityConfig":{"SampledRequestsEnabled":true,"CloudWatchMetricsEnabled":true,"MetricName":"CommonRules"}},
+    {"Name":"RateLimit","Priority":2,
+     "Action":{"Block":{}},
+     "Statement":{"RateBasedStatement":{"Limit":2000,"AggregateKeyType":"IP"}},
+     "VisibilityConfig":{"SampledRequestsEnabled":true,"CloudWatchMetricsEnabled":true,"MetricName":"RateLimit"}}
+  ]' \\
+  --visibility-config SampledRequestsEnabled=true,CloudWatchMetricsEnabled=true,MetricName=taskapp-waf`,
+  tips:[
+    {h:"Count mode first",b:"Set new rules to Count (not Block) for the first week. Monitor what gets flagged in CloudWatch. Only switch to Block after confirming no false positives"},
+    {h:"Geo blocking",b:"Add Geo match rule to block countries you don't serve. Reduces attack surface significantly with no false positives for legitimate users"},
+    {h:"Bot Control",b:"Add AWS Bot Control managed rule group ($10/month) — blocks known bad bots, scrapers, credential stuffers while allowing GoogleBot and other good bots"},
+    {h:"IP reputation",b:"Add AWSManagedRulesAmazonIpReputationList — blocks IPs known to AWS as bad actors (botnets, Tor exit nodes, scanners). Highly effective, low false positives"},
+  ]
+},
+
+{ cat:"Auth & Security", icon:"🔒", bg:"rgba(151,117,250,.12)", name:"ACM", full:"AWS Certificate Manager", tagline:"Free SSL/TLS certificates — auto-renewed", free:true,
+  what:"ACM provides free SSL/TLS certificates for HTTPS. You request a cert for your domain, verify ownership via DNS, and attach it to CloudFront or ALB. ACM auto-renews before expiry — you never have to touch a certificate again.",
+  console:["Certificate Manager","Request a certificate"],
+  steps:[
+    {t:"Open ACM — choose correct region",d:"For CloudFront certificates: open ACM in <strong>us-east-1 (N. Virginia)</strong> specifically — CloudFront only accepts certs from us-east-1. For ALB only: use your app's region.",n:"Critical: must be us-east-1 for CloudFront"},
+    {t:"Request a certificate",d:"ACM → <strong>Request a certificate</strong> → <strong>Request a public certificate</strong> → Next.",n:""},
+    {t:"Add domain names",d:"Fully qualified domain name: <strong>taskapp.com</strong>. Click <strong>Add another name</strong>: add <strong>*.taskapp.com</strong> (wildcard covers www, api, app subdomains).",n:""},
+    {t:"DNS validation",d:"Validation method: <strong>DNS validation</strong> (recommended). Email validation is manual; DNS is automatic. Click Request.",n:""},
+    {t:"Create DNS validation records",d:"ACM shows CNAME records to add. If you use Route 53: click <strong>Create records in Route 53</strong> — it auto-adds the CNAMEs. Validation takes 5-30 minutes.",n:""},
+    {t:"Wait for Issued status",d:"Refresh the ACM console. Status changes from Pending to <strong>Issued</strong>. Certificate ARN is now ready to use.",n:""},
+    {t:"Attach to CloudFront",d:"In CloudFront distribution settings → Edit → Custom SSL certificate → select your ACM cert from the dropdown. Save changes.",n:""},
+    {t:"Attach to ALB",d:"In ALB → Listeners → HTTPS:443 → Edit → Default SSL certificate → change to your ACM cert. Add redirect rule on HTTP:80 → HTTPS.",n:""},
+  ],
+  cli:`# Request certificate (must be us-east-1 for CloudFront)
+aws acm request-certificate \\
+  --domain-name taskapp.com \\
+  --subject-alternative-names "*.taskapp.com" \\
+  --validation-method DNS \\
+  --region us-east-1
+
+# After validation, check status
+aws acm describe-certificate \\
+  --certificate-arn arn:aws:acm:us-east-1:ACCOUNT:certificate/xxx \\
+  --region us-east-1 \\
+  --query 'Certificate.Status'`,
+  tips:[
+    {h:"Always wildcard",b:"Request *.taskapp.com + taskapp.com together in one cert. Wildcard covers all subdomains. No extra cost — certs are always free"},
+    {h:"Auto-renewal",b:"ACM renews automatically 60 days before expiry. As long as your DNS CNAME validation record exists, renewal is fully automatic — zero work"},
+    {h:"Region matters",b:"CloudFront is global, so it needs a cert from us-east-1. ALB, API Gateway use regional certs. You may need two certs in different regions"},
+    {h:"Imported certs",b:"You can import your own certificate (e.g. Let's Encrypt). But ACM-issued certs are free and auto-renew — almost never a reason to import"},
+  ]
+},
+
+/* ════════════════ API ════════════════ */
+{ cat:"API", icon:"🔌", bg:"rgba(255,140,0,.1)", name:"API Gateway", full:"Amazon API Gateway", tagline:"REST API entry point — routing, auth, rate limits", free:true,
+  what:"API Gateway is the front door of your backend. It receives all HTTP requests from the frontend, authenticates them using the Cognito authorizer, and forwards them to your EC2 ALB or Lambda functions. It handles rate limiting, CORS, request validation, and API versioning.",
+  console:["API Gateway","Create API","REST API"],
+  steps:[
+    {t:"Open API Gateway → Create API",d:"API Gateway Console → <strong>Create API</strong> → choose <strong>REST API</strong> (not HTTP API — REST has more features like API keys and usage plans) → <strong>Build</strong>.",n:"Free: 1M calls/month for 12 months"},
+    {t:"Create REST API",d:"Protocol: REST. Create new API. API name: <strong>taskapp-api</strong>. Endpoint type: <strong>Regional</strong> (for ALB backend) or <strong>Edge optimized</strong> (for Lambda, uses CloudFront).",n:""},
+    {t:"Create Cognito Authorizer",d:"Left panel → <strong>Authorizers</strong> → <strong>Create authorizer</strong>. Name: CognitoAuth. Type: <strong>Cognito</strong>. User pool: select taskapp-users. Token source: <strong>Authorization</strong> (header). Click Create.",n:""},
+    {t:"Create resources",d:"Left panel → <strong>Resources</strong> → Actions → <strong>Create resource</strong>. Resource path: <strong>/tasks</strong>. Enable CORS. Repeat for /upload, /projects.",n:""},
+    {t:"Create methods",d:"Select /tasks → Actions → <strong>Create Method</strong> → GET. Integration type: <strong>HTTP</strong>. HTTP method: GET. Endpoint URL: http://your-alb-dns/tasks. Click Save.",n:""},
+    {t:"Attach authorizer to methods",d:"Select GET method → <strong>Method Request</strong> → Authorization: select <strong>CognitoAuth</strong>. Now this endpoint requires a valid Cognito JWT. Repeat for all protected methods.",n:""},
+    {t:"Enable CORS",d:"Select /tasks resource → Actions → <strong>Enable CORS</strong>. Access-Control-Allow-Origin: your domain. Methods: GET,POST,PUT,DELETE. Headers: Authorization,Content-Type. Click Enable.",n:""},
+    {t:"Deploy API",d:"Actions → <strong>Deploy API</strong>. Deployment stage: create new stage named <strong>prod</strong>. Click Deploy. Copy the Invoke URL — add it to your frontend as REACT_APP_API_URL.",n:""},
+  ],
+  cli:`# Create REST API
+aws apigateway create-rest-api \\
+  --name taskapp-api \\
+  --endpoint-configuration types=REGIONAL
+
+# Get root resource id
+aws apigateway get-resources \\
+  --rest-api-id API_ID
+
+# Create /tasks resource
+aws apigateway create-resource \\
+  --rest-api-id API_ID \\
+  --parent-id ROOT_RESOURCE_ID \\
+  --path-part tasks
+
+# Create Cognito authorizer
+aws apigateway create-authorizer \\
+  --rest-api-id API_ID \\
+  --name CognitoAuth \\
+  --type COGNITO_USER_POOLS \\
+  --provider-arns arn:aws:cognito-idp:region:account:userpool/pool-id \\
+  --identity-source 'method.request.header.Authorization'`,
+  tips:[
+    {h:"REST vs HTTP API",b:"HTTP API is cheaper and faster but fewer features. REST API has API keys, usage plans, request/response mapping, and WAF support — use REST for full control"},
+    {h:"Usage plans + API keys",b:"Create Usage Plans (e.g. basic: 1000 req/day, premium: 10000 req/day) and API Keys for third-party integrations. Throttle by key per plan"},
+    {h:"Request validation",b:"Enable request validation in Method Request — validate body, headers, query params against JSON Schema model. Reject bad requests before they hit your backend"},
+    {h:"Caching",b:"Enable API Gateway caching (0.5 GB cache = $0.02/hr). Cache GET responses for 60-300 seconds. Reduces backend load and improves response times"},
+  ]
+},
+
+{ cat:"API", icon:"🌐", bg:"rgba(255,140,0,.1)", name:"CloudFront", full:"Amazon CloudFront", tagline:"CDN — global edge delivery for frontend and API", free:true,
+  what:"CloudFront is a Content Delivery Network with 450+ edge locations worldwide. For the frontend, it caches and serves the React app from the nearest edge to the user. It also handles SSL termination, WAF integration, and can be a proxy for the API Gateway.",
+  console:["CloudFront","Create distribution"],
+  steps:[
+    {t:"Open CloudFront → Create distribution",d:"CloudFront Console → <strong>Create distribution</strong>.",n:"Free: 1 TB data transfer/month"},
+    {t:"Origin — S3 bucket",d:"Origin domain: select your <strong>S3 frontend bucket</strong>. Origin path: leave blank. Name: auto-filled.",n:""},
+    {t:"S3 bucket access (OAC)",d:"S3 bucket access: <strong>Origin access control settings (recommended)</strong> → Create control setting → Name: taskapp-oac → Sign requests. Copy the bucket policy shown and apply it to your S3 bucket.",n:""},
+    {t:"Default cache behavior",d:"Viewer protocol policy: <strong>Redirect HTTP to HTTPS</strong>. Allowed HTTP methods: GET, HEAD (frontend is read-only). Cache policy: <strong>CachingOptimized</strong>.",n:""},
+    {t:"Custom error pages",d:"Error pages tab → Create custom error response. HTTP error code: 404 → Response page path: /index.html → HTTP response code: 200. This fixes React Router deep links.",n:""},
+    {t:"Price class",d:"Price class: <strong>Use all edge locations</strong> for global, or <strong>Use only North America and Europe</strong> to save cost. For India: select All Edge Locations (India has POP in Mumbai, Chennai, Hyderabad).",n:""},
+    {t:"Alternate domain names",d:"Alternate domain names (CNAMEs): add <strong>www.taskapp.com</strong>. Custom SSL certificate: select your ACM certificate from us-east-1.",n:""},
+    {t:"Create and get domain",d:"Click Create distribution. Takes 5-10 minutes to deploy globally. CloudFront gives a domain like abc123.cloudfront.net. Create Route 53 A alias record pointing to it.",n:""},
+  ],
+  cli:`aws cloudfront create-distribution \\
+  --distribution-config '{
+    "CallerReference":"taskapp-'$(date +%s)'",
+    "Origins":{"Quantity":1,"Items":[{"Id":"S3-taskapp-frontend","DomainName":"taskapp-frontend-yourname.s3.ap-south-1.amazonaws.com","S3OriginConfig":{"OriginAccessIdentity":""}}]},
+    "DefaultCacheBehavior":{"TargetOriginId":"S3-taskapp-frontend","ViewerProtocolPolicy":"redirect-to-https","CachePolicyId":"658327ea-f89d-4fab-a63d-7e88639e58f6","AllowedMethods":{"Quantity":2,"Items":["GET","HEAD"]}},
+    "Comment":"taskapp frontend",
+    "Enabled":true
+  }'
+
+# Invalidate cache after deploy
+aws cloudfront create-invalidation \\
+  --distribution-id DIST_ID \\
+  --paths "/*"`,
+  tips:[
+    {h:"Cache invalidation",b:"After every frontend deploy: aws cloudfront create-invalidation --paths '/*'. Without this, users see the old version for up to 24 hours"},
+    {h:"Cache-Control headers",b:"Set different max-age: index.html (no-cache), static assets with hash in filename (max-age=31536000). Hashed filenames = permanent cache, safe to expire instantly on new deploy"},
+    {h:"Multiple origins",b:"CloudFront can have multiple origins. Route /api/* to API Gateway and /* to S3. One domain for both frontend and API, no CORS needed"},
+    {h:"Security headers",b:"Add a CloudFront Function (not Lambda@Edge) to inject security headers: X-Frame-Options, X-Content-Type-Options, Strict-Transport-Security, Content-Security-Policy"},
+  ]
+},
+
+/* ════════════════ MESSAGING ════════════════ */
+{ cat:"Messaging", icon:"📬", bg:"rgba(56,217,169,.1)", name:"SQS", full:"Simple Queue Service", tagline:"Message queue — decouple API from background workers", free:true,
+  what:"SQS is a message queue that decouples your API from background processing. When a user creates a task, the API puts a message in SQS and responds immediately (fast). A Lambda or ECS worker picks up the message and does the slow work (sending email, generating PDF) asynchronously.",
+  console:["SQS","Create queue"],
+  steps:[
+    {t:"Open SQS → Create queue",d:"SQS Console → <strong>Create queue</strong>.",n:"Free: 1M requests/month"},
+    {t:"Queue type",d:"Type: <strong>Standard queue</strong> (unlimited throughput, at-least-once delivery). Use FIFO only if exact order matters (e.g. payment processing).",n:""},
+    {t:"Queue name and settings",d:"Name: <strong>taskapp-tasks</strong>. Visibility timeout: <strong>60 seconds</strong> (time Lambda has to process before message re-appears for retry). Message retention: <strong>1 day</strong>.",n:""},
+    {t:"Receive message wait time",d:"Receive message wait time: <strong>20 seconds</strong>. This enables Long Polling — reduces empty receives and cost. Lambda does this automatically.",n:""},
+    {t:"Create Dead Letter Queue (DLQ)",d:"First create another queue: <strong>taskapp-tasks-dlq</strong>. Then in the main queue, enable <strong>Dead-letter queue</strong>. Select taskapp-tasks-dlq. Maximum receives: <strong>3</strong> (after 3 failed attempts, move to DLQ).",n:"DLQ = safety net for failures"},
+    {t:"Access policy",d:"Access policy: Basic. Define who can send/receive. Choose your EC2 role and Lambda role. Or use resource-based policy JSON for fine control.",n:""},
+    {t:"Encryption",d:"Encryption: choose <strong>Amazon SQS key (SSE-SQS)</strong>. Free encryption using AWS-managed key. Messages encrypted at rest.",n:""},
+    {t:"Wire up Lambda trigger",d:"After creating queue, go to Lambda → select your email worker function → Add trigger → SQS → select taskapp-tasks → Batch size: 10. Lambda now polls SQS automatically.",n:""},
+  ],
+  cli:`# Create main queue
+aws sqs create-queue \\
+  --queue-name taskapp-tasks \\
+  --attributes '{
+    "VisibilityTimeout":"60",
+    "MessageRetentionPeriod":"86400",
+    "ReceiveMessageWaitTimeSeconds":"20",
+    "RedrivePolicy":"{\"deadLetterTargetArn\":\"arn:aws:sqs:region:account:taskapp-tasks-dlq\",\"maxReceiveCount\":\"3\"}"
+  }'
+
+# Send message from Node.js (in EC2 server code)
+# const sqs = new SQSClient({region:"ap-south-1"})
+# await sqs.send(new SendMessageCommand({
+#   QueueUrl: process.env.SQS_TASK_QUEUE_URL,
+#   MessageBody: JSON.stringify({type:"TASK_CREATED", taskId, userId})
+# }))`,
+  tips:[
+    {h:"Idempotent consumers",b:"SQS delivers at-least-once — your consumer may receive duplicates. Make processing idempotent: check if task already processed before acting"},
+    {h:"DLQ monitoring",b:"Set CloudWatch alarm on DLQ ApproximateNumberOfMessagesVisible > 0. Any message in DLQ means a failure — investigate immediately"},
+    {h:"Batch size vs timeout",b:"Lambda batch size 10 = Lambda gets 10 messages at once. Process all 10 in parallel. Visibility timeout must be > your processing time for entire batch"},
+    {h:"FIFO for ordering",b:"FIFO queues guarantee exactly-once, in-order delivery. Max 300 TPS. Add .fifo suffix to name. Use MessageGroupId to parallelize within a group"},
+  ]
+},
+
+{ cat:"Messaging", icon:"📢", bg:"rgba(56,217,169,.1)", name:"SNS", full:"Simple Notification Service", tagline:"Pub/Sub — broadcast notifications to multiple targets", free:true,
+  what:"SNS is a publish-subscribe service. One message published to an SNS Topic is delivered to ALL subscribers — multiple SQS queues, Lambda functions, email addresses, or HTTP endpoints simultaneously. Use it when one event needs to trigger multiple different actions.",
+  console:["SNS","Topics","Create topic"],
+  steps:[
+    {t:"Open SNS → Create topic",d:"SNS Console → <strong>Topics</strong> → <strong>Create topic</strong>.",n:"Free: 1M publishes/month"},
+    {t:"Topic type",d:"Type: <strong>Standard</strong> (high throughput, at-least-once). FIFO only if subscribers need strict ordering.",n:""},
+    {t:"Topic name",d:"Name: <strong>taskapp-notifications</strong>. Display name (for SMS): <strong>TaskApp</strong>. Encryption: SSE enabled (SSE-SNS key).",n:""},
+    {t:"Create subscription — SQS",d:"After topic creation: <strong>Create subscription</strong>. Protocol: <strong>SQS</strong>. Endpoint: select taskapp-tasks queue ARN. This fans out to SQS.",n:""},
+    {t:"Create subscription — Email",d:"Create another subscription. Protocol: <strong>Email</strong>. Endpoint: admin@yourdomain.com. Confirm the subscription email AWS sends.",n:""},
+    {t:"Create subscription — Lambda",d:"Protocol: <strong>AWS Lambda</strong>. Endpoint: select your notification Lambda function ARN. All three subscribers receive every published message.",n:""},
+    {t:"Set SQS queue access policy",d:"The SQS queue needs a policy allowing SNS to send messages to it. SQS Console → queue → Access policy → add Allow sqs:SendMessage from the SNS topic ARN.",n:""},
+    {t:"Publish from backend",d:"In your Node.js code: use SNS PublishCommand. Set Message (JSON body) and Subject. All subscribers receive it instantly.",n:""},
+  ],
+  cli:`# Create topic
+aws sns create-topic --name taskapp-notifications
+
+# Subscribe SQS to SNS
+aws sns subscribe \\
+  --topic-arn arn:aws:sns:region:account:taskapp-notifications \\
+  --protocol sqs \\
+  --notification-endpoint arn:aws:sqs:region:account:taskapp-tasks
+
+# Subscribe email
+aws sns subscribe \\
+  --topic-arn arn:aws:sns:region:account:taskapp-notifications \\
+  --protocol email \\
+  --notification-endpoint admin@yourdomain.com
+
+# Publish message
+aws sns publish \\
+  --topic-arn arn:aws:sns:region:account:taskapp-notifications \\
+  --message '{"type":"TASK_DUE","taskId":"123","userId":"456"}' \\
+  --subject "Task Reminder"`,
+  tips:[
+    {h:"Message filtering",b:"Add FilterPolicy to subscriptions — each subscriber only receives messages matching their filter. E.g. email subscriber gets only TASK_DUE events, SQS gets everything"},
+    {h:"Mobile push",b:"SNS supports Apple APNs, Google FCM for mobile push notifications. Create Platform Application for each platform, then subscribe device tokens"},
+    {h:"Fan-out pattern",b:"SNS → multiple SQS queues is the fan-out pattern. Email service reads from one queue, analytics reads from another — fully decoupled"},
+    {h:"Message attributes",b:"Add message attributes (key-value metadata) to published messages. Subscribers use these in filter policies without parsing the message body"},
+  ]
+},
+
+{ cat:"Messaging", icon:"📧", bg:"rgba(56,217,169,.1)", name:"SES", full:"Simple Email Service", tagline:"Send transactional emails — verification, reminders, alerts", free:false,
+  what:"SES sends transactional emails from your application: account verification, password reset, task reminders, due date alerts. It's 62x cheaper than services like SendGrid. In Sandbox mode (dev), you can only send to verified addresses. Request production access to send to anyone.",
+  console:["SES","Verified identities","Create identity"],
+  steps:[
+    {t:"Verify your domain",d:"SES Console → <strong>Verified identities</strong> → <strong>Create identity</strong>. Identity type: <strong>Domain</strong>. Domain: <strong>taskapp.com</strong>.",n:""},
+    {t:"Add DNS records",d:"SES shows DKIM CNAME records and a TXT record. Add these to Route 53 (or your DNS). DKIM prevents email from landing in spam. Takes ~72 hours to verify.",n:""},
+    {t:"Verify email address (sandbox)",d:"While waiting for domain: Create identity → type: <strong>Email address</strong>. Enter your email. AWS sends verification email — click the link. Now you can send to this address in sandbox.",n:""},
+    {t:"Create email template",d:"SES → <strong>Email templates</strong> → Create template. Template name: TaskReminder. Subject: Your task '{{taskTitle}}' is due tomorrow. Body HTML: use Handlebars {{variables}} for personalization.",n:""},
+    {t:"Request production access",d:"In SES Console → <strong>Account dashboard</strong> → Request production access. Fill form: use case, website, volume. AWS approves within 24 hours. After approval, you can send to any email address.",n:""},
+    {t:"Configure sending settings",d:"Configuration sets → Create configuration set: <strong>taskapp-emails</strong>. Add event destination: CloudWatch (for bounce/complaint monitoring). This tracks deliveries, bounces, opens, clicks.",n:""},
+    {t:"Send from code",d:"Use AWS SDK SESv2Client. SendEmailCommand with From (your verified domain), To, Subject, Body. Pass ConfigurationSetName for tracking. Lambda email worker calls this.",n:""},
+    {t:"Handle bounces",d:"SES → Suppression list. Set up SNS topic for bounces and complaints. Your Lambda moves bounced emails to suppression list — stops retrying, protects sender reputation.",n:""},
+  ],
+  cli:`# Send email via CLI (after domain verified)
+aws sesv2 send-email \\
+  --from-email-address noreply@taskapp.com \\
+  --destination ToAddresses=user@example.com \\
+  --content '{
+    "Simple":{
+      "Subject":{"Data":"Task Reminder","Charset":"UTF-8"},
+      "Body":{"Html":{"Data":"<h1>Your task is due tomorrow!</h1>","Charset":"UTF-8"}}
+    }
+  }' \\
+  --configuration-set-name taskapp-emails
+
+# Send templated email
+aws sesv2 send-email \\
+  --from-email-address noreply@taskapp.com \\
+  --destination ToAddresses=user@example.com \\
+  --content '{"Template":{"TemplateName":"TaskReminder","TemplateData":"{\"taskTitle\":\"Deploy app\"}"}}'`,
+  tips:[
+    {h:"Sandbox limits",b:"Sandbox: 200 emails/day, only to verified addresses. Production: no daily limit, any address. Always test in sandbox before requesting production"},
+    {h:"SPF + DKIM + DMARC",b:"All three DNS records prevent spoofing and improve deliverability. SES auto-configures SPF and DKIM when you verify domain. Add DMARC TXT record manually"},
+    {h:"Bounce management",b:"High bounce rate (>5%) gets your account suspended. Never email unverified addresses. Use double opt-in. Process bounces immediately and remove from list"},
+    {h:"vs SendGrid",b:"SES: $0.10/1000 emails. SendGrid: $14.95/month for 50K. For AWS-hosted apps, SES is obvious choice — same network, IAM auth, no API key management"},
+  ]
+},
+
+/* ════════════════ CONTAINERS ════════════════ */
+{ cat:"Containers", icon:"🐳", bg:"rgba(255,107,107,.1)", name:"ECR", full:"Elastic Container Registry", tagline:"Private Docker image registry", free:false,
+  what:"ECR stores your Docker images privately in AWS. Your CI/CD pipeline builds images and pushes to ECR. ECS pulls images from ECR to run containers. ECR integrates with IAM for access control and scans images for security vulnerabilities automatically.",
+  console:["ECR","Repositories","Create repository"],
+  steps:[
+    {t:"Open ECR → Create repository",d:"ECR Console → <strong>Repositories</strong> → <strong>Create repository</strong>.",n:"$0.10/GB/month"},
+    {t:"Repository settings",d:"Visibility: <strong>Private</strong>. Repository name: <strong>taskapp/backend</strong>. Tag immutability: <strong>Enabled</strong> (prevents overwriting existing tags — important for traceability).",n:""},
+    {t:"Scan on push",d:"Image scan settings: enable <strong>Scan on push</strong>. ECR uses Clair to scan for known CVEs in your image layers. Check scan results after each push.",n:""},
+    {t:"Encryption",d:"Encryption: <strong>AES-256</strong> (default, free). Or KMS for compliance requirements.",n:""},
+    {t:"Authenticate Docker to ECR",d:"Run this command to get ECR login token and configure Docker:\n<code>aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ACCOUNT.dkr.ecr.ap-south-1.amazonaws.com</code>",n:"Token expires in 12 hours"},
+    {t:"Build and push image",d:"docker build -t taskapp/backend .\ndocker tag taskapp/backend:latest ACCOUNT.dkr.ecr.ap-south-1.amazonaws.com/taskapp/backend:latest\ndocker push ACCOUNT.dkr.ecr.ap-south-1.amazonaws.com/taskapp/backend:latest",n:""},
+    {t:"Lifecycle policy",d:"ECR → Repositories → taskapp/backend → Lifecycle policy → Create rule. Keep only 10 most recent images tagged 'prod-*'. Delete untagged images after 1 day. Saves storage cost.",n:""},
+  ],
+  cli:`# Authenticate Docker to ECR
+aws ecr get-login-password --region ap-south-1 | \\
+  docker login --username AWS \\
+  --password-stdin ACCOUNT.dkr.ecr.ap-south-1.amazonaws.com
+
+# Build and push
+docker build -t taskapp/backend .
+docker tag taskapp/backend:latest \\
+  ACCOUNT.dkr.ecr.ap-south-1.amazonaws.com/taskapp/backend:latest
+docker push \\
+  ACCOUNT.dkr.ecr.ap-south-1.amazonaws.com/taskapp/backend:latest
+
+# List images
+aws ecr list-images \\
+  --repository-name taskapp/backend`,
+  tips:[
+    {h:"Tag strategy",b:"Use meaningful tags: git-{SHA}, prod-{date}, latest. Never rely on 'latest' in production — always deploy specific SHA tag for reproducibility"},
+    {h:"Vulnerability scanning",b:"Check scan results in ECR after push. High/Critical findings should block deployment in CI/CD. Use ECR Enhanced scanning with Inspector for deeper analysis"},
+    {h:"Cross-account",b:"ECR supports cross-account access via resource-based policy. One central ECR account, multiple deployment accounts pull images using role assumption"},
+    {h:"Pull-through cache",b:"ECR Pull Through Cache mirrors Docker Hub images to ECR. Avoids Docker Hub rate limits (100 pulls/6hr for anonymous). Set up once, transparent to your builds"},
+  ]
+},
+
+{ cat:"Containers", icon:"📦", bg:"rgba(255,107,107,.1)", name:"ECS Fargate", full:"Elastic Container Service with Fargate", tagline:"Run Docker containers without managing servers", free:false,
+  what:"ECS Fargate runs your Docker containers without you managing any EC2 instances. You define Task Definitions (what container to run, how much CPU/memory) and Services (how many copies, which VPC/subnets). Fargate provisions and manages the underlying compute automatically.",
+  console:["ECS","Clusters","Create cluster"],
+  steps:[
+    {t:"Create ECS Cluster",d:"ECS Console → <strong>Clusters</strong> → <strong>Create cluster</strong>. Cluster name: <strong>taskapp-cluster</strong>. Infrastructure: <strong>AWS Fargate (serverless)</strong>. Click Create.",n:""},
+    {t:"Create Task Definition",d:"ECS → <strong>Task definitions</strong> → <strong>Create new task definition</strong>. Task definition family: <strong>taskapp-worker</strong>. Launch type: <strong>AWS Fargate</strong>.",n:""},
+    {t:"Container settings",d:"Add container: name: app. Image URI: paste your ECR image URI. Essential container: yes. CPU: 256 (.25 vCPU). Memory: 512 MB. Port mappings: 3000 TCP.",n:""},
+    {t:"Environment variables",d:"In container settings → Environment variables. Add: NODE_ENV=production. For secrets: use <strong>ValueFrom</strong> with Secrets Manager ARN — ECS fetches secrets at container start.",n:""},
+    {t:"Task role and execution role",d:"Task role: taskapp-ecs-task-role (permissions for your app: S3, SQS). Task execution role: ecsTaskExecutionRole (permissions for ECS to pull ECR image and push CloudWatch logs).",n:""},
+    {t:"Logging",d:"Log configuration: awslogs. Log group: /ecs/taskapp-worker. Log region: ap-south-1. Stream prefix: ecs. ECS streams container stdout/stderr to CloudWatch automatically.",n:""},
+    {t:"Create Service",d:"Cluster → taskapp-cluster → <strong>Create service</strong>. Launch type: Fargate. Task definition: taskapp-worker. Service name: taskapp-worker-service. Desired tasks: <strong>2</strong>.",n:""},
+    {t:"Networking",d:"VPC: taskapp-vpc. Subnets: private subnets. Security group: allow outbound only (workers don't receive inbound traffic). Enable <strong>auto-assign public IP</strong>: disabled (private subnet).",n:""},
+  ],
+  cli:`# Create cluster
+aws ecs create-cluster --cluster-name taskapp-cluster \\
+  --capacity-providers FARGATE
+
+# Register task definition
+aws ecs register-task-definition \\
+  --family taskapp-worker \\
+  --network-mode awsvpc \\
+  --requires-compatibilities FARGATE \\
+  --cpu 256 --memory 512 \\
+  --execution-role-arn arn:aws:iam::ACCOUNT:role/ecsTaskExecutionRole \\
+  --task-role-arn arn:aws:iam::ACCOUNT:role/taskapp-ecs-task-role \\
+  --container-definitions '[{"name":"app","image":"ACCOUNT.dkr.ecr.region.amazonaws.com/taskapp/backend:latest","essential":true,"portMappings":[{"containerPort":3000}],"logConfiguration":{"logDriver":"awslogs","options":{"awslogs-group":"/ecs/taskapp-worker","awslogs-region":"ap-south-1","awslogs-stream-prefix":"ecs"}}}]'
+
+# Create service
+aws ecs create-service \\
+  --cluster taskapp-cluster \\
+  --service-name taskapp-worker-service \\
+  --task-definition taskapp-worker \\
+  --desired-count 2 \\
+  --launch-type FARGATE \\
+  --network-configuration 'awsvpcConfiguration={subnets=[subnet-prv1,subnet-prv2],securityGroups=[sg-ecs],assignPublicIp=DISABLED}'`,
+  tips:[
+    {h:"Fargate vs EC2 launch type",b:"Fargate: no instance management, pay per task-second, slower startup. EC2: manage instances, better for long-running workloads, cheaper at scale"},
+    {h:"Auto Scaling",b:"Add Application Auto Scaling to your ECS Service. Scale based on SQS queue depth (target tracking) — more messages = more tasks. Scales to zero when queue is empty"},
+    {h:"Blue/Green deploy",b:"Use CodeDeploy Blue/Green with ECS — deploy new task version alongside old, shift traffic gradually, auto-rollback if health checks fail. Zero-downtime deploys"},
+    {h:"Container Insights",b:"Enable ECS Container Insights for detailed CPU/memory metrics per container. Costs extra but essential for debugging performance issues in production"},
+  ]
+},
+
+/* ════════════════ CI/CD ════════════════ */
+{ cat:"CI/CD", icon:"🔄", bg:"rgba(204,93,232,.1)", name:"CodePipeline", full:"AWS CodePipeline", tagline:"Automated CI/CD — push to deploy in minutes", free:false,
+  what:"CodePipeline automates your entire deployment process. Push code to GitHub → CodeBuild runs tests and builds the Docker image → pushes to ECR → deploys to ECS or EC2 automatically. Every push to main branch triggers the pipeline.",
+  console:["CodePipeline","Pipelines","Create pipeline"],
+  steps:[
+    {t:"Open CodePipeline → Create pipeline",d:"CodePipeline Console → <strong>Pipelines</strong> → <strong>Create pipeline</strong>.",n:"$1/month per active pipeline"},
+    {t:"Pipeline settings",d:"Pipeline name: <strong>taskapp-pipeline</strong>. Service role: <strong>New service role</strong> (auto-creates). Artifact store: <strong>Default location</strong> (S3 bucket auto-created).",n:""},
+    {t:"Source — GitHub",d:"Source stage. Provider: <strong>GitHub (Version 2)</strong>. Click Connect to GitHub → authorize AWS. Repository: your repo. Branch: <strong>main</strong>. Detection: <strong>GitHub webhooks</strong> (instant trigger on push).",n:""},
+    {t:"Build — CodeBuild",d:"Build stage. Provider: <strong>AWS CodeBuild</strong>. Click <strong>Create project</strong>. Project name: taskapp-build. Environment: Managed image, Ubuntu, Standard runtime, aws/codebuild/standard:7.0.",n:""},
+    {t:"Configure buildspec",d:"In CodeBuild project: Buildspec → <strong>Use a buildspec file</strong>. CodeBuild reads <strong>buildspec.yml</strong> from your repo root. This file defines install, pre_build, build, post_build phases.",n:""},
+    {t:"Deploy — ECS",d:"Deploy stage. Provider: <strong>Amazon ECS</strong>. Cluster: taskapp-cluster. Service: taskapp-worker-service. Image definitions file: imagedefs.json (output from build stage).",n:""},
+    {t:"Add notifications",d:"Pipeline → Settings → Notifications → Create notification rule. Events: Pipeline execution failed. Target: SNS topic → your email. Get alerted on failures.",n:""},
+    {t:"Manual approval stage",d:"Optional: add Manual approval stage between Build and Deploy for production. Someone must review and click Approve in the console before deployment proceeds.",n:""},
+  ],
+  cli:`# buildspec.yml - commit this to your repo root
+# version: 0.2
+# phases:
+#   install:
+#     commands:
+#       - npm install
+#   pre_build:
+#     commands:
+#       - npm test
+#       - aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_URI
+#   build:
+#     commands:
+#       - docker build -t $ECR_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+#       - docker push $ECR_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION
+#       - printf '[{"name":"app","imageUri":"%s"}]' $ECR_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION > imagedefs.json
+#   post_build:
+#     commands:
+#       - cd frontend && npm run build
+#       - aws s3 sync build/ s3://$FRONTEND_BUCKET --delete
+#       - aws cloudfront create-invalidation --distribution-id $CF_ID --paths "/*"
+# artifacts:
+#   files: [imagedefs.json]`,
+  tips:[
+    {h:"Environment variables",b:"In CodeBuild project → Environment variables: add ECR_URI, FRONTEND_BUCKET, CF_DIST_ID. Mark sensitive values as Parameter Store or Secrets Manager type"},
+    {h:"Caching in CodeBuild",b:"Enable CodeBuild cache (S3). Cache node_modules between builds. Cuts build time from 3 minutes to 30 seconds for Node.js projects"},
+    {h:"Parallel actions",b:"Pipeline stages can have parallel actions. Run frontend build and Docker build simultaneously — cuts total pipeline time in half"},
+    {h:"Test reports",b:"CodeBuild Test Reports shows test results in the console. Add reportGroup in buildspec.yml, output JUnit XML. Failed tests are highlighted per test case"},
+  ]
+},
+
+/* ════════════════ MONITORING ════════════════ */
+{ cat:"Monitoring", icon:"📊", bg:"rgba(116,192,252,.1)", name:"CloudWatch", full:"Amazon CloudWatch", tagline:"Metrics, logs, alarms, dashboards — full observability", free:true,
+  what:"CloudWatch is your observability platform. EC2, RDS, Lambda, ALB, and all AWS services automatically send metrics to CloudWatch. You create Alarms that trigger when metrics cross thresholds (CPU > 80%) and send notifications via SNS. Log Groups collect application logs.",
+  console:["CloudWatch","Alarms","Create alarm"],
+  steps:[
+    {t:"View automatic metrics",d:"CloudWatch Console → <strong>Metrics</strong> → All metrics. Browse AWS namespaces: EC2 (CPUUtilization), RDS (FreeStorageSpace), Lambda (Errors, Duration). These arrive automatically — no setup needed.",n:""},
+    {t:"Create CPU alarm for EC2",d:"Alarms → <strong>Create alarm</strong>. Select metric: EC2 → Per-Instance Metrics → CPUUtilization. Select your instance. Period: 5 minutes. Statistic: Average.",n:""},
+    {t:"Set threshold and action",d:"Threshold: Greater than <strong>80</strong>. Datapoints to alarm: 2 out of 2. In alarm: send notification to SNS topic (taskapp-alerts). Alarm name: taskapp-high-cpu.",n:""},
+    {t:"Create application log group",d:"CloudWatch → <strong>Log groups</strong> → <strong>Create log group</strong>. Name: <strong>/taskapp/server</strong>. Retention: 30 days. Your Node.js app sends logs here using CloudWatch agent or SDK.",n:""},
+    {t:"Install CloudWatch Agent on EC2",d:"SSH into EC2: sudo yum install amazon-cloudwatch-agent. Configure: sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard. Collect: CPU, memory, disk metrics + application logs.",n:""},
+    {t:"Create Dashboard",d:"CloudWatch → <strong>Dashboards</strong> → <strong>Create dashboard</strong>. Name: taskapp-production. Add widgets: Line graph (CPU, RDS connections), Number (Lambda errors, ALB 5XX count), Log query table.",n:""},
+    {t:"CloudWatch Logs Insights",d:"Logs → <strong>Logs Insights</strong>. Select /taskapp/server log group. Query example: fields @timestamp, @message | filter @message like /ERROR/ | sort @timestamp desc | limit 20",n:""},
+    {t:"Set up error rate alarm",d:"Create alarm on ALB metric: HTTPCode_ELB_5XX_Count. Threshold > 10. Period: 1 minute. This catches backend errors in real time.",n:""},
+  ],
+  cli:`# Create CPU alarm
+aws cloudwatch put-metric-alarm \\
+  --alarm-name taskapp-high-cpu \\
+  --metric-name CPUUtilization \\
+  --namespace AWS/EC2 \\
+  --dimensions Name=InstanceId,Value=i-xxx \\
+  --statistic Average \\
+  --period 300 \\
+  --threshold 80 \\
+  --comparison-operator GreaterThanThreshold \\
+  --evaluation-periods 2 \\
+  --alarm-actions arn:aws:sns:region:account:taskapp-alerts
+
+# Query logs via Insights
+aws logs start-query \\
+  --log-group-name /taskapp/server \\
+  --start-time $(date -d '1 hour ago' +%s) \\
+  --end-time $(date +%s) \\
+  --query-string 'fields @timestamp, @message | filter @message like /ERROR/ | limit 20'`,
+  tips:[
+    {h:"Custom metrics",b:"Push custom metrics from your app: request latency, orders processed, cache hit rate. Use PutMetricData API. Costs $0.30 per custom metric per month"},
+    {h:"Log metric filters",b:"Create Metric Filter on a log group — count occurrences of 'ERROR' in logs and create a metric. Then create alarm on that metric. Powerful for app-level alerting"},
+    {h:"Composite alarms",b:"Combine alarms: alarm only if BOTH CPU is high AND error rate is high. Reduces false positives from single-metric spikes"},
+    {h:"Contributor Insights",b:"Enable Contributor Insights on API Gateway or CloudWatch Logs — identifies top contributors to high latency or error rates (top error-causing IPs, endpoints, user agents)"},
+  ]
+},
+
+{ cat:"Monitoring", icon:"📋", bg:"rgba(116,192,252,.1)", name:"CloudTrail", full:"AWS CloudTrail", tagline:"Audit log — every AWS API call recorded", free:true,
+  what:"CloudTrail records every single AWS API call: who did what, when, from which IP, on which resource. Essential for security auditing, compliance, and forensics. If someone accidentally deletes your S3 bucket or changes IAM permissions, CloudTrail shows you exactly who did it.",
+  console:["CloudTrail","Trails","Create trail"],
+  steps:[
+    {t:"Open CloudTrail → Create trail",d:"CloudTrail Console → <strong>Trails</strong> → <strong>Create trail</strong>.",n:"First trail: free"},
+    {t:"Trail name and scope",d:"Trail name: <strong>taskapp-trail</strong>. Apply trail to <strong>all regions</strong>. This catches API calls in every region — including attackers using unexpected regions.",n:""},
+    {t:"Storage location",d:"Create new S3 bucket: <strong>taskapp-cloudtrail-YOURACCOUNTID</strong>. Log file prefix: taskapp. SSE-S3 encryption: enabled. Log file validation: enabled (detects tampered logs).",n:""},
+    {t:"CloudWatch Logs integration",d:"Enable CloudWatch Logs. Create new log group: <strong>aws-cloudtrail-logs</strong>. Create new IAM role. This streams CloudTrail events to CloudWatch in real time.",n:""},
+    {t:"Choose events to log",d:"Management events: <strong>Read + Write</strong>. Data events: add S3 → All S3 buckets → Read + Write (logs every GetObject, PutObject). Lambda → log all invocations.",n:""},
+    {t:"Create CloudWatch alarm",d:"Create metric filter on CloudTrail log group: filter for { $.errorCode = 'UnauthorizedAccess' }. Create alarm: > 5 occurrences in 5 minutes → SNS alert. Catches brute force IAM attempts.",n:""},
+    {t:"Athena for analysis",d:"CloudTrail → Event history → Create Athena table. Query years of logs with SQL: SELECT * FROM cloudtrail WHERE userIdentity.arn LIKE '%attacker%' AND eventTime > '2024-01-01'",n:""},
+  ],
+  cli:`# Create trail in all regions
+aws cloudtrail create-trail \\
+  --name taskapp-trail \\
+  --s3-bucket-name taskapp-cloudtrail-ACCOUNT \\
+  --is-multi-region-trail \\
+  --include-global-service-events \\
+  --enable-log-file-validation \\
+  --cloud-watch-logs-log-group-arn arn:aws:logs:region:account:log-group:cloudtrail \\
+  --cloud-watch-logs-role-arn arn:aws:iam::account:role/cloudtrail-cw-role
+
+# Start logging
+aws cloudtrail start-logging --name taskapp-trail
+
+# Look up recent events
+aws cloudtrail lookup-events \\
+  --lookup-attributes AttributeKey=EventName,AttributeValue=DeleteBucket`,
+  tips:[
+    {h:"Event history",b:"CloudTrail Event History (free, no trail needed) keeps last 90 days of management events. Search by event name, user, resource. First place to look when something breaks"},
+    {h:"Integrity validation",b:"Enable log file validation — CloudTrail signs each log file. Run aws cloudtrail validate-logs to detect any tampering. Required for compliance (SOC2, PCI, HIPAA)"},
+    {h:"Org trail",b:"If using AWS Organizations, create an Organization Trail in the management account — captures events from all member accounts in one trail"},
+    {h:"Athena analysis",b:"Use CloudTrail Lake (newer, easier than S3+Athena) for querying. SQL interface, 7-year retention, no S3 bucket management needed"},
+  ]
+},
+
+];
+
+// ── BUILD UI ─────────────────────────────────────────────────
+
+function buildCatFilters() {
+  const cats = [...new Set(SERVICES.map(s => s.cat))];
+  const container = document.getElementById('cat-filters');
+  const all = document.createElement('button');
+  all.className = 'cf on';
+  all.textContent = 'All';
+  all.dataset.cat = '';
+  all.onclick = () => { setFilter(''); };
+  container.appendChild(all);
+  cats.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'cf';
+    btn.textContent = c;
+    btn.dataset.cat = c;
+    btn.onclick = () => { setFilter(c); };
+    container.appendChild(btn);
+  });
+}
+
+let activeFilter = '';
+function setFilter(cat) {
+  activeFilter = cat;
+  document.querySelectorAll('.cf').forEach(b => {
+    b.classList.toggle('on', b.dataset.cat === cat);
+  });
+  filterAll();
+}
+
+function filterAll() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  document.querySelectorAll('.svc-card').forEach(card => {
+    const name = card.dataset.name.toLowerCase();
+    const cat = card.dataset.cat;
+    const full = card.dataset.full.toLowerCase();
+    const tagline = card.dataset.tagline.toLowerCase();
+    const matchQ = !q || name.includes(q) || full.includes(q) || tagline.includes(q) || cat.toLowerCase().includes(q);
+    const matchCat = !activeFilter || cat === activeFilter;
+    card.classList.toggle('hidden', !(matchQ && matchCat));
+  });
+  document.querySelectorAll('.section-group').forEach(group => {
+    const visible = group.querySelectorAll('.svc-card:not(.hidden)').length;
+    group.classList.toggle('empty', visible === 0);
+  });
+}
+
+function stepsHTML(steps) {
+  return steps.map((s, i) => `
+    <div class="step-row">
+      <div class="step-left">
+        <div class="step-num">${i+1}</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-content">
+        <div class="step-title">${s.t}</div>
+        <div class="step-detail">${s.d}</div>
+        ${s.n ? `<span class="step-note">${s.n}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function tipsHTML(tips) {
+  return tips.map(t => `
+    <div class="tip-card">
+      <div class="tip-head"><span class="tip-dot"></span>${t.h}</div>
+      <div class="tip-body">${t.b}</div>
+    </div>
+  `).join('');
+}
+
+function consolePathHTML(steps) {
+  return steps.map((s, i) =>
+    `<span class="path-step ${i === steps.length-1 ? 'active-path' : ''}">${s}</span>${i < steps.length-1 ? '<span class="path-arrow">›</span>' : ''}`
+  ).join('');
+}
+
+function buildPage() {
+  const cats = [...new Set(SERVICES.map(s => s.cat))];
+  const page = document.getElementById('page');
+
+  cats.forEach(cat => {
+    const group = document.createElement('div');
+    group.className = 'section-group';
+    const catInfo = CATS[cat] || { color: '#888', dot: '#888' };
+    group.innerHTML = `
+      <div class="group-header">
+        <div class="group-dot" style="background:${catInfo.dot}"></div>
+        <span class="group-title">${cat}</span>
+        <span class="group-count">${SERVICES.filter(s => s.cat === cat).length} services</span>
+      </div>
+    `;
+
+    SERVICES.filter(s => s.cat === cat).forEach(svc => {
+      const card = document.createElement('div');
+      card.className = 'svc-card';
+      card.dataset.name = svc.name;
+      card.dataset.cat = svc.cat;
+      card.dataset.full = svc.full;
+      card.dataset.tagline = svc.tagline;
+      card.innerHTML = `
+        <div class="card-trigger" onclick="toggleCard(this)">
+          <div class="svc-icon-wrap" style="background:${svc.bg}">
+            <span style="font-size:22px">${svc.icon}</span>
+          </div>
+          <div class="svc-info">
+            <div class="svc-name">${svc.name} <span style="font-weight:400;color:var(--muted);font-size:12px">— ${svc.full}</span></div>
+            <div class="svc-tagline">${svc.tagline}</div>
+          </div>
+          <div class="svc-badges">
+            <span class="badge ${svc.free ? 'badge-free' : 'badge-paid'}">${svc.free ? 'FREE TIER' : 'PAID'}</span>
+          </div>
+          <span class="card-arrow">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <div class="what-is">${svc.what}</div>
+
+            <div class="section-title">Console path</div>
+            <div class="console-path">${consolePathHTML(svc.console)}</div>
+
+            <div class="section-title">Step-by-step setup</div>
+            <div class="steps-list">${stepsHTML(svc.steps)}</div>
+
+            <div class="section-title">AWS CLI command</div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-fname">aws cli</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre>${escapeHTML(svc.cli)}</pre>
+            </div>
+
+            <div class="section-title">Best practices & tips</div>
+            <div class="tips-grid">${tipsHTML(svc.tips)}</div>
+          </div>
+        </div>
+      `;
+      group.appendChild(card);
+    });
+
+    page.appendChild(group);
+  });
+}
+
+function toggleCard(trigger) {
+  const card = trigger.closest('.svc-card');
+  const wasOpen = card.classList.contains('active');
+  document.querySelectorAll('.svc-card.active').forEach(c => c.classList.remove('active'));
+  if (!wasOpen) card.classList.add('active');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function escapeHTML(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+buildCatFilters();
+buildPage();
+</script>
+</body>
+</html>

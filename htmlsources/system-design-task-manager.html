@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design: Task Manager (Jira-like) — End to End</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;600&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --surface: #faf7f2;
+  --surface2: #eee8da;
+  --border: #d4c9b0;
+  --border2: #c5b89a;
+  --ink: #1a1508;
+  --ink2: #3d3520;
+  --ink3: #7a6e58;
+  --ink4: #b0a48c;
+  --red: #c0392b;
+  --blue: #1a56a0;
+  --green: #1a7a3c;
+  --orange: #c45c0a;
+  --purple: #6b2fa0;
+  --teal: #0a7a6e;
+  --yellow: #b58c00;
+  --red-bg: rgba(192,57,43,0.08);
+  --blue-bg: rgba(26,86,160,0.08);
+  --green-bg: rgba(26,122,60,0.08);
+  --orange-bg: rgba(196,92,10,0.08);
+  --purple-bg: rgba(107,47,160,0.08);
+  --teal-bg: rgba(10,122,110,0.08);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* grain texture */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position:fixed;
+  left:0;top:0;bottom:0;
+  width:270px;
+  background: var(--surface);
+  border-right: 2px solid var(--border);
+  padding:0;
+  z-index:100;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+}
+
+.sidebar-brand {
+  padding:28px 24px;
+  border-bottom:2px solid var(--border);
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.sidebar-brand .eyebrow {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color: var(--ink4);
+  margin-bottom:6px;
+  display:block;
+}
+
+.sidebar-brand h2 {
+  font-family:'Syne',sans-serif;
+  font-size:16px;
+  font-weight:800;
+  line-height:1.25;
+  color:#f5f0e8;
+}
+
+.nav-section {
+  padding:16px 24px 6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--ink4);
+  margin-top:8px;
+}
+
+.nav-item {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 24px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--ink3);
+  text-decoration:none;
+  border-left:3px solid transparent;
+  transition:all 0.15s;
+  cursor:pointer;
+}
+
+.nav-item:hover, .nav-item.active {
+  color:var(--ink);
+  border-left-color:var(--red);
+  background:var(--surface2);
+}
+
+.nav-item .num {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--ink4);
+  width:22px;
+  flex-shrink:0;
+}
+
+/* ── MAIN ── */
+.main { margin-left:270px; }
+
+/* ── HERO ── */
+.hero {
+  background:var(--ink);
+  color:var(--bg);
+  padding:80px 80px 80px;
+  position:relative;
+  overflow:hidden;
+  border-bottom:3px solid var(--border2);
+}
+
+.hero::before {
+  content:'TASK\AMANAGER';
+  white-space:pre;
+  position:absolute;
+  right:-40px;top:-20px;
+  font-family:'Syne',sans-serif;
+  font-size:180px;
+  font-weight:800;
+  color:rgba(245,240,232,0.04);
+  line-height:0.85;
+  pointer-events:none;
+  letter-spacing:-5px;
+}
+
+.hero-label {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:4px;
+  padding:5px 12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:#b0a48c;
+  margin-bottom:28px;
+}
+
+.hero h1 {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(42px,5.5vw,72px);
+  font-weight:800;
+  line-height:1.0;
+  letter-spacing:-2px;
+  margin-bottom:12px;
+}
+
+.hero h1 span { color:#e8a020; }
+
+.hero-sub {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(16px,2vw,22px);
+  font-weight:400;
+  color:#8a8070;
+  margin-bottom:36px;
+  letter-spacing:-0.3px;
+}
+
+.hero-desc {
+  font-size:15px;
+  color:#a09080;
+  max-width:560px;
+  line-height:1.8;
+  margin-bottom:48px;
+}
+
+.hero-pills {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:48px;
+}
+
+.pill {
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:100px;
+  padding:5px 14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:#c0b098;
+}
+
+.hero-stats {
+  display:flex;
+  gap:48px;
+  flex-wrap:wrap;
+  padding-top:36px;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+
+.stat { display:flex; flex-direction:column; gap:2px; }
+.stat-val {
+  font-family:'Syne',sans-serif;
+  font-size:32px;
+  font-weight:800;
+  color:#e8a020;
+  line-height:1;
+}
+.stat-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:#6a6050;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+/* ── SECTIONS ── */
+.section {
+  padding:72px 80px;
+  border-bottom:2px solid var(--border);
+  position:relative;
+}
+
+.section-header {
+  display:flex;
+  align-items:baseline;
+  gap:16px;
+  margin-bottom:40px;
+}
+
+.section-num {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--ink4);
+  letter-spacing:2px;
+  flex-shrink:0;
+}
+
+.section h2 {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(26px,3vw,40px);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:-1px;
+  color:var(--ink);
+}
+
+.section h2 mark {
+  background:none;
+  color:var(--red);
+}
+
+.section-intro {
+  font-size:15px;
+  color:var(--ink3);
+  max-width:680px;
+  line-height:1.8;
+  margin-bottom:40px;
+}
+
+/* ── CARDS ── */
+.card-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin-bottom:32px;
+}
+
+.card-grid-3 {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  margin-bottom:32px;
+}
+
+.card {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:12px;
+  padding:24px;
+}
+
+.card h3 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.h3-red { color:var(--red); }
+.h3-blue { color:var(--blue); }
+.h3-green { color:var(--green); }
+.h3-orange { color:var(--orange); }
+.h3-purple { color:var(--purple); }
+.h3-teal { color:var(--teal); }
+
+.req-item {
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin-bottom:9px;
+  font-size:13px;
+  color:var(--ink2);
+  line-height:1.6;
+}
+
+.req-item::before {
+  content:'›';
+  font-family:'IBM Plex Mono',monospace;
+  color:var(--ink4);
+  flex-shrink:0;
+  margin-top:1px;
+}
+
+/* ── CODE ── */
+.code-wrap {
+  background:var(--ink);
+  border-radius:12px;
+  overflow:hidden;
+  margin:24px 0;
+  border:2px solid var(--border2);
+}
+
+.code-bar {
+  background:#111008;
+  padding:12px 20px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border-bottom:1px solid #2a2510;
+}
+
+.dot { width:10px;height:10px;border-radius:50%; }
+.d1{background:#ff5f57;} .d2{background:#febc2e;} .d3{background:#28c840;}
+
+.code-fname {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:#5a5040;
+  margin-left:auto;
+  letter-spacing:0.5px;
+}
+
+.code-body {
+  padding:28px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px;
+  line-height:1.75;
+  overflow-x:auto;
+  color:#c8b898;
+}
+
+.ck { color:#d090e0; }   /* keyword */
+.cs { color:#90c870; }   /* string */
+.ct { color:#70d0e0; }   /* type */
+.cn { color:#e08850; }   /* number */
+.cc { color:#606050; }   /* comment */
+.cf { color:#e0c050; }   /* function */
+.cp { color:#8888a0; }   /* punct */
+
+/* ── DB SCHEMA ── */
+.schema-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:16px;
+  margin-bottom:24px;
+}
+
+.schema-table {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.schema-thead {
+  background:var(--ink2);
+  padding:10px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.schema-thead h4 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  font-weight:600;
+  color:#f5f0e8;
+}
+
+.schema-thead span {
+  font-size:9px;
+  color:#8a7a60;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+.schema-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 14px;
+  border-bottom:1px solid var(--surface2);
+  font-size:12px;
+}
+.schema-row:last-child { border-bottom:none; }
+
+.sf {
+  font-family:'IBM Plex Mono',monospace;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.pk {
+  font-size:8px;
+  background:rgba(180,140,0,0.15);
+  color:var(--yellow);
+  border:1px solid rgba(180,140,0,0.3);
+  border-radius:3px;
+  padding:1px 4px;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+.fk {
+  font-size:8px;
+  background:var(--purple-bg);
+  color:var(--purple);
+  border:1px solid rgba(107,47,160,0.3);
+  border-radius:3px;
+  padding:1px 4px;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+.st {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--purple);
+}
+
+/* ── FLOW STEPS ── */
+.two-flow { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+.flow-card {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:12px;
+  padding:24px;
+}
+
+.flow-card h4 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.flow-step {
+  display:flex;
+  gap:12px;
+  margin-bottom:13px;
+  align-items:flex-start;
+}
+
+.step-num {
+  width:22px;height:22px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  font-weight:600;
+  flex-shrink:0;
+}
+
+.sn-red { background:var(--red-bg); color:var(--red); border:1px solid rgba(192,57,43,0.3); }
+.sn-blue { background:var(--blue-bg); color:var(--blue); border:1px solid rgba(26,86,160,0.3); }
+.sn-green { background:var(--green-bg); color:var(--green); border:1px solid rgba(26,122,60,0.3); }
+.sn-purple { background:var(--purple-bg); color:var(--purple); border:1px solid rgba(107,47,160,0.3); }
+.sn-orange { background:var(--orange-bg); color:var(--orange); border:1px solid rgba(196,92,10,0.3); }
+.sn-teal { background:var(--teal-bg); color:var(--teal); border:1px solid rgba(10,122,110,0.3); }
+
+.step-content {
+  font-size:13px;
+  color:var(--ink2);
+  line-height:1.6;
+  padding-top:2px;
+}
+
+.step-content strong { color:var(--ink); font-weight:700; }
+
+/* ── ARCH TIERS ── */
+.arch-tier {
+  margin-bottom:20px;
+}
+
+.tier-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--ink4);
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.tier-label::after {
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border);
+}
+
+.tier-nodes {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.tier-node {
+  border-radius:8px;
+  padding:12px 16px;
+  flex:1;
+  min-width:140px;
+}
+
+.tier-node h5 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.tier-node p {
+  font-size:11px;
+  color:var(--ink3);
+  line-height:1.5;
+}
+
+.tn-red { background:var(--red-bg); border:1px solid rgba(192,57,43,0.2); }
+.tn-red h5 { color:var(--red); }
+.tn-blue { background:var(--blue-bg); border:1px solid rgba(26,86,160,0.2); }
+.tn-blue h5 { color:var(--blue); }
+.tn-green { background:var(--green-bg); border:1px solid rgba(26,122,60,0.2); }
+.tn-green h5 { color:var(--green); }
+.tn-orange { background:var(--orange-bg); border:1px solid rgba(196,92,10,0.2); }
+.tn-orange h5 { color:var(--orange); }
+.tn-purple { background:var(--purple-bg); border:1px solid rgba(107,47,160,0.2); }
+.tn-purple h5 { color:var(--purple); }
+.tn-teal { background:var(--teal-bg); border:1px solid rgba(10,122,110,0.2); }
+.tn-teal h5 { color:var(--teal); }
+.tn-yellow { background:rgba(180,140,0,0.08); border:1px solid rgba(180,140,0,0.2); }
+.tn-yellow h5 { color:var(--yellow); }
+.tn-ink { background:rgba(26,21,8,0.06); border:1px solid rgba(26,21,8,0.15); }
+.tn-ink h5 { color:var(--ink); }
+
+.tier-arrow {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 0;
+  color:var(--ink4);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  gap:8px;
+}
+
+.tier-arrow::before, .tier-arrow::after {
+  content:'';
+  flex:1;
+  max-width:80px;
+  height:1px;
+  background:var(--border);
+}
+
+/* ── API TABLE ── */
+.api-list { display:flex; flex-direction:column; gap:10px; }
+
+.api-item {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:10px;
+  padding:16px 20px;
+  display:grid;
+  grid-template-columns:72px 1fr auto;
+  gap:14px;
+  align-items:start;
+}
+
+.method {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  font-weight:600;
+  padding:4px 6px;
+  border-radius:4px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+.m-post { background:var(--orange-bg); color:var(--orange); border:1px solid rgba(196,92,10,0.3); }
+.m-get  { background:var(--green-bg);  color:var(--green);  border:1px solid rgba(26,122,60,0.3); }
+.m-put  { background:var(--blue-bg);   color:var(--blue);   border:1px solid rgba(26,86,160,0.3); }
+.m-del  { background:var(--red-bg);    color:var(--red);    border:1px solid rgba(192,57,43,0.3); }
+.m-ws   { background:var(--purple-bg); color:var(--purple); border:1px solid rgba(107,47,160,0.3); }
+.m-patch{ background:var(--teal-bg);   color:var(--teal);   border:1px solid rgba(10,122,110,0.3); }
+
+.api-endpoint {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px;
+  color:var(--ink);
+  margin-bottom:3px;
+}
+
+.api-desc {
+  font-size:12px;
+  color:var(--ink3);
+  line-height:1.5;
+}
+
+.api-code {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--ink4);
+  text-align:right;
+  white-space:nowrap;
+}
+
+/* ── INLINE TAGS ── */
+.tag {
+  display:inline-block;
+  border-radius:4px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  padding:1px 6px;
+  vertical-align:middle;
+}
+
+.tag-red    { background:var(--red-bg);    color:var(--red);    border:1px solid rgba(192,57,43,0.25); }
+.tag-blue   { background:var(--blue-bg);   color:var(--blue);   border:1px solid rgba(26,86,160,0.25); }
+.tag-green  { background:var(--green-bg);  color:var(--green);  border:1px solid rgba(26,122,60,0.25); }
+.tag-orange { background:var(--orange-bg); color:var(--orange); border:1px solid rgba(196,92,10,0.25); }
+.tag-purple { background:var(--purple-bg); color:var(--purple); border:1px solid rgba(107,47,160,0.25); }
+.tag-teal   { background:var(--teal-bg);   color:var(--teal);   border:1px solid rgba(10,122,110,0.25); }
+
+/* ── CALLOUT ── */
+.callout {
+  border-radius:0 10px 10px 0;
+  padding:16px 20px;
+  margin:20px 0;
+  font-size:13.5px;
+  color:var(--ink2);
+  line-height:1.7;
+  border-left:3px solid;
+}
+
+.callout strong { font-weight:700; }
+.callout-red   { background:var(--red-bg);    border-color:var(--red);    }
+.callout-blue  { background:var(--blue-bg);   border-color:var(--blue);   }
+.callout-green { background:var(--green-bg);  border-color:var(--green);  }
+.callout-orange{ background:var(--orange-bg); border-color:var(--orange); }
+.callout-purple{ background:var(--purple-bg); border-color:var(--purple); }
+.callout-teal  { background:var(--teal-bg);   border-color:var(--teal);   }
+
+/* ── ESTIMATION TABLE ── */
+.est-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+.est-box {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:10px;
+  padding:22px;
+}
+
+.est-box h3 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--ink4);
+  margin-bottom:16px;
+}
+
+.est-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:9px 0;
+  border-bottom:1px solid var(--surface2);
+  font-size:13px;
+}
+
+.est-row:last-child { border-bottom:none; }
+.est-key { color:var(--ink2); }
+.est-val { font-family:'IBM Plex Mono',monospace; color:var(--orange); font-weight:600; }
+
+/* ── BOTTLENECK TABLE ── */
+.btable { width:100%; border-collapse:collapse; font-size:13px; margin:24px 0; }
+
+.btable th {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--ink4);
+  text-align:left;
+  padding:10px 14px;
+  border-bottom:2px solid var(--border);
+  background:var(--surface2);
+}
+
+.btable td {
+  padding:13px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--ink2);
+  vertical-align:top;
+  line-height:1.6;
+}
+
+.btable tr:last-child td { border-bottom:none; }
+.btable tr:hover td { background:var(--surface); }
+.btable td:first-child { font-family:'IBM Plex Mono',monospace; color:var(--orange); white-space:nowrap; }
+
+.sev {
+  display:inline-block;
+  padding:2px 7px;
+  border-radius:4px;
+  font-size:9px;
+  font-family:'IBM Plex Mono',monospace;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.sev-h { background:var(--red-bg);    color:var(--red);    border:1px solid rgba(192,57,43,0.3); }
+.sev-m { background:var(--orange-bg); color:var(--orange); border:1px solid rgba(196,92,10,0.3); }
+.sev-l { background:var(--green-bg);  color:var(--green);  border:1px solid rgba(26,122,60,0.3); }
+
+/* ── NOTIFICATION SECTION ── */
+.notif-channels {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:28px;
+}
+
+.notif-channel {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:10px;
+  padding:18px 16px;
+  text-align:center;
+}
+
+.notif-channel .icon { font-size:28px; margin-bottom:8px; display:block; }
+
+.notif-channel h4 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+.notif-channel p { font-size:12px; color:var(--ink3); line-height:1.5; }
+
+/* ── SCALE GRID ── */
+.scale-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  margin-bottom:32px;
+}
+
+.scale-card {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:10px;
+  padding:20px;
+}
+
+.scale-card .icon { font-size:24px; margin-bottom:10px; display:block; }
+
+.scale-card h3 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--ink2);
+  margin-bottom:8px;
+}
+
+.scale-card p { font-size:12px; color:var(--ink3); line-height:1.6; }
+
+/* ── SUMMARY ── */
+.summary-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:36px;
+}
+
+.sum-card {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:10px;
+  padding:20px 16px;
+  text-align:center;
+}
+
+.sum-card .icon { font-size:28px; margin-bottom:10px; display:block; }
+
+.sum-card h3 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--ink4);
+  margin-bottom:6px;
+}
+
+.sum-card p { font-size:11px; color:var(--ink3); line-height:1.5; }
+
+/* ── STACK GRID ── */
+.stack-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  margin-top:24px;
+}
+
+.stack-col h4 {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--ink4);
+  margin-bottom:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+
+.stack-item {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+  font-size:13px;
+  color:var(--ink2);
+}
+
+/* ── FOOTER ── */
+.footer {
+  background:var(--ink);
+  color:#6a6050;
+  padding:36px 80px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.footer-left {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.footer-right { font-size:12px; }
+
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+@media print {
+  .sidebar { display:none; }
+  .main { margin-left:0; }
+  .section, .hero { padding:40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="eyebrow">System Design</span>
+    <h2>Task Manager<br>(Jira-like)<br>End-to-End</h2>
+  </div>
+
+  <span class="nav-section">Navigation</span>
+
+  <a class="nav-item active" href="#intro"><span class="num">00</span> Overview</a>
+  <a class="nav-item" href="#requirements"><span class="num">01</span> Requirements</a>
+  <a class="nav-item" href="#estimation"><span class="num">02</span> Estimation</a>
+  <a class="nav-item" href="#api"><span class="num">03</span> API Design</a>
+  <a class="nav-item" href="#db"><span class="num">04</span> Database Design</a>
+  <a class="nav-item" href="#architecture"><span class="num">05</span> Architecture</a>
+  <a class="nav-item" href="#flows"><span class="num">06</span> Request Flows</a>
+  <a class="nav-item" href="#realtime"><span class="num">07</span> Real-time Updates</a>
+  <a class="nav-item" href="#notifications"><span class="num">08</span> Notifications System</a>
+  <a class="nav-item" href="#search"><span class="num">09</span> Search</a>
+  <a class="nav-item" href="#permissions"><span class="num">10</span> Permissions (RBAC)</a>
+  <a class="nav-item" href="#caching"><span class="num">11</span> Caching Strategy</a>
+  <a class="nav-item" href="#scaling"><span class="num">12</span> Scaling & HA</a>
+  <a class="nav-item" href="#bottlenecks"><span class="num">13</span> Bottlenecks</a>
+  <a class="nav-item" href="#summary"><span class="num">14</span> Summary</a>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+<!-- HERO -->
+<section class="hero" id="intro">
+  <div class="hero-label">⬛ System Design Document · End-to-End</div>
+  <h1>Task <span>Manager</span></h1>
+  <div class="hero-sub">Jira-like Project Management Platform</div>
+  <p class="hero-desc">
+    A complete production-grade system design for a collaborative task management platform
+    supporting projects, sprints, issues, comments, file attachments, real-time updates,
+    a multi-channel notification system, full-text search, and role-based access control.
+  </p>
+  <div class="hero-pills">
+    <span class="pill">Issues & Subtasks</span>
+    <span class="pill">Kanban / Sprint Boards</span>
+    <span class="pill">WebSocket Real-time</span>
+    <span class="pill">Multi-channel Notifications</span>
+    <span class="pill">Full-text Search</span>
+    <span class="pill">RBAC Permissions</span>
+    <span class="pill">File Attachments</span>
+    <span class="pill">Audit Logs</span>
+    <span class="pill">Activity Feed</span>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-val">10M</span><span class="stat-label">Users</span></div>
+    <div class="stat"><span class="stat-val">500M</span><span class="stat-label">Issues stored</span></div>
+    <div class="stat"><span class="stat-val">50K</span><span class="stat-label">Concurrent WS</span></div>
+    <div class="stat"><span class="stat-val">99.95%</span><span class="stat-label">Availability</span></div>
+    <div class="stat"><span class="stat-val">&lt;200ms</span><span class="stat-label">API P99</span></div>
+  </div>
+</section>
+
+<!-- ── 01 REQUIREMENTS ── -->
+<section class="section" id="requirements">
+  <div class="section-header">
+    <span class="section-num">01 /</span>
+    <h2>Requirements <mark>Gathering</mark></h2>
+  </div>
+  <p class="section-intro">
+    A task manager is complex — far more than CRUD. Clarify scope with the interviewer: real-time collaboration?
+    Offline support? Mobile? Here we design a cloud-first web platform at Jira-scale.
+  </p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3 class="h3-red">● Functional — Core Task Management</h3>
+      <div class="req-item">Create/update/delete projects, epics, sprints, issues, subtasks</div>
+      <div class="req-item">Issue types: Story, Bug, Task, Epic, Sub-task</div>
+      <div class="req-item">Issue fields: title, description (rich text), assignee, reporter, priority, status, labels, due date, story points</div>
+      <div class="req-item">Kanban board view (drag-and-drop columns) and Backlog view</div>
+      <div class="req-item">Sprint planning: create sprint, move issues, start/close sprint</div>
+      <div class="req-item">Comments (threaded), @mentions, reactions, edit history</div>
+      <div class="req-item">File attachments (images, PDFs, docs) up to 25MB per file</div>
+      <div class="req-item">Issue linking (blocks, is-blocked-by, relates-to, duplicates)</div>
+      <div class="req-item">Activity feed / audit trail per issue and per project</div>
+    </div>
+
+    <div class="card">
+      <h3 class="h3-blue">◆ Functional — Collaboration & Notifications</h3>
+      <div class="req-item">Real-time updates: when an issue changes, all viewers see it instantly</div>
+      <div class="req-item">@mention triggers immediate in-app + email notification</div>
+      <div class="req-item">Watch/unwatch issues for change notifications</div>
+      <div class="req-item">Notification channels: In-app, Email, Slack, Mobile Push</div>
+      <div class="req-item">Notification preferences per user (mute, digest mode, channel selection)</div>
+      <div class="req-item">Daily/weekly email digest of watched issues</div>
+      <div class="req-item">Full-text search across issue titles, descriptions, comments</div>
+      <div class="req-item">Role-based permissions: Admin, Project Lead, Developer, Viewer</div>
+      <div class="req-item">Invite members to workspace / project via email</div>
+    </div>
+
+    <div class="card">
+      <h3 class="h3-green">◈ Non-Functional Requirements</h3>
+      <div class="req-item">API P99 latency &lt; 200ms; board load &lt; 1s</div>
+      <div class="req-item">99.95% availability (4.4 hours downtime/year)</div>
+      <div class="req-item">Support 10M users, 500M issues across all workspaces</div>
+      <div class="req-item">Notification delivery: in-app &lt;1s, email &lt;30s, push &lt;5s</div>
+      <div class="req-item">Search results within 200ms (eventually consistent, 30s lag ok)</div>
+      <div class="req-item">Horizontal scalability — no single point of failure</div>
+      <div class="req-item">Strong consistency for issue state; eventual for notifications/analytics</div>
+      <div class="req-item">GDPR compliant: data residency, right to deletion</div>
+    </div>
+
+    <div class="card">
+      <h3 class="h3-orange">◉ Out of Scope (v1)</h3>
+      <div class="req-item">Native mobile apps (API-first; mobile apps build on same API)</div>
+      <div class="req-item">Advanced reporting / BI dashboards (v2)</div>
+      <div class="req-item">Git integration, CI/CD pipeline linking</div>
+      <div class="req-item">Time tracking and billing</div>
+      <div class="req-item">AI-powered issue suggestions</div>
+      <div class="req-item">Video/voice calls (use Zoom/Meet integrations)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 02 ESTIMATION ── -->
+<section class="section" id="estimation">
+  <div class="section-header">
+    <span class="section-num">02 /</span>
+    <h2>Capacity <mark>Estimation</mark></h2>
+  </div>
+  <p class="section-intro">
+    Unlike a URL shortener, a task manager has complex access patterns: heavy reads of board views,
+    moderate writes (issue updates), real-time collaborative sessions, and notification fan-out spikes.
+  </p>
+
+  <div class="est-grid">
+    <div class="est-box">
+      <h3>Traffic Estimates</h3>
+      <div class="est-row"><span class="est-key">Active users / day</span><span class="est-val">2M DAU</span></div>
+      <div class="est-row"><span class="est-key">Issue reads / sec (avg)</span><span class="est-val">~5,000 RPS</span></div>
+      <div class="est-row"><span class="est-key">Issue writes / sec (avg)</span><span class="est-val">~500 WPS</span></div>
+      <div class="est-row"><span class="est-key">Peak multiplier</span><span class="est-val">5×</span></div>
+      <div class="est-row"><span class="est-key">Peak read RPS</span><span class="est-val">25,000</span></div>
+      <div class="est-row"><span class="est-key">Concurrent WebSocket sessions</span><span class="est-val">50,000</span></div>
+      <div class="est-row"><span class="est-key">Notifications / day</span><span class="est-val">~50M</span></div>
+      <div class="est-row"><span class="est-key">Search queries / sec</span><span class="est-val">~1,000</span></div>
+    </div>
+    <div class="est-box">
+      <h3>Storage Estimates</h3>
+      <div class="est-row"><span class="est-key">Issues (500M × 2KB avg)</span><span class="est-val">~1 TB</span></div>
+      <div class="est-row"><span class="est-key">Comments (2B × 500B avg)</span><span class="est-val">~1 TB</span></div>
+      <div class="est-row"><span class="est-key">Attachments (S3)</span><span class="est-val">~50 TB</span></div>
+      <div class="est-row"><span class="est-key">Search index (Elasticsearch)</span><span class="est-val">~2 TB</span></div>
+      <div class="est-row"><span class="est-key">Activity logs (append-only)</span><span class="est-val">~3 TB/yr</span></div>
+      <div class="est-row"><span class="est-key">Notification events (Kafka)</span><span class="est-val">~500 GB</span></div>
+      <div class="est-row"><span class="est-key">Redis (boards + sessions)</span><span class="est-val">~64 GB</span></div>
+      <div class="est-row"><span class="est-key">Total (year 1)</span><span class="est-val">~58 TB</span></div>
+    </div>
+  </div>
+
+  <div class="callout callout-orange" style="margin-top:24px;">
+    <strong>Key Pattern:</strong> Unlike read-heavy URL shorteners, task managers are <em>write-intensive during peak hours</em> (sprints, standups).
+    Notification fan-out is the biggest scaling challenge: one issue update can trigger 100+ notifications across watchers.
+    Design for fan-out spikes, not average load.
+  </div>
+</section>
+
+<!-- ── 03 API ── -->
+<section class="section" id="api">
+  <div class="section-header">
+    <span class="section-num">03 /</span>
+    <h2>API <mark>Design</mark></h2>
+  </div>
+  <p class="section-intro">
+    RESTful API for CRUD operations. WebSocket for real-time push. GraphQL considered but REST chosen
+    for simplicity, caching, and CDN compatibility. Auth via JWT + refresh tokens.
+  </p>
+
+  <div style="margin-bottom:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);">Issues & Tasks</div>
+  <div class="api-list" style="margin-bottom:28px;">
+    <div class="api-item">
+      <div class="method m-get">GET</div>
+      <div>
+        <div class="api-endpoint">/api/v1/projects/:pid/issues</div>
+        <div class="api-desc">List issues with filters: status, assignee, sprint, label, priority, text search. Cursor-based pagination. Returns denormalized view (assignee name, avatar included).</div>
+      </div>
+      <div class="api-code">200 OK<br>400 Bad filter</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-post">POST</div>
+      <div>
+        <div class="api-endpoint">/api/v1/projects/:pid/issues</div>
+        <div class="api-desc">Create issue. Body: <span class="tag tag-orange">type</span> <span class="tag tag-orange">title</span> <span class="tag tag-orange">description</span> <span class="tag tag-orange">assignee_id</span> <span class="tag tag-orange">priority</span> <span class="tag tag-orange">sprint_id</span>. Triggers notification fan-out asynchronously.</div>
+      </div>
+      <div class="api-code">201 Created<br>422 Validation</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-patch">PATCH</div>
+      <div>
+        <div class="api-endpoint">/api/v1/issues/:issue_id</div>
+        <div class="api-desc">Partial update (status change, reassign, edit fields). Optimistic locking via <span class="tag tag-blue">version</span> field to prevent conflicts. Emits WebSocket event and queues notifications.</div>
+      </div>
+      <div class="api-code">200 OK<br>409 Conflict</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-post">POST</div>
+      <div>
+        <div class="api-endpoint">/api/v1/issues/:issue_id/comments</div>
+        <div class="api-desc">Add comment with rich text (Markdown). Parses @mentions, extracts user IDs, triggers mention notifications. Returns comment with resolved mention data.</div>
+      </div>
+      <div class="api-code">201 Created</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-post">POST</div>
+      <div>
+        <div class="api-endpoint">/api/v1/issues/:issue_id/attachments</div>
+        <div class="api-desc">Upload file attachment. Returns a pre-signed S3 URL for direct browser upload (avoids routing large files through API servers). Stores metadata in DB after upload confirms.</div>
+      </div>
+      <div class="api-code">201 Created<br>413 Too Large</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);">Boards, Sprints & Projects</div>
+  <div class="api-list" style="margin-bottom:28px;">
+    <div class="api-item">
+      <div class="method m-get">GET</div>
+      <div>
+        <div class="api-endpoint">/api/v1/projects/:pid/board</div>
+        <div class="api-desc">Returns full board state: columns with issue cards grouped by status. Served from Redis cache (invalidated on any issue change). Includes ordering info for drag-and-drop.</div>
+      </div>
+      <div class="api-code">200 OK</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-put">PUT</div>
+      <div>
+        <div class="api-endpoint">/api/v1/issues/:issue_id/position</div>
+        <div class="api-desc">Drag-and-drop reorder. Body: <span class="tag tag-blue">status</span> (column change) + <span class="tag tag-blue">rank</span> (order within column, using Lexorank algorithm). Broadcasts position update via WebSocket.</div>
+      </div>
+      <div class="api-code">200 OK</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-post">POST</div>
+      <div>
+        <div class="api-endpoint">/api/v1/projects/:pid/sprints/:sid/start</div>
+        <div class="api-desc">Start sprint — validates no other sprint active, moves all sprint issues to active state, sets start/end dates. Notifies all project members via in-app notification.</div>
+      </div>
+      <div class="api-code">200 OK<br>400 Already active</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);">Real-time & Notifications</div>
+  <div class="api-list">
+    <div class="api-item">
+      <div class="method m-ws">WS</div>
+      <div>
+        <div class="api-endpoint">wss://api/ws/projects/:pid</div>
+        <div class="api-desc">WebSocket connection for project-scoped real-time events. Client subscribes on board open. Server pushes: <span class="tag tag-purple">issue.updated</span> <span class="tag tag-purple">comment.created</span> <span class="tag tag-purple">member.online</span> events.</div>
+      </div>
+      <div class="api-code">101 Upgrade<br>4401 Unauthorized</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-get">GET</div>
+      <div>
+        <div class="api-endpoint">/api/v1/notifications?cursor=&amp;unread=true</div>
+        <div class="api-desc">Fetch paginated notification list for current user. Supports <span class="tag tag-green">unread=true</span> filter. Notifications ordered by created_at desc. Returns unread_count in header.</div>
+      </div>
+      <div class="api-code">200 OK</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-put">PUT</div>
+      <div>
+        <div class="api-endpoint">/api/v1/notifications/read-all</div>
+        <div class="api-desc">Mark all notifications as read. Updates in DB and pushes a WebSocket event to update the unread badge in real-time across all open tabs/devices for the user.</div>
+      </div>
+      <div class="api-code">204 No Content</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-put">PUT</div>
+      <div>
+        <div class="api-endpoint">/api/v1/users/me/notification-prefs</div>
+        <div class="api-desc">Update notification preferences: per-event-type channel selection (in-app/email/slack/push), digest mode, quiet hours. Stored in user preferences table.</div>
+      </div>
+      <div class="api-code">200 OK</div>
+    </div>
+    <div class="api-item">
+      <div class="method m-get">GET</div>
+      <div>
+        <div class="api-endpoint">/api/v1/search?q=&amp;project=&amp;type=&amp;assignee=</div>
+        <div class="api-desc">Full-text search. Routes to Elasticsearch. Supports filters, facets, highlighting. Returns ranked results with snippets. Fallback to DB LIKE query if Elasticsearch is unavailable.</div>
+      </div>
+      <div class="api-code">200 OK</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 04 DB ── -->
+<section class="section" id="db">
+  <div class="section-header">
+    <span class="section-num">04 /</span>
+    <h2>Database <mark>Design</mark></h2>
+  </div>
+  <p class="section-intro">
+    PostgreSQL is the primary store — ACID transactions are essential for sprint operations, issue state machines,
+    and permission checks. Separate specialized stores handle search, notifications, and real-time state.
+  </p>
+
+  <div class="schema-grid">
+    <div class="schema-table">
+      <div class="schema-thead"><h4>workspaces</h4><span>Tenant root</span></div>
+      <div class="schema-row"><div class="sf"><span class="pk">PK</span> workspace_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">slug</div><div class="st">VARCHAR(50)</div></div>
+      <div class="schema-row"><div class="sf">name</div><div class="st">VARCHAR(255)</div></div>
+      <div class="schema-row"><div class="sf">plan_type</div><div class="st">ENUM</div></div>
+      <div class="schema-row"><div class="sf">created_at</div><div class="st">TIMESTAMPTZ</div></div>
+    </div>
+
+    <div class="schema-table">
+      <div class="schema-thead"><h4>users</h4><span>Accounts</span></div>
+      <div class="schema-row"><div class="sf"><span class="pk">PK</span> user_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">email</div><div class="st">VARCHAR(255)</div></div>
+      <div class="schema-row"><div class="sf">display_name</div><div class="st">VARCHAR(100)</div></div>
+      <div class="schema-row"><div class="sf">avatar_url</div><div class="st">TEXT</div></div>
+      <div class="schema-row"><div class="sf">timezone</div><div class="st">VARCHAR(50)</div></div>
+      <div class="schema-row"><div class="sf">created_at</div><div class="st">TIMESTAMPTZ</div></div>
+    </div>
+
+    <div class="schema-table">
+      <div class="schema-thead"><h4>projects</h4><span>Project config</span></div>
+      <div class="schema-row"><div class="sf"><span class="pk">PK</span> project_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf"><span class="fk">FK</span> workspace_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">key</div><div class="st">VARCHAR(10)</div></div>
+      <div class="schema-row"><div class="sf">name</div><div class="st">VARCHAR(255)</div></div>
+      <div class="schema-row"><div class="sf">board_type</div><div class="st">ENUM</div></div>
+      <div class="schema-row"><div class="sf">lead_user_id</div><div class="st">UUID</div></div>
+    </div>
+
+    <div class="schema-table">
+      <div class="schema-thead"><h4>issues</h4><span>Core entity</span></div>
+      <div class="schema-row"><div class="sf"><span class="pk">PK</span> issue_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf"><span class="fk">FK</span> project_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">issue_key</div><div class="st">VARCHAR(20)</div></div>
+      <div class="schema-row"><div class="sf">type</div><div class="st">ENUM</div></div>
+      <div class="schema-row"><div class="sf">title</div><div class="st">VARCHAR(500)</div></div>
+      <div class="schema-row"><div class="sf">description</div><div class="st">JSONB (rich text)</div></div>
+      <div class="schema-row"><div class="sf">status</div><div class="st">VARCHAR(50)</div></div>
+      <div class="schema-row"><div class="sf">priority</div><div class="st">ENUM</div></div>
+      <div class="schema-row"><div class="sf">assignee_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">reporter_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf"><span class="fk">FK</span> sprint_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">story_points</div><div class="st">INT</div></div>
+      <div class="schema-row"><div class="sf">rank</div><div class="st">VARCHAR(255)</div></div>
+      <div class="schema-row"><div class="sf">due_date</div><div class="st">DATE</div></div>
+      <div class="schema-row"><div class="sf">parent_id</div><div class="st">UUID (self-ref)</div></div>
+      <div class="schema-row"><div class="sf">version</div><div class="st">BIGINT</div></div>
+      <div class="schema-row"><div class="sf">created_at</div><div class="st">TIMESTAMPTZ</div></div>
+      <div class="schema-row"><div class="sf">updated_at</div><div class="st">TIMESTAMPTZ</div></div>
+    </div>
+
+    <div class="schema-table">
+      <div class="schema-thead"><h4>comments</h4><span>Threaded</span></div>
+      <div class="schema-row"><div class="sf"><span class="pk">PK</span> comment_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf"><span class="fk">FK</span> issue_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf"><span class="fk">FK</span> author_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">body</div><div class="st">JSONB</div></div>
+      <div class="schema-row"><div class="sf">parent_comment_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">is_edited</div><div class="st">BOOLEAN</div></div>
+      <div class="schema-row"><div class="sf">created_at</div><div class="st">TIMESTAMPTZ</div></div>
+    </div>
+
+    <div class="schema-table">
+      <div class="schema-thead"><h4>notifications</h4><span>User inbox</span></div>
+      <div class="schema-row"><div class="sf"><span class="pk">PK</span> notif_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf"><span class="fk">FK</span> recipient_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">type</div><div class="st">ENUM</div></div>
+      <div class="schema-row"><div class="sf">actor_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">entity_type</div><div class="st">VARCHAR(50)</div></div>
+      <div class="schema-row"><div class="sf">entity_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">payload</div><div class="st">JSONB</div></div>
+      <div class="schema-row"><div class="sf">is_read</div><div class="st">BOOLEAN</div></div>
+      <div class="schema-row"><div class="sf">created_at</div><div class="st">TIMESTAMPTZ</div></div>
+    </div>
+
+    <div class="schema-table">
+      <div class="schema-thead"><h4>issue_watchers</h4><span>Subscriptions</span></div>
+      <div class="schema-row"><div class="sf"><span class="fk">FK</span> issue_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf"><span class="fk">FK</span> user_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">watched_at</div><div class="st">TIMESTAMPTZ</div></div>
+      <div style="padding:8px 14px;font-size:11px;color:var(--ink4)">PK: (issue_id, user_id)</div>
+    </div>
+
+    <div class="schema-table">
+      <div class="schema-thead"><h4>activity_log</h4><span>Audit trail</span></div>
+      <div class="schema-row"><div class="sf"><span class="pk">PK</span> log_id</div><div class="st">BIGSERIAL</div></div>
+      <div class="schema-row"><div class="sf">entity_type</div><div class="st">VARCHAR(50)</div></div>
+      <div class="schema-row"><div class="sf">entity_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">actor_id</div><div class="st">UUID</div></div>
+      <div class="schema-row"><div class="sf">action</div><div class="st">VARCHAR(100)</div></div>
+      <div class="schema-row"><div class="sf">before_state</div><div class="st">JSONB</div></div>
+      <div class="schema-row"><div class="sf">after_state</div><div class="st">JSONB</div></div>
+      <div class="schema-row"><div class="sf">created_at</div><div class="st">TIMESTAMPTZ</div></div>
+    </div>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>Lexorank for ordering:</strong> Jira uses the Lexorank algorithm for drag-and-drop ordering. Instead of integer positions (which require re-numbering all rows on reorder), Lexorank uses strings that can always be inserted between any two values. Example: between "aaa" and "bbb" insert "aaU" — no other rows change. This turns reorders into single-row updates.
+  </div>
+
+  <div class="callout callout-green">
+    <strong>Sharding Strategy:</strong> Shard PostgreSQL by <span class="tag tag-blue">workspace_id</span>. All data for a workspace (projects, issues, comments, members) lives on the same shard — no cross-shard JOINs needed. Large workspaces (enterprise) get dedicated shards. Use Citus or application-level sharding via consistent hashing.
+  </div>
+</section>
+
+<!-- ── 05 ARCHITECTURE ── -->
+<section class="section" id="architecture">
+  <div class="section-header">
+    <span class="section-num">05 /</span>
+    <h2>System <mark>Architecture</mark></h2>
+  </div>
+  <p class="section-intro">
+    Microservice-oriented architecture with domain-separated services. Services communicate
+    via REST (sync) and Kafka (async). WebSocket Gateway handles all real-time connections centrally.
+  </p>
+
+  <div class="arch-tier">
+    <div class="tier-label">Tier 1 — Client Layer</div>
+    <div class="tier-nodes">
+      <div class="tier-node tn-ink"><h5>🌐 Web App (React SPA)</h5><p>Board, backlog, issue detail views. WebSocket client. Optimistic UI updates.</p></div>
+      <div class="tier-node tn-ink"><h5>📱 Mobile (React Native)</h5><p>Consumes same REST API. Push notifications via FCM/APNs.</p></div>
+      <div class="tier-node tn-ink"><h5>🤖 Integrations</h5><p>Slack bot, GitHub Actions, Zapier webhooks consuming API.</p></div>
+    </div>
+  </div>
+
+  <div class="tier-arrow">↓ HTTPS / WSS via CDN + WAF + API Gateway</div>
+
+  <div class="arch-tier">
+    <div class="tier-label">Tier 2 — Edge & Gateway</div>
+    <div class="tier-nodes">
+      <div class="tier-node tn-yellow"><h5>☁️ CDN (CloudFront)</h5><p>Serves static assets (JS/CSS). Caches public GET responses. Edge termination.</p></div>
+      <div class="tier-node tn-yellow"><h5>🛡️ WAF + Rate Limiter</h5><p>OWASP rules. Per-user API rate limits via Redis token bucket. DDoS protection.</p></div>
+      <div class="tier-node tn-yellow"><h5>🚪 API Gateway (Kong)</h5><p>JWT auth validation. Routes requests to services. Request logging. Plugin ecosystem.</p></div>
+    </div>
+  </div>
+
+  <div class="tier-arrow">↓ Internal routing to microservices</div>
+
+  <div class="arch-tier">
+    <div class="tier-label">Tier 3 — Application Services (Stateless, K8s Pods)</div>
+    <div class="tier-nodes">
+      <div class="tier-node tn-red"><h5>📋 Issue Service</h5><p>CRUD for issues, subtasks, comments, attachments. Publishes events to Kafka on every mutation.</p></div>
+      <div class="tier-node tn-blue"><h5>🗂️ Project Service</h5><p>Projects, sprints, board config, member management, RBAC enforcement.</p></div>
+      <div class="tier-node tn-purple"><h5>🔌 WebSocket Gateway</h5><p>Manages 50K+ persistent WS connections. Subscribes to Redis Pub/Sub for event fan-out to clients.</p></div>
+      <div class="tier-node tn-orange"><h5>🔔 Notification Service</h5><p>Consumes Kafka events. Resolves watchers. Routes to channels (email, push, Slack, in-app).</p></div>
+      <div class="tier-node tn-teal"><h5>🔍 Search Service</h5><p>Wraps Elasticsearch. Handles query parsing, filtering, highlighting. Sync from Kafka consumer.</p></div>
+      <div class="tier-node tn-green"><h5>👤 Auth Service</h5><p>JWT issue/refresh, OAuth2 (Google, GitHub SSO), session management, invite flows.</p></div>
+    </div>
+  </div>
+
+  <div class="tier-arrow">↓ Async via Kafka / Sync via service calls</div>
+
+  <div class="arch-tier">
+    <div class="tier-label">Tier 4 — Messaging & Event Bus</div>
+    <div class="tier-nodes">
+      <div class="tier-node tn-purple"><h5>📨 Apache Kafka</h5><p>Topics: issue.events, notification.events, search.sync, audit.log. 50+ partitions each. 7-day retention.</p></div>
+      <div class="tier-node tn-red"><h5>📡 Redis Pub/Sub</h5><p>WebSocket event routing. WS Gateway subscribes to project channels. Real-time presence (who's online).</p></div>
+      <div class="tier-node tn-orange"><h5>⏰ Job Scheduler</h5><p>Digest emails, sprint reminders, due-date alerts. BullMQ (Redis) + cron workers.</p></div>
+    </div>
+  </div>
+
+  <div class="tier-arrow">↓ Persistence layer</div>
+
+  <div class="arch-tier">
+    <div class="tier-label">Tier 5 — Data Storage</div>
+    <div class="tier-nodes">
+      <div class="tier-node tn-blue"><h5>🐘 PostgreSQL (Sharded)</h5><p>Primary store. Issues, comments, projects, users. Sharded by workspace_id via Citus.</p></div>
+      <div class="tier-node tn-red"><h5>⚡ Redis Cluster</h5><p>Board state cache, sessions, rate limiting, presence tracking, WS pub/sub channels.</p></div>
+      <div class="tier-node tn-teal"><h5>🔍 Elasticsearch</h5><p>Full-text search index. Synced from Kafka. 3-node cluster, 1 replica per shard.</p></div>
+      <div class="tier-node tn-green"><h5>🗃️ S3 (Object Store)</h5><p>File attachments, avatar images. Signed URL upload/download. CDN fronted for reads.</p></div>
+      <div class="tier-node tn-orange"><h5>📊 ClickHouse</h5><p>Analytics: sprint velocity, issue throughput, cycle time reports. Async ingest from Kafka.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 06 FLOWS ── -->
+<section class="section" id="flows">
+  <div class="section-header">
+    <span class="section-num">06 /</span>
+    <h2>Request <mark>Flows</mark></h2>
+  </div>
+  <p class="section-intro">
+    Three critical flows: updating an issue (most common write), loading a board (most common read),
+    and creating a comment with @mention (triggers notification pipeline).
+  </p>
+
+  <div class="two-flow" style="margin-bottom:24px;">
+    <div class="flow-card">
+      <h4 class="h3-red">🔄 Issue Status Update</h4>
+      <div class="flow-step"><div class="step-num sn-red">1</div><div class="step-content">User drags card on board. Client sends <strong>PATCH /issues/:id</strong> with new status + optimistic UI update shown immediately.</div></div>
+      <div class="flow-step"><div class="step-num sn-red">2</div><div class="step-content">API Gateway validates JWT. Routes to <strong>Issue Service</strong>. Checks RBAC permission (can user edit in this project?).</div></div>
+      <div class="flow-step"><div class="step-num sn-red">3</div><div class="step-content">Issue Service runs <strong>optimistic lock check</strong>: <code style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px;">WHERE version = request.version</code>. If version mismatch → 409 Conflict (someone else edited).</div></div>
+      <div class="flow-step"><div class="step-num sn-red">4</div><div class="step-content">Write to <strong>PostgreSQL</strong>, increment version. Write activity log entry. Invalidate Redis board cache for this project.</div></div>
+      <div class="flow-step"><div class="step-num sn-red">5</div><div class="step-content">Publish <strong>issue.updated</strong> event to Kafka. Return 200 to client immediately — rest is async.</div></div>
+      <div class="flow-step"><div class="step-num sn-red">6</div><div class="step-content">Kafka consumers: (a) Notification Service fans out to watchers, (b) Search Service updates Elasticsearch index, (c) WebSocket Gateway pushes real-time event to all board viewers.</div></div>
+    </div>
+
+    <div class="flow-card">
+      <h4 class="h3-blue">📋 Board Load</h4>
+      <div class="flow-step"><div class="step-num sn-blue">1</div><div class="step-content">User opens project board. Client sends <strong>GET /projects/:pid/board</strong> + opens WebSocket connection <strong>wss://.../projects/:pid</strong>.</div></div>
+      <div class="flow-step"><div class="step-num sn-blue">2</div><div class="step-content">Project Service checks Redis for cached board state: <strong>Redis GET board:{project_id}</strong>. Cache TTL = 60s, invalidated on any change.</div></div>
+      <div class="flow-step"><div class="step-num sn-blue">3</div><div class="step-content"><strong>Cache HIT</strong> (most cases): Return serialized board JSON instantly. &lt;20ms response.</div></div>
+      <div class="flow-step"><div class="step-num sn-blue">4</div><div class="step-content"><strong>Cache MISS</strong>: Query PostgreSQL for all active sprint issues, group by status, include assignee names/avatars. ~50–150ms.</div></div>
+      <div class="flow-step"><div class="step-num sn-blue">5</div><div class="step-content">Write board state to Redis cache. Return to client. Client registers WebSocket listeners for live updates.</div></div>
+      <div class="flow-step"><div class="step-num sn-blue">6</div><div class="step-content">All subsequent updates arrive via WebSocket — client patches local state without re-fetching the entire board.</div></div>
+    </div>
+  </div>
+
+  <div class="flow-card" style="margin-bottom:0;">
+    <h4 class="h3-purple">💬 Comment with @mention → Notification Pipeline</h4>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:8px;">
+      <div>
+        <div class="flow-step"><div class="step-num sn-purple">1</div><div class="step-content">User submits comment: <strong>"@Alice can you review this bug?"</strong> POST /issues/:id/comments</div></div>
+        <div class="flow-step"><div class="step-num sn-purple">2</div><div class="step-content">Issue Service <strong>parses @mentions</strong> from comment body. Resolves display names to user_ids.</div></div>
+      </div>
+      <div>
+        <div class="flow-step"><div class="step-num sn-purple">3</div><div class="step-content">Saves comment to PostgreSQL. Publishes <strong>comment.created</strong> event to Kafka with mention list.</div></div>
+        <div class="flow-step"><div class="step-num sn-purple">4</div><div class="step-content"><strong>WebSocket Gateway</strong> receives from Redis Pub/Sub, pushes comment to all board viewers instantly (&lt;100ms).</div></div>
+      </div>
+      <div>
+        <div class="flow-step"><div class="step-num sn-purple">5</div><div class="step-content"><strong>Notification Service</strong> consumes event. Loads watcher list + mentioned users. Deduplicates. Checks user preferences.</div></div>
+        <div class="flow-step"><div class="step-num sn-purple">6</div><div class="step-content">Creates <strong>in-app notification</strong> records in PostgreSQL for each recipient. Pushes to user's WS channel for real-time bell badge.</div></div>
+      </div>
+      <div>
+        <div class="flow-step"><div class="step-num sn-purple">7</div><div class="step-content">Routes to <strong>Email / Push / Slack</strong> channels based on user preferences. Email via SES, Push via FCM, Slack via webhooks.</div></div>
+        <div class="flow-step"><div class="step-num sn-purple">8</div><div class="step-content">Failed deliveries queued for <strong>retry with exponential backoff</strong>. Dead-letter queue for permanent failures. Delivery receipt tracked.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 07 REAL-TIME ── -->
+<section class="section" id="realtime">
+  <div class="section-header">
+    <span class="section-num">07 /</span>
+    <h2>Real-time <mark>Updates</mark></h2>
+  </div>
+  <p class="section-intro">
+    Real-time collaboration is a core differentiator. We use WebSockets (not polling) for push-based updates.
+    The challenge: routing events from any API server to the correct WebSocket connection on any WS server.
+  </p>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>
+      <span class="code-fname">websocket_gateway.py</span>
+    </div>
+    <div class="code-body">
+<span class="cc"># WebSocket Gateway — manages all client connections</span>
+<span class="cc"># Problem: API servers and WS servers are different pods.</span>
+<span class="cc"># Solution: Redis Pub/Sub as the event bus between them.</span>
+
+<span class="ck">class</span> <span class="ct">WebSocketGateway</span>:
+    <span class="ck">def</span> <span class="cf">__init__</span>(self):
+        self.connections: dict[<span class="ct">str</span>, set[<span class="ct">WebSocket</span>]] = {}  <span class="cc"># project_id → connections</span>
+        self.user_connections: dict[<span class="ct">str</span>, set[<span class="ct">WebSocket</span>]] = {}   <span class="cc"># user_id → connections</span>
+        self.redis_sub = redis.pubsub()
+
+    <span class="ck">async def</span> <span class="cf">connect</span>(self, ws: <span class="ct">WebSocket</span>, project_id: <span class="ct">str</span>, user_id: <span class="ct">str</span>):
+        <span class="ck">await</span> ws.accept()
+        self.connections.setdefault(project_id, set()).add(ws)
+        self.user_connections.setdefault(user_id, set()).add(ws)
+
+        <span class="cc"># Subscribe to project channel in Redis Pub/Sub</span>
+        <span class="ck">await</span> self.redis_sub.subscribe(f<span class="cs">"project:{project_id}"</span>)
+
+        <span class="cc"># Broadcast user presence to project members</span>
+        <span class="ck">await</span> self.<span class="cf">publish_presence</span>(project_id, user_id, <span class="cs">"online"</span>)
+
+    <span class="ck">async def</span> <span class="cf">broadcast_to_project</span>(self, project_id: <span class="ct">str</span>, event: dict):
+        <span class="cc"># API server publishes to Redis; ALL WS gateway pods receive it</span>
+        <span class="ck">await</span> redis.publish(f<span class="cs">"project:{project_id}"</span>, json.dumps(event))
+
+    <span class="ck">async def</span> <span class="cf">on_redis_message</span>(self, message):
+        channel = message[<span class="cs">'channel'</span>]                  <span class="cc"># "project:uuid"</span>
+        project_id = channel.split(<span class="cs">':'</span>)[<span class="cn">1</span>]
+        event = json.loads(message[<span class="cs">'data'</span>])
+
+        <span class="cc"># Fan-out to all WS connections watching this project (on THIS pod)</span>
+        dead = set()
+        <span class="ck">for</span> ws <span class="ck">in</span> self.connections.get(project_id, set()):
+            <span class="ck">try</span>:
+                <span class="ck">await</span> ws.send_json(event)
+            <span class="ck">except</span> <span class="ct">ConnectionClosed</span>:
+                dead.add(ws)
+        self.connections[project_id] -= dead        <span class="cc"># cleanup dead connections</span>
+
+<span class="cc"># ── Event types pushed to clients ─────────────────────────────────────</span>
+EVENT_TYPES = {
+    <span class="cs">"issue.updated"</span>:    <span class="cs">"issue_id, changed_fields, updated_by, version"</span>,
+    <span class="cs">"issue.created"</span>:    <span class="cs">"issue_id, issue_data, created_by"</span>,
+    <span class="cs">"comment.created"</span>:  <span class="cs">"comment_id, issue_id, body, author"</span>,
+    <span class="cs">"member.online"</span>:    <span class="cs">"user_id, display_name, avatar_url"</span>,
+    <span class="cs">"member.offline"</span>:   <span class="cs">"user_id"</span>,
+    <span class="cs">"notification.new"</span>: <span class="cs">"notif_id, type, payload, unread_count"</span>,
+}
+    </div>
+  </div>
+
+  <div class="callout callout-purple">
+    <strong>Horizontal Scaling of WebSocket Servers:</strong> Each WS Gateway pod independently manages its connections.
+    Redis Pub/Sub is the glue — when Issue Service publishes <span class="tag tag-purple">project:uuid</span>, every WS pod subscribed to that channel receives the message and fans out to its local connections. This scales linearly: add WS pods as needed. Redis Cluster handles the pub/sub load.
+  </div>
+</section>
+
+<!-- ── 08 NOTIFICATIONS ── -->
+<section class="section" id="notifications">
+  <div class="section-header">
+    <span class="section-num">08 /</span>
+    <h2>Notification <mark>System</mark></h2>
+  </div>
+  <p class="section-intro">
+    The notification system is the most complex subsystem. It must handle high fan-out (one event → many users),
+    multiple delivery channels, user preferences, deduplication, retry logic, and digest batching.
+  </p>
+
+  <div class="notif-channels">
+    <div class="notif-channel">
+      <span class="icon">🔔</span>
+      <h4 style="color:var(--red)">In-App</h4>
+      <p>Stored in PostgreSQL. Real-time delivery via WebSocket push to active clients. Unread badge count updated live. Persistent inbox.</p>
+    </div>
+    <div class="notif-channel">
+      <span class="icon">📧</span>
+      <h4 style="color:var(--blue)">Email</h4>
+      <p>Sent via AWS SES / SendGrid. Immediate for @mentions, digest (daily/weekly) for low-priority events. Unsubscribe link in footer. GDPR compliant.</p>
+    </div>
+    <div class="notif-channel">
+      <span class="icon">📱</span>
+      <h4 style="color:var(--orange)">Mobile Push</h4>
+      <p>FCM (Android) + APNs (iOS). Token stored per device. Supports notification grouping. Respects quiet hours in user preferences.</p>
+    </div>
+    <div class="notif-channel">
+      <span class="icon">💬</span>
+      <h4 style="color:var(--purple)">Slack</h4>
+      <p>OAuth integration. Workspace-level bot posts to DM or channel. Rich formatting with issue title, status, assignee. User can /connect-slack to link account.</p>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>
+      <span class="code-fname">notification_service.py</span>
+    </div>
+    <div class="code-body">
+<span class="cc"># ── Notification Service: Consumer + Fan-out ───────────────────────</span>
+
+NOTIFICATION_TRIGGERS = {
+    <span class="cs">"issue.assigned"</span>:      {<span class="cs">"recipients"</span>: [<span class="cs">"assignee"</span>],          <span class="cs">"priority"</span>: <span class="cs">"high"</span>},
+    <span class="cs">"issue.commented"</span>:     {<span class="cs">"recipients"</span>: [<span class="cs">"watchers"</span>, <span class="cs">"reporter"</span>], <span class="cs">"priority"</span>: <span class="cs">"medium"</span>},
+    <span class="cs">"issue.mentioned"</span>:     {<span class="cs">"recipients"</span>: [<span class="cs">"mentioned_users"</span>],     <span class="cs">"priority"</span>: <span class="cs">"high"</span>},
+    <span class="cs">"issue.status_changed"</span>:{<span class="cs">"recipients"</span>: [<span class="cs">"watchers"</span>],             <span class="cs">"priority"</span>: <span class="cs">"low"</span>},
+    <span class="cs">"sprint.started"</span>:      {<span class="cs">"recipients"</span>: [<span class="cs">"project_members"</span>],      <span class="cs">"priority"</span>: <span class="cs">"medium"</span>},
+    <span class="cs">"due_date.approaching"</span>:{<span class="cs">"recipients"</span>: [<span class="cs">"assignee"</span>, <span class="cs">"reporter"</span>], <span class="cs">"priority"</span>: <span class="cs">"high"</span>},
+}
+
+<span class="ck">async def</span> <span class="cf">process_event</span>(event: dict):
+    trigger = NOTIFICATION_TRIGGERS.get(event[<span class="cs">"type"</span>])
+    <span class="ck">if not</span> trigger: <span class="ck">return</span>
+
+    <span class="cc"># 1. Resolve recipient list</span>
+    recipients = <span class="ck">await</span> <span class="cf">resolve_recipients</span>(event, trigger[<span class="cs">"recipients"</span>])
+    recipients = [r <span class="ck">for</span> r <span class="ck">in</span> recipients <span class="ck">if</span> r != event[<span class="cs">"actor_id"</span>]]  <span class="cc"># don't notify self</span>
+
+    <span class="ck">for</span> user_id <span class="ck">in</span> recipients:
+        prefs = <span class="ck">await</span> <span class="cf">get_user_prefs</span>(user_id)
+
+        <span class="cc"># 2. Deduplication: skip if same notif delivered &lt;5min ago</span>
+        dedup_key = f<span class="cs">"notif:{user_id}:{event['type']}:{event['entity_id']}"</span>
+        <span class="ck">if await</span> redis.<span class="cf">exists</span>(dedup_key): <span class="ck">continue</span>
+        <span class="ck">await</span> redis.<span class="cf">setex</span>(dedup_key, <span class="cn">300</span>, <span class="cn">1</span>)
+
+        <span class="cc"># 3. Save in-app notification (always)</span>
+        notif = <span class="ck">await</span> db.<span class="cf">create_notification</span>(user_id, event)
+
+        <span class="cc"># 4. Push via WebSocket if user is online</span>
+        <span class="ck">await</span> redis.publish(f<span class="cs">"user:{user_id}:notifs"</span>, notif.to_json())
+
+        <span class="cc"># 5. Route to external channels based on preferences + priority</span>
+        <span class="ck">if</span> prefs.email_enabled <span class="ck">and</span> trigger[<span class="cs">"priority"</span>] == <span class="cs">"high"</span>:
+            <span class="ck">await</span> email_queue.<span class="cf">enqueue</span>(user_id, notif)     <span class="cc"># SES</span>
+
+        <span class="ck">elif</span> prefs.digest_mode:
+            <span class="ck">await</span> digest_queue.<span class="cf">add</span>(user_id, notif)         <span class="cc"># batch for daily email</span>
+
+        <span class="ck">if</span> prefs.push_enabled <span class="ck">and not</span> <span class="cf">is_quiet_hours</span>(user_id):
+            <span class="ck">await</span> push_queue.<span class="cf">enqueue</span>(user_id, notif)       <span class="cc"># FCM/APNs</span>
+
+        <span class="ck">if</span> prefs.slack_token:
+            <span class="ck">await</span> slack_queue.<span class="cf">enqueue</span>(prefs.slack_token, notif)   <span class="cc"># Slack API</span>
+
+<span class="cc"># ── Retry Logic ───────────────────────────────────────────────────</span>
+<span class="cc"># Each channel queue uses exponential backoff: 1s → 5s → 30s → 5min → give up</span>
+<span class="cc"># Failed deliveries after 5 retries → Dead Letter Queue (DLQ) for investigation</span>
+<span class="cc"># Email bounces: update user's email_deliverable=false, alert admin</span>
+    </div>
+  </div>
+
+  <div class="card-grid" style="margin-top:24px;">
+    <div class="card">
+      <h3 class="h3-orange">● Fan-out Strategy</h3>
+      <div class="req-item"><strong>Push model (fan-out on write):</strong> When an event occurs, immediately write notification to each recipient's inbox. Fast reads, higher write cost. Works well for moderate watcher counts (&lt;1000).</div>
+      <div class="req-item"><strong>Pull model (fan-out on read):</strong> Store one event, each user fetches their feed. Low write cost, but expensive reads and harder to personalize. Use for large project broadcasts (sprint start).</div>
+      <div class="req-item"><strong>Hybrid:</strong> Push for &lt;500 watchers (most issues), pull for >500 (large projects / org-wide announcements).</div>
+    </div>
+    <div class="card">
+      <h3 class="h3-blue">◆ Digest Batching</h3>
+      <div class="req-item">Users who prefer digest mode: accumulate notifications in Redis sorted set (score = timestamp).</div>
+      <div class="req-item">Cron job runs daily at user's preferred time (respects timezone from user profile).</div>
+      <div class="req-item">Aggregates: "5 issues were updated in Project X, 2 @mentions waiting for you."</div>
+      <div class="req-item">Renders HTML email from template, sends via SES. Clears digest queue after send.</div>
+      <div class="req-item">Due date alerts run 24h before due: cron scans issues WHERE due_date = tomorrow AND status != done.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 09 SEARCH ── -->
+<section class="section" id="search">
+  <div class="section-header">
+    <span class="section-num">09 /</span>
+    <h2>Full-Text <mark>Search</mark></h2>
+  </div>
+  <p class="section-intro">
+    PostgreSQL LIKE queries don't scale to 500M issues. Elasticsearch provides sub-200ms full-text search
+    with relevance ranking, facets, and typo-tolerance. The challenge is keeping it in sync with PostgreSQL.
+  </p>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>
+      <span class="code-fname">search_index_mapping.json</span>
+    </div>
+    <div class="code-body">
+<span class="cc">// Elasticsearch index mapping for issues</span>
+<span class="cp">{</span>
+  <span class="cs">"mappings"</span>: <span class="cp">{</span>
+    <span class="cs">"properties"</span>: <span class="cp">{</span>
+      <span class="cs">"issue_id"</span>:      <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span>,
+      <span class="cs">"workspace_id"</span>:  <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span>,   <span class="cc">// for tenant isolation</span>
+      <span class="cs">"project_id"</span>:    <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span>,
+      <span class="cs">"issue_key"</span>:     <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span>,   <span class="cc">// PROJ-123</span>
+      <span class="cs">"title"</span>: <span class="cp">{</span>
+        <span class="cs">"type"</span>: <span class="cs">"text"</span>,
+        <span class="cs">"analyzer"</span>: <span class="cs">"english"</span>,
+        <span class="cs">"fields"</span>: <span class="cp">{</span> <span class="cs">"keyword"</span>: <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span> <span class="cp">}</span>  <span class="cc">// for exact match + sort</span>
+      <span class="cp">}</span>,
+      <span class="cs">"description_text"</span>: <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"text"</span>, <span class="cs">"analyzer"</span>: <span class="cs">"english"</span> <span class="cp">}</span>,
+      <span class="cs">"comment_bodies"</span>:   <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"text"</span>, <span class="cs">"analyzer"</span>: <span class="cs">"english"</span> <span class="cp">}</span>,  <span class="cc">// denormalized</span>
+      <span class="cs">"status"</span>:        <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span>,
+      <span class="cs">"priority"</span>:      <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span>,
+      <span class="cs">"assignee_id"</span>:   <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span>,
+      <span class="cs">"labels"</span>:        <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"keyword"</span> <span class="cp">}</span>,
+      <span class="cs">"updated_at"</span>:    <span class="cp">{</span> <span class="cs">"type"</span>: <span class="cs">"date"</span> <span class="cp">}</span>
+    <span class="cp">}</span>
+  <span class="cp">}</span>
+<span class="cp">}</span>
+
+<span class="cc">// Sync strategy: Kafka consumer listens to issue.events topic</span>
+<span class="cc">// On issue.created / issue.updated: upsert Elasticsearch doc</span>
+<span class="cc">// On issue.deleted: delete from index</span>
+<span class="cc">// Lag: ~5-30 seconds (eventual consistency — acceptable for search)</span>
+<span class="cc">// Initial index build: pg_logical replication slot → bulk index</span>
+    </div>
+  </div>
+
+  <div class="callout callout-teal">
+    <strong>Search Security (Tenant Isolation):</strong> Every Elasticsearch query MUST include a <span class="tag tag-teal">workspace_id</span> filter term.
+    The Search Service enforces this — it injects the workspace from the JWT token, so users can never search another tenant's data even if they construct malicious queries.
+    Use Elasticsearch aliases per workspace for strict isolation at scale.
+  </div>
+</section>
+
+<!-- ── 10 PERMISSIONS ── -->
+<section class="section" id="permissions">
+  <div class="section-header">
+    <span class="section-num">10 /</span>
+    <h2>Permissions <mark>& RBAC</mark></h2>
+  </div>
+  <p class="section-intro">
+    Role-Based Access Control with two scopes: workspace-level and project-level.
+    Permissions are checked on every API call and cached in Redis for performance.
+  </p>
+
+  <div class="card-grid-3" style="margin-bottom:24px;">
+    <div class="card">
+      <h3 class="h3-red">🔴 Admin</h3>
+      <div class="req-item">Full workspace management</div>
+      <div class="req-item">Create / delete projects</div>
+      <div class="req-item">Manage all members and roles</div>
+      <div class="req-item">Access billing and settings</div>
+      <div class="req-item">View audit logs</div>
+      <div class="req-item">Delete any issue / comment</div>
+    </div>
+    <div class="card">
+      <h3 class="h3-orange">🟠 Project Lead</h3>
+      <div class="req-item">Manage project settings</div>
+      <div class="req-item">Create / delete sprints</div>
+      <div class="req-item">Invite members to project</div>
+      <div class="req-item">Create / edit / delete issues</div>
+      <div class="req-item">Manage board columns / workflow</div>
+      <div class="req-item">Assign / reassign any issue</div>
+    </div>
+    <div class="card">
+      <h3 class="h3-blue">🔵 Developer</h3>
+      <div class="req-item">Create issues and subtasks</div>
+      <div class="req-item">Update issue status / fields</div>
+      <div class="req-item">Comment on any issue</div>
+      <div class="req-item">Upload attachments</div>
+      <div class="req-item">Edit own comments only</div>
+      <div class="req-item">Watch / unwatch issues</div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>
+      <span class="code-fname">rbac_middleware.py</span>
+    </div>
+    <div class="code-body">
+<span class="cc"># Permission check middleware — runs on every authenticated request</span>
+
+PERMISSION_MAP = {
+    <span class="cp">(</span><span class="cs">"PATCH"</span>, <span class="cs">"/issues/:id"</span><span class="cp">)</span>:          [<span class="cs">"developer"</span>, <span class="cs">"lead"</span>, <span class="cs">"admin"</span>],
+    <span class="cp">(</span><span class="cs">"DELETE"</span>, <span class="cs">"/issues/:id"</span><span class="cp">)</span>:         [<span class="cs">"lead"</span>, <span class="cs">"admin"</span>],
+    <span class="cp">(</span><span class="cs">"POST"</span>, <span class="cs">"/sprints/:id/start"</span><span class="cp">)</span>:    [<span class="cs">"lead"</span>, <span class="cs">"admin"</span>],
+    <span class="cp">(</span><span class="cs">"DELETE"</span>, <span class="cs">"/comments/:id"</span><span class="cp">)</span>:       [<span class="cs">"own_comment"</span>, <span class="cs">"lead"</span>, <span class="cs">"admin"</span>],
+}
+
+<span class="ck">async def</span> <span class="cf">check_permission</span>(user_id: <span class="ct">str</span>, project_id: <span class="ct">str</span>, action: <span class="ct">str</span>) -> <span class="ct">bool</span>:
+    <span class="cc"># Cache key: permission:{user_id}:{project_id} → role (TTL 5min)</span>
+    cache_key = f<span class="cs">"perm:{user_id}:{project_id}"</span>
+    role = <span class="ck">await</span> redis.<span class="cf">get</span>(cache_key)
+
+    <span class="ck">if not</span> role:
+        <span class="cc"># Fetch from DB: workspace_members or project_members table</span>
+        role = <span class="ck">await</span> db.<span class="cf">get_user_role</span>(user_id, project_id)
+        <span class="ck">await</span> redis.<span class="cf">setex</span>(cache_key, <span class="cn">300</span>, role)  <span class="cc"># cache 5 minutes</span>
+
+    allowed_roles = PERMISSION_MAP.get(action, [])
+    <span class="ck">return</span> role <span class="ck">in</span> allowed_roles
+
+<span class="cc"># Invalidate cache when role changes (e.g., user promoted to lead)</span>
+<span class="ck">async def</span> <span class="cf">on_role_change</span>(user_id: <span class="ct">str</span>, project_id: <span class="ct">str</span>):
+    <span class="ck">await</span> redis.<span class="cf">delete</span>(f<span class="cs">"perm:{user_id}:{project_id}"</span>)
+    </div>
+  </div>
+</section>
+
+<!-- ── 11 CACHING ── -->
+<section class="section" id="caching">
+  <div class="section-header">
+    <span class="section-num">11 /</span>
+    <h2>Caching <mark>Strategy</mark></h2>
+  </div>
+  <p class="section-intro">
+    Unlike URL shorteners, task managers have more complex cache invalidation — issues change frequently
+    and board views are composite objects. We cache strategically, not aggressively.
+  </p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3 class="h3-red">● What We Cache (Redis)</h3>
+      <div class="req-item"><strong>Board state</strong>: <span class="tag tag-red">board:{project_id}</span> — full Kanban view, TTL 60s, invalidated on any issue change. Saves complex JOIN queries on every page load.</div>
+      <div class="req-item"><strong>User sessions</strong>: <span class="tag tag-red">session:{token}</span> — JWT session data. TTL = token expiry. Avoids DB lookup on every request.</div>
+      <div class="req-item"><strong>User permissions</strong>: <span class="tag tag-red">perm:{user_id}:{project_id}</span> — role lookup. TTL 5min. Invalidated on role change.</div>
+      <div class="req-item"><strong>Unread notification count</strong>: <span class="tag tag-red">unread:{user_id}</span> — integer counter. Increment on new notif, reset on read-all.</div>
+      <div class="req-item"><strong>Issue detail</strong>: <span class="tag tag-red">issue:{issue_id}</span> — denormalized view with assignee info. TTL 30s. Invalidated on update.</div>
+    </div>
+    <div class="card">
+      <h3 class="h3-blue">◆ What We DON'T Cache</h3>
+      <div class="req-item"><strong>Comments</strong>: Always fetched fresh — comments must be real-time accurate to avoid confusion in discussions.</div>
+      <div class="req-item"><strong>Activity logs</strong>: Append-only, no caching needed — each view fetches the latest tail.</div>
+      <div class="req-item"><strong>Search results</strong>: Elasticsearch handles its own caching. We don't double-cache in Redis.</div>
+      <div class="req-item"><strong>User profile data</strong>: Changes rarely — rely on CDN caching of avatar images; profile data fetched once per session.</div>
+      <div class="req-item"><strong>Notification inbox</strong>: Too personalized and frequently updated — fetch from PostgreSQL with proper pagination index.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 12 SCALING ── -->
+<section class="section" id="scaling">
+  <div class="section-header">
+    <span class="section-num">12 /</span>
+    <h2>Scaling & <mark>High Availability</mark></h2>
+  </div>
+  <p class="section-intro">
+    Every component designed for horizontal scale and zero-downtime deployments.
+    Multi-region active-passive with automated failover.
+  </p>
+
+  <div class="scale-grid">
+    <div class="scale-card"><span class="icon">🐘</span><h3>PostgreSQL HA</h3><p>Primary + 2 read replicas. Reads distributed across replicas. Failover via Patroni (auto-promotes replica in &lt;30s). Point-in-time recovery (PITR) via WAL archiving to S3. Backup every 6 hours.</p></div>
+    <div class="scale-card"><span class="icon">⚡</span><h3>Redis HA</h3><p>Redis Cluster (3 primaries + 3 replicas). Automatic failover via Redis Sentinel. Data persistence: RDB snapshots + AOF. Separate Redis instances for cache vs Pub/Sub vs sessions.</p></div>
+    <div class="scale-card"><span class="icon">📦</span><h3>Stateless Services</h3><p>All services (Issue, Project, Notification, Search) are stateless. K8s Deployment with HPA — auto-scale on CPU/RPS. Rolling updates with zero downtime. Health checks every 10s.</p></div>
+    <div class="scale-card"><span class="icon">🔌</span><h3>WebSocket Scaling</h3><p>WebSocket pods scaled by active connection count. Redis Pub/Sub bridges pods. Sticky sessions NOT needed (any pod can serve any connection via Pub/Sub). 50K concurrent connections on 5 pods.</p></div>
+    <div class="scale-card"><span class="icon">📨</span><h3>Kafka HA</h3><p>3-broker Kafka cluster. Replication factor 3. Min ISR = 2 (guarantees no data loss on 1 broker failure). Consumer groups allow independent scaling of Notification, Search, and Analytics consumers.</p></div>
+    <div class="scale-card"><span class="icon">🔍</span><h3>Elasticsearch HA</h3><p>3-node cluster. 1 replica per shard. Master elections via zen discovery. Index aliases for zero-downtime re-indexing. Curator for index lifecycle management (archive old data).</p></div>
+    <div class="scale-card"><span class="icon">🗃️</span><h3>S3 Durability</h3><p>11 nines durability (AWS S3). Cross-region replication enabled. Lifecycle policies: move attachments older than 1 year to Glacier. Pre-signed URLs expire in 1 hour for security.</p></div>
+    <div class="scale-card"><span class="icon">🌍</span><h3>Multi-Region</h3><p>Primary region (US-East), DR region (EU-West). PostgreSQL WAL streaming replication to DR. RTO &lt;15min, RPO &lt;1min. Traffic failover via Route53 health checks + weighted routing.</p></div>
+    <div class="scale-card"><span class="icon">📊</span><h3>Observability</h3><p>Prometheus + Grafana (metrics). Jaeger (distributed tracing — trace every request across services). ELK stack (centralized logs). PagerDuty alerts for P1/P2 incidents. SLO dashboards.</p></div>
+  </div>
+</section>
+
+<!-- ── 13 BOTTLENECKS ── -->
+<section class="section" id="bottlenecks">
+  <div class="section-header">
+    <span class="section-num">13 /</span>
+    <h2>Bottlenecks & <mark>Mitigations</mark></h2>
+  </div>
+  <p class="section-intro">
+    Anticipating failure modes and having clear mitigations demonstrates production thinking.
+    These are the highest-risk bottlenecks for this system at scale.
+  </p>
+
+  <table class="btable">
+    <thead>
+      <tr><th>Bottleneck</th><th>Severity</th><th>Root Cause & Symptom</th><th>Mitigation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Notification fan-out spike</td>
+        <td><span class="sev sev-h">HIGH</span></td>
+        <td>Sprint start or @everyone mention in large project (10K watchers) triggers 10K simultaneous DB writes and 10K Slack API calls. Notification Service gets overwhelmed.</td>
+        <td>Fan-out via Kafka with consumer concurrency throttling. Slack calls via rate-limited BullMQ queue. Max 100 fan-out writes/sec per event — queue the rest. Use push/pull hybrid for projects >500 members.</td>
+      </tr>
+      <tr>
+        <td>PostgreSQL write hotspot</td>
+        <td><span class="sev sev-h">HIGH</span></td>
+        <td>All teams in a large workspace write to the same DB shard during sprint ceremonies (10am standup spike). Single shard becomes the bottleneck.</td>
+        <td>Shard by workspace_id. Large enterprise customers get dedicated shards. Use PgBouncer connection pooling to cap DB connections. Read replicas absorb board load queries.</td>
+      </tr>
+      <tr>
+        <td>Board cache stampede</td>
+        <td><span class="sev sev-m">MED</span></td>
+        <td>Board cache expires and 50 users reload simultaneously — all miss Redis and hit PostgreSQL with complex JOIN queries at the same moment.</td>
+        <td>Use probabilistic early expiration (refresh cache at 90% of TTL with jitter). Redis lock-based population: first miss acquires lock and populates; others wait briefly then read.</td>
+      </tr>
+      <tr>
+        <td>WebSocket connection limit</td>
+        <td><span class="sev sev-m">MED</span></td>
+        <td>Each WS connection is a persistent TCP connection. OS limits (~65K FDs per process), memory (~50MB per pod for 5K connections). Sudden spike in users opening boards.</td>
+        <td>Each WS pod handles ~5K connections. HPA auto-scales pods on connection count metric. Implement connection graceful degradation: fall back to SSE (Server-Sent Events) or 30s polling if WS unavailable.</td>
+      </tr>
+      <tr>
+        <td>Elasticsearch index lag</td>
+        <td><span class="sev sev-m">MED</span></td>
+        <td>Kafka consumer falls behind during heavy write bursts. Search results are stale by 5+ minutes. Users see recently created issues missing from search.</td>
+        <td>Increase Elasticsearch consumer parallelism (more partitions, more consumers). Monitor consumer lag (Kafka offsets). Fallback search: if Elasticsearch lag >2min, route simple queries to PostgreSQL LIKE query with GIN index.</td>
+      </tr>
+      <tr>
+        <td>Email delivery backlog</td>
+        <td><span class="sev sev-l">LOW</span></td>
+        <td>SES rate limits or Slack API rate limits cause notification queue to back up. Users receive email notifications hours late.</td>
+        <td>SES sending limits are soft quotas — request increase proactively. Per-channel queues are isolated (Slack backlog doesn't affect email). Exponential backoff + dead letter queue. Show in-app notification immediately regardless.</td>
+      </tr>
+      <tr>
+        <td>Rich-text description size</td>
+        <td><span class="sev sev-l">LOW</span></td>
+        <td>Users paste large documents or images into issue descriptions (JSONB). Single issue row becomes 5MB+, bloating cache and slowing serialization.</td>
+        <td>Cap description JSONB at 500KB server-side. Images in descriptions → uploaded to S3, stored as reference URLs. Description stored separately in its own table with lazy loading (not included in board list queries).</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── 14 SUMMARY ── -->
+<section class="section" id="summary">
+  <div class="section-header">
+    <span class="section-num">14 /</span>
+    <h2>Architecture <mark>Summary</mark></h2>
+  </div>
+  <p class="section-intro">
+    Every design decision maps back to core constraints: collaborative writes, real-time updates,
+    complex notification routing, and multi-tenant data isolation at 10M-user scale.
+  </p>
+
+  <div class="summary-grid">
+    <div class="sum-card"><span class="icon">🐘</span><h3>Primary DB</h3><p>PostgreSQL sharded by workspace_id. ACID for issue state machine and sprint ops.</p></div>
+    <div class="sum-card"><span class="icon">⚡</span><h3>Cache</h3><p>Redis for board state, sessions, permissions. Strategic caching, not aggressive.</p></div>
+    <div class="sum-card"><span class="icon">🔌</span><h3>Real-time</h3><p>WebSocket Gateway + Redis Pub/Sub. Any pod can serve any user's connection.</p></div>
+    <div class="sum-card"><span class="icon">📨</span><h3>Events</h3><p>Kafka decouples writes from notifications, search sync, analytics, and audit.</p></div>
+    <div class="sum-card"><span class="icon">🔔</span><h3>Notifications</h3><p>Multi-channel fan-out with user preferences, dedup, retry, and digest batching.</p></div>
+    <div class="sum-card"><span class="icon">🔍</span><h3>Search</h3><p>Elasticsearch for full-text. Async sync via Kafka. Tenant isolation enforced in query.</p></div>
+    <div class="sum-card"><span class="icon">🛡️</span><h3>RBAC</h3><p>Workspace + project roles. Permission check cached 5min in Redis. Invalidated on change.</p></div>
+    <div class="sum-card"><span class="icon">🌍</span><h3>Multi-region</h3><p>Primary + DR region. WAL streaming. Route53 health-check failover. RTO &lt;15min.</p></div>
+  </div>
+
+  <div class="code-wrap" style="margin-top:0;">
+    <div class="code-bar">
+      <div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>
+      <span class="code-fname">tech_stack_summary</span>
+    </div>
+    <div class="code-body">
+<span class="cc">┌─────────────────────────────────────────────────────────────────────────┐</span>
+<span class="cc">│                   COMPLETE TECHNOLOGY STACK                             │</span>
+<span class="cc">├───────────────────┬─────────────────────────────────────────────────────┤</span>
+<span class="cc">│ COMPUTE           │ Kubernetes (EKS), Docker, NGINX Ingress             │</span>
+<span class="cc">│ API GATEWAY       │ Kong (JWT, rate limiting, routing, logging)          │</span>
+<span class="cc">│ SERVICES (Lang)   │ Go (Issue/Project/Auth) + Python (Notification)     │</span>
+<span class="cc">│ PRIMARY DB        │ PostgreSQL 15 + Citus (sharding) + PgBouncer        │</span>
+<span class="cc">│ CACHE             │ Redis 7 Cluster (3 primary + 3 replica)             │</span>
+<span class="cc">│ MESSAGE QUEUE     │ Apache Kafka 3.x (MSK) — 3 brokers, RF=3           │</span>
+<span class="cc">│ REAL-TIME         │ WebSocket (Go gorilla/ws) + Redis Pub/Sub           │</span>
+<span class="cc">│ SEARCH            │ Elasticsearch 8 — 3 node cluster                   │</span>
+<span class="cc">│ OBJECT STORAGE    │ AWS S3 + CloudFront CDN                             │</span>
+<span class="cc">│ EMAIL             │ AWS SES (transactional) + SendGrid (marketing)      │</span>
+<span class="cc">│ PUSH NOTIF        │ FCM (Android) + APNs (iOS)                         │</span>
+<span class="cc">│ JOB QUEUE         │ BullMQ (Redis-backed) for retry + digest jobs       │</span>
+<span class="cc">│ ANALYTICS         │ ClickHouse (OLAP) + Kafka consumer                 │</span>
+<span class="cc">│ MONITORING        │ Prometheus + Grafana + Jaeger + ELK                │</span>
+<span class="cc">│ CI/CD             │ GitHub Actions → ECR → ArgoCD (GitOps)             │</span>
+<span class="cc">│ INFRA AS CODE     │ Terraform (AWS resources) + Helm (K8s charts)      │</span>
+<span class="cc">│ SECRETS           │ AWS Secrets Manager + K8s Secrets (encrypted)      │</span>
+<span class="cc">└───────────────────┴─────────────────────────────────────────────────────┘</span>
+    </div>
+  </div>
+
+  <div class="callout callout-red" style="margin-top:28px;">
+    <strong>Interview Pro Tip:</strong> For a task manager system design, the two topics that impress most are <em>(1) the notification fan-out strategy</em> (push vs pull vs hybrid, dedup, channel routing, retry) and <em>(2) real-time WebSocket scaling</em> (Redis Pub/Sub bridge across stateless pods). These are the deep-dives interviewers at top companies focus on. Master these two and you'll stand out.
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-left">System Design · Task Manager (Jira-like) · End-to-End · 14 Sections</div>
+  <div class="footer-right">Requirements · Estimation · API · DB · Architecture · Real-time · Notifications · Search · RBAC · Scaling</div>
+</div>
+
+</div>
+
+<script>
+const sections = document.querySelectorAll('.section, .hero');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navItems.forEach(n => n.classList.toggle('active', n.getAttribute('href') === `#${id}`));
+    }
+  });
+}, { threshold: 0.25 });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

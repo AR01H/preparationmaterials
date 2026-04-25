@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Prep – Akhilesh Ravuri</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c18;
+    --card: #0f1628;
+    --card2: #131a2e;
+    --border: #1c2847;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --pink: #f472b6;
+    --blue: #60a5fa;
+    --text: #dde6f5;
+    --muted: #4a5a7a;
+    --muted2: #8899bb;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 5% 10%, rgba(0,212,255,0.05) 0%, transparent 45%),
+      radial-gradient(ellipse at 95% 90%, rgba(124,58,237,0.05) 0%, transparent 45%);
+  }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 22px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(8,12,24,0.97);
+    backdrop-filter: blur(16px);
+    z-index: 200;
+    gap: 16px;
+  }
+  .logo { font-family: var(--font-head); font-size: 1rem; font-weight: 800; color: var(--accent); letter-spacing: 0.08em; white-space: nowrap; }
+  .logo span { color: var(--text); }
+  .header-meta { display: flex; gap: 20px; font-size: 0.68rem; color: var(--muted2); }
+  .header-meta strong { color: var(--accent); }
+  .search-wrap { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; }
+  .search-wrap input { background: transparent; border: none; outline: none; color: var(--text); font-family: var(--font-mono); font-size: 0.75rem; width: 180px; }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .filters {
+    padding: 14px 36px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,12,24,0.9);
+    position: sticky;
+    top: 69px;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .filter-btn { padding: 5px 14px; border: 1px solid var(--border); background: transparent; color: var(--muted2); border-radius: 20px; cursor: pointer; font-family: var(--font-mono); font-size: 0.68rem; transition: all 0.18s; letter-spacing: 0.04em; white-space: nowrap; }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: rgba(0,212,255,0.1); border-color: var(--accent); color: var(--accent); }
+  .filter-btn[data-cat="AWS"].active { background:rgba(245,158,11,0.08); border-color:var(--yellow); color:var(--yellow); }
+  .filter-btn[data-cat="Python"].active { background:rgba(16,185,129,0.08); border-color:var(--green); color:var(--green); }
+  .filter-btn[data-cat="Docker/K8s"].active { background:rgba(96,165,250,0.08); border-color:var(--blue); color:var(--blue); }
+  .filter-btn[data-cat="Jenkins"].active { background:rgba(255,107,53,0.08); border-color:var(--accent2); color:var(--accent2); }
+  .filter-btn[data-cat="Terraform"].active { background:rgba(124,58,237,0.08); border-color:var(--accent3); color:var(--accent3); }
+  .filter-btn[data-cat="Monitoring"].active { background:rgba(244,114,182,0.08); border-color:var(--pink); color:var(--pink); }
+  .filter-btn[data-cat="PHP"].active { background:rgba(124,58,237,0.08); border-color:var(--accent3); color:var(--accent3); }
+  .filter-btn[data-cat="NodeJS"].active { background:rgba(16,185,129,0.08); border-color:var(--green); color:var(--green); }
+  .filter-btn[data-cat="Database"].active { background:rgba(245,158,11,0.08); border-color:var(--yellow); color:var(--yellow); }
+  .filter-btn[data-cat="Security"].active { background:rgba(244,114,182,0.08); border-color:var(--pink); color:var(--pink); }
+  main { max-width: 1120px; margin: 0 auto; padding: 28px 36px 90px; }
+  .section-label { font-family: var(--font-head); font-size: 0.62rem; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; margin-bottom: 18px; margin-top: 10px; display: flex; align-items: center; gap: 14px; }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .grid { display: grid; gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
+  .card:hover { border-color: rgba(0,212,255,0.2); }
+  .card.open { border-color: rgba(0,212,255,0.35); box-shadow: 0 0 0 1px rgba(0,212,255,0.07); }
+  .card-header { padding: 18px 22px; cursor: pointer; display: flex; align-items: flex-start; gap: 14px; user-select: none; transition: background 0.15s; }
+  .card-header:hover { background: rgba(255,255,255,0.02); }
+  .q-num { font-size: 0.6rem; color: var(--muted); min-width: 30px; padding-top: 3px; font-weight: 700; letter-spacing: 0.06em; }
+  .q-body { flex: 1; }
+  .q-text { font-size: 0.85rem; line-height: 1.65; color: var(--text); margin-bottom: 5px; }
+  .q-sub { font-size: 0.67rem; color: var(--muted2); letter-spacing: 0.02em; font-style: italic; }
+  .q-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-top: 2px; }
+  .diff-badge { font-size: 0.55rem; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.08em; font-weight: 700; text-transform: uppercase; }
+  .diff-easy   { background:rgba(16,185,129,0.15); color:var(--green); }
+  .diff-medium { background:rgba(245,158,11,0.15); color:var(--yellow); }
+  .diff-hard   { background:rgba(244,114,182,0.15); color:var(--pink); }
+  .cat-tag { font-size: 0.58rem; padding: 3px 9px; border-radius: 10px; letter-spacing: 0.06em; font-weight: 700; text-transform: uppercase; }
+  .tag-DevOps { background:rgba(0,212,255,0.1); color:var(--accent); }
+  .tag-AWS { background:rgba(245,158,11,0.1); color:var(--yellow); }
+  .tag-Python { background:rgba(16,185,129,0.1); color:var(--green); }
+  .tag-Docker { background:rgba(96,165,250,0.1); color:var(--blue); }
+  .tag-Jenkins { background:rgba(255,107,53,0.1); color:var(--accent2); }
+  .tag-Terraform { background:rgba(124,58,237,0.1); color:var(--accent3); }
+  .tag-Monitor { background:rgba(244,114,182,0.1); color:var(--pink); }
+  .tag-Web { background:rgba(52,211,153,0.1); color:#34d399; }
+  .tag-Behavior { background:rgba(255,107,53,0.1); color:var(--accent2); }
+  .tag-PHP { background:rgba(124,58,237,0.1); color:var(--accent3); }
+  .tag-NodeJS { background:rgba(16,185,129,0.1); color:var(--green); }
+  .tag-Database { background:rgba(245,158,11,0.1); color:var(--yellow); }
+  .tag-Security { background:rgba(244,114,182,0.1); color:var(--pink); }
+  .chevron { color: var(--muted); font-size: 0.7rem; transition: transform 0.28s; }
+  .card.open .chevron { transform: rotate(90deg); color: var(--accent); }
+  .answer-section { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .card.open .answer-section { max-height: 4000px; border-top: 1px solid var(--border); }
+  .version-tabs { display: flex; background: rgba(0,0,0,0.25); border-bottom: 1px solid var(--border); }
+  .vtab { padding: 10px 20px; font-size: 0.68rem; font-family: var(--font-mono); cursor: pointer; color: var(--muted2); border-bottom: 2px solid transparent; transition: all 0.18s; letter-spacing: 0.04em; user-select: none; }
+  .vtab:hover { color: var(--text); }
+  .vtab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(0,212,255,0.04); }
+  .vtab.v2023.active { color: var(--green); border-bottom-color: var(--green); background: rgba(16,185,129,0.04); }
+  .answer-content { display: none; padding: 22px 26px; animation: fadeUp 0.22s ease; }
+  .answer-content.visible { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+  .answer-text { font-size: 0.8rem; line-height: 2; color: var(--text); white-space: pre-wrap; }
+  .answer-text .hl  { color: var(--accent); font-weight: 700; }
+  .answer-text .hl2 { color: var(--yellow); font-weight: 700; }
+  .answer-text .hl3 { color: var(--green); font-weight: 700; }
+  .answer-text .cmd { background: rgba(0,212,255,0.07); color: #93c5fd; padding: 1px 7px; border-radius: 4px; font-size: 0.75rem; font-family: var(--font-mono); }
+  .code-block { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 0.73rem; line-height: 1.8; color: #93c5fd; overflow-x: auto; white-space: pre; font-family: var(--font-mono); }
+  .tip-box { margin-top: 16px; padding: 11px 16px; background: rgba(245,158,11,0.06); border-left: 3px solid var(--yellow); border-radius: 0 8px 8px 0; font-size: 0.74rem; color: #fcd34d; line-height: 1.75; }
+  .tip-box::before { content:'💡 TIP: '; font-weight:700; }
+  .trap-box { margin-top: 12px; padding: 11px 16px; background: rgba(244,114,182,0.06); border-left: 3px solid var(--pink); border-radius: 0 8px 8px 0; font-size: 0.74rem; color: #fbcfe8; line-height: 1.75; }
+  .trap-box::before { content:'⚠️ TRAP: '; font-weight:700; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .compare-col { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .compare-col h4 { font-size: 0.68rem; color: var(--accent); margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .compare-col h4.g { color: var(--green); }
+  .compare-col p { font-size: 0.76rem; line-height: 1.8; color: var(--muted2); white-space: pre-wrap; }
+  .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(8,12,24,0.97); border-top: 1px solid var(--border); padding: 10px 36px; display: flex; align-items: center; gap: 16px; z-index: 200; backdrop-filter: blur(12px); }
+  .bar-label { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+  .bar-count  { font-size: 0.72rem; color: var(--accent); font-weight:700; white-space:nowrap; }
+  .bar-track  { flex:1; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .bar-fill   { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent3)); border-radius:2px; transition:width 0.4s; width:0%; }
+  .expand-all { padding: 5px 14px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--muted2); font-family: var(--font-mono); font-size: 0.66rem; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+  .expand-all:hover { border-color: var(--accent); color: var(--accent); }
+  @media(max-width:700px){ header,main,.filters,.bottom-bar { padding-left:14px; padding-right:14px; } .header-meta,.search-wrap { display:none; } .compare-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">PREP<span>DECK</span> · Akhilesh</div>
+  <div class="header-meta">
+    <span>Role: <strong>DevOps + Software Dev</strong></span>
+    <span>Exp: <strong>3.5 yrs · TriByte Technologies</strong></span>
+  </div>
+  <div class="search-wrap">
+    <span>🔍</span>
+    <input type="text" id="search-input" placeholder="Search questions..." oninput="filterSearch()">
+  </div>
+</header>
+
+<div class="filters">
+  <button class="filter-btn active" data-cat="All">All</button>
+  <button class="filter-btn" data-cat="DevOps">DevOps</button>
+  <button class="filter-btn" data-cat="Jenkins">Jenkins/CI-CD</button>
+  <button class="filter-btn" data-cat="AWS">AWS</button>
+  <button class="filter-btn" data-cat="Docker/K8s">Docker/K8s</button>
+  <button class="filter-btn" data-cat="Terraform">Terraform</button>
+  <button class="filter-btn" data-cat="Python">Python</button>
+  <button class="filter-btn" data-cat="PHP">PHP</button>
+  <button class="filter-btn" data-cat="NodeJS">Node.js</button>
+  <button class="filter-btn" data-cat="Database">Database</button>
+  <button class="filter-btn" data-cat="Monitoring">Monitoring</button>
+  <button class="filter-btn" data-cat="Security">Security</button>
+  <button class="filter-btn" data-cat="Web Dev">Web Dev</button>
+  <button class="filter-btn" data-cat="Behavioral">Behavioral</button>
+</div>
+
+<main>
+  <div class="section-label">Click any question to expand · 2022 tab = how you built it · 2023+ tab = what evolved</div>
+  <div class="grid" id="q-grid"></div>
+</main>
+
+<div class="bottom-bar">
+  <span class="bar-label">Opened</span>
+  <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+  <span class="bar-count" id="bar-count">0 / 0</span>
+  <button class="expand-all" id="expand-btn" onclick="toggleAll()">Expand All</button>
+</div>
+
+<script>
+const Q = [
+
+// ══ JENKINS / CI-CD ══
+{cat:"Jenkins",diff:"medium",
+q:"Walk me through your Jenkins CI/CD pipeline. What stages, triggers, and integrations?",
+sub:"Focus: stage order, what happens on failure, how builds are triggered",
+v1:`<span class="hl">Jenkinsfile (Declarative Pipeline)</span> — stored in repo root, version-controlled.
+
+<span class="hl2">Stage order:</span>
+1. Checkout — Git pull from <span class="cmd">Azure DevOps Repos</span> (webhook on push/PR)
+2. Install — <span class="cmd">composer install --no-dev</span> / <span class="cmd">npm ci</span>
+3. Code Quality — SonarQube Scanner → <span class="cmd">waitForQualityGate abortPipeline:true</span>
+4. Unit Test — PHPUnit / pytest — JUnit XML archived in Jenkins
+5. Package — zip artifact OR <span class="cmd">docker build</span> → tag with GIT_COMMIT_SHORT
+6. Push — artifact to S3 / image to ECR
+7. Deploy — trigger Ansible playbook via <span class="cmd">ansible-playbook deploy.yml -e version=$BUILD_NUMBER</span>
+8. Health Check — <span class="cmd">curl -f http://app/health</span> — fail build if not 200
+
+<span class="hl2">Infrastructure:</span>
+• Master on EC2 t3.medium, agent nodes per project (env isolation)
+• Azure DevOps webhooks trigger builds — PR → validation pipeline, merge to main → deploy pipeline`,
+v2:`<span class="hl3">2023 improvements:</span>
+• <span class="cmd">parallel {}</span> stages — SonarQube + unit tests ran simultaneously → 35% faster pipelines
+• Jenkins Shared Libraries for DRY code across 6 client projects
+• Docker-in-Docker ephemeral agents — no static EC2 agent sprawl
+• <span class="cmd">input</span> step for manual prod approval gate
+• Slack integration: <span class="cmd">post { failure { slackSend ... } always { junit ... } }</span>`,
+tip:"'Shift-left' = catching failures earlier in pipeline. SonarQube blocking the build is your best example of this.",
+trap:"Don't say 'Jenkins just runs scripts'. Each stage catches a specific category of failure. Show you designed it with intent."},
+
+{cat:"Jenkins",diff:"medium",
+q:"How did you integrate Jenkins with Azure DevOps Repos? Challenges faced?",
+sub:"Focus: plugin, auth, webhook setup, branch strategy",
+v1:`<span class="hl2">Plugin:</span> Azure DevOps plugin (formerly VSTS plugin)
+
+<span class="hl2">Setup:</span>
+1. Generated PAT in Azure DevOps (Code Read scope)
+2. Stored PAT as Jenkins credential (Username+Password type)
+3. Multi-branch Pipeline → Azure DevOps source
+4. Webhook in Azure DevOps → Jenkins URL <span class="cmd">/azure-devops/hook</span>
+5. Branch filter: <span class="cmd">main, develop, feature/*</span>
+
+<span class="hl2">Challenges we hit:</span>
+• Jenkins on private EC2 — webhook delivery failed. Fixed: exposed Jenkins via ALB with HTTPS
+• PAT expiry caused silent build failures. Fixed: 90-day rotation reminder + Jenkins credential alert
+• Branch names with slashes (feature/xyz) needed URL encoding in webhook payload`,
+v2:`<span class="hl3">2023:</span>
+• Switched to Azure DevOps Service Connections (OAuth) — no PAT expiry issues
+• PR builds: auto-comment with SonarQube results in Azure DevOps PR review
+• Branch protection: PRs to main require green Jenkins build before merge`,
+tip:"Always mention webhook security: add a shared secret to validate payloads — prevents spoofed build triggers."},
+
+{cat:"Jenkins",diff:"hard",
+q:"How did you handle rollbacks? Walk through a real rollback scenario end to end.",
+sub:"Focus: artifact versioning, DB migration safety, how fast was rollback",
+v1:`<span class="hl2">Artifact strategy:</span>
+Every successful build tagged: <span class="cmd">app-{GIT_SHA}-{BUILD_NUM}.tar.gz</span> → uploaded to S3.
+S3 lifecycle: keep last 10 versions, delete older.
+
+<span class="hl2">Rollback job:</span>
+Parameterized Jenkins job — accepts VERSION input.
+Ansible downloads that specific artifact from S3 and redeploys.
+
+<span class="hl2">Real scenario (DB connection exhaustion):</span>
+• Deploy at 01:50 AM introduced N+1 query bug
+• Grafana alert at 02:14: <span class="cmd">mysql_connections > 150</span> (max 151), ALB 5XX at 40%
+• CloudWatch Logs: "Too many connections" flooding
+• Decision: rollback immediately while debugging in parallel
+• Ansible rollback to previous artifact: 4 minutes
+• Site recovered: 02:27 AM — 13 min total incident
+
+<span class="hl2">DB migration safety:</span>
+• Every migration had a matching rollback script
+• Destructive changes (DROP COLUMN) → feature flagged, never reversed mid-deploy`,
+v2:`<span class="hl3">2023 — Blue-Green on ECS:</span>
+• Deploy to inactive ECS target group → health checks pass → swap ALB listener
+• Rollback = swap listener back (seconds, not minutes)
+• Zero traffic impact during swap`,
+tip:"End the rollback story with 'what we changed to prevent recurrence' — load test stage added, alert threshold lowered. That's the senior answer.",
+trap:"Saying 'we just reverted the git commit' is wrong. That doesn't redeploy anything. Show you know artifact-based rollback."},
+
+{cat:"Jenkins",diff:"medium",
+q:"What is SonarQube? What quality gates did you configure and what metrics did you track?",
+sub:"Focus: specific thresholds, what triggered gate failure, how it blocked deploys",
+v1:`<span class="hl">SonarQube</span> = static code analysis without running the code.
+
+<span class="hl2">Metrics we tracked:</span>
+• Bugs — logic defects (null dereference, unclosed streams)
+• Vulnerabilities — OWASP-mapped issues (SQL injection risk, hardcoded credentials)
+• Code Smells — maintainability (methods too long, duplications)
+• Coverage — % of new code covered by tests
+• Duplicated Lines %
+
+<span class="hl2">Quality gate thresholds (on new code only):</span>
+• New bugs: 0
+• New critical/blocker vulnerabilities: 0
+• Coverage on new code: ≥ 70%
+• Duplicated lines on new code: &lt; 5%
+
+<span class="hl2">Jenkins integration:</span>
+<div class="code-block">stage('SonarQube') {
+  steps {
+    withSonarQubeEnv('SonarQube-Server') {
+      sh 'sonar-scanner -Dsonar.projectKey=lms-app'
+    }
+  }
+}
+stage('Quality Gate') {
+  steps { waitForQualityGate abortPipeline: true }
+}</div>
+If gate fails → build ABORTED → no artifact created → no deploy.`,
+v2:`<span class="hl3">2023:</span>
+• Branch analysis — each PR gets own SQ report, diff vs main shown in Azure DevOps PR comments
+• Security hotspot review became a sprint ceremony, not just CI gate
+• Added SAST findings to team KPI dashboard`,
+tip:"Say 'quality gate on new code only' — SonarQube best practice. Fail on new problems, not legacy debt. Interviewers love this nuance."},
+
+// ══ AWS ══
+{cat:"AWS",diff:"medium",
+q:"Explain the difference between EC2, ECS, and Lambda. When did you use each at TriByte?",
+sub:"Focus: decision criteria, real usage examples, tradeoffs",
+v1:`<div class="compare-grid">
+<div class="compare-col"><h4>EC2</h4><p>Full VMs. You manage OS, patching, scaling.
+Used for: Jenkins master/agents, PHP monolith (staging), Prometheus/Grafana server.
+When: long-running stateful workloads.</p></div>
+<div class="compare-col"><h4 class="g">ECS (Fargate)</h4><p>Managed containers. No EC2 node management.
+Used for: microservices in UAT/prod. Each service = ECS task.
+When: containerized, always-on services.</p></div>
+</div>
+<div class="compare-grid">
+<div class="compare-col"><h4>Lambda</h4><p>Serverless functions. Event-driven.
+Used for: S3 upload processing, SQS consumers, EventBridge scheduled jobs.
+When: short-lived, bursty, event-triggered work.</p></div>
+<div class="compare-col"><h4 class="g">Decision rule</h4><p>Always-on + stateful → EC2
+Containerized service → ECS
+Event-driven, &lt;15 min → Lambda</p></div>
+</div>`,
+v2:`<span class="hl3">2023 evolution:</span>
+• Migrated EC2 Ansible-managed monolith → ECS Fargate (eliminated OS patching)
+• Lambda → container image deployment (larger deps, same event-driven model)
+• Graviton2 (ARM) EC2 instances for 20% cost reduction`,
+tip:"Cold start is the Lambda gotcha — mention Provisioned Concurrency for latency-sensitive endpoints. Shows production awareness.",
+trap:"Don't confuse ECS and EKS. ECS = AWS-native orchestration. EKS = managed Kubernetes. We used both for different complexity levels."},
+
+{cat:"AWS",diff:"hard",
+q:"How did you architect VPC networking? Walk through subnets, routing, NAT, security groups.",
+sub:"Focus: why private/public separation, actual CIDR ranges, SG vs NACL difference",
+v1:`<span class="hl2">VPC per environment (Staging, UAT, Prod = 3 separate VPCs):</span>
+CIDR: <span class="cmd">10.0.0.0/16</span> each (65k IPs)
+
+<span class="hl2">Subnet layout (2 AZs for HA):</span>
+• Public:  <span class="cmd">10.0.1.0/24</span>, <span class="cmd">10.0.2.0/24</span>  → ALB, NAT Gateway, Bastion
+• Private: <span class="cmd">10.0.10.0/24</span>, <span class="cmd">10.0.11.0/24</span> → EC2 app, ECS tasks
+• DB:      <span class="cmd">10.0.20.0/24</span>, <span class="cmd">10.0.21.0/24</span> → RDS only (no outbound route)
+
+<span class="hl2">Routing:</span>
+• Public subnet: <span class="cmd">0.0.0.0/0 → Internet Gateway</span>
+• Private subnet: <span class="cmd">0.0.0.0/0 → NAT Gateway</span> (NAT is in public subnet!)
+• DB subnet: no default route — completely isolated
+
+<span class="hl2">Security Groups (stateful, resource-level):</span>
+• ALB SG: 443 from 0.0.0.0/0
+• App SG: 8080 from ALB SG only (not internet)
+• DB SG: 3306 from App SG only
+
+<span class="hl2">NACLs (stateless, subnet-level):</span>
+• Additional layer blocking known malicious IP ranges
+• Must allow BOTH inbound AND outbound (stateless = no auto return traffic)`,
+v2:`<span class="hl3">2023:</span>
+• VPC Flow Logs → CloudWatch for network audit + anomaly detection
+• VPC Endpoints for S3, DynamoDB — traffic stays on AWS backbone (no NAT cost)
+• VPC Peering between environments for shared auth service`,
+tip:"The SG vs NACL question is a classic trap. Memorize: SG = stateful (return traffic automatic). NACL = stateless (both directions explicit).",
+trap:"NAT Gateway lives in the PUBLIC subnet. Many candidates get this backwards. It needs internet access to do outbound NAT translation for private subnets."},
+
+{cat:"AWS",diff:"medium",
+q:"How did you use S3 in production? What features beyond basic file storage?",
+sub:"Focus: CloudFront integration, events, lifecycle, access control",
+v1:`<span class="hl2">S3 use cases at TriByte:</span>
+
+<span class="hl">1. Build Artifacts:</span>
+<span class="cmd">s3://artifacts/app/{env}/{version}.tar.gz</span>
+Versioning ON, lifecycle: delete after 30 days.
+
+<span class="hl">2. LMS Video CDN:</span>
+• S3 private bucket (no public access)
+• CloudFront with OAI (Origin Access Identity) — only CloudFront can read S3
+• Signed URLs for time-limited (4hr) video access per user
+• Result: videos served from 300+ CloudFront PoPs — 60% faster load for students
+
+<span class="hl">3. Terraform Remote State:</span>
+Versioned bucket, SSE-KMS encrypted, access locked to deploy role.
+
+<span class="hl">4. S3 Event → Processing:</span>
+On file upload → S3 event notification → SQS → Lambda processes (file validation, thumbnail generation).
+
+<span class="hl2">Security settings we enforced:</span>
+• Block all public access ✓
+• SSE-S3 encryption at rest ✓
+• Bucket policies: deny if not using HTTPS (aws:SecureTransport)`,
+v2:`<span class="hl3">2023:</span>
+• S3 Intelligent-Tiering for media — automatic cost optimization
+• Object Lock on audit logs (compliance — prevent deletion)
+• Multipart upload via boto3 for large video files (&gt;100MB)`,
+tip:"For LMS video: S3 + CloudFront + signed URLs is the full answer. Each part has a reason: S3=storage, CloudFront=speed, signed URL=access control."},
+
+{cat:"AWS",diff:"medium",
+q:"Explain IAM roles, policies, and principle of least privilege. How did you implement it?",
+sub:"Focus: roles vs users, instance profiles, how you actually tightened permissions",
+v1:`<span class="hl2">IAM structure:</span>
+• Root account: only for billing, MFA enforced, never used for daily work
+• IAM Users: human devs only, each has own credentials + MFA
+• IAM Roles: for all services/applications — NO hardcoded keys
+
+<span class="hl2">Service roles we configured:</span>
+• EC2 Instance Profile → S3 read (artifacts), SQS send/receive — nothing else
+• Lambda Execution Role → specific S3 prefix + SQS queue ARN — not all SQS
+• Jenkins Deploy Role → ECR push + ECS UpdateService + S3 put artifacts only
+
+<span class="hl2">Sample minimal policy (Jenkins deploy):</span>
+<div class="code-block">{
+  "Effect": "Allow",
+  "Action": [
+    "ecr:GetAuthorizationToken",
+    "ecr:BatchCheckLayerAvailability",
+    "ecr:PutImage",
+    "ecs:UpdateService",
+    "ecs:DescribeServices"
+  ],
+  "Resource": "arn:aws:ecs:ap-south-1:ACCOUNT_ID:service/cluster/*"
+}</div>
+
+<span class="hl2">How we achieved least privilege in practice:</span>
+• Start broad during dev, use <span class="cmd">IAM Access Analyzer</span> to see unused permissions
+• Access Analyzer reads CloudTrail → shows what's actually called
+• Remove unused permissions based on analysis`,
+v2:`<span class="hl3">2023:</span>
+• Permission boundaries on developer IAM roles — can't escalate own privileges
+• AWS SSO (IAM Identity Center) — centralized login across multi-account org
+• SCPs at AWS Organizations level — guardrails even root can't override`,
+tip:"IAM Access Analyzer is the gold-standard answer to 'how do you achieve least privilege'. It analyzes actual CloudTrail usage, not guesswork.",
+trap:"Never use IAM Users for applications. Hardcoded access keys in code = instant security failure. Always IAM Roles + instance profiles for services."},
+
+{cat:"AWS",diff:"medium",
+q:"How did you use CloudWatch? What alarms and dashboards did you build?",
+sub:"Focus: specific metrics, alarm thresholds, what happened when alarms fired",
+v1:`<span class="hl2">Metrics we monitored:</span>
+• EC2: CPUUtilization, StatusCheckFailed, NetworkIn/Out
+• RDS: DatabaseConnections, FreeStorageSpace (&lt;10GB), ReadLatency, WriteLatency
+• ALB: RequestCount, TargetResponseTime, HTTPCode_5XX_Count
+• Lambda: Errors, Duration, Throttles, ConcurrentExecutions
+• SQS: ApproximateNumberOfMessagesVisible (queue depth), NumberOfMessagesSent
+
+<span class="hl2">Key alarms (with thresholds):</span>
+• EC2 CPU &gt; 80% for 5 min → SNS → email
+• RDS DatabaseConnections &gt; 120 (80% of max 150) → alert (connection pool warning)
+• ALB 5XX &gt; 1% over 5 min → PagerDuty (production SLA breach)
+• SQS DLQ depth &gt; 0 → immediate alert (failed jobs)
+• RDS FreeStorageSpace &lt; 10GB → alert
+
+<span class="hl2">Log metric filters:</span>
+<span class="cmd">ERROR</span> pattern on app log group → custom metric → alarm on count &gt; 50 per min`,
+v2:`<span class="hl3">2023:</span>
+• Composite alarms: CPU + memory + error rate combined → single alert (reduce noise)
+• Container Insights for ECS — pod-level metrics without Prometheus overhead
+• Anomaly detection alarms — ML-based dynamic threshold, no manual tuning`,
+tip:"RDS DatabaseConnections alarm is the one most people forget — it catches the most painful production outages (connection pool exhaustion).",},
+
+{cat:"AWS",diff:"hard",
+q:"How did you use SQS? Difference between Standard and FIFO queues? DLQ pattern?",
+sub:"Focus: actual use case, DLQ config, idempotency requirement",
+v1:`<span class="hl2">SQS use case — async job decoupling:</span>
+User requests heavy report → API responds 202 immediately → message in SQS → worker processes → DB updated → user notified.
+
+<span class="hl2">Queue settings:</span>
+• Visibility timeout: 60s (= max processing SLA)
+• Message retention: 4 days
+• Long polling: WaitTimeSeconds=20 (reduces empty polls, saves cost)
+• Max receive count: 3 → then moves to DLQ
+
+<span class="hl2">Dead Letter Queue:</span>
+• Separate SQS queue captures messages failed 3+ times
+• CloudWatch alarm: DLQ ApproximateNumberOfMessages &gt; 0 → immediate alert
+• Ops inspects DLQ messages to identify bug pattern
+
+<div class="compare-grid">
+<div class="compare-col"><h4>Standard Queue</h4><p>At-least-once delivery
+Best-effort ordering
+Unlimited throughput
+Used for: reports, emails, file processing</p></div>
+<div class="compare-col"><h4 class="g">FIFO Queue</h4><p>Exactly-once delivery
+Strict ordering guaranteed
+300 TPS (3000 with batching)
+Used for: payment events, order sequences</p></div>
+</div>`,
+v2:`<span class="hl3">2023:</span>
+• Lambda SQS event source mapping — auto-scales consumers based on queue depth
+• SNS → multiple SQS fan-out pattern (one event → multiple consumers)
+• Batch size tuning: Lambda batch=10, concurrency=5 for throughput optimization`,
+tip:"DLQ + CloudWatch alarm on DLQ depth is the production pattern. Shows you think about failure paths, not just the happy path.",
+trap:"Standard queue = at-least-once. Your consumer MUST be idempotent (processing same message twice = safe). Check if already processed before acting."},
+
+// ══ DOCKER / K8s ══
+{cat:"Docker/K8s",diff:"medium",
+q:"Explain Docker multi-stage builds. Why did you use them? Show an example.",
+sub:"Focus: image size, security benefit, what you removed from production image",
+v1:`<span class="hl">Problem:</span> Build tools (compilers, dev deps) shouldn't be in production images.
+
+<span class="hl2">Multi-stage build example (Node.js):</span>
+<div class="code-block">## Stage 1: Build
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build    # compile TypeScript, bundle
+
+## Stage 2: Runtime (minimal)
+FROM node:18-alpine AS runtime
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3000
+USER node            # non-root
+CMD ["node", "dist/index.js"]</div>
+
+<span class="hl2">Impact:</span>
+• Image size: 1.2GB → 180MB (stripped dev deps, build tools, typescript compiler)
+• No compiler in prod = smaller attack surface
+• Faster ECS task launch (smaller image pull)
+
+<span class="hl2">PHP example:</span>
+<div class="code-block">FROM composer:2 AS deps
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader
+
+FROM php:8.1-fpm-alpine AS runtime
+COPY --from=deps /app/vendor ./vendor
+COPY . .
+USER www-data</div>`,
+v2:`<span class="hl3">2023:</span>
+• BuildKit cache mounts: <span class="cmd">RUN --mount=type=cache,target=/root/.npm npm ci</span> → 60% faster builds
+• ECR image scanning (Trivy) in pipeline → block deploy on HIGH CVEs
+• Moved to <span class="cmd">node:18-alpine</span> + some services to distroless (no shell, minimal OS)`,
+tip:"Three things that make a production image: 1) Multi-stage (size), 2) Non-root USER (security), 3) HEALTHCHECK (orchestration). Hit all three.",
+trap:"Alpine images can break things — musl libc vs glibc. Some C extensions (like some Python packages) need full Debian. Know the tradeoff."},
+
+{cat:"Docker/K8s",diff:"hard",
+q:"Walk through what happens internally when you run kubectl apply. From API call to running container.",
+sub:"Focus: API server, etcd, controller manager, scheduler, kubelet sequence",
+v1:`<span class="hl2">Full sequence:</span>
+
+1. <span class="hl">kubectl apply -f deployment.yaml</span>
+   → Sends REST request to <span class="cmd">kube-apiserver</span> with auth (RBAC check)
+
+2. <span class="hl">API Server → etcd</span>
+   → Validates manifest (schema), stores desired state in etcd
+
+3. <span class="hl">Deployment Controller</span> (part of controller-manager)
+   → Watches etcd, sees desired=3 pods, actual=0
+   → Creates 3 Pod objects in etcd (status: Pending, no node assigned)
+
+4. <span class="hl">Scheduler</span>
+   → Watches for unscheduled pods
+   → Scores nodes based on: available CPU/memory, taints, affinity rules
+   → Assigns best node → writes nodeName to pod spec in etcd
+
+5. <span class="hl">Kubelet</span> (on assigned node)
+   → Watches API server for pods assigned to its node
+   → Pulls image from ECR via containerd (CRI)
+   → Starts container, sets up networking
+   → Reports status: Running → API server → etcd
+
+6. <span class="hl">kube-proxy</span>
+   → Updates iptables/IPVS on all nodes for Service routing to new pod IP`,
+v2:`<span class="hl3">Additions we configured:</span>
+• Pod Disruption Budgets — prevent evicting all pods during node drain
+• Priority Classes — critical services preempt lower-priority pods during resource pressure
+• Resource quotas per namespace — client isolation`,
+tip:"This shows you understand K8s internals, not just kubectl commands. Most candidates stop at 'the scheduler assigns it'. Going deeper = senior signal.",
+trap:"etcd stores DESIRED state. Kubelet reports ACTUAL state. The reconciliation loop bridges the gap — this is the core K8s philosophy. Know this."},
+
+{cat:"Docker/K8s",diff:"medium",
+q:"What are Kubernetes Liveness vs Readiness probes? How did you configure them?",
+sub:"Focus: exact difference, what happens on failure, real YAML config",
+v1:`<div class="compare-grid">
+<div class="compare-col"><h4>Readiness Probe</h4><p>"Ready to receive traffic?"
+FAIL → removed from Service endpoints (no traffic routed)
+Pod stays running, just excluded from LB.
+Use: DB connection check, cache check, dependencies ready.</p></div>
+<div class="compare-col"><h4 class="g">Liveness Probe</h4><p>"Still alive?"
+FAIL (after failureThreshold) → kubelet KILLS + RESTARTS container
+Use: detect stuck/deadlocked processes, memory leaks.</p></div>
+</div>
+<span class="hl2">Our YAML config:</span>
+<div class="code-block">livenessProbe:
+  httpGet:
+    path: /health    # just: return 200 (process alive)
+    port: 8080
+  initialDelaySeconds: 30   # wait for app startup
+  periodSeconds: 10
+  failureThreshold: 3        # 3 fails = container restart
+
+readinessProbe:
+  httpGet:
+    path: /ready     # checks: DB conn, Redis conn, deps
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 2        # 2 fails = remove from LB</div>
+
+<span class="hl2">Our endpoints:</span>
+• <span class="cmd">/health</span> → just returns 200 (is the process alive?)
+• <span class="cmd">/ready</span> → checks DB pool, cache connection (am I ready to serve?)`,
+v2:`<span class="hl3">2023 addition — Startup Probe:</span>
+For slow-starting apps (Java services taking 60+ sec to start):
+<div class="code-block">startupProbe:
+  httpGet: { path: /health, port: 8080 }
+  failureThreshold: 30
+  periodSeconds: 5   # allow up to 150s startup</div>
+Liveness probe disabled until startup probe passes — prevents premature restart loops.`,
+tip:"KEY: Readiness failure = stop routing traffic. Liveness failure = restart container. Failing readiness does NOT restart. Get this crystal clear.",
+trap:"initialDelaySeconds too short = liveness probe kills app before it starts = infinite restart loop. Set it longer than your worst-case startup time."},
+
+{cat:"Docker/K8s",diff:"medium",
+q:"What is Helm and why did you use it over raw Kubernetes YAML?",
+sub:"Focus: real problems Helm solved, values override pattern, rollback",
+v1:`<span class="hl">Problem with raw YAML:</span>
+6 client projects × (deployment + service + ingress + configmap + hpa) = 30+ YAML files.
+Changing the image tag = find/replace across 6 files. Different env configs = copy-pasted files.
+
+<span class="hl2">Helm chart structure:</span>
+<div class="code-block">my-app/
+├── Chart.yaml           # chart name, version, dependencies
+├── values.yaml          # defaults
+├── values-staging.yaml  # staging overrides
+├── values-prod.yaml     # prod overrides
+└── templates/
+    ├── deployment.yaml
+    ├── service.yaml
+    ├── ingress.yaml
+    └── hpa.yaml</div>
+
+<span class="hl2">Deploy command:</span>
+<span class="cmd">helm upgrade --install my-app ./my-app -f values-prod.yaml --set image.tag=abc123</span>
+
+<span class="hl2">Benefits:</span>
+• Single chart parameterizes staging + prod (different replicas, resources, ingress hosts)
+• <span class="cmd">helm rollback my-app 2</span> — instant rollback to revision 2
+• <span class="cmd">helm history my-app</span> — full deploy audit trail with timestamps`,
+v2:`<span class="hl3">2023:</span>
+• Helmfile for declarative multi-chart management across environments
+• OCI chart storage in ECR — versioned, immutable chart releases
+• Chart dependencies: shared ingress-nginx + cert-manager charts`,
+tip:"'helm rollback' is instant and versioned — it's better than re-running a pipeline. Mention this specifically.",
+trap:"Helm Secrets vs Helm Values — never put DB passwords in values.yaml in Git. Use Helm Secrets plugin or reference Secrets Manager ARNs in values."},
+
+// ══ TERRAFORM ══
+{cat:"Terraform",diff:"medium",
+q:"How did you structure Terraform code for multiple client environments?",
+sub:"Focus: modules, directory structure, state isolation, variable files",
+v1:`<span class="hl2">Directory structure:</span>
+<div class="code-block">infrastructure/
+├── modules/
+│   ├── vpc/           # reusable: inputs, outputs, resources
+│   ├── ec2/
+│   ├── rds/
+│   └── ecs-service/
+└── environments/
+    ├── staging/
+    │   ├── main.tf         # calls modules with staging vars
+    │   ├── variables.tf
+    │   ├── terraform.tfvars
+    │   └── backend.tf      # separate S3 state bucket/key
+    ├── uat/
+    └── production/</div>
+
+<span class="hl2">Module call example:</span>
+<div class="code-block">module "app_vpc" {
+  source     = "../../modules/vpc"
+  cidr_block = var.vpc_cidr         # 10.0.0.0/16 staging
+  env        = var.environment      # "staging"
+  tags       = local.common_tags
+}</div>
+
+<span class="hl2">Why separate dirs over workspaces:</span>
+• Workspaces share same state bucket — risky for prod
+• Separate dirs = separate state files = separate locks = full isolation
+• Separate dirs also means separate backend.tf — explicit, not magical`,
+v2:`<span class="hl3">2023:</span>
+• Terragrunt — eliminates backend.tf boilerplate duplication across envs
+• Pre-commit: <span class="cmd">terraform fmt</span> + <span class="cmd">terraform validate</span> + <span class="cmd">tflint</span> on every commit
+• Checkov security scan on Terraform code in CI (catches public S3, unencrypted RDS, etc.)`,
+tip:"'Modules + separate environment directories' is the production standard. If asked 'workspaces vs dirs?' — choose dirs for strong isolation.",
+trap:"Never commit secrets to terraform.tfvars. Reference AWS Secrets Manager via data source: <span class=\"cmd\">data \"aws_secretsmanager_secret_version\"</span>."},
+
+{cat:"Terraform",diff:"hard",
+q:"What is Terraform state? What happens when it drifts? How do you fix it?",
+sub:"Focus: state file role, drift causes, terraform import, state commands",
+v1:`<span class="hl">Terraform state</span> (<span class="cmd">terraform.tfstate</span>) maps Terraform config → real AWS resources.
+
+<span class="hl2">Why critical:</span>
+• Terraform uses state to know: what exists, what to create, what to change, what to delete
+• Without state = tries to recreate everything = disaster
+
+<span class="hl2">Drift causes in our env:</span>
+• Someone added SG rule manually in console ("just temporary")
+• Infrastructure created via AWS CLI not captured in Terraform
+• Another team provisioned resources without TF
+
+<span class="hl2">How we detected drift:</span>
+• <span class="cmd">terraform plan</span> run daily in CI — any diff = drift alert
+• AWS Config rules: alert on manual SG, S3 bucket policy changes
+
+<span class="hl2">Fix strategies:</span>
+<span class="hl">Re-apply</span>: Accept TF as truth, apply removes/reverts manual changes.
+<span class="hl">Update .tf</span>: Accept manual change, add it to .tf file, plan shows no diff.
+<span class="hl">terraform import</span>: Resource created outside TF → bring under management:
+<span class="cmd">terraform import aws_instance.app i-0abc12345</span>
+
+<span class="hl2">State manipulation commands:</span>
+• <span class="cmd">terraform state rm</span> — stop managing resource (doesn't delete it in AWS)
+• <span class="cmd">terraform state mv</span> — rename resource after code refactor`,
+v2:`<span class="hl3">2023:</span>
+• <span class="cmd">terraform apply -refresh-only</span> — refresh state from real AWS without applying changes
+• Driftctl tool — generates full drift report across all resources
+• Team policy: any manual change must have a TF commit within 24h`,
+tip:"'terraform import' impresses interviewers — many engineers don't know it. Shows maturity with real-world environments where not everything was TF from day one.",
+trap:"<span class=\"cmd\">terraform state rm</span> does NOT delete the AWS resource. It just makes TF forget about it. Resource keeps running. This is a common interview trap."},
+
+// ══ PYTHON ══
+{cat:"Python",diff:"medium",
+q:"How did you use Boto3 for AWS automation? Give a concrete example with error handling.",
+sub:"Focus: actual code pattern, pagination, IAM permissions needed",
+v1:`<span class="hl2">Example: Cleanup old S3 build artifacts:</span>
+<div class="code-block">import boto3
+from datetime import datetime, timezone, timedelta
+
+s3 = boto3.client('s3', region_name='ap-south-1')
+bucket = 'artifacts-bucket'
+prefix = 'app/staging/'
+cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+
+paginator = s3.get_paginator('list_objects_v2')
+deleted = 0
+for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+    for obj in page.get('Contents', []):
+        if obj['LastModified'] &lt; cutoff:
+            try:
+                s3.delete_object(Bucket=bucket, Key=obj['Key'])
+                print(f"Deleted: {obj['Key']}")
+                deleted += 1
+            except s3.exceptions.NoSuchKey:
+                pass  # already gone
+            except Exception as e:
+                print(f"Error deleting {obj['Key']}: {e}")
+
+print(f"Cleaned up {deleted} artifacts")</div>
+
+<span class="hl2">Other boto3 automations we built:</span>
+• EC2 start/stop scheduler (EventBridge → Lambda → boto3)
+• RDS snapshot: create on deploy, cleanup snapshots older than 7 days
+• SQS producer/consumer for job queue
+• CloudWatch log export to S3 for compliance archive`,
+v2:`<span class="hl3">2023:</span>
+• Lambda Powertools for structured logging: <span class="cmd">from aws_lambda_powertools import Logger, Tracer</span>
+• async boto3 (<span class="cmd">aioboto3</span>) for concurrent S3 operations in Lambda
+• Moved repeated scripts to Lambda + EventBridge scheduled rules`,
+tip:"Always mention the paginator. AWS APIs page results (max 1000 objects per call). Without it your cleanup script silently only processes 1000 items.",
+trap:"boto3.resource (OOP, high-level) vs boto3.client (low-level, more control). resource is easier, client needed for advanced operations like presigned URLs."},
+
+{cat:"Python",diff:"medium",
+q:"Explain Python decorators, generators, and context managers with DevOps-relevant examples.",
+sub:"Focus: practical usage you've actually done, not textbook definitions",
+v1:`<span class="hl2">Decorators — function wrappers for cross-cutting concerns:</span>
+<div class="code-block">import functools, time
+
+def retry(max_attempts=3, delay=2):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt == max_attempts - 1: raise
+                    print(f"Attempt {attempt+1} failed: {e}, retrying...")
+                    time.sleep(delay)
+        return wrapper
+    return decorator
+
+@retry(max_attempts=5, delay=3)
+def call_aws_api():
+    # AWS calls fail transiently — retry is essential
+    return boto3.client('ec2').describe_instances()</div>
+
+<span class="hl2">Generators — memory-efficient streaming:</span>
+<div class="code-block">def stream_s3_objects(bucket, prefix):
+    paginator = s3.get_paginator('list_objects_v2')
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+        for obj in page.get('Contents', []):
+            yield obj   # one at a time — doesn't load all into memory</div>
+
+<span class="hl2">Context managers — guaranteed cleanup:</span>
+<div class="code-block">from contextlib import contextmanager
+
+@contextmanager
+def db_connection():
+    conn = get_db()
+    try:
+        yield conn
+    finally:
+        conn.close()   # always runs, even on exception
+
+with db_connection() as db:
+    db.execute("SELECT * FROM users")</div>`,
+v2:`<span class="hl3">2023:</span>
+• Dataclasses for structured config objects (replacing plain dicts)
+• Type hints: <span class="cmd">from typing import Generator, Iterator, Optional</span>
+• asyncio + <span class="cmd">async with</span> for async context managers in Lambda`,
+tip:"The retry decorator is the most real-world DevOps pattern here. AWS APIs fail transiently. Show this and you've shown Python beyond basics.",
+trap:"Generators are consumed once. After exhaustion, iterating again yields nothing. Recreate the generator object if you need to iterate again."},
+
+{cat:"Python",diff:"medium",
+q:"How did you build the AI-assisted query auto-correction system? Walk through the architecture.",
+sub:"Focus: problem → solution → how it worked → results",
+v1:`<span class="hl2">Problem:</span>
+LMS had dynamically generated SQL (from user-configured report builder). Some queries were invalid — wrong column names, type mismatches, syntax errors. Users saw error pages.
+
+<span class="hl2">Pipeline:</span>
+
+<span class="hl">Step 1 — Capture:</span>
+<div class="code-block">def execute_query(query, params):
+    try:
+        return db.execute(query, params)
+    except pymysql.OperationalError as e:
+        return auto_correct_and_retry(query, e)</div>
+
+<span class="hl">Step 2 — AI Fix:</span>
+<div class="code-block">def auto_correct_and_retry(query, error):
+    prompt = f"""Fix this SQL query.
+Error: {str(error)}
+Schema: {get_schema_summary()}
+Query: {query}
+Return only the fixed SQL. No explanation."""
+
+    response = anthropic_client.messages.create(
+        model="claude-3-haiku",
+        max_tokens=500,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    fixed_query = extract_sql(response.content[0].text)</div>
+
+<span class="hl">Step 3 — Validate:</span>
+Run <span class="cmd">EXPLAIN {fixed_query}</span> — if no MySQL error, syntactically valid.
+
+<span class="hl">Step 4 — Track:</span>
+Log (original_query, error, fixed_query, success) → weekly report on most common failures → fix permanently in report builder.
+
+<span class="hl2">Outcome:</span> 90%+ of transient query failures auto-resolved without user-visible error.`,
+v2:`<span class="hl3">2023 improvements:</span>
+• Few-shot prompting — include 3 example correct queries from same schema in prompt
+• Cache common fix patterns — skip API call for repeated error types
+• Slack notification for uncorrectable queries → human review queue`,
+tip:"Frame this as a 'self-healing system with a feedback loop'. Interviewers remember unique, impactful projects. This is yours."},
+
+// ══ PHP ══
+{cat:"PHP",diff:"medium",
+q:"What PHP features did you use? PHP 7.4 vs PHP 8.x key differences.",
+sub:"Focus: actual features you adopted, migration challenges, performance impact",
+v1:`<span class="hl2">PHP 7.4 (initial stack 2022):</span>
+• Typed properties: <span class="cmd">public int $userId;</span>
+• Arrow functions: <span class="cmd">fn($x) => $x * 2</span>
+• Null coalescing assignment: <span class="cmd">$data['key'] ??= 'default'</span>
+
+<span class="hl2">PHP 8.0/8.1 features we adopted:</span>
+• <span class="hl">Match expression</span> (cleaner than switch):
+<div class="code-block">$label = match($statusCode) {
+    200 => 'Success',
+    404 => 'Not Found',
+    500 => 'Server Error',
+    default => 'Unknown'
+};</div>
+• <span class="hl">Nullsafe operator</span>: <span class="cmd">$user?->getProfile()?->getAvatar()</span>
+  → Eliminates nested null checks, code became 30% shorter for chain calls
+• <span class="hl">Named arguments</span>: <span class="cmd">array_slice(array: $arr, offset: 0, length: 5)</span>
+• <span class="hl">Readonly properties</span> (PHP 8.1): <span class="cmd">public readonly string $name;</span>
+• <span class="hl">Enums</span> (PHP 8.1): replaced class-constants pattern for status codes
+• <span class="hl">Fibers</span> (PHP 8.1): cooperative multitasking (used in ReactPHP async context)
+
+<span class="hl2">Performance:</span>
+PHP 8.0 JIT compiler → 10-15% improvement on compute-heavy report generation.`,
+v2:`<span class="hl3">PHP 8.2/8.3:</span>
+• Readonly classes
+• Typed class constants
+• <span class="cmd">array_any()</span>, <span class="cmd">array_all()</span> (8.3)`,
+tip:"Nullsafe operator (?->) is the most practical feature to highlight — it eliminates deeply nested null checks in real ORM-heavy code.",
+trap:"PHP 8.0 JIT is mainly beneficial for CPU-intensive operations. For typical web I/O-bound apps, improvement is minimal. Don't oversell it."},
+
+{cat:"PHP",diff:"hard",
+q:"How did you optimize PHP + MySQL performance in the LMS? Specific problems and fixes.",
+sub:"Focus: N+1, opcache config, connection pooling, profiling tools used",
+v1:`<span class="hl2">Problem 1: N+1 Query (biggest impact):</span>
+Loading 100 courses → 1 query for courses + 100 individual queries for each course's enrollment count.
+
+Fix: Eager loading with subquery:
+<div class="code-block">-- Before: N+1 (101 queries)
+SELECT * FROM courses;
+SELECT COUNT(*) FROM enrollments WHERE course_id = 1;
+SELECT COUNT(*) FROM enrollments WHERE course_id = 2;
+-- ... 100 more
+
+-- After: 1 query
+SELECT c.*, COUNT(e.id) as enrollment_count
+FROM courses c
+LEFT JOIN enrollments e ON c.id = e.course_id
+GROUP BY c.id;</div>
+
+<span class="hl2">Problem 2: OpCache misconfiguration:</span>
+<div class="code-block">opcache.enable=1
+opcache.memory_consumption=256
+opcache.max_accelerated_files=10000
+opcache.revalidate_freq=0  ; prod: no file check overhead
+opcache.jit_buffer_size=64M
+opcache.jit=tracing</div>
+
+<span class="hl2">Problem 3: MySQL slow queries:</span>
+• Enabled slow query log: <span class="cmd">slow_query_log=ON, long_query_time=0.5</span>
+• Used <span class="cmd">EXPLAIN ANALYZE</span> on flagged queries
+• Added composite index: <span class="cmd">INDEX(user_id, course_id, created_at)</span> for common filter pattern
+• Result: 2.3s → 0.08s on enrollment report query
+
+<span class="hl2">Profiling tools:</span>
+Blackfire.io for request profiling, MySQL slow query log + pt-query-digest`,
+v2:`<span class="hl3">2023:</span>
+• Redis for: session storage, query result caching (60-min TTL for static report data)
+• PHP-FPM pool tuning: pm.max_children=50 (based on 30MB avg process size on 2GB server)
+• HTTP/2 on ALB for multiplexed static asset loading`,
+tip:"N+1 fix with concrete numbers ('101 queries → 1 query, 2.3s → 0.08s') is a memorable, credible answer. Always quantify the impact."},
+
+// ══ NODE.JS ══
+{cat:"NodeJS",diff:"medium",
+q:"Explain the Node.js event loop. Why does it matter for your LMS backend services?",
+sub:"Focus: single-thread + async, what breaks it, how you worked around it",
+v1:`<span class="hl">Node.js is single-threaded</span> but handles massive concurrency via non-blocking async I/O.
+
+<span class="hl2">Event loop phases:</span>
+<div class="code-block">1. timers          → setTimeout/setInterval callbacks
+2. pending callbacks → deferred I/O callbacks
+3. idle/prepare    → internal
+4. poll            → wait for new I/O events (here when idle)
+5. check           → setImmediate callbacks
+6. close callbacks → socket close events</div>
+
+<span class="hl2">Why single-thread works for I/O:</span>
+DB query sent → Node doesn't wait → handles other requests → callback fires when DB responds.
+Works perfectly for I/O-bound work (APIs, DB, file reads).
+Fails for CPU-bound work (video encoding, heavy crypto) — blocks entire loop.
+
+<span class="hl2">How we used this in LMS backend:</span>
+• Parallel DB queries with <span class="cmd">Promise.all()</span>:
+<div class="code-block">// Sequential (bad): 3 × 50ms = 150ms total
+const user    = await getUser(userId);
+const courses = await getCourses(userId);
+const progress = await getProgress(userId);
+
+// Parallel (good): max(50ms, 50ms, 50ms) = 50ms total
+const [user, courses, progress] = await Promise.all([
+  getUser(userId),
+  getCourses(userId),
+  getProgress(userId)
+]);</div>
+• Heavy CPU jobs (PDF reports) → pushed to SQS → Lambda (off the event loop)`,
+v2:`<span class="hl3">2023:</span>
+• Worker Threads for CPU-bound tasks (kept off main thread)
+• <span class="cmd">AsyncLocalStorage</span> for request-scoped trace IDs through async callbacks
+• Node 18 native fetch (dropped axios for simple cases)`,
+tip:"Promise.all for parallel queries is the single highest-impact optimization. '3 sequential 50ms queries → 1 parallel 50ms result' is a clear, concrete win.",
+trap:"CPU-intensive code in Node (heavy loops, image processing) blocks the event loop — all other requests wait. ALWAYS offload to workers or a separate service."},
+
+{cat:"NodeJS",diff:"medium",
+q:"How did you structure Express.js REST API services? Middleware stack and error handling.",
+sub:"Focus: folder structure, middleware order, centralized error handling",
+v1:`<span class="hl2">Project structure:</span>
+<div class="code-block">src/
+├── routes/          # route definitions only (thin)
+│   ├── auth.routes.js
+│   └── courses.routes.js
+├── controllers/     # request/response handling
+├── services/        # business logic (no HTTP objects)
+├── models/          # DB queries (raw SQL or ORM)
+├── middleware/
+│   ├── auth.js      # JWT validation
+│   ├── validate.js  # Joi/Zod schema validation
+│   └── error.js     # global error handler
+└── utils/
+    ├── logger.js    # Winston/Pino structured logging
+    └── response.js  # standard response formatter</div>
+
+<span class="hl2">Middleware stack (order matters):</span>
+<div class="code-block">app.use(helmet());              // security headers first
+app.use(cors(corsConfig));      // CORS before body parsing
+app.use(rateLimit(limits));     // rate limit before auth
+app.use(express.json());        // body parsing
+app.use(requestLogger);         // log all requests
+app.use('/api/v1', routes);     // actual routes
+app.use(notFoundHandler);       // 404 catcher
+app.use(globalErrorHandler);    // LAST — catches all errors</div>
+
+<span class="hl2">Global error handler (avoids try/catch in every route):</span>
+<div class="code-block">function globalErrorHandler(err, req, res, next) {
+  const status = err.status || 500;
+  logger.error({ err, requestId: req.id });
+  res.status(status).json({
+    success: false,
+    error: err.message,
+    requestId: req.id
+  });
+}</div>`,
+v2:`<span class="hl3">2023:</span>
+• Fastify for high-throughput routes (3× faster than Express for JSON serialization)
+• OpenAPI/Swagger auto-gen from JSDoc annotations
+• Request validation with Zod schemas at middleware layer`,
+tip:"Global error handler = centralizing error handling. 'No try/catch in every route controller' shows senior architecture thinking.",
+trap:"Middleware ORDER in Express matters critically. Error handler MUST be last (4 arguments: err, req, res, next). CORS before body parsing. Security headers first."},
+
+// ══ DATABASE ══
+{cat:"Database",diff:"medium",
+q:"How did you manage MySQL on AWS RDS in production? Backups, scaling, connection pooling.",
+sub:"Focus: RDS-specific features, connection limits, Multi-AZ vs Read Replica",
+v1:`<span class="hl2">RDS setup:</span>
+• Staging: <span class="cmd">db.t3.medium</span> — cost-optimized
+• Production: <span class="cmd">db.r5.large</span> — memory-optimized (8GB RAM, better for MySQL buffer pool)
+• Multi-AZ: enabled on prod — synchronous standby replica, automatic failover (~60s)
+• Storage: gp3 SSD, autoscaling (started 100GB → auto-grows, no manual intervention)
+
+<span class="hl2">Backup strategy:</span>
+• Automated daily snapshots (3 AM UTC) — 7-day retention
+• Manual snapshot before every major deployment
+• Point-in-time recovery tested quarterly (actually restore to verify it works)
+
+<span class="hl2">Connection pooling (Node.js):</span>
+<div class="code-block">const pool = mysql2.createPool({
+  host: process.env.DB_HOST,
+  connectionLimit: 10,
+  waitForConnections: true,
+  queueLimit: 50
+});
+// Always release connections:
+const conn = await pool.getConnection();
+try { /* queries */ } finally { conn.release(); }</div>
+
+<span class="hl2">PHP: PDO with persistent connections + explicit close in finally block.</span>`,
+v2:`<span class="hl3">2023 critical addition — RDS Proxy:</span>
+Lambda was creating new DB connections per invocation (100 concurrent Lambdas = 100 new connections → MySQL max_connections hit).
+RDS Proxy pools and reuses connections — Lambda talks to proxy, not RDS directly.
+Result: connection count went from 80+ to 8 stable.
+
+Also added: Read Replica for reporting queries (offload heavy SELECTs from primary).`,
+tip:"RDS Proxy for Lambda is a common 2023 story — Lambda connection explosion is a real production problem. Knowing the solution = senior AWS knowledge.",
+trap:"Multi-AZ = high availability (failover). Read Replica = read scaling. They're different things. Interviewers test this. Don't say Multi-AZ for performance."},
+
+{cat:"Database",diff:"hard",
+q:"How did you run database migrations safely with zero downtime in production?",
+sub:"Focus: ALTER TABLE locking, expand-contract pattern, rollback plan",
+v1:`<span class="hl2">The problem:</span>
+<span class="cmd">ALTER TABLE users ADD COLUMN phone VARCHAR(20)</span> on a 2M row table → table locks for 8+ minutes → production down.
+
+<span class="hl2">Solution 1: Expand-Contract Pattern (for non-breaking changes)</span>
+
+<span class="hl">Phase 1 — Expand:</span> Add new column, keep old column. Deploy code that writes to BOTH.
+<span class="hl">Phase 2 — Backfill:</span> Migrate old data in small batches (not one big UPDATE):
+<div class="code-block">-- Batched backfill (safe, doesn't lock long)
+UPDATE users
+SET phone = old_phone
+WHERE phone IS NULL
+  AND id BETWEEN ? AND ?
+LIMIT 1000;</div>
+<span class="hl">Phase 3 — Contract:</span> Remove old column after all rows have new value.
+
+<span class="hl2">Solution 2: pt-online-schema-change (Percona tool)</span>
+<div class="code-block">pt-osc --alter "ADD INDEX idx_email(email)" \
+       --execute D=mydb,t=users</div>
+Creates shadow table, copies rows in chunks, swaps atomically. No production lock.
+
+<span class="hl2">Solution 3: Feature flags for schema changes</span>
+Deploy new code with feature OFF → run migration → turn feature ON.
+
+<span class="hl2">Versioning:</span>
+SQL files numbered sequentially: <span class="cmd">V001__add_phone_to_users.sql</span>
+Flyway tracks which scripts have run (migration history table in DB).`,
+v2:`<span class="hl3">2023:</span>
+• Always-paired rollback scripts (V001__add_phone.sql + V001__rollback.sql)
+• Pre-deploy mandatory: run migration in staging, EXPLAIN ANALYZE heavy queries, verify performance`,
+tip:"Expand-Contract pattern is the senior-level answer. Most candidates say 'we ran ALTER TABLE'. Show you thought about table locks.",
+trap:"You cannot easily rollback DROP COLUMN — data is gone. Never DROP in prod without a migration window or feature flag protecting the code change first."},
+
+// ══ SECURITY ══
+{cat:"Security",diff:"hard",
+q:"What security practices did you implement across infrastructure and application code?",
+sub:"Focus: actual implementations, not generic list — tools, configs, examples",
+v1:`<span class="hl2">Infrastructure security:</span>
+• No root AWS usage, MFA on all IAM users
+• IAM roles with least privilege (instance profiles, no hardcoded keys)
+• App servers in private subnets — only ALB accessible from internet
+• Security groups: source = SG reference (not 0.0.0.0/0 except ALB port 443)
+• CloudTrail: all API calls logged, alert on sensitive actions (IAM changes, SG modifications)
+• S3: Block all public access enforced, SSE at rest, deny non-HTTPS bucket policy
+• RDS: private subnet, encryption at rest (KMS), no public accessibility
+
+<span class="hl2">Application security:</span>
+• SonarQube OWASP scanning in CI (SQL injection, XSS risks auto-detected)
+• PHP: PDO prepared statements everywhere — zero raw string interpolation into SQL
+• Node.js: <span class="cmd">helmet()</span> middleware (CSP, HSTS, X-Frame-Options, XSS-Protection headers)
+• Rate limiting on auth endpoints: 5 attempts / 15 min per IP
+• All secrets in AWS Secrets Manager (never .env files on servers)
+• HTTPS only: ALB handles TLS termination, ACM cert, HTTP→HTTPS redirect
+
+<span class="hl2">Docker security:</span>
+• Non-root USER in all Dockerfiles
+• .dockerignore excludes .env, .git, node_modules
+• ECR image scanning on push`,
+v2:`<span class="hl3">2023 additions:</span>
+• AWS WAF on API Gateway — OWASP Core Rule Set managed rules
+• Checkov on Terraform code in CI — catches insecure IaC before apply
+• Secrets rotation: Lambda function rotates DB passwords every 90 days via Secrets Manager
+• Dependency scanning: <span class="cmd">npm audit</span> / <span class="cmd">composer audit</span> in Jenkins pipeline`,
+tip:"Prepared statements (SQL injection) + helmet (XSS/CSP) + Secrets Manager (credential exposure) covers 3 of OWASP Top 10. Structure your answer this way.",
+trap:"Docker ENV variables are NOT secret. Anyone with docker exec can read them. Use Secrets Manager + inject at runtime via entrypoint script or ECS task secrets."},
+
+// ══ WEB DEV ══
+{cat:"Web Dev",diff:"medium",
+q:"How did you integrate Razorpay? Walk through the full payment flow including security verification.",
+sub:"Focus: order creation → checkout → verification → webhook → fulfillment",
+v1:`<span class="hl2">Full payment flow (5 steps):</span>
+
+<span class="hl">Step 1 — Create Order (backend):</span>
+<div class="code-block">const order = await razorpay.orders.create({
+  amount: price * 100,    // always in paise
+  currency: 'INR',
+  receipt: 'receipt_' + userId + '_' + Date.now(),
+  notes: { userId, courseId }
+});</div>
+
+<span class="hl">Step 2 — Frontend modal:</span>
+Checkout.js with order_id, key_id. On success: returns payment_id, order_id, signature.
+
+<span class="hl">Step 3 — Signature verification (CRITICAL):</span>
+<div class="code-block">const crypto = require('crypto');
+const body = order_id + '|' + payment_id;
+const expected = crypto
+  .createHmac('sha256', process.env.RAZORPAY_SECRET)
+  .update(body)
+  .digest('hex');
+if (expected !== signature) {
+  throw new Error('Payment verification failed — possible tamper');
+}</div>
+
+<span class="hl">Step 4 — Webhook handler (idempotent):</span>
+Razorpay sends webhook on payment events (even if user closes tab).
+• Verify webhook signature first
+• Check if enrollment already exists before creating (idempotency)
+• Respond 200 IMMEDIATELY, process async via SQS
+
+<span class="hl">Step 5 — Fulfillment:</span>
+Enroll user, send SES confirmation email, grant course access.`,
+v2:`<span class="hl3">2023:</span>
+• Webhook events → SQS → Lambda (handle payment spikes without dropping events)
+• Added UPI payment links for mobile-first users
+• Razorpay subscription for recurring course membership`,
+tip:"Signature verification is the security-critical step most people skip. This prevents attackers faking a successful payment by manipulating JavaScript.",
+trap:"Never trust client-side payment_id alone. A user can manipulate JS variables. ALWAYS verify on backend via Razorpay API before granting access."},
+
+{cat:"Web Dev",diff:"medium",
+q:"Describe the adaptive learning system you built. Data model, algorithm, outcomes.",
+sub:"Focus: how personalization logic worked, DB schema, measurable results",
+v1:`<span class="hl2">Problem:</span>
+Fixed linear course content — all users same content regardless of performance. Low completion rates.
+
+<span class="hl2">Data we collected per user:</span>
+• Quiz scores per topic (weighted by recency — recent attempts matter more)
+• Video completion % per module
+• Retry count (how many attempts per quiz)
+• Time-on-content ratio (vs expected)
+
+<span class="hl2">Mastery score formula (per topic):</span>
+<div class="code-block">topic_mastery_score = (
+  quiz_score      * 0.50  +   # most important
+  completion_rate * 0.30  +
+  time_efficiency * 0.20
+)  # range: 0-100</div>
+
+<span class="hl2">Content routing logic:</span>
+• Score &lt; 40% → show remedial content + re-attempt quiz
+• Score 40–70% → standard progression
+• Score &gt; 70% → skip ahead, unlock advanced bonus material
+
+<span class="hl2">DB schema:</span>
+<div class="code-block">user_topic_mastery (userId, topicId, score, updatedAt)
+content_prerequisites (contentId, requiredTopicId, minScore)
+user_content_queue (userId, contentId, recommended_at, reason)</div>
+
+<span class="hl2">Results:</span>
+• Course completion rate: 42% → 67%
+• Avg quiz score improved 18% vs control cohort on non-adaptive version`,
+v2:`<span class="hl3">2023 evolution:</span>
+• Spaced repetition for review (Leitner-box algorithm)
+• A/B testing framework comparing adaptive vs standard per cohort
+• Dropout risk prediction (logistic regression on engagement signals)`,
+tip:"Always lead with the problem and end with quantified results. '42% → 67% completion' is the memorable anchor of this answer."},
+
+{cat:"Web Dev",diff:"medium",
+q:"How did you integrate Zoho Webinar and Merito? What were the technical challenges?",
+sub:"Focus: OAuth flow, webhook reliability, SSO approach",
+v1:`<span class="hl2">Zoho Webinar Integration:</span>
+
+<span class="hl">Auth:</span> OAuth 2.0
+• Registered LMS as Zoho app → client_id + client_secret
+• Users authorized → access token stored per user with refresh token
+• Cron: auto-refresh tokens 5 min before expiry
+
+<span class="hl">Actions implemented:</span>
+• Create webinar via Zoho API when admin schedules in LMS
+• Bulk-register LMS users for upcoming webinars
+• Fetch post-webinar attendance → update LMS completion records
+
+<span class="hl">Challenge — webhook out-of-order delivery:</span>
+Zoho webhooks for join/leave/end events could arrive out of order or duplicated.
+Fix:
+• Idempotency check: store processed event_id in DB, skip if seen
+• Timestamp ordering: only update attendance if event_time &gt; last_known_time
+• Respond 200 immediately → process async → retry on failure
+
+<span class="hl2">Merito Integration (Assessment platform):</span>
+• Merito hosted quizzes, embedded via iframe
+• SSO: LMS backend generates signed JWT (HS256) → Merito validates with shared secret
+• On completion: Merito webhook → our endpoint → update LMS progress → trigger certificate
+
+<span class="hl">JWT payload:</span>
+<div class="code-block">{
+  "sub": userId,
+  "name": userName,
+  "email": userEmail,
+  "iat": Date.now(),
+  "exp": Date.now() + 3600  // 1hr session
+}</div>`,
+v2:`<span class="hl3">2023:</span>
+• Webhook events buffered in SQS → process reliably even during spikes
+• Unified integration health dashboard (success/failure rates for all 3rd party calls)
+• Retry with exponential backoff for failed Merito API calls`,
+tip:"Idempotency for webhooks is the senior answer. Webhooks CAN fire multiple times. Your handler must be safe to call twice with same payload.",
+trap:"Never block webhook response while processing. Return 200 immediately, push to queue, process async. Zoho retries if it doesn't get 200 within 10s."},
+
+// ══ BEHAVIORAL ══
+{cat:"Behavioral",diff:"easy",
+q:"Tell me about yourself — background, current role, why you're looking to move.",
+sub:"Target: 90 seconds. Practice until it flows naturally without reading.",
+v1:`<span class="hl2">Structure: Background → Role → Why Moving</span>
+
+<span class="hl">Background (15s):</span>
+"I'm a Software Developer and DevOps Engineer with 3.5 years of experience, working at TriByte Technologies since September 2022."
+
+<span class="hl">Current role (50s):</span>
+"My role spans both infrastructure and development. On the DevOps side, I own CI/CD pipelines using Jenkins, manage AWS environments across staging, UAT, and production, and handle containerization with Docker and Kubernetes. On the software dev side, I build backend services in PHP, Node.js, and Python — including features like an adaptive learning engine and an AI-assisted query auto-correction system for our LMS products."
+
+<span class="hl">Why moving (25s):</span>
+"I've built strong fundamentals across the full stack at TriByte, and I'm looking for an opportunity where I can work on larger-scale distributed systems and go deeper into cloud-native architecture."
+
+<span class="hl2">What to hit:</span>
+✓ Both roles (DevOps + Dev) mentioned
+✓ One specific technical project (makes you memorable)
+✓ Forward-looking closer (not 'escaping' current job)`,
+v2:``,
+tip:"Practice 10× out loud. Under 60s = shallow. Over 2 min = losing them. 90 seconds is the sweet spot.",
+trap:"Never say 'I want to leave because...' with negatives. Frame it always as 'ready for next chapter' not 'escaping something'."},
+
+{cat:"Behavioral",diff:"medium",
+q:"Describe a time you handled both developer and DevOps responsibilities simultaneously in the same sprint.",
+sub:"Focus: concrete example, how you managed switching, what advantage the dual role gave",
+v1:`<span class="hl2">Real sprint — payment gateway integration:</span>
+
+<span class="hl">Developer hat (mornings):</span>
+• Designed Razorpay order creation + webhook handler in Node.js
+• Built signature verification and idempotency logic
+• Wrote enrollment DB schema and queries
+
+<span class="hl">DevOps hat (afternoons):</span>
+• Provisioned new UAT environment in Terraform for payment testing
+• Set up SQS queue for webhook processing with DLQ + CloudWatch alerts
+• Configured Jenkins pipeline for the new payment service
+• Set up ECR repo + ECS task definition for the payment service container
+
+<span class="hl2">How I managed context switching:</span>
+• Time-blocking: dev work in deep focus mornings, infra work in afternoons
+• Feature branches in Git — clear separation (feature/payment-backend vs infra/payment-sqs)
+• TF changes in separate PR from application code
+
+<span class="hl2">Advantage of dual role:</span>
+• No waiting for infra team — I provisioned what I needed when I needed it
+• Built infrastructure knowing exactly what the app needed (right queue config, right ECS resources)
+• 3-day feature → 1 day faster vs team with separate infra/dev handoff`,
+v2:``,
+tip:"Punchline: 'My DevOps background makes me a faster developer because I understand deployment constraints upfront.' Interviewers hiring a hybrid role want to hear exactly this.",
+trap:"Don't make it sound chaotic. Show structure: time-blocking, separate branches, separate PRs. Organized context switching, not just 'doing everything at once'."},
+
+{cat:"Behavioral",diff:"medium",
+q:"Tell me about a production incident you handled. Walk through detection, triage, fix, and postmortem.",
+sub:"Focus: calm under pressure, systematic approach, what changed after",
+v1:`<span class="hl2">Incident: RDS security group misconfiguration (18-min downtime)</span>
+
+<span class="hl">Detection (Saturday 11:32 PM):</span>
+PagerDuty → ALB 503 rate spiking. Grafana: EC2 instances healthy, CPU normal. CloudWatch Logs: "MySQL server has gone away" flooding.
+
+<span class="hl">Triage (3 min):</span>
+• RDS console: instance status = available (DB itself fine)
+• CloudTrail: SG modification at 11:12 PM — 20 min before alert
+• Someone removed app server SG inbound rule on port 3306 "temporarily"
+
+<span class="hl">Fix (3 min):</span>
+Re-added the App-SG → RDS-SG inbound rule on port 3306.
+App pools reconnected within seconds. 503s stopped.
+
+<span class="hl">Communication (same time as fix):</span>
+• Client Slack at 11:37 PM: "Investigating connectivity issue, working on it"
+• Resolution at 11:50 PM: "Root cause identified and fixed. Downtime: 18 minutes. Full RCA tomorrow."
+
+<span class="hl">Postmortem (next day — blameless):</span>
+• Timeline documented
+• Contributing factor: no change control process for SG modifications
+• Action 1: AWS Config rule — alert on any SG inbound rule deletion (done in 1 day)
+• Action 2: SG change request process added to team runbook
+• Action 3: Added automated SG validation test in Terraform plan CI`,
+v2:``,
+tip:"Communication timeline is as important as the technical fix. Clients remember how you kept them informed. Document this in your story.",
+trap:"Don't skip the prevention step. 'We fixed it' is table stakes. What you changed to prevent recurrence is the senior differentiator."},
+
+{cat:"Behavioral",diff:"easy",
+q:"How do you evaluate and adopt new DevOps/cloud tools? Give a real example.",
+sub:"Focus: process (not just list of things you read), specific tool adoption story",
+v1:`<span class="hl2">My evaluation process:</span>
+1. Start with a pain point (not a tool looking for a problem)
+2. Read official docs + 2–3 engineering blog posts from companies who've used it in prod
+3. POC on personal AWS account (free tier or minimal cost)
+4. Compare 2–3 alternatives on same criteria: capability, cost, operational overhead, learning curve
+5. Present POC + comparison to team
+6. Incremental adoption: one project first, then roll out
+
+<span class="hl2">Real example — Helm chart adoption:</span>
+Pain: Raw K8s YAML across 6 client projects was copy-pasted and diverging.
+Evaluated: Helm vs Kustomize vs envsubst.
+POC: Built Helm chart for one client service in 2 days.
+Result: 60% less YAML, single values.yaml controls all envs, helm rollback works.
+Adoption: Rolled out to all 6 projects over 2 sprints.
+
+<span class="hl2">How I stay current:</span>
+• AWS What's New feed (weekly scan)
+• HashiCorp changelog for Terraform updates
+• CNCF Landscape for emerging tools
+• Use Claude/ChatGPT to quickly understand new concepts and generate POCs`,
+v2:``,
+tip:"End with: 'I always start from the pain point, not the technology.' Shows engineering maturity — solutions to real problems, not tools for their own sake.",
+trap:"Don't just list 'I read blogs and watch YouTube'. Show a process. The pain point → evaluation → POC → incremental adoption story is memorable."}
+
+]; // end Q
+
+// ─── RENDER ──────────────────────────────────
+const tagMap = {
+  Jenkins:'tag-Jenkins', AWS:'tag-AWS', Python:'tag-Python',
+  'Docker/K8s':'tag-Docker', Terraform:'tag-Terraform', Monitoring:'tag-Monitor',
+  'Web Dev':'tag-Web', Behavioral:'tag-Behavior', DevOps:'tag-DevOps',
+  PHP:'tag-PHP', NodeJS:'tag-NodeJS', Database:'tag-Database', Security:'tag-Security'
+};
+const diffClass = { easy:'diff-easy', medium:'diff-medium', hard:'diff-hard' };
+
+let openCards = new Set();
+let currentFilter = 'All';
+let searchTerm = '';
+let allOpen = false;
+
+function buildCards() {
+  const grid = document.getElementById('q-grid');
+  grid.innerHTML = '';
+
+  const list = Q.filter(item => {
+    const catOk = currentFilter === 'All' || item.cat === currentFilter;
+    const termOk = !searchTerm || item.q.toLowerCase().includes(searchTerm) || (item.sub||'').toLowerCase().includes(searchTerm);
+    return catOk && termOk;
+  });
+
+  if (!list.length) {
+    grid.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;padding:24px 0;text-align:center;">No questions match. Try clearing the search or filter.</p>';
+    updateBar();
+    return;
+  }
+
+  list.forEach((item, i) => {
+    const gIdx = Q.indexOf(item);
+    const isOpen = openCards.has(gIdx);
+    const tag = tagMap[item.cat] || 'tag-DevOps';
+    const dc = diffClass[item.diff] || 'diff-medium';
+
+    const card = document.createElement('div');
+    card.className = 'card' + (isOpen ? ' open' : '');
+    card.dataset.idx = gIdx;
+
+    card.innerHTML = `
+      <div class="card-header" onclick="toggleCard(${gIdx})">
+        <div class="q-num">Q${String(i+1).padStart(2,'0')}</div>
+        <div class="q-body">
+          <div class="q-text">${item.q}</div>
+          ${item.sub ? `<div class="q-sub">${item.sub}</div>` : ''}
+        </div>
+        <div class="q-right">
+          <span class="diff-badge ${dc}">${item.diff}</span>
+          <span class="cat-tag ${tag}">${item.cat}</span>
+          <span class="chevron">▶</span>
+        </div>
+      </div>
+      <div class="answer-section">
+        <div class="version-tabs">
+          <div class="vtab active" onclick="switchTab(this,'v1')">📅 2022 — How I built it</div>
+          ${item.v2 ? `<div class="vtab v2023" onclick="switchTab(this,'v2')">🚀 2023+ — What evolved</div>` : ''}
+        </div>
+        <div class="answer-content visible" data-ver="v1">
+          <div class="answer-text">${item.v1}</div>
+          ${item.tip ? `<div class="tip-box">${item.tip}</div>` : ''}
+          ${item.trap ? `<div class="trap-box">${item.trap}</div>` : ''}
+        </div>
+        ${item.v2 ? `<div class="answer-content" data-ver="v2"><div class="answer-text">${item.v2}</div></div>` : ''}
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  updateBar();
+}
+
+function toggleCard(idx) {
+  const card = document.querySelector(`.card[data-idx="${idx}"]`);
+  if (!card) return;
+  if (openCards.has(idx)) { openCards.delete(idx); card.classList.remove('open'); }
+  else { openCards.add(idx); card.classList.add('open'); }
+  updateBar();
+}
+
+function switchTab(tab, ver) {
+  const section = tab.closest('.answer-section');
+  section.querySelectorAll('.vtab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  section.querySelectorAll('.answer-content').forEach(c => {
+    c.classList.remove('visible');
+    if (c.dataset.ver === ver) c.classList.add('visible');
+  });
+}
+
+function updateBar() {
+  const cards = document.querySelectorAll('.card');
+  const opened = [...cards].filter(c => c.classList.contains('open')).length;
+  document.getElementById('bar-count').textContent = `${opened} / ${cards.length}`;
+  document.getElementById('bar-fill').style.width = cards.length ? `${(opened/cards.length)*100}%` : '0%';
+}
+
+function toggleAll() {
+  allOpen = !allOpen;
+  document.querySelectorAll('.card').forEach(c => {
+    const idx = parseInt(c.dataset.idx);
+    if (allOpen) { c.classList.add('open'); openCards.add(idx); }
+    else { c.classList.remove('open'); openCards.delete(idx); }
+  });
+  document.getElementById('expand-btn').textContent = allOpen ? 'Collapse All' : 'Expand All';
+  updateBar();
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.cat;
+    allOpen = false;
+    document.getElementById('expand-btn').textContent = 'Expand All';
+    buildCards();
+  });
+});
+
+function filterSearch() {
+  searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+  buildCards();
+}
+
+buildCards();
+</script>
+</body>
+</html>

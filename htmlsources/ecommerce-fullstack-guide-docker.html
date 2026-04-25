@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full-Stack E-Commerce App — End-to-End Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #7c6dfa;
+    --accent2: #fa6d6d;
+    --accent3: #6dfabd;
+    --accent4: #fadb6d;
+    --text: #e8e8f0;
+    --muted: #888899;
+    --code-bg: #0d0d15;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    padding: 24px 0;
+  }
+  .sidebar-logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .sidebar-logo h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+  .sidebar-logo p { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .nav-section { padding: 8px 20px 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; }
+  .nav-item {
+    display: block; padding: 7px 20px; font-size: 13px; color: var(--muted);
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover, .nav-item.active { color: var(--text); border-left-color: var(--accent); background: rgba(124,109,250,0.06); }
+  .nav-item span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); margin-right: 8px; }
+
+  /* MAIN */
+  .main { margin-left: 260px; padding: 48px 56px; max-width: 1100px; }
+
+  /* HERO */
+  .hero {
+    padding: 60px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,109,250,0.12); border: 1px solid rgba(124,109,250,0.3);
+    border-radius: 20px; padding: 5px 14px; font-size: 12px; color: var(--accent);
+    margin-bottom: 24px; font-family: 'JetBrains Mono', monospace;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 52px;
+    line-height: 1.05; margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff 0%, #a89dff 50%, #7c6dfa 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p { font-size: 17px; color: var(--muted); max-width: 580px; line-height: 1.65; }
+  .tech-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+  .tag {
+    padding: 4px 12px; border-radius: 4px; font-size: 12px; font-family: 'JetBrains Mono', monospace;
+    border: 1px solid; font-weight: 700;
+  }
+  .tag.react { background: rgba(97,218,251,0.08); border-color: rgba(97,218,251,0.3); color: #61dafb; }
+  .tag.node { background: rgba(109,250,189,0.08); border-color: rgba(109,250,189,0.3); color: var(--accent3); }
+  .tag.pg { background: rgba(250,219,109,0.08); border-color: rgba(250,219,109,0.3); color: var(--accent4); }
+  .tag.redis { background: rgba(250,109,109,0.08); border-color: rgba(250,109,109,0.3); color: var(--accent2); }
+  .tag.docker { background: rgba(124,109,250,0.08); border-color: rgba(124,109,250,0.3); color: var(--accent); }
+  .tag.aws { background: rgba(255,153,0,0.08); border-color: rgba(255,153,0,0.3); color: #ff9900; }
+  .tag.stripe { background: rgba(99,91,255,0.08); border-color: rgba(99,91,255,0.3); color: #635bff; }
+
+  /* ARCHITECTURE */
+  .arch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; }
+  .arch-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px; transition: border-color 0.2s;
+  }
+  .arch-card:hover { border-color: var(--accent); }
+  .arch-card .icon { font-size: 24px; margin-bottom: 10px; }
+  .arch-card h4 { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .arch-card p { font-size: 12px; color: var(--muted); }
+
+  /* SECTIONS */
+  .section { margin-bottom: 72px; }
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 32px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(124,109,250,0.15); border: 1px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent);
+    font-weight: 700; flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px;
+  }
+  .section-header .badge {
+    margin-left: auto; font-size: 11px; font-family: 'JetBrains Mono', monospace;
+    padding: 3px 10px; border-radius: 12px; background: var(--surface2);
+    color: var(--muted); border: 1px solid var(--border); white-space: nowrap;
+  }
+
+  h3 { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 18px; margin: 28px 0 12px; color: var(--text); }
+  h4 { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; margin: 20px 0 8px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+  p { margin-bottom: 12px; color: #c8c8d8; }
+  ul, ol { margin: 12px 0 12px 20px; }
+  li { margin-bottom: 6px; color: #c8c8d8; font-size: 14px; }
+  strong { color: var(--text); font-weight: 600; }
+
+  /* CODE */
+  .code-block {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 10px; margin: 16px 0; overflow: hidden;
+  }
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-header .filename {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .code-header .lang-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    padding: 2px 8px; border-radius: 4px; background: rgba(124,109,250,0.15); color: var(--accent);
+  }
+  pre {
+    padding: 20px; overflow-x: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.65; color: #cdd6f4;
+  }
+  .kw { color: #cba6f7; } /* keywords */
+  .fn { color: #89b4fa; } /* functions */
+  .str { color: #a6e3a1; } /* strings */
+  .cm { color: #6c7086; font-style: italic; } /* comments */
+  .num { color: #fab387; } /* numbers */
+  .prop { color: #89dceb; } /* properties */
+  .op { color: #89dceb; } /* operators */
+
+  /* INFO BOXES */
+  .info-box {
+    border-radius: 8px; padding: 16px 20px; margin: 20px 0;
+    border-left: 3px solid;
+  }
+  .info-box.tip { background: rgba(109,250,189,0.05); border-color: var(--accent3); }
+  .info-box.warn { background: rgba(250,219,109,0.05); border-color: var(--accent4); }
+  .info-box.note { background: rgba(124,109,250,0.05); border-color: var(--accent); }
+  .info-box.danger { background: rgba(250,109,109,0.05); border-color: var(--accent2); }
+  .info-box .label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 6px; font-family: 'JetBrains Mono', monospace;
+  }
+  .info-box.tip .label { color: var(--accent3); }
+  .info-box.warn .label { color: var(--accent4); }
+  .info-box.note .label { color: var(--accent); }
+  .info-box.danger .label { color: var(--accent2); }
+  .info-box p { margin: 0; font-size: 13px; }
+
+  /* STEP LIST */
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li {
+    display: flex; gap: 16px; padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .steps li:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(124,109,250,0.15); border: 1px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent);
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .step-content { flex: 1; }
+  .step-content strong { display: block; margin-bottom: 4px; font-size: 14px; }
+  .step-content p { margin: 0; font-size: 13px; color: var(--muted); }
+
+  /* FILE TREE */
+  .file-tree {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.9;
+  }
+  .ft-dir { color: var(--accent4); }
+  .ft-file { color: var(--text); }
+  .ft-comment { color: var(--muted); font-size: 11px; }
+  .ft-indent1 { padding-left: 20px; }
+  .ft-indent2 { padding-left: 40px; }
+  .ft-indent3 { padding-left: 60px; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  th {
+    text-align: left; padding: 10px 14px; font-size: 12px;
+    background: var(--surface2); color: var(--muted); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    background: var(--surface2); padding: 2px 6px; border-radius: 4px; color: var(--accent);
+  }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    background: var(--surface2); padding: 2px 6px; border-radius: 4px; color: var(--accent3);
+  }
+
+  /* TOC visible on mobile */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px 20px; }
+    .hero h1 { font-size: 32px; }
+    .arch-grid { grid-template-columns: 1fr; }
+  }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h2>E-Commerce<br>Full-Stack Guide</h2>
+    <p>Docker + AWS • End-to-End</p>
+  </div>
+  <div class="nav-section">Overview</div>
+  <a class="nav-item active" href="#architecture"><span>01</span>Architecture</a>
+  <a class="nav-item" href="#project-structure"><span>02</span>Project Structure</a>
+  <div class="nav-section">Backend</div>
+  <a class="nav-item" href="#backend-setup"><span>03</span>Node.js + Express API</a>
+  <a class="nav-item" href="#database"><span>04</span>PostgreSQL Schema</a>
+  <a class="nav-item" href="#redis"><span>05</span>Redis (Cache + Sessions)</a>
+  <a class="nav-item" href="#auth"><span>06</span>Auth (JWT)</a>
+  <a class="nav-item" href="#payment"><span>07</span>Stripe Payments</a>
+  <div class="nav-section">Frontend</div>
+  <a class="nav-item" href="#frontend"><span>08</span>React + Vite Frontend</a>
+  <div class="nav-section">DevOps</div>
+  <a class="nav-item" href="#docker"><span>09</span>Docker + Compose</a>
+  <a class="nav-item" href="#aws"><span>10</span>AWS Deployment</a>
+  <a class="nav-item" href="#cicd"><span>11</span>CI/CD Pipeline</a>
+  <div class="nav-section">Reference</div>
+  <a class="nav-item" href="#env"><span>12</span>Env Variables</a>
+  <a class="nav-item" href="#commands"><span>13</span>All Commands</a>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">⚡ Complete Project Blueprint</div>
+    <h1>Full-Stack<br>E-Commerce App</h1>
+    <p>A production-grade shopping application built with modern technologies. Every layer explained — from database schema to AWS deployment.</p>
+    <div class="tech-tags">
+      <span class="tag react">React + Vite</span>
+      <span class="tag node">Node.js + Express</span>
+      <span class="tag pg">PostgreSQL</span>
+      <span class="tag redis">Redis</span>
+      <span class="tag docker">Docker</span>
+      <span class="tag aws">AWS (EC2 + RDS)</span>
+      <span class="tag stripe">Stripe</span>
+    </div>
+  </div>
+
+  <!-- 01 ARCHITECTURE -->
+  <section class="section" id="architecture">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>System Architecture</h2>
+      <span class="badge">Overview</span>
+    </div>
+
+    <p>This app follows a classic <strong>3-tier architecture</strong>: a React frontend, a RESTful Node.js API, and a PostgreSQL database — plus Redis for caching/sessions and Nginx as a reverse proxy.</p>
+
+    <div class="arch-grid">
+      <div class="arch-card">
+        <div class="icon">🖥️</div>
+        <h4>Frontend (React)</h4>
+        <p>React + Vite SPA. Talks to the API via REST. Deployed to S3/CloudFront or as a Docker container.</p>
+      </div>
+      <div class="arch-card">
+        <div class="icon">⚙️</div>
+        <h4>Backend (Node.js)</h4>
+        <p>Express REST API with JWT auth, Stripe payments, and business logic. Runs in Docker.</p>
+      </div>
+      <div class="arch-card">
+        <div class="icon">🗄️</div>
+        <h4>Database (PostgreSQL)</h4>
+        <p>Primary data store: users, products, orders, reviews. Runs on AWS RDS in production.</p>
+      </div>
+      <div class="arch-card">
+        <div class="icon">⚡</div>
+        <h4>Cache (Redis)</h4>
+        <p>Session storage, cart caching, and product catalog caching. Reduces DB load significantly.</p>
+      </div>
+      <div class="arch-card">
+        <div class="icon">🔀</div>
+        <h4>Nginx (Reverse Proxy)</h4>
+        <p>Routes traffic to frontend and backend. Handles SSL termination in production.</p>
+      </div>
+      <div class="arch-card">
+        <div class="icon">☁️</div>
+        <h4>AWS (Cloud)</h4>
+        <p>EC2 for servers, RDS for Postgres, ElastiCache for Redis, S3 + CloudFront for frontend assets.</p>
+      </div>
+    </div>
+
+    <div class="info-box note">
+      <div class="label">🏗️ Architecture Flow</div>
+      <p><strong>User → Nginx → React App / Node API → PostgreSQL + Redis</strong><br>
+      In production on AWS: <strong>User → CloudFront → ALB → EC2 → RDS + ElastiCache</strong></p>
+    </div>
+  </section>
+
+  <!-- 02 PROJECT STRUCTURE -->
+  <section class="section" id="project-structure">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Project Structure</h2>
+      <span class="badge">Monorepo</span>
+    </div>
+
+    <div class="file-tree">
+      <div class="ft-dir">📁 ecommerce-app/</div>
+      <div class="ft-indent1 ft-dir">📁 backend/</div>
+      <div class="ft-indent2 ft-dir">📁 src/</div>
+      <div class="ft-indent3 ft-dir">📁 config/</div>
+      <div class="ft-indent3 ft-file">  db.js &nbsp;&nbsp;&nbsp;<span class="ft-comment"># PostgreSQL connection</span></div>
+      <div class="ft-indent3 ft-file">  redis.js &nbsp;<span class="ft-comment"># Redis client</span></div>
+      <div class="ft-indent3 ft-dir">📁 controllers/</div>
+      <div class="ft-indent3 ft-file">  auth.controller.js</div>
+      <div class="ft-indent3 ft-file">  product.controller.js</div>
+      <div class="ft-indent3 ft-file">  order.controller.js</div>
+      <div class="ft-indent3 ft-file">  cart.controller.js</div>
+      <div class="ft-indent3 ft-dir">📁 middleware/</div>
+      <div class="ft-indent3 ft-file">  auth.middleware.js &nbsp;<span class="ft-comment"># JWT verify</span></div>
+      <div class="ft-indent3 ft-dir">📁 routes/</div>
+      <div class="ft-indent3 ft-file">  auth.routes.js</div>
+      <div class="ft-indent3 ft-file">  product.routes.js</div>
+      <div class="ft-indent3 ft-file">  order.routes.js</div>
+      <div class="ft-indent3 ft-dir">📁 models/</div>
+      <div class="ft-indent3 ft-file">  schema.sql &nbsp;<span class="ft-comment"># DB schema</span></div>
+      <div class="ft-indent2 ft-file">  server.js &nbsp;&nbsp;&nbsp;<span class="ft-comment"># Entry point</span></div>
+      <div class="ft-indent2 ft-file">  .env</div>
+      <div class="ft-indent2 ft-file">  Dockerfile</div>
+      <div class="ft-indent2 ft-file">  package.json</div>
+      <div class="ft-indent1 ft-dir">📁 frontend/</div>
+      <div class="ft-indent2 ft-dir">📁 src/</div>
+      <div class="ft-indent3 ft-dir">📁 components/ &nbsp;<span class="ft-comment"># Reusable UI</span></div>
+      <div class="ft-indent3 ft-dir">📁 pages/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-comment"># Home, Cart, Checkout…</span></div>
+      <div class="ft-indent3 ft-dir">📁 store/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-comment"># Zustand state</span></div>
+      <div class="ft-indent3 ft-dir">📁 api/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-comment"># Axios API calls</span></div>
+      <div class="ft-indent2 ft-file">  Dockerfile</div>
+      <div class="ft-indent2 ft-file">  vite.config.js</div>
+      <div class="ft-indent1 ft-dir">📁 nginx/</div>
+      <div class="ft-indent2 ft-file">  nginx.conf</div>
+      <div class="ft-indent1 ft-file">  docker-compose.yml</div>
+      <div class="ft-indent1 ft-file">  docker-compose.prod.yml</div>
+      <div class="ft-indent1 ft-file">  .env.example</div>
+      <div class="ft-indent1 ft-file">  README.md</div>
+    </div>
+  </section>
+
+  <!-- 03 BACKEND -->
+  <section class="section" id="backend-setup">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Node.js + Express API</h2>
+      <span class="badge">Backend</span>
+    </div>
+
+    <h3>Initialize the project</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">terminal</span><span class="lang-badge">bash</span></div>
+      <pre><span class="cm"># Inside /backend</span>
+npm init -y
+npm install express pg redis bcryptjs jsonwebtoken \
+  stripe cors dotenv helmet morgan express-rate-limit
+npm install --save-dev nodemon</pre>
+    </div>
+
+    <h3>Entry Point — <code>server.js</code></h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/server.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> cors    = <span class="fn">require</span>(<span class="str">'cors'</span>);
+<span class="kw">const</span> helmet  = <span class="fn">require</span>(<span class="str">'helmet'</span>);
+<span class="kw">const</span> morgan  = <span class="fn">require</span>(<span class="str">'morgan'</span>);
+<span class="fn">require</span>(<span class="str">'dotenv'</span>).<span class="fn">config</span>();
+
+<span class="kw">const</span> authRoutes    = <span class="fn">require</span>(<span class="str">'./src/routes/auth.routes'</span>);
+<span class="kw">const</span> productRoutes = <span class="fn">require</span>(<span class="str">'./src/routes/product.routes'</span>);
+<span class="kw">const</span> orderRoutes   = <span class="fn">require</span>(<span class="str">'./src/routes/order.routes'</span>);
+<span class="kw">const</span> cartRoutes    = <span class="fn">require</span>(<span class="str">'./src/routes/cart.routes'</span>);
+
+<span class="kw">const</span> app = <span class="fn">express</span>();
+
+app.<span class="fn">use</span>(<span class="fn">helmet</span>());
+app.<span class="fn">use</span>(<span class="fn">cors</span>({ origin: process.env.FRONTEND_URL, credentials: <span class="kw">true</span> }));
+app.<span class="fn">use</span>(<span class="fn">morgan</span>(<span class="str">'dev'</span>));
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());
+
+app.<span class="fn">use</span>(<span class="str">'/api/auth'</span>,     authRoutes);
+app.<span class="fn">use</span>(<span class="str">'/api/products'</span>, productRoutes);
+app.<span class="fn">use</span>(<span class="str">'/api/orders'</span>,   orderRoutes);
+app.<span class="fn">use</span>(<span class="str">'/api/cart'</span>,     cartRoutes);
+
+app.<span class="fn">get</span>(<span class="str">'/health'</span>, (req, res) =&gt; res.<span class="fn">json</span>({ status: <span class="str">'ok'</span> }));
+
+<span class="kw">const</span> PORT = process.env.PORT || <span class="num">4000</span>;
+app.<span class="fn">listen</span>(PORT, () =&gt; console.<span class="fn">log</span>(<span class="str">`Server running on port <span class="prop">${PORT}</span>`</span>));</pre>
+    </div>
+
+    <h3>Product Routes + Controller</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/routes/product.routes.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> router = <span class="fn">require</span>(<span class="str">'express'</span>).<span class="fn">Router</span>();
+<span class="kw">const</span> { <span class="prop">getProducts</span>, <span class="prop">getProduct</span>, <span class="prop">createProduct</span> } =
+  <span class="fn">require</span>(<span class="str">'../controllers/product.controller'</span>);
+<span class="kw">const</span> { <span class="prop">authenticate</span>, <span class="prop">isAdmin</span> } =
+  <span class="fn">require</span>(<span class="str">'../middleware/auth.middleware'</span>);
+
+router.<span class="fn">get</span>(<span class="str">'/'</span>,           getProducts);         <span class="cm">// public</span>
+router.<span class="fn">get</span>(<span class="str">'/:id'</span>,        getProduct);          <span class="cm">// public</span>
+router.<span class="fn">post</span>(<span class="str">'/'</span>, authenticate, isAdmin, createProduct); <span class="cm">// admin only</span>
+
+module.exports = router;</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/controllers/product.controller.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> db    = <span class="fn">require</span>(<span class="str">'../config/db'</span>);
+<span class="kw">const</span> redis = <span class="fn">require</span>(<span class="str">'../config/redis'</span>);
+
+<span class="cm">// GET /api/products?page=1&limit=12&category=shoes</span>
+exports.<span class="prop">getProducts</span> = <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> { page = <span class="num">1</span>, limit = <span class="num">12</span>, category } = req.query;
+    <span class="kw">const</span> cacheKey = <span class="str">`products:<span class="prop">${page}</span>:<span class="prop">${limit}</span>:<span class="prop">${category||'all'}</span>`</span>;
+
+    <span class="cm">// Try cache first</span>
+    <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(cacheKey);
+    <span class="kw">if</span> (cached) <span class="kw">return</span> res.<span class="fn">json</span>(JSON.<span class="fn">parse</span>(cached));
+
+    <span class="kw">const</span> offset = (page - <span class="num">1</span>) * limit;
+    <span class="kw">let</span> query = <span class="str">`SELECT * FROM products WHERE is_active = true`</span>;
+    <span class="kw">const</span> params = [];
+
+    <span class="kw">if</span> (category) {
+      params.<span class="fn">push</span>(category);
+      query += <span class="str">` AND category = $<span class="prop">${params.length}</span>`</span>;
+    }
+    params.<span class="fn">push</span>(limit, offset);
+    query += <span class="str">` ORDER BY created_at DESC LIMIT $<span class="prop">${params.length-1}</span> OFFSET $<span class="prop">${params.length}</span>`</span>;
+
+    <span class="kw">const</span> { rows } = <span class="kw">await</span> db.<span class="fn">query</span>(query, params);
+
+    <span class="cm">// Cache for 5 minutes</span>
+    <span class="kw">await</span> redis.<span class="fn">setex</span>(cacheKey, <span class="num">300</span>, JSON.<span class="fn">stringify</span>(rows));
+    res.<span class="fn">json</span>(rows);
+  } <span class="kw">catch</span> (err) {
+    res.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">json</span>({ error: err.message });
+  }
+};</pre>
+    </div>
+  </section>
+
+  <!-- 04 DATABASE -->
+  <section class="section" id="database">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>PostgreSQL Schema</h2>
+      <span class="badge">Database</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/models/schema.sql</span><span class="lang-badge">sql</span></div>
+      <pre><span class="cm">-- Enable UUID extension</span>
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+<span class="cm">-- USERS</span>
+CREATE TABLE users (
+  id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email      VARCHAR(255) UNIQUE NOT NULL,
+  password   VARCHAR(255) NOT NULL,
+  name       VARCHAR(255) NOT NULL,
+  role       VARCHAR(20) DEFAULT 'customer' CHECK (role IN ('customer','admin')),
+  avatar     TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+<span class="cm">-- CATEGORIES</span>
+CREATE TABLE categories (
+  id   SERIAL PRIMARY KEY,
+  name VARCHAR(100) UNIQUE NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL
+);
+
+<span class="cm">-- PRODUCTS</span>
+CREATE TABLE products (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name        VARCHAR(255) NOT NULL,
+  description TEXT,
+  price       NUMERIC(10,2) NOT NULL,
+  stock       INTEGER NOT NULL DEFAULT 0,
+  category_id INTEGER REFERENCES categories(id),
+  images      TEXT[],          <span class="cm">-- array of image URLs</span>
+  is_active   BOOLEAN DEFAULT true,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+<span class="cm">-- ORDERS</span>
+CREATE TABLE orders (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id         UUID REFERENCES users(id) ON DELETE SET NULL,
+  status          VARCHAR(30) DEFAULT 'pending'
+    CHECK (status IN ('pending','paid','shipped','delivered','cancelled')),
+  total           NUMERIC(10,2) NOT NULL,
+  stripe_pi_id    VARCHAR(255),  <span class="cm">-- Stripe PaymentIntent ID</span>
+  shipping_addr   JSONB,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+<span class="cm">-- ORDER ITEMS</span>
+CREATE TABLE order_items (
+  id         SERIAL PRIMARY KEY,
+  order_id   UUID REFERENCES orders(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+  quantity   INTEGER NOT NULL,
+  price      NUMERIC(10,2) NOT NULL  <span class="cm">-- price at time of purchase</span>
+);
+
+<span class="cm">-- REVIEWS</span>
+CREATE TABLE reviews (
+  id         SERIAL PRIMARY KEY,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  user_id    UUID REFERENCES users(id) ON DELETE CASCADE,
+  rating     SMALLINT CHECK (rating BETWEEN 1 AND 5),
+  comment    TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(product_id, user_id)  <span class="cm">-- one review per user per product</span>
+);
+
+<span class="cm">-- INDEXES for performance</span>
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_orders_user       ON orders(user_id);
+CREATE INDEX idx_order_items_order ON order_items(order_id);</pre>
+    </div>
+
+    <h3>Database Connection</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/config/db.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> { Pool } = <span class="fn">require</span>(<span class="str">'pg'</span>);
+
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({
+  host:     process.env.DB_HOST,
+  port:     process.env.DB_PORT || <span class="num">5432</span>,
+  database: process.env.DB_NAME,
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  max:      <span class="num">20</span>,      <span class="cm">// max pool size</span>
+  idleTimeoutMillis: <span class="num">30000</span>,
+});
+
+pool.<span class="fn">on</span>(<span class="str">'error'</span>, (err) =&gt; console.error(<span class="str">'Unexpected DB error'</span>, err));
+module.exports = pool;</pre>
+    </div>
+  </section>
+
+  <!-- 05 REDIS -->
+  <section class="section" id="redis">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>Redis — Cache &amp; Cart</h2>
+      <span class="badge">In-Memory Store</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/config/redis.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> { createClient } = <span class="fn">require</span>(<span class="str">'redis'</span>);
+
+<span class="kw">const</span> client = <span class="fn">createClient</span>({
+  url: <span class="str">`redis://<span class="prop">${process.env.REDIS_HOST}</span>:<span class="prop">${process.env.REDIS_PORT||6379}</span>`</span>
+});
+
+client.<span class="fn">on</span>(<span class="str">'error'</span>, err =&gt; console.error(<span class="str">'Redis error:'</span>, err));
+client.<span class="fn">connect</span>();
+
+module.exports = client;</pre>
+    </div>
+
+    <h3>Cart Controller (using Redis)</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/controllers/cart.controller.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> redis = <span class="fn">require</span>(<span class="str">'../config/redis'</span>);
+
+<span class="kw">const</span> <span class="fn">cartKey</span> = (userId) =&gt; <span class="str">`cart:<span class="prop">${userId}</span>`</span>;
+
+<span class="cm">// GET /api/cart</span>
+exports.<span class="prop">getCart</span> = <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> data = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="fn">cartKey</span>(req.user.id));
+  res.<span class="fn">json</span>(data ? JSON.<span class="fn">parse</span>(data) : { items: [] });
+};
+
+<span class="cm">// POST /api/cart/add  { productId, quantity }</span>
+exports.<span class="prop">addToCart</span> = <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { productId, quantity = <span class="num">1</span> } = req.body;
+  <span class="kw">const</span> key  = <span class="fn">cartKey</span>(req.user.id);
+  <span class="kw">const</span> data = <span class="kw">await</span> redis.<span class="fn">get</span>(key);
+  <span class="kw">const</span> cart = data ? JSON.<span class="fn">parse</span>(data) : { items: [] };
+
+  <span class="kw">const</span> existing = cart.items.<span class="fn">find</span>(i =&gt; i.productId === productId);
+  <span class="kw">if</span> (existing) existing.quantity += quantity;
+  <span class="kw">else</span> cart.items.<span class="fn">push</span>({ productId, quantity });
+
+  <span class="cm">// Expire cart after 7 days</span>
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(key, <span class="num">604800</span>, JSON.<span class="fn">stringify</span>(cart));
+  res.<span class="fn">json</span>(cart);
+};
+
+<span class="cm">// DELETE /api/cart/clear</span>
+exports.<span class="prop">clearCart</span> = <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">await</span> redis.<span class="fn">del</span>(<span class="fn">cartKey</span>(req.user.id));
+  res.<span class="fn">json</span>({ success: <span class="kw">true</span> });
+};</pre>
+    </div>
+  </section>
+
+  <!-- 06 AUTH -->
+  <section class="section" id="auth">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>JWT Authentication</h2>
+      <span class="badge">Security</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/controllers/auth.controller.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> bcrypt = <span class="fn">require</span>(<span class="str">'bcryptjs'</span>);
+<span class="kw">const</span> jwt    = <span class="fn">require</span>(<span class="str">'jsonwebtoken'</span>);
+<span class="kw">const</span> db     = <span class="fn">require</span>(<span class="str">'../config/db'</span>);
+
+<span class="cm">// POST /api/auth/register</span>
+exports.<span class="prop">register</span> = <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> { email, password, name } = req.body;
+    <span class="kw">const</span> hash = <span class="kw">await</span> bcrypt.<span class="fn">hash</span>(password, <span class="num">12</span>);
+
+    <span class="kw">const</span> { rows } = <span class="kw">await</span> db.<span class="fn">query</span>(
+      <span class="str">`INSERT INTO users (email, password, name)
+       VALUES ($1, $2, $3) RETURNING id, email, name, role`</span>,
+      [email, hash, name]
+    );
+
+    <span class="kw">const</span> token = jwt.<span class="fn">sign</span>(
+      { id: rows[<span class="num">0</span>].id, role: rows[<span class="num">0</span>].role },
+      process.env.JWT_SECRET,
+      { expiresIn: <span class="str">'7d'</span> }
+    );
+    res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>({ token, user: rows[<span class="num">0</span>] });
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">if</span> (err.code === <span class="str">'23505'</span>)  <span class="cm">// unique violation</span>
+      <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">409</span>).<span class="fn">json</span>({ error: <span class="str">'Email already in use'</span> });
+    res.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">json</span>({ error: err.message });
+  }
+};
+
+<span class="cm">// POST /api/auth/login</span>
+exports.<span class="prop">login</span> = <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { email, password } = req.body;
+  <span class="kw">const</span> { rows } = <span class="kw">await</span> db.<span class="fn">query</span>(
+    <span class="str">`SELECT * FROM users WHERE email = $1`</span>, [email]
+  );
+  <span class="kw">if</span> (!rows[<span class="num">0</span>] || !<span class="kw">await</span> bcrypt.<span class="fn">compare</span>(password, rows[<span class="num">0</span>].password))
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid credentials'</span> });
+
+  <span class="kw">const</span> token = jwt.<span class="fn">sign</span>(
+    { id: rows[<span class="num">0</span>].id, role: rows[<span class="num">0</span>].role },
+    process.env.JWT_SECRET,
+    { expiresIn: <span class="str">'7d'</span> }
+  );
+  <span class="kw">const</span> { password: _, ...user } = rows[<span class="num">0</span>];  <span class="cm">// strip password</span>
+  res.<span class="fn">json</span>({ token, user });
+};</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/middleware/auth.middleware.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> jwt = <span class="fn">require</span>(<span class="str">'jsonwebtoken'</span>);
+
+exports.<span class="prop">authenticate</span> = (req, res, next) =&gt; {
+  <span class="kw">const</span> token = req.headers.authorization?.split(<span class="str">' '</span>)[<span class="num">1</span>];
+  <span class="kw">if</span> (!token) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'No token'</span> });
+  <span class="kw">try</span> {
+    req.user = jwt.<span class="fn">verify</span>(token, process.env.JWT_SECRET);
+    <span class="fn">next</span>();
+  } <span class="kw">catch</span> {
+    res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid token'</span> });
+  }
+};
+
+exports.<span class="prop">isAdmin</span> = (req, res, next) =&gt; {
+  <span class="kw">if</span> (req.user.role !== <span class="str">'admin'</span>)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">403</span>).<span class="fn">json</span>({ error: <span class="str">'Forbidden'</span> });
+  <span class="fn">next</span>();
+};</pre>
+    </div>
+  </section>
+
+  <!-- 07 STRIPE -->
+  <section class="section" id="payment">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <h2>Stripe Payments</h2>
+      <span class="badge">Payments</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/src/controllers/order.controller.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">const</span> stripe = <span class="fn">require</span>(<span class="str">'stripe'</span>)(process.env.STRIPE_SECRET_KEY);
+<span class="kw">const</span> db     = <span class="fn">require</span>(<span class="str">'../config/db'</span>);
+<span class="kw">const</span> redis  = <span class="fn">require</span>(<span class="str">'../config/redis'</span>);
+
+<span class="cm">// POST /api/orders/checkout</span>
+exports.<span class="prop">createOrder</span> = <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> client = <span class="kw">await</span> db.<span class="fn">connect</span>();
+  <span class="kw">try</span> {
+    <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">'BEGIN'</span>);
+
+    <span class="kw">const</span> { shippingAddress } = req.body;
+    <span class="kw">const</span> cartData = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="str">`cart:<span class="prop">${req.user.id}</span>`</span>);
+    <span class="kw">if</span> (!cartData) <span class="kw">throw new</span> Error(<span class="str">'Cart is empty'</span>);
+    <span class="kw">const</span> cart = JSON.<span class="fn">parse</span>(cartData);
+
+    <span class="cm">// Fetch prices from DB (never trust client prices)</span>
+    <span class="kw">let</span> total = <span class="num">0</span>;
+    <span class="kw">const</span> enrichedItems = [];
+    <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> cart.items) {
+      <span class="kw">const</span> { rows } = <span class="kw">await</span> client.<span class="fn">query</span>(
+        <span class="str">'SELECT id, price, stock FROM products WHERE id = $1'</span>,
+        [item.productId]
+      );
+      <span class="kw">if</span> (!rows[<span class="num">0</span>] || rows[<span class="num">0</span>].stock &lt; item.quantity)
+        <span class="kw">throw new</span> Error(<span class="str">`Insufficient stock for product <span class="prop">${item.productId}</span>`</span>);
+      total += rows[<span class="num">0</span>].price * item.quantity;
+      enrichedItems.<span class="fn">push</span>({ ...item, price: rows[<span class="num">0</span>].price });
+    }
+
+    <span class="cm">// Create Stripe PaymentIntent</span>
+    <span class="kw">const</span> paymentIntent = <span class="kw">await</span> stripe.paymentIntents.<span class="fn">create</span>({
+      amount: Math.<span class="fn">round</span>(total * <span class="num">100</span>),  <span class="cm">// cents</span>
+      currency: <span class="str">'usd'</span>,
+      metadata: { userId: req.user.id },
+    });
+
+    <span class="cm">// Insert order</span>
+    <span class="kw">const</span> { rows: [order] } = <span class="kw">await</span> client.<span class="fn">query</span>(
+      <span class="str">`INSERT INTO orders (user_id, total, stripe_pi_id, shipping_addr)
+       VALUES ($1, $2, $3, $4) RETURNING *`</span>,
+      [req.user.id, total, paymentIntent.id, JSON.<span class="fn">stringify</span>(shippingAddress)]
+    );
+
+    <span class="cm">// Insert order items + decrement stock</span>
+    <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> enrichedItems) {
+      <span class="kw">await</span> client.<span class="fn">query</span>(
+        <span class="str">`INSERT INTO order_items (order_id, product_id, quantity, price)
+         VALUES ($1, $2, $3, $4)`</span>,
+        [order.id, item.productId, item.quantity, item.price]
+      );
+      <span class="kw">await</span> client.<span class="fn">query</span>(
+        <span class="str">`UPDATE products SET stock = stock - $1 WHERE id = $2`</span>,
+        [item.quantity, item.productId]
+      );
+    }
+
+    <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">'COMMIT'</span>);
+    <span class="kw">await</span> redis.<span class="fn">del</span>(<span class="str">`cart:<span class="prop">${req.user.id}</span>`</span>);  <span class="cm">// clear cart</span>
+
+    res.<span class="fn">json</span>({
+      orderId: order.id,
+      clientSecret: paymentIntent.client_secret  <span class="cm">// send to frontend</span>
+    });
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">'ROLLBACK'</span>);
+    res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({ error: err.message });
+  } <span class="kw">finally</span> {
+    client.<span class="fn">release</span>();
+  }
+};</pre>
+    </div>
+
+    <div class="info-box tip">
+      <div class="label">💡 Key Practice Point</div>
+      <p>Notice the <strong>database transaction</strong> (BEGIN/COMMIT/ROLLBACK). This ensures that if stock decrementation fails, the order also rolls back — preventing overselling.</p>
+    </div>
+  </section>
+
+  <!-- 08 FRONTEND -->
+  <section class="section" id="frontend">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <h2>React + Vite Frontend</h2>
+      <span class="badge">Frontend</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">terminal</span><span class="lang-badge">bash</span></div>
+      <pre><span class="cm"># Inside /frontend</span>
+npm create vite@latest . -- --template react
+npm install axios zustand react-router-dom @stripe/react-stripe-js @stripe/stripe-js</pre>
+    </div>
+
+    <h3>Zustand Store (Cart + Auth)</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">frontend/src/store/useStore.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">import</span> { create } <span class="kw">from</span> <span class="str">'zustand'</span>;
+<span class="kw">import</span> { persist } <span class="kw">from</span> <span class="str">'zustand/middleware'</span>;
+<span class="kw">import</span> api <span class="kw">from</span> <span class="str">'../api/axios'</span>;
+
+<span class="kw">export const</span> useStore = <span class="fn">create</span>(
+  <span class="fn">persist</span>(
+    (set, get) =&gt; ({
+      <span class="cm">// AUTH</span>
+      user:  <span class="kw">null</span>,
+      token: <span class="kw">null</span>,
+      <span class="fn">login</span>: <span class="kw">async</span> (email, password) =&gt; {
+        <span class="kw">const</span> { data } = <span class="kw">await</span> api.<span class="fn">post</span>(<span class="str">'/auth/login'</span>, { email, password });
+        set({ user: data.user, token: data.token });
+      },
+      <span class="fn">logout</span>: () =&gt; set({ user: <span class="kw">null</span>, token: <span class="kw">null</span>, cart: [] }),
+
+      <span class="cm">// CART (local state, synced with Redis via API)</span>
+      cart: [],
+      <span class="fn">addToCart</span>: <span class="kw">async</span> (productId, quantity = <span class="num">1</span>) =&gt; {
+        <span class="kw">const</span> { data } = <span class="kw">await</span> api.<span class="fn">post</span>(<span class="str">'/cart/add'</span>, { productId, quantity });
+        set({ cart: data.items });
+      },
+      <span class="fn">fetchCart</span>: <span class="kw">async</span> () =&gt; {
+        <span class="kw">const</span> { data } = <span class="kw">await</span> api.<span class="fn">get</span>(<span class="str">'/cart'</span>);
+        set({ cart: data.items });
+      },
+    }),
+    { name: <span class="str">'ecommerce-store'</span>, partialize: s =&gt; ({ token: s.token, user: s.user }) }
+  )
+);</pre>
+    </div>
+
+    <h3>Axios Instance</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">frontend/src/api/axios.js</span><span class="lang-badge">js</span></div>
+      <pre><span class="kw">import</span> axios <span class="kw">from</span> <span class="str">'axios'</span>;
+<span class="kw">import</span> { useStore } <span class="kw">from</span> <span class="str">'../store/useStore'</span>;
+
+<span class="kw">const</span> api = axios.<span class="fn">create</span>({
+  baseURL: <span class="kw">import</span>.meta.env.VITE_API_URL || <span class="str">'http://localhost:4000/api'</span>,
+});
+
+<span class="cm">// Auto-attach JWT token to every request</span>
+api.interceptors.request.<span class="fn">use</span>((config) =&gt; {
+  <span class="kw">const</span> token = useStore.<span class="fn">getState</span>().token;
+  <span class="kw">if</span> (token) config.headers.Authorization = <span class="str">`Bearer <span class="prop">${token}</span>`</span>;
+  <span class="kw">return</span> config;
+});
+
+<span class="kw">export default</span> api;</pre>
+    </div>
+
+    <h3>Checkout with Stripe</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">frontend/src/pages/CheckoutPage.jsx</span><span class="lang-badge">jsx</span></div>
+      <pre><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;
+<span class="kw">import</span> { useStripe, useElements, CardElement } <span class="kw">from</span> <span class="str">'@stripe/react-stripe-js'</span>;
+<span class="kw">import</span> api <span class="kw">from</span> <span class="str">'../api/axios'</span>;
+
+<span class="kw">export default function</span> <span class="fn">CheckoutPage</span>() {
+  <span class="kw">const</span> stripe   = <span class="fn">useStripe</span>();
+  <span class="kw">const</span> elements = <span class="fn">useElements</span>();
+  <span class="kw">const</span> [loading, setLoading] = <span class="fn">useState</span>(<span class="kw">false</span>);
+  <span class="kw">const</span> [error, setError]     = <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="kw">const</span> <span class="fn">handleSubmit</span> = <span class="kw">async</span> (e) =&gt; {
+    e.<span class="fn">preventDefault</span>();
+    <span class="fn">setLoading</span>(<span class="kw">true</span>);
+
+    <span class="cm">// 1. Create order + get clientSecret</span>
+    <span class="kw">const</span> { data } = <span class="kw">await</span> api.<span class="fn">post</span>(<span class="str">'/orders/checkout'</span>, {
+      shippingAddress: { street: <span class="str">'...'</span>, city: <span class="str">'...'</span> }
+    });
+
+    <span class="cm">// 2. Confirm payment with Stripe</span>
+    <span class="kw">const</span> { error: stripeError } = <span class="kw">await</span> stripe.<span class="fn">confirmCardPayment</span>(
+      data.clientSecret,
+      { payment_method: { card: elements.<span class="fn">getElement</span>(CardElement) } }
+    );
+
+    <span class="kw">if</span> (stripeError) { <span class="fn">setError</span>(stripeError.message); <span class="fn">setLoading</span>(<span class="kw">false</span>); <span class="kw">return</span>; }
+    <span class="cm">// 3. Redirect to success page</span>
+    window.location.href = <span class="str">`/order/<span class="prop">${data.orderId}</span>/success`</span>;
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="prop">form</span> onSubmit={handleSubmit}&gt;
+      &lt;<span class="prop">CardElement</span> /&gt;
+      {error &amp;&amp; &lt;<span class="prop">p</span> style={{color:'red'}}&gt;{error}&lt;/<span class="prop">p</span>&gt;}
+      &lt;<span class="prop">button</span> type=<span class="str">"submit"</span> disabled={!stripe || loading}&gt;
+        {loading ? <span class="str">'Processing...'</span> : <span class="str">'Pay Now'</span>}
+      &lt;/<span class="prop">button</span>&gt;
+    &lt;/<span class="prop">form</span>&gt;
+  );
+}</pre>
+    </div>
+  </section>
+
+  <!-- 09 DOCKER -->
+  <section class="section" id="docker">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <h2>Docker &amp; Docker Compose</h2>
+      <span class="badge">DevOps</span>
+    </div>
+
+    <h3>Backend Dockerfile</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/Dockerfile</span><span class="lang-badge">dockerfile</span></div>
+      <pre><span class="cm"># Build stage</span>
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+<span class="cm"># Production stage</span>
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+EXPOSE 4000
+CMD ["node", "server.js"]</pre>
+    </div>
+
+    <h3>Frontend Dockerfile</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">frontend/Dockerfile</span><span class="lang-badge">dockerfile</span></div>
+      <pre><span class="cm"># Build stage</span>
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+<span class="cm"># Serve with nginx</span>
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]</pre>
+    </div>
+
+    <h3>Docker Compose (local dev)</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">docker-compose.yml</span><span class="lang-badge">yaml</span></div>
+      <pre><span class="kw">version</span>: <span class="str">'3.9'</span>
+
+<span class="kw">services</span>:
+  <span class="prop">postgres</span>:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:       ecommerce
+      POSTGRES_USER:     admin
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/models/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ecommerce"]
+      interval: 10s
+      retries: 5
+
+  <span class="prop">redis</span>:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  <span class="prop">backend</span>:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      DB_HOST:    postgres
+      REDIS_HOST: redis
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./backend:/app        <span class="cm"># hot reload in dev</span>
+      - /app/node_modules
+
+  <span class="prop">frontend</span>:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  <span class="prop">nginx</span>:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - frontend
+
+<span class="kw">volumes</span>:
+  postgres_data:
+  redis_data:</pre>
+    </div>
+
+    <h3>Nginx Config</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">nginx/nginx.conf</span><span class="lang-badge">nginx</span></div>
+      <pre>events { worker_connections 1024; }
+
+http {
+  upstream backend  { server backend:4000; }
+  upstream frontend { server frontend:80;  }
+
+  server {
+    listen 80;
+
+    location /api/ {
+      proxy_pass         http://backend;
+      proxy_set_header   Host $host;
+      proxy_set_header   X-Real-IP $remote_addr;
+    }
+
+    location / {
+      proxy_pass         http://frontend;
+      proxy_set_header   Host $host;
+      try_files $uri $uri/ /index.html;
+    }
+  }
+}</pre>
+    </div>
+
+    <h4>Docker Commands Cheatsheet</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">terminal</span><span class="lang-badge">bash</span></div>
+      <pre><span class="cm"># Start everything (first time)</span>
+docker compose up --build
+
+<span class="cm"># Start in background</span>
+docker compose up -d
+
+<span class="cm"># View logs</span>
+docker compose logs -f backend
+
+<span class="cm"># Rebuild one service</span>
+docker compose up -d --build backend
+
+<span class="cm"># Stop everything</span>
+docker compose down
+
+<span class="cm"># Nuke everything including volumes (fresh start)</span>
+docker compose down -v
+
+<span class="cm"># Open a shell in the running backend container</span>
+docker compose exec backend sh
+
+<span class="cm"># Run DB migrations manually</span>
+docker compose exec postgres psql -U admin -d ecommerce -f /schema.sql</pre>
+    </div>
+  </section>
+
+  <!-- 10 AWS -->
+  <section class="section" id="aws">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <h2>AWS Deployment</h2>
+      <span class="badge">Production</span>
+    </div>
+
+    <p>This is the production architecture. We use EC2 for the app, RDS for PostgreSQL, ElastiCache for Redis, and S3+CloudFront for the frontend.</p>
+
+    <h3>Step-by-Step AWS Setup</h3>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>Create a VPC with public + private subnets</strong>
+          <p>EC2 and ALB go in public subnets. RDS and ElastiCache go in private subnets. This is the standard secure architecture.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>Launch RDS PostgreSQL</strong>
+          <p>Go to RDS → Create database → PostgreSQL 16 → Free tier (db.t3.micro) → Set credentials → Place in private subnet. Note the endpoint URL.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>Launch ElastiCache Redis</strong>
+          <p>Go to ElastiCache → Create cluster → Redis OSS → t3.micro → Place in private subnet. Note the endpoint URL.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <strong>Create ECR Repositories &amp; Push Docker Images</strong>
+          <p>Create two repos: <code>ecommerce/backend</code> and <code>ecommerce/frontend</code>. Build and push images using the commands below.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <strong>Launch EC2 (Ubuntu 22.04, t3.small+)</strong>
+          <p>Install Docker, pull your images from ECR, and run with docker-compose.prod.yml pointing to RDS/ElastiCache endpoints.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <strong>Create S3 Bucket + CloudFront for Frontend</strong>
+          <p>Upload the React build to S3, enable static website hosting, create a CloudFront distribution pointing at S3. This is fast and cheap.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <strong>Configure Security Groups</strong>
+          <p>EC2 allows 80/443 from internet. RDS allows 5432 only from EC2 security group. ElastiCache allows 6379 only from EC2 security group.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">8</div>
+        <div class="step-content">
+          <strong>SSL Certificate with ACM + ALB</strong>
+          <p>Request a free SSL cert from ACM, create an ALB with HTTPS listener pointing to your EC2 instance. This handles HTTPS termination.</p>
+        </div>
+      </li>
+    </ul>
+
+    <h3>ECR Push Commands</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">terminal</span><span class="lang-badge">bash</span></div>
+      <pre><span class="cm"># Set your vars</span>
+AWS_REGION=ap-south-1
+AWS_ACCOUNT_ID=123456789012
+ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+<span class="cm"># Authenticate Docker to ECR</span>
+aws ecr get-login-password --region $AWS_REGION \
+  | docker login --username AWS --password-stdin $ECR_URI
+
+<span class="cm"># Build and push backend</span>
+docker build -t ecommerce-backend ./backend
+docker tag ecommerce-backend:latest $ECR_URI/ecommerce/backend:latest
+docker push $ECR_URI/ecommerce/backend:latest
+
+<span class="cm"># Build and push frontend</span>
+docker build -t ecommerce-frontend ./frontend
+docker tag ecommerce-frontend:latest $ECR_URI/ecommerce/frontend:latest
+docker push $ECR_URI/ecommerce/frontend:latest</pre>
+    </div>
+
+    <h3>Production Compose</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="filename">docker-compose.prod.yml</span><span class="lang-badge">yaml</span></div>
+      <pre><span class="kw">version</span>: <span class="str">'3.9'</span>
+
+<span class="kw">services</span>:
+  <span class="prop">backend</span>:
+    image: 123456789012.dkr.ecr.ap-south-1.amazonaws.com/ecommerce/backend:latest
+    env_file: .env.prod
+    environment:
+      DB_HOST:    your-rds-endpoint.rds.amazonaws.com
+      REDIS_HOST: your-elasticache-endpoint.cache.amazonaws.com
+      NODE_ENV:   production
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+
+  <span class="prop">nginx</span>:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+    restart: unless-stopped</pre>
+    </div>
+  </section>
+
+  <!-- 11 CI/CD -->
+  <section class="section" id="cicd">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <h2>CI/CD with GitHub Actions</h2>
+      <span class="badge">Automation</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">.github/workflows/deploy.yml</span><span class="lang-badge">yaml</span></div>
+      <pre><span class="kw">name</span>: Build &amp; Deploy to AWS
+
+<span class="kw">on</span>:
+  push:
+    branches: [main]
+
+<span class="kw">jobs</span>:
+  <span class="prop">test-and-build</span>:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install &amp; Test Backend
+        working-directory: ./backend
+        run: |
+          npm ci
+          npm test
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ap-south-1
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build &amp; Push Docker images
+        run: |
+          docker build -t ${{ secrets.ECR_URI }}/ecommerce/backend:latest ./backend
+          docker push ${{ secrets.ECR_URI }}/ecommerce/backend:latest
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region ap-south-1 \
+              | docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+            docker image prune -f</pre>
+    </div>
+  </section>
+
+  <!-- 12 ENV -->
+  <section class="section" id="env">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <h2>Environment Variables</h2>
+      <span class="badge">Config</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">backend/.env.example</span><span class="lang-badge">env</span></div>
+      <pre><span class="cm"># Server</span>
+PORT=4000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+
+<span class="cm"># PostgreSQL</span>
+DB_HOST=postgres
+DB_PORT=5432
+DB_NAME=ecommerce
+DB_USER=admin
+DB_PASSWORD=secret
+
+<span class="cm"># Redis</span>
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+<span class="cm"># JWT</span>
+JWT_SECRET=your-super-long-random-secret-at-least-64-chars
+
+<span class="cm"># Stripe</span>
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="filename">frontend/.env.example</span><span class="lang-badge">env</span></div>
+      <pre>VITE_API_URL=http://localhost:4000/api
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...</pre>
+    </div>
+
+    <div class="info-box danger">
+      <div class="label">⚠️ Security</div>
+      <p>Never commit <code>.env</code> files to git. Add them to <code>.gitignore</code>. For production on AWS, use <strong>AWS Secrets Manager</strong> or <strong>Parameter Store</strong> to manage secrets — never hardcode them in docker-compose files.</p>
+    </div>
+  </section>
+
+  <!-- 13 COMMANDS -->
+  <section class="section" id="commands">
+    <div class="section-header">
+      <div class="section-num">13</div>
+      <h2>All Commands Reference</h2>
+      <span class="badge">Cheatsheet</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Task</th><th>Command</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Start local dev</strong></td><td><code>docker compose up --build</code></td></tr>
+        <tr><td><strong>Stop all containers</strong></td><td><code>docker compose down</code></td></tr>
+        <tr><td><strong>Fresh start (wipe DB)</strong></td><td><code>docker compose down -v && docker compose up --build</code></td></tr>
+        <tr><td><strong>View backend logs</strong></td><td><code>docker compose logs -f backend</code></td></tr>
+        <tr><td><strong>Shell into container</strong></td><td><code>docker compose exec backend sh</code></td></tr>
+        <tr><td><strong>Connect to Postgres</strong></td><td><code>docker compose exec postgres psql -U admin -d ecommerce</code></td></tr>
+        <tr><td><strong>Connect to Redis</strong></td><td><code>docker compose exec redis redis-cli</code></td></tr>
+        <tr><td><strong>Build for production</strong></td><td><code>docker compose -f docker-compose.prod.yml up --build</code></td></tr>
+        <tr><td><strong>Push to ECR</strong></td><td><code>docker push $ECR_URI/ecommerce/backend:latest</code></td></tr>
+        <tr><td><strong>Deploy to EC2</strong></td><td><code>ssh ubuntu@your-ec2-ip "docker compose pull && docker compose up -d"</code></td></tr>
+        <tr><td><strong>View running containers</strong></td><td><code>docker ps</code></td></tr>
+        <tr><td><strong>Prune unused images</strong></td><td><code>docker image prune -f</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>What to Practice — Learning Path</h3>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>Run locally with Docker Compose</strong>
+          <p>Get all 5 containers running together. Test API endpoints with Postman or curl. Practice <code>docker compose logs</code> and debugging.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>Add a feature end-to-end</strong>
+          <p>Try adding product search — DB query → controller → route → frontend API call → React component. Feel the full stack.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>Break things intentionally</strong>
+          <p>Stop Redis — see how the cart fails gracefully. Stop Postgres — observe error handling. This builds intuition for resilient systems.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <strong>Deploy to AWS (Free Tier)</strong>
+          <p>Set up RDS + ElastiCache + EC2. Push your Docker images to ECR. Deploy with docker-compose.prod.yml. Get your app live on the internet.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <strong>Set up CI/CD pipeline</strong>
+          <p>Connect GitHub Actions to your AWS account. Push to main → tests run → Docker image builds → auto-deploys to EC2. Real DevOps workflow.</p>
+        </div>
+      </li>
+    </ul>
+
+    <div class="info-box note">
+      <div class="label">🎯 Pro Tip</div>
+      <p>Use <strong>Stripe Test Mode</strong> (card: <code>4242 4242 4242 4242</code>, any future expiry, any CVC) to test payments without real money. Stripe's Dashboard shows all test transactions.</p>
+    </div>
+
+    <hr class="divider">
+
+    <p style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0;">
+      Built with ♥ for learning full-stack development.<br>
+      Stack: React · Node.js · PostgreSQL · Redis · Docker · AWS · Stripe
+    </p>
+  </section>
+
+</main>
+
+<script>
+  // Highlight active nav item on scroll
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(item => item.classList.remove('active'));
+        const id = entry.target.id;
+        const activeLink = document.querySelector(`.nav-item[href="#${id}"]`);
+        if (activeLink) activeLink.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

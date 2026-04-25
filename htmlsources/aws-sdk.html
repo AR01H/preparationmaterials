@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS SDK — Windows & Linux Setup Guide</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0d1117;
+    --surf:    #161b22;
+    --surf2:   #21262d;
+    --border:  #30363d;
+    --aws:     #ff9900;
+    --aws2:    #ff6600;
+    --win:     #00adef;
+    --linux:   #fcc624;
+    --green:   #3fb950;
+    --red:     #f85149;
+    --text:    #e6edf3;
+    --muted:   #8b949e;
+    --purple:  #a371f7;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; line-height: 1.65; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 54px 0 38px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -80px; left: -80px;
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(255,153,0,0.09) 0%, transparent 70%);
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,173,239,0.07) 0%, transparent 70%);
+  }
+  .badge-hero {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,153,0,0.1); border: 1px solid rgba(255,153,0,0.25);
+    color: var(--aws); padding: 4px 14px; border-radius: 100px;
+    font-size: 0.72rem; font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 1.2px; margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(1.8rem, 4vw, 2.9rem); font-weight: 800; line-height: 1.1;
+    background: linear-gradient(120deg, #fff 0%, var(--aws) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 12px;
+  }
+  .hero p { color: var(--muted); font-size: 0.97rem; max-width: 560px; }
+  .os-chips { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .oschip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 14px; border-radius: 100px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; font-weight: 600;
+    border: 1px solid;
+  }
+  .win-chip  { background: rgba(0,173,239,0.1); border-color: rgba(0,173,239,0.3); color: var(--win); }
+  .lin-chip  { background: rgba(252,198,36,0.1); border-color: rgba(252,198,36,0.3); color: var(--linux); }
+  .aws-chip  { background: rgba(255,153,0,0.1); border-color: rgba(255,153,0,0.3); color: var(--aws); }
+
+  /* SECTION */
+  .section { padding: 44px 0 0; }
+  .sec-hdr { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; }
+  .snum {
+    width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--aws2), var(--aws));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 0.95rem; color: #000;
+  }
+  .stitle { font-size: 1.28rem; font-weight: 700; color: #fff; }
+  .ssub   { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+
+  /* CARDS */
+  .cdk { background: var(--surf); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .chdr {
+    background: var(--surf2); border-bottom: 1px solid var(--border);
+    padding: 10px 16px; display: flex; align-items: center; gap: 7px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: var(--muted);
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .dr{background:#f85149;} .dy{background:#e3b341;} .dg{background:#3fb950;}
+
+  /* OS tabs */
+  .otabs { display: flex; gap: 0; margin-bottom: -1px; }
+  .otab {
+    padding: 7px 18px; font-size: 0.78rem;
+    font-family: 'IBM Plex Mono', monospace; cursor: pointer;
+    border: 1px solid transparent; border-radius: 8px 8px 0 0;
+    color: var(--muted); background: transparent; transition: all 0.15s;
+  }
+  .otab.active { background: var(--surf2); border-color: var(--border); border-bottom-color: var(--surf2); color: var(--aws); }
+  .tpane { display: none; } .tpane.active { display: block; }
+
+  pre {
+    margin: 0; padding: 16px 18px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem;
+    line-height: 1.85; overflow-x: auto; background: transparent !important; color: var(--text);
+  }
+  .cmd{color:var(--aws);} .cmt{color:var(--muted);font-style:italic;}
+  .str{color:var(--green);} .kw{color:var(--purple);}
+  .hi{color:#fff;font-weight:700;} .win{color:var(--win);font-weight:600;}
+  .lin{color:var(--linux);font-weight:600;} .ok{color:var(--green);} .err{color:var(--red);}
+  .bw{border-left:3px solid var(--win)!important;}
+  .bl{border-left:3px solid var(--linux)!important;}
+
+  .tip {
+    background: rgba(255,153,0,0.06); border: 1px solid rgba(255,153,0,0.2);
+    border-left: 3px solid var(--aws); border-radius: 10px;
+    padding: 12px 16px; font-size: 0.86rem; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .warn {
+    background: rgba(248,81,73,0.06); border: 1px solid rgba(248,81,73,0.2);
+    border-left: 3px solid var(--red); border-radius: 10px;
+    padding: 12px 16px; font-size: 0.86rem; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .ai { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+
+  .ref-table { width: 100%; border-collapse: collapse; }
+  .ref-table th {
+    background: var(--surf2); color: var(--muted); font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 1px; padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace; border-bottom: 1px solid var(--border); text-align: left;
+  }
+  .ref-table td {
+    padding: 10px 14px; font-size: 0.8rem; font-family: 'IBM Plex Mono', monospace;
+    border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top;
+  }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .cpybtn {
+    margin-left: auto; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); color: var(--muted);
+    font-size: 0.68rem; padding: 2px 9px; border-radius: 5px;
+    cursor: pointer; font-family: 'IBM Plex Mono', monospace; transition: all 0.15s;
+  }
+  .cpybtn:hover { background: rgba(255,153,0,0.1); color: var(--aws); border-color: var(--aws); }
+
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 44px 0 0; }
+  footer { margin-top: 56px; border-top: 1px solid var(--border); padding: 24px 0; color: var(--muted); font-size: 0.78rem; text-align: center; }
+  ::-webkit-scrollbar{width:5px;height:5px;} ::-webkit-scrollbar-track{background:var(--bg);} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <div class="badge-hero"><i class="bi bi-cloud-fill"></i> AWS SDK · SETUP GUIDE</div>
+    <h1>AWS SDK Setup<br>Windows & Linux</h1>
+    <p>Install AWS CLI, configure credentials, use multiple profiles, and call AWS services via SDK — complete end to end.</p>
+    <div class="os-chips">
+      <span class="oschip win-chip"><i class="bi bi-windows"></i> Windows</span>
+      <span class="oschip lin-chip"><i class="bi bi-ubuntu"></i> Linux</span>
+      <span class="oschip aws-chip"><i class="bi bi-cloud"></i> AWS CLI v2</span>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-4">
+
+<!-- STEP 1: INSTALL AWS CLI -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">1</div>
+    <div><div class="stitle">Install AWS CLI v2</div><div class="ssub">One-time install on your machine</div></div>
+  </div>
+  <div class="otabs" id="ot1">
+    <button class="otab active" onclick="sw('t1win','t1',this)"><i class="bi bi-windows"></i> Windows</button>
+    <button class="otab" onclick="sw('t1lin','t1',this)"><i class="bi bi-ubuntu"></i> Linux</button>
+  </div>
+  <div class="cdk" style="border-radius:0 12px 12px 12px">
+    <div id="t1win" class="tpane active">
+      <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="win">PowerShell / cmd — Windows</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Option 1: Download MSI installer (recommended)</span>
+<span class="cmt"># Go to: https://awscli.amazonaws.com/AWSCLIV2.msi</span>
+<span class="cmt"># Double-click and install</span>
+
+<span class="cmt"># Option 2: via winget (Windows Package Manager)</span>
+<span class="cmd">winget install</span> Amazon.AWSCLI
+
+<span class="cmt"># Option 3: via Chocolatey</span>
+<span class="cmd">choco install</span> awscli
+
+<span class="cmt"># Verify install (open new terminal after install)</span>
+<span class="cmd">aws</span> --version
+<span class="cmt"># should print: aws-cli/2.x.x Windows/...</span></pre>
+    </div>
+    <div id="t1lin" class="tpane">
+      <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span class="lin">terminal — Linux (Ubuntu/Debian/Amazon Linux)</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Download and install AWS CLI v2</span>
+<span class="cmd">curl</span> "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+<span class="cmd">unzip</span> awscliv2.zip
+<span class="cmd">sudo ./aws/install</span>
+
+<span class="cmt"># Verify</span>
+<span class="cmd">aws</span> --version
+<span class="cmt"># should print: aws-cli/2.x.x Linux/...</span>
+
+<span class="cmt"># For ARM (Raspberry Pi / AWS Graviton):</span>
+<span class="cmd">curl</span> "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"</pre>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 2: CREATE IAM USER & ACCESS KEYS -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">2</div>
+    <div><div class="stitle">Create IAM User & Access Keys in AWS Console</div><div class="ssub">Do this in AWS website before running any commands</div></div>
+  </div>
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>AWS Console — steps to follow</span></div>
+    <pre><span class="cmt">1. Login to AWS Console → https://console.aws.amazon.com
+2. Search for "IAM" → Click IAM
+3. Left sidebar → Users → Create User
+4. Username: give a name (e.g. "dev-user")
+5. Permissions: Attach policies directly → choose what you need
+   (e.g. AmazonS3FullAccess, AdministratorAccess, etc.)
+6. After user is created → click the user name
+7. Tab: "Security credentials" → Create access key
+8. Use case: "Command Line Interface (CLI)"
+9. Copy the two values — you will need them next:</span>
+
+<span class="hi">Access Key ID:     AKIAIOSFODNN7EXAMPLE</span>
+<span class="hi">Secret Access Key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY</span>
+
+<span class="cmt"># ⚠️ Save these NOW — Secret Key is shown only ONCE</span></pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 3: CONFIGURE CREDENTIALS -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">3</div>
+    <div><div class="stitle">Configure AWS Credentials</div><div class="ssub">For default + multiple profiles (from your notes)</div></div>
+  </div>
+
+  <div class="tip mb-3">
+    <span class="ai" style="color:var(--aws)"><i class="bi bi-lightbulb-fill"></i></span>
+    <span>All credential files live in <code>~/.aws/</code> on Linux and <code>C:\Users\YOU\.aws\</code> on Windows. Same structure on both OS.</span>
+  </div>
+
+  <!-- Quick configure -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr bw"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span class="win">Windows — aws configure</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Quick setup — default profile</span>
+<span class="cmd">aws configure</span>
+
+<span class="cmt"># It will ask 4 questions:</span>
+AWS Access Key ID: <span class="hi">AKIAIOSFODNN7EXAMPLE</span>
+AWS Secret Access Key: <span class="hi">your-secret-key</span>
+Default region name: <span class="hi">us-east-1</span>
+Default output format: <span class="hi">json</span>
+
+<span class="cmt"># For secondary profile:</span>
+<span class="cmd">aws configure</span> --profile <span class="str">secondary</span>
+<span class="cmt"># fills secondary profile credentials</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr bl"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span class="lin">Linux — same commands</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Identical commands on Linux</span>
+<span class="cmd">aws configure</span>
+
+AWS Access Key ID: <span class="hi">AKIAIOSFODNN7EXAMPLE</span>
+AWS Secret Access Key: <span class="hi">your-secret-key</span>
+Default region name: <span class="hi">ap-south-1</span>
+Default output format: <span class="hi">json</span>
+
+<span class="cmt"># For secondary profile:</span>
+<span class="cmd">aws configure</span> --profile <span class="str">secondary</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual credentials file -->
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>~/.aws/credentials (Linux) &nbsp;|&nbsp; C:\Users\YOU\.aws\credentials (Windows)</span>
+          <button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Default profile</span>
+[<span class="hi">default</span>]
+aws_access_key_id = <span class="str">AKIAIOSFODNN7EXAMPLE</span>
+aws_secret_access_key = <span class="str">wJalrXUtnFEMI/K7MDENG</span>
+
+<span class="cmt"># Secondary profile</span>
+[<span class="hi">secondary</span>]
+aws_access_key_id = <span class="str">AKIAI2NDKEY7EXAMPLE</span>
+aws_secret_access_key = <span class="str">2ndSecretKeyHere</span></pre>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="cdk h-100">
+        <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span>~/.aws/config (Linux) &nbsp;|&nbsp; C:\Users\YOU\.aws\config (Windows)</span>
+          <button class="cpybtn" onclick="cp(this)">copy</button></div>
+        <pre><span class="cmt"># Default profile</span>
+[<span class="hi">default</span>]
+region = us-east-1
+output = json
+
+<span class="cmt"># Secondary profile (note: "profile" prefix required)</span>
+[<span class="hi">profile secondary</span>]
+region = us-east-2
+output = json</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 4: TEST + USE PROFILES -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">4</div>
+    <div><div class="stitle">Test Connection & Use Profiles</div><div class="ssub">Verify your credentials work and switch between accounts</div></div>
+  </div>
+
+  <div class="cdk mb-3">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>terminal — test and switch profiles (same on Windows & Linux)</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># Test default profile</span>
+<span class="cmd">aws sts get-caller-identity</span>
+<span class="cmt"># shows: Account ID, UserID, ARN</span>
+
+<span class="cmt"># Test secondary profile</span>
+<span class="cmd">aws sts get-caller-identity</span> --profile <span class="str">secondary</span>
+
+<span class="cmt"># List S3 buckets — default account</span>
+<span class="cmd">aws s3 ls</span>
+
+<span class="cmt"># List S3 buckets — secondary account</span>
+<span class="cmd">aws s3 ls</span> --profile <span class="str">secondary</span>
+
+<span class="cmt"># Set default profile for current session</span>
+<span class="cmt"># Linux/Mac:</span>
+<span class="cmd">export</span> AWS_PROFILE=secondary
+
+<span class="cmt"># Windows PowerShell:</span>
+<span class="cmd">$env:AWS_PROFILE</span> = <span class="str">"secondary"</span>
+
+<span class="cmt"># Windows CMD:</span>
+<span class="cmd">set</span> AWS_PROFILE=secondary</pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 5: SDK IN CODE -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">5</div>
+    <div><div class="stitle">Use AWS SDK in Code</div><div class="ssub">Node.js, Python — same on Windows & Linux</div></div>
+  </div>
+
+  <div class="otabs" id="ot5">
+    <button class="otab active" onclick="sw('t5node','t5',this)"><i class="bi bi-filetype-js"></i> Node.js</button>
+    <button class="otab" onclick="sw('t5py','t5',this)"><i class="bi bi-filetype-py"></i> Python</button>
+  </div>
+  <div class="cdk" style="border-radius:0 12px 12px 12px">
+    <div id="t5node" class="tpane active">
+      <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>Node.js — install & use AWS SDK v3</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Install SDK</span>
+<span class="cmd">npm install</span> @aws-sdk/client-s3
+<span class="cmd">npm install</span> @aws-sdk/client-dynamodb
+
+<span class="cmt"># ── app.js ──────────────────────────────────</span>
+<span class="kw">const</span> { S3Client, ListBucketsCommand } = require(<span class="str">'@aws-sdk/client-s3'</span>);
+
+<span class="cmt">// Default profile (reads from ~/.aws/credentials)</span>
+<span class="kw">const</span> client = <span class="kw">new</span> S3Client({ region: <span class="str">'us-east-1'</span> });
+
+<span class="cmt">// Secondary profile</span>
+<span class="kw">const</span> { fromIni } = require(<span class="str">'@aws-sdk/credential-providers'</span>);
+<span class="kw">const</span> client2 = <span class="kw">new</span> S3Client({
+  region: <span class="str">'us-east-2'</span>,
+  credentials: fromIni({ profile: <span class="str">'secondary'</span> })
+});
+
+<span class="cmt">// List buckets</span>
+<span class="kw">async function</span> listBuckets() {
+  <span class="kw">const</span> data = <span class="kw">await</span> client.send(<span class="kw">new</span> ListBucketsCommand({}));
+  console.log(data.Buckets);
+}
+listBuckets();</pre>
+    </div>
+    <div id="t5py" class="tpane">
+      <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+        <span>Python — install boto3 & use</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+      <pre><span class="cmt"># Install boto3</span>
+<span class="cmd">pip install</span> boto3            <span class="cmt"># Linux</span>
+<span class="cmd">pip install</span> boto3            <span class="cmt"># Windows (same)</span>
+
+<span class="cmt"># ── app.py ──────────────────────────────────</span>
+<span class="kw">import</span> boto3
+
+<span class="cmt"># Default profile</span>
+s3 = boto3.client(<span class="str">'s3'</span>, region_name=<span class="str">'us-east-1'</span>)
+
+<span class="cmt"># Secondary profile</span>
+session = boto3.Session(profile_name=<span class="str">'secondary'</span>)
+s3_secondary = session.client(<span class="str">'s3'</span>, region_name=<span class="str">'us-east-2'</span>)
+
+<span class="cmt"># List buckets</span>
+response = s3.list_buckets()
+<span class="kw">for</span> bucket <span class="kw">in</span> response[<span class="str">'Buckets'</span>]:
+    print(bucket[<span class="str">'Name'</span>])
+
+<span class="cmt"># Upload file to S3</span>
+s3.upload_file(<span class="str">'local-file.txt'</span>, <span class="str">'my-bucket'</span>, <span class="str">'s3-key.txt'</span>)</pre>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- STEP 6: TERRAFORM PROVIDER (from notes) -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum">6</div>
+    <div><div class="stitle">AWS Profiles in Terraform</div><div class="ssub">Use multiple AWS accounts from your credentials file</div></div>
+  </div>
+  <div class="cdk">
+    <div class="chdr"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+      <span>main.tf — default + secondary profile</span><button class="cpybtn" onclick="cp(this)">copy</button></div>
+    <pre><span class="cmt"># Default provider — no profile needed</span>
+<span class="kw">provider</span> <span class="str">"aws"</span> {
+  region = <span class="str">"us-east-1"</span>
+}
+
+<span class="cmt"># Secondary provider — uses "secondary" profile from ~/.aws/credentials</span>
+<span class="kw">provider</span> <span class="str">"aws"</span> {
+  alias   = <span class="str">"secondary"</span>
+  region  = <span class="str">"us-east-2"</span>
+  profile = <span class="str">"secondary"</span>
+}
+
+<span class="cmt"># Use secondary provider in a resource</span>
+<span class="kw">resource</span> <span class="str">"aws_s3_bucket"</span> <span class="str">"backup"</span> {
+  provider = aws.secondary
+  bucket   = <span class="str">"my-backup-bucket"</span>
+}</pre>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- REFERENCE -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="snum"><i class="bi bi-table"></i></div>
+    <div><div class="stitle">Quick Reference</div></div>
+  </div>
+  <div class="cdk">
+    <table class="ref-table">
+      <thead><tr><th>What</th><th>Windows Path</th><th>Linux Path</th></tr></thead>
+      <tbody>
+        <tr><td>Credentials file</td><td style="color:var(--win)">C:\Users\YOU\.aws\credentials</td><td style="color:var(--linux)">~/.aws/credentials</td></tr>
+        <tr><td>Config file</td><td style="color:var(--win)">C:\Users\YOU\.aws\config</td><td style="color:var(--linux)">~/.aws/config</td></tr>
+        <tr><td>Set profile (session)</td><td style="color:var(--win)">$env:AWS_PROFILE="secondary"</td><td style="color:var(--linux)">export AWS_PROFILE=secondary</td></tr>
+        <tr><td>Test credentials</td><td colspan="2" style="color:var(--green)">aws sts get-caller-identity</td></tr>
+        <tr><td>Use profile in CLI</td><td colspan="2" style="color:var(--green)">aws s3 ls --profile secondary</td></tr>
+        <tr><td>Node.js SDK</td><td colspan="2" style="color:var(--green)">npm install @aws-sdk/client-s3</td></tr>
+        <tr><td>Python SDK</td><td colspan="2" style="color:var(--green)">pip install boto3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+<footer><div class="container"><span style="color:var(--aws);font-family:'IBM Plex Mono',monospace;font-weight:700">AWS SDK</span> · Windows & Linux · Multiple Profiles</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function sw(id, grp, btn) {
+  document.querySelectorAll('#'+grp+' .otab, [id^="'+grp+'"]').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active'); btn.classList.add('active');
+}
+function cp(btn) {
+  const pre = btn.closest('.cdk').querySelector('pre');
+  if(!pre) return;
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='copied!'; btn.style.color='var(--green)';
+    setTimeout(()=>{btn.textContent='copy';btn.style.color='';},2000);
+  });
+}
+// Fix tab switching
+document.querySelectorAll('.otab').forEach(btn => {
+  btn.onclick = function(e) {
+    const tabs = this.closest('div').parentElement;
+    const grpId = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+    const pane = document.getElementById(grpId);
+    if(!pane) return;
+    const container = pane.closest('.cdk,.tpane')?.parentElement || pane.parentElement;
+    container.querySelectorAll('.tpane').forEach(p=>p.classList.remove('active'));
+    this.closest('.otabs').querySelectorAll('.otab').forEach(b=>b.classList.remove('active'));
+    pane.classList.add('active'); this.classList.add('active');
+  };
+});
+</script>
+</body>
+</html>

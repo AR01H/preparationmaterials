@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Sync Generator Pro v2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090d;--surface:#0d1017;--surface2:#131820;--surface3:#1a2030;
+  --border:#1e2838;--accent:#00d488;--accent2:#4f8ef7;--accent3:#f97316;
+  --purple:#a78bfa;--text:#dde6f5;--muted:#4a5672;--danger:#ef4444;--yellow:#fbbf24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,212,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,136,.025) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;z-index:0}
+
+header{position:relative;z-index:2;border-bottom:1px solid var(--border);padding:13px 26px;
+  display:flex;align-items:center;gap:12px;
+  background:linear-gradient(180deg,rgba(0,212,136,.05) 0%,transparent 100%);flex-shrink:0}
+.logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+header h1{font-size:1.1rem;font-weight:800;letter-spacing:-.03em}
+header p{font-size:.7rem;color:var(--muted);margin-top:1px}
+.hbadges{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+.hb{font-size:.6rem;font-weight:700;letter-spacing:.07em;padding:3px 8px;border-radius:100px}
+.hb.g{background:rgba(0,212,136,.12);border:1px solid rgba(0,212,136,.25);color:var(--accent)}
+.hb.b{background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.25);color:var(--accent2)}
+.hb.o{background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.25);color:var(--accent3)}
+.hb.p{background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.25);color:var(--purple)}
+
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden}
+
+/* sidebar */
+.sidebar{width:375px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow:hidden}
+.mode-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.mode-tab{flex:1;padding:10px 3px;font-family:'Syne',sans-serif;font-size:.62rem;font-weight:700;
+  letter-spacing:.04em;background:none;border:none;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;line-height:1.2}
+.mode-tab .ico{font-size:15px}
+.mode-tab.active.g{color:var(--accent);border-bottom-color:var(--accent)}
+.mode-tab.active.b{color:var(--accent2);border-bottom-color:var(--accent2)}
+.mode-tab.active.o{color:var(--accent3);border-bottom-color:var(--accent3)}
+.mode-tab.active.p{color:var(--purple);border-bottom-color:var(--purple)}
+.mode-tab:hover:not(.active){color:var(--text)}
+
+.panels{flex:1;overflow-y:auto;overflow-x:hidden}
+.panels::-webkit-scrollbar{width:3px}
+.panels::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.panel{display:none;padding:15px;flex-direction:column;gap:13px}
+.panel.active{display:flex}
+
+.sec-label{font-size:.6rem;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.72rem;font-weight:600;color:var(--text)}
+.field input,.field select{background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:7px 10px;border-radius:7px;
+  outline:none;width:100%;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.field input::placeholder{color:var(--muted)}
+.field select option{background:var(--surface2)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+
+/* schedule */
+.schedule-box{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:9px}
+.mfl{font-size:.6rem;color:var(--muted);margin-bottom:3px}
+.sched-presets{display:flex;flex-wrap:wrap;gap:4px}
+.preset-btn{font-family:'Syne',sans-serif;font-size:.64rem;font-weight:700;padding:4px 9px;border-radius:5px;
+  cursor:pointer;transition:all .2s;background:var(--surface3);border:1px solid var(--border);color:var(--muted)}
+.preset-btn:hover,.preset-btn.sel{background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.3);color:var(--purple)}
+.cron-preview{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--purple);
+  background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.15);border-radius:5px;padding:5px 9px}
+
+/* mapping rows */
+.map-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.btn-add{background:rgba(0,212,136,.1);border:1px solid rgba(0,212,136,.25);color:var(--accent);
+  font-family:'Syne',sans-serif;font-size:.66rem;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .2s}
+.btn-add:hover{background:rgba(0,212,136,.2)}
+
+.map-row{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px;
+  margin-bottom:7px;position:relative;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.row-badge{display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:800;
+  padding:2px 7px;border-radius:4px;margin-bottom:7px}
+.rb-g{background:var(--accent);color:#000}
+.rb-b{background:var(--accent2);color:#fff}
+.rb-o{background:var(--accent3);color:#fff}
+.rb-p{background:var(--purple);color:#fff}
+.btn-del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);
+  cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:color .2s}
+.btn-del:hover{color:var(--danger)}
+.mf{margin-bottom:5px}
+.mf:last-child{margin-bottom:0}
+.map-row input,.map-row select{background:var(--surface3);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:6px 9px;border-radius:5px;
+  outline:none;width:100%;transition:border-color .2s}
+.map-row input:focus,.map-row select:focus{border-color:var(--accent)}
+.map-row input::placeholder{color:var(--muted)}
+.map-row select option{background:var(--surface2)}
+
+/* per-row strategy */
+.strat-wrap{margin-top:5px}
+.strat-label{font-size:.58rem;color:var(--muted);margin-bottom:3px}
+.strat-btns{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.sb{font-family:'Syne',sans-serif;font-size:.62rem;font-weight:700;padding:5px 4px;border-radius:5px;
+  cursor:pointer;transition:all .2s;text-align:center;background:var(--surface3);
+  border:1px solid var(--border);color:var(--muted)}
+.sb.sel{background:rgba(0,212,136,.12);border-color:rgba(0,212,136,.3);color:var(--accent)}
+
+.info-note{background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.2);border-radius:7px;padding:9px;font-size:.7rem;color:#93c5fd;line-height:1.6}
+.warn-note{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:7px;padding:9px;font-size:.7rem;color:#fde68a;line-height:1.6}
+
+.sidebar-bottom{border-top:1px solid var(--border);padding:12px 15px;background:var(--surface);flex-shrink:0}
+.btn-gen{width:100%;background:var(--accent);color:#000;border:none;font-family:'Syne',sans-serif;
+  font-size:.84rem;font-weight:800;padding:11px;border-radius:8px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-gen:hover{background:#00ffb3;transform:translateY(-1px)}
+.btn-gen:active{transform:translateY(0)}
+
+/* output */
+.output{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.out-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px;background:var(--surface);flex-shrink:0}
+.out-tab{padding:11px 14px;font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.04em;
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.out-tab.active{color:var(--accent2);border-bottom-color:var(--accent2)}
+.out-tab:hover:not(.active){color:var(--text)}
+.out-panels{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.out-panel{display:none;flex:1;flex-direction:column;overflow:hidden}
+.out-panel.active{display:flex}
+
+.code-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;
+  border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.code-file{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.fdot{width:7px;height:7px;border-radius:50%;background:var(--accent3)}
+.code-btns{display:flex;gap:6px}
+.btn-copy,.btn-dl{font-family:'Syne',sans-serif;font-size:.67rem;font-weight:700;padding:5px 11px;
+  border-radius:6px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;border:none}
+.btn-copy{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-copy:hover{border-color:var(--accent);color:var(--accent)}
+.btn-dl{background:var(--accent2);color:#fff}
+.btn-dl:hover{background:#6ba3fb}
+
+pre{flex:1;overflow:auto;padding:20px 22px;font-family:'JetBrains Mono',monospace;font-size:.73rem;
+  line-height:1.75;color:var(--text);background:var(--bg);white-space:pre;margin:0}
+pre::-webkit-scrollbar{width:5px;height:5px}
+pre::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;color:var(--muted);text-align:center;padding:40px}
+.empty-ico{font-size:42px;opacity:.2}
+.empty h3{font-size:.92rem;font-weight:700;color:var(--text);opacity:.3}
+.empty p{font-size:.74rem;line-height:1.7;max-width:230px}
+
+/* diagram */
+.diag-wrap{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;align-items:center}
+.diag-title{font-size:.6rem;font-weight:700;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
+.dflow{width:100%;max-width:620px;display:flex;flex-direction:column;align-items:center}
+.dnode{width:100%;border-radius:9px;padding:11px 17px;text-align:center;border:1px solid var(--border);background:var(--surface2)}
+.dnode.g{border-color:rgba(0,212,136,.4);background:rgba(0,212,136,.04)}
+.dnode.b{border-color:rgba(79,142,247,.4);background:rgba(79,142,247,.04)}
+.dnode.o{border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.04)}
+.dnode.p{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.04)}
+.dn-lbl{font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+.dn-lbl.g{color:var(--accent)}.dn-lbl.b{color:var(--accent2)}.dn-lbl.o{color:var(--accent3)}.dn-lbl.p{color:var(--purple)}
+.dn-name{font-size:.88rem;font-weight:700;margin-top:2px}
+.dn-sub{font-size:.67rem;color:var(--muted);margin-top:2px}
+.darrow{display:flex;flex-direction:column;align-items:center;padding:4px 0}
+.dline{width:2px;height:14px}
+.dline.g{background:linear-gradient(180deg,var(--accent),transparent)}
+.dline.b{background:linear-gradient(180deg,var(--accent2),transparent)}
+.dline.p{background:linear-gradient(180deg,var(--purple),transparent)}
+.dline.o{background:linear-gradient(180deg,var(--accent3),transparent)}
+.dhead{font-size:12px;margin-top:-3px}
+.dlbl{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:100px;margin:2px 0}
+.dlbl.g{background:rgba(0,212,136,.1);color:var(--accent)}
+.dlbl.b{background:rgba(79,142,247,.1);color:var(--accent2)}
+.dlbl.p{background:rgba(167,139,250,.12);color:var(--purple)}
+.dlbl.o{background:rgba(249,115,22,.1);color:var(--accent3)}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;width:100%;margin-top:5px}
+.chip{background:var(--surface2);border:1px solid rgba(79,142,247,.2);border-radius:6px;padding:6px 7px;text-align:center}
+.chip-f{font-size:.6rem;color:var(--accent);font-family:'JetBrains Mono',monospace}
+.chip-r{font-size:.57rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip-s{font-size:.54rem;padding:1px 4px;border-radius:3px;margin-top:2px;display:inline-block}
+.chip-s.full{background:rgba(249,115,22,.12);color:var(--accent3)}
+.chip-s.diff{background:rgba(0,212,136,.1);color:var(--accent)}
+
+/* setup */
+.setup-wrap{flex:1;overflow-y:auto;padding:20px}
+.setup-wrap::-webkit-scrollbar{width:4px}
+.setup-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.step{display:flex;gap:12px;margin-bottom:20px}
+.step-num{width:27px;height:27px;border-radius:50%;background:var(--accent);color:#000;
+  font-weight:800;font-size:.76rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body h4{font-size:.84rem;font-weight:700;margin-bottom:4px}
+.step-body p{font-size:.73rem;color:var(--muted);line-height:1.65}
+.step-body code{font-family:'JetBrains Mono',monospace;font-size:.7rem;background:var(--surface2);
+  border:1px solid var(--border);padding:1px 5px;border-radius:4px;color:var(--accent)}
+.code-block{margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;
+  padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:.68rem;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.strat-explainer{background:var(--surface2);border:1px solid var(--border);border-radius:7px;
+  padding:10px 12px;margin-top:8px;display:flex;flex-direction:column;gap:7px}
+.strat-row-ex{display:flex;gap:8px;align-items:flex-start}
+.strat-tag{font-family:'Syne',sans-serif;font-size:.62rem;font-weight:700;padding:2px 7px;
+  border-radius:4px;flex-shrink:0;margin-top:1px}
+.strat-tag.full{background:rgba(249,115,22,.12);color:var(--accent3)}
+.strat-tag.diff{background:rgba(0,212,136,.1);color:var(--accent)}
+.strat-desc{font-size:.7rem;color:var(--muted);line-height:1.55}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#000;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.76rem;padding:8px 16px;border-radius:8px;
+  z-index:999;transform:translateY(50px);opacity:0;pointer-events:none;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡</div>
+  <div>
+    <h1>GitHub Sync Generator Pro</h1>
+    <p>4 modes · full schedule control · per-mapping strategy on every row</p>
+  </div>
+  <div class="hbadges">
+    <span class="hb g">MONO→REPOS</span>
+    <span class="hb b">REPO→ALL</span>
+    <span class="hb o">REPO→REPO</span>
+    <span class="hb p">SCHEDULED</span>
+  </div>
+</header>
+
+<div class="app">
+<div class="sidebar">
+  <div class="mode-tabs">
+    <button class="mode-tab active g" onclick="setMode('forward')"><span class="ico">➡</span>MONO<br>→REPOS</button>
+    <button class="mode-tab b" onclick="setMode('reverse')"><span class="ico">↩</span>REPO<br>→ALL</button>
+    <button class="mode-tab o" onclick="setMode('direct')"><span class="ico">🔗</span>REPO<br>→REPO</button>
+    <button class="mode-tab p" onclick="setMode('scheduled')"><span class="ico">🕐</span>SCHED<br>ULED</button>
+  </div>
+
+  <div class="panels">
+
+    <!-- ── FORWARD ── -->
+    <div class="panel active" id="panel-forward">
+      <div>
+        <div class="sec-label">Global Settings</div>
+        <div class="two-col">
+          <div class="field"><label>Source Branch</label><input id="f-src" value="main"></div>
+          <div class="field"><label>Target Branch</label><input id="f-tgt" value="main"></div>
+        </div>
+      </div>
+      <div class="info-note">📌 Each row maps one monorepo folder → one target repo. Set strategy per row independently.</div>
+      <div>
+        <div class="map-header">
+          <div class="sec-label" style="margin:0">Folder → Repo Mappings</div>
+          <button class="btn-add" onclick="addRow('fwd')">+ Add</button>
+        </div>
+        <div id="fwd-rows"></div>
+      </div>
+    </div>
+
+    <!-- ── REVERSE ── -->
+    <div class="panel" id="panel-reverse">
+      <div>
+        <div class="sec-label">This Repo's Identity</div>
+        <div class="field"><label>This Repo's Folder in Monorepo</label><input id="r-folder" placeholder="project-3"></div>
+        <div class="field" style="margin-top:7px"><label>Trigger Branch</label><input id="r-branch" value="main"></div>
+      </div>
+      <div>
+        <div class="sec-label">Monorepo Target</div>
+        <div class="field"><label>Monorepo (owner/repo)</label><input id="r-mono-repo" placeholder="your-org/monorepo"></div>
+        <div class="field" style="margin-top:7px"><label>Monorepo Token Secret</label><input id="r-mono-token" value="MONO_SYNC_TOKEN"></div>
+        <div class="strat-wrap" style="margin-top:8px">
+          <div class="strat-label">Monorepo Sync Strategy</div>
+          <div class="strat-btns" id="strat-mono">
+            <button type="button" class="sb sel" id="strat-mono-full" onclick="setSt('mono','full')">🔄 Full Replace</button>
+            <button type="button" class="sb" id="strat-mono-diff" onclick="setSt('mono','diff')">📝 Changed Only</button>
+          </div>
+          <input type="hidden" id="strat-val-mono" value="full">
+        </div>
+      </div>
+      <div>
+        <div class="map-header">
+          <div class="sec-label" style="margin:0">Sibling Repos to Broadcast</div>
+          <button class="btn-add" onclick="addRow('rev')">+ Add</button>
+        </div>
+        <div class="info-note" style="margin-bottom:8px">📡 Each sibling gets its own strategy selection.</div>
+        <div id="rev-rows"></div>
+      </div>
+    </div>
+
+    <!-- ── DIRECT ── -->
+    <div class="panel" id="panel-direct">
+      <div class="info-note">🔗 Direct sync from this repo to any destination repo(s). Place workflow in source repo.</div>
+      <div>
+        <div class="sec-label">Trigger Settings</div>
+        <div class="two-col">
+          <div class="field"><label>Trigger Branch</label><input id="d-branch" value="main"></div>
+          <div class="field"><label>Push to Branch</label><input id="d-tgt-branch" value="main"></div>
+        </div>
+      </div>
+      <div>
+        <div class="map-header">
+          <div class="sec-label" style="margin:0">Source → Destination Mappings</div>
+          <button class="btn-add" onclick="addRow('dir')">+ Add</button>
+        </div>
+        <div id="dir-rows"></div>
+      </div>
+    </div>
+
+    <!-- ── SCHEDULED ── -->
+    <div class="panel" id="panel-scheduled">
+      <div class="info-note">🕐 Auto-sync on a schedule. Each mapping has its own strategy. Also supports push trigger + manual dispatch.</div>
+
+      <div>
+        <div class="sec-label">Schedule Configuration</div>
+        <div class="schedule-box">
+          <div>
+            <div class="mfl">Sync Type</div>
+            <select id="sc-type" onchange="toggleScType()" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:6px 9px;border-radius:5px;outline:none;width:100%">
+              <option value="mono2repos">Monorepo → All Target Repos</option>
+              <option value="direct">Repo → Repo (direct)</option>
+            </select>
+          </div>
+          <div>
+            <div class="mfl">Schedule Preset</div>
+            <div class="sched-presets">
+              <button class="preset-btn sel" onclick="setPre('0 17 * * *','Daily 5 PM UTC',this)">5 PM Daily</button>
+              <button class="preset-btn" onclick="setPre('0 9 * * *','Daily 9 AM UTC',this)">9 AM Daily</button>
+              <button class="preset-btn" onclick="setPre('30 11 * * *','Daily 5 PM IST',this)">5 PM IST</button>
+              <button class="preset-btn" onclick="setPre('30 3 * * *','Daily 9 AM IST',this)">9 AM IST</button>
+              <button class="preset-btn" onclick="setPre('0 */6 * * *','Every 6 hours',this)">Every 6h</button>
+              <button class="preset-btn" onclick="setPre('0 */12 * * *','Every 12 hours',this)">Every 12h</button>
+              <button class="preset-btn" onclick="setPre('0 */3 * * *','Every 3 hours',this)">Every 3h</button>
+              <button class="preset-btn" onclick="setPre('0 0 * * *','Midnight UTC',this)">Midnight</button>
+              <button class="preset-btn" onclick="setPre('0 0 * * 1','Every Monday',this)">Weekly Mon</button>
+              <button class="preset-btn" onclick="setPre('0 0 1 * *','Monthly',this)">Monthly</button>
+              <button class="preset-btn" onclick="openCustomCron(this)">Custom ✏️</button>
+            </div>
+          </div>
+          <div id="custom-cron-wrap" style="display:none">
+            <div class="mfl">Custom Cron (UTC)</div>
+            <input id="sc-cron-custom" placeholder="0 17 * * *" oninput="updateCustomCron()"
+              style="background:var(--surface3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:7px 9px;border-radius:5px;outline:none;width:100%">
+            <div style="font-size:.6rem;color:var(--muted);margin-top:4px">Format: minute hour day month weekday (0=Sun)</div>
+          </div>
+          <div class="cron-preview" id="cron-preview">cron: "0 17 * * *"  →  Daily 5 PM UTC</div>
+          <div>
+            <div class="mfl">Also trigger on push to branch?</div>
+            <select id="sc-also-push" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:6px 9px;border-radius:5px;outline:none;width:100%">
+              <option value="yes">Yes — push + schedule</option>
+              <option value="no">No — schedule only</option>
+            </select>
+          </div>
+          <div id="sc-push-branch-wrap">
+            <div class="mfl">Push trigger branch</div>
+            <input id="sc-push-branch" value="main" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:6px 9px;border-radius:5px;outline:none;width:100%">
+          </div>
+        </div>
+      </div>
+
+      <div id="sc-mono-section" style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div class="sec-label">Branch Settings</div>
+          <div class="two-col">
+            <div class="field"><label>Source Branch</label><input id="sc-src-branch" value="main"></div>
+            <div class="field"><label>Target Branch</label><input id="sc-tgt-branch" value="main"></div>
+          </div>
+        </div>
+        <div>
+          <div class="map-header">
+            <div class="sec-label" style="margin:0">Folder → Repo Mappings</div>
+            <button class="btn-add" onclick="addRow('sc')">+ Add</button>
+          </div>
+          <div id="sc-rows"></div>
+        </div>
+      </div>
+
+      <div id="sc-direct-section" style="display:none;flex-direction:column;gap:10px">
+        <div>
+          <div class="sec-label">Branch Settings</div>
+          <div class="two-col">
+            <div class="field"><label>From Branch</label><input id="sc-d-branch" value="main"></div>
+            <div class="field"><label>To Branch</label><input id="sc-d-tgt" value="main"></div>
+          </div>
+        </div>
+        <div>
+          <div class="map-header">
+            <div class="sec-label" style="margin:0">Source → Destination Mappings</div>
+            <button class="btn-add" onclick="addRow('scdir')">+ Add</button>
+          </div>
+          <div id="scdir-rows"></div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /panels -->
+
+  <div class="sidebar-bottom">
+    <button class="btn-gen" onclick="generate()">⚡ Generate Workflow YAML</button>
+  </div>
+</div><!-- /sidebar -->
+
+<!-- OUTPUT -->
+<div class="output">
+  <div class="out-tabs">
+    <button class="out-tab active" onclick="switchOut('yaml',this)">YAML Output</button>
+    <button class="out-tab" onclick="switchOut('diagram',this)">Flow Diagram</button>
+    <button class="out-tab" onclick="switchOut('setup',this)">Setup Guide</button>
+  </div>
+  <div class="out-panels">
+    <div class="out-panel active" id="op-yaml">
+      <div class="empty" id="yaml-empty">
+        <div class="empty-ico">📄</div><h3>Nothing yet</h3>
+        <p>Choose a mode, configure your mappings, and click <strong>Generate</strong>.</p>
+      </div>
+      <div id="yaml-code" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+        <div class="code-bar">
+          <div class="code-file"><span class="fdot"></span><span id="yaml-fname">.github/workflows/sync.yml</span></div>
+          <div class="code-btns">
+            <button class="btn-copy" onclick="copyYaml()">📋 Copy</button>
+            <button class="btn-dl" onclick="dlYaml()">⬇ Download</button>
+          </div>
+        </div>
+        <pre id="yaml-pre"></pre>
+      </div>
+    </div>
+    <div class="out-panel" id="op-diagram">
+      <div class="empty" id="diag-empty"><div class="empty-ico">🔀</div><h3>Generate first</h3><p>Generate a workflow to see the architecture diagram.</p></div>
+      <div class="diag-wrap" id="diag-content" style="display:none">
+        <div class="diag-title">Sync Flow Architecture</div>
+        <div class="dflow" id="dflow-nodes"></div>
+      </div>
+    </div>
+    <div class="out-panel" id="op-setup">
+      <div class="setup-wrap"><div id="setup-body"></div></div>
+    </div>
+  </div>
+</div>
+</div><!-- /app -->
+
+<div class="toast" id="toast">✓ Copied!</div>
+
+<script>
+/* ─── state ─── */
+let mode='forward', lastYaml='', lastFile='sync.yml';
+let selectedCron='0 17 * * *', selectedCronLabel='Daily 5 PM UTC';
+const counters={fwd:0,rev:0,dir:0,sc:0,scdir:0};
+const rowIds={fwd:[],rev:[],dir:[],sc:[],scdir:[]};
+
+/* ─── mode ─── */
+function setMode(m){
+  mode=m;
+  const cols={forward:'g',reverse:'b',direct:'o',scheduled:'p'};
+  const order=['forward','reverse','direct','scheduled'];
+  document.querySelectorAll('.mode-tab').forEach((t,i)=>{
+    t.className='mode-tab '+(m===order[i]?'active '+cols[m]:'');
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`panel-${m}`).classList.add('active');
+  buildSetup();
+}
+
+/* ─── out tab ─── */
+function switchOut(tab,btn){
+  document.querySelectorAll('.out-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.out-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`op-${tab}`).classList.add('active');
+}
+
+/* ─── schedule ─── */
+function setPre(cron,label,btn){
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('custom-cron-wrap').style.display='none';
+  selectedCron=cron; selectedCronLabel=label;
+  document.getElementById('cron-preview').textContent=`cron: "${cron}"  →  ${label}`;
+}
+function openCustomCron(btn){
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('custom-cron-wrap').style.display='block';
+}
+function updateCustomCron(){
+  const c=document.getElementById('sc-cron-custom').value.trim()||'0 17 * * *';
+  selectedCron=c; selectedCronLabel='Custom';
+  document.getElementById('cron-preview').textContent=`cron: "${c}"  →  Custom`;
+}
+function toggleScType(){
+  const t=document.getElementById('sc-type').value;
+  document.getElementById('sc-mono-section').style.display=t==='mono2repos'?'flex':'none';
+  document.getElementById('sc-direct-section').style.display=t==='direct'?'flex':'none';
+}
+document.getElementById('sc-also-push').addEventListener('change',function(){
+  document.getElementById('sc-push-branch-wrap').style.display=this.value==='yes'?'block':'none';
+});
+
+/* ─── per-row strategy ─── */
+function setSt(id,val){
+  document.getElementById(`strat-${id}-full`).classList.toggle('sel',val==='full');
+  document.getElementById(`strat-${id}-diff`).classList.toggle('sel',val==='diff');
+  document.getElementById(`strat-val-${id}`).value=val;
+}
+function stratHTML(id,def='full'){
+  return `<div class="strat-wrap">
+    <div class="strat-label">Sync Strategy</div>
+    <div class="strat-btns">
+      <button type="button" class="sb ${def==='full'?'sel':''}" id="strat-${id}-full" onclick="setSt('${id}','full')">🔄 Full Replace</button>
+      <button type="button" class="sb ${def==='diff'?'sel':''}" id="strat-${id}-diff" onclick="setSt('${id}','diff')">📝 Changed Only</button>
+    </div>
+    <input type="hidden" id="strat-val-${id}" value="${def}">
+  </div>`;
+}
+
+/* ─── generic row factory ─── */
+const CONFIGS={
+  fwd:{container:'fwd-rows',prefix:'fr',badge:'rb-g',icon:'📁',
+    fields:id=>`
+      <div class="mf"><div class="mfl">Folder in monorepo</div><input id="fwd${id}-folder" placeholder="project-1"></div>
+      <div class="mf"><div class="mfl">Target repo (owner/repo)</div><input id="fwd${id}-repo" placeholder="account1-user/repo-1"></div>
+      <div class="mf"><div class="mfl">Token secret name</div><input id="fwd${id}-token" placeholder="SYNC_TOKEN_ACCOUNT1"></div>
+      ${stratHTML('fwd'+id)}`},
+  rev:{container:'rev-rows',prefix:'rr',badge:'rb-b',icon:'🎯',
+    fields:id=>`
+      <div class="mf"><div class="mfl">Sibling folder (in monorepo)</div><input id="rev${id}-folder" placeholder="project-5"></div>
+      <div class="mf"><div class="mfl">Sibling repo (owner/repo)</div><input id="rev${id}-repo" placeholder="account5-user/repo-5"></div>
+      <div class="mf"><div class="mfl">Token secret name</div><input id="rev${id}-token" placeholder="SYNC_TOKEN_ACCOUNT5"></div>
+      ${stratHTML('rev'+id)}`},
+  dir:{container:'dir-rows',prefix:'dr',badge:'rb-o',icon:'🔗',
+    fields:id=>`
+      <div class="mf"><div class="mfl">Source repo (owner/repo)</div><input id="dir${id}-src" placeholder="account1-user/source-repo"></div>
+      <div class="mf"><div class="mfl">Destination repo (owner/repo)</div><input id="dir${id}-dest" placeholder="account2-user/dest-repo"></div>
+      <div class="mf"><div class="mfl">Token secret name</div><input id="dir${id}-token" placeholder="SYNC_TOKEN_DEST"></div>
+      ${stratHTML('dir'+id)}`},
+  sc:{container:'sc-rows',prefix:'sc',badge:'rb-p',icon:'📁',
+    fields:id=>`
+      <div class="mf"><div class="mfl">Folder in monorepo</div><input id="sc${id}-folder" placeholder="project-1"></div>
+      <div class="mf"><div class="mfl">Target repo (owner/repo)</div><input id="sc${id}-repo" placeholder="account1-user/repo-1"></div>
+      <div class="mf"><div class="mfl">Token secret name</div><input id="sc${id}-token" placeholder="SYNC_TOKEN_ACCOUNT1"></div>
+      ${stratHTML('sc'+id)}`},
+  scdir:{container:'scdir-rows',prefix:'sd',badge:'rb-p',icon:'🔗',
+    fields:id=>`
+      <div class="mf"><div class="mfl">Source repo (owner/repo)</div><input id="sd${id}-src" placeholder="account1-user/source"></div>
+      <div class="mf"><div class="mfl">Destination repo (owner/repo)</div><input id="sd${id}-dest" placeholder="account2-user/dest"></div>
+      <div class="mf"><div class="mfl">Token secret name</div><input id="sd${id}-token" placeholder="SYNC_TOKEN_DEST"></div>
+      ${stratHTML('sd'+id)}`},
+};
+
+function addRow(type){
+  counters[type]++;
+  const id=counters[type];
+  rowIds[type].push(id);
+  const cfg=CONFIGS[type];
+  const num=rowIds[type].length;
+  const c=document.getElementById(cfg.container);
+  const d=document.createElement('div');
+  d.className='map-row'; d.id=`${cfg.prefix}row${id}`;
+  d.innerHTML=`<div class="row-badge ${cfg.badge}">${cfg.icon} #${num}</div>
+    <button class="btn-del" onclick="delRow('${type}',${id})">✕</button>
+    ${cfg.fields(id)}`;
+  c.appendChild(d);
+}
+
+function delRow(type,id){
+  rowIds[type]=rowIds[type].filter(r=>r!==id);
+  document.getElementById(`${CONFIGS[type].prefix}row${id}`)?.remove();
+  document.querySelectorAll(`#${CONFIGS[type].container} .row-badge`).forEach((el,i)=>el.innerHTML=`${CONFIGS[type].icon} #${i+1}`);
+}
+
+/* ─── collect ─── */
+function g(id){return(document.getElementById(id)?.value||'').trim()}
+function getFwd()  {return rowIds.fwd.map(id=>({folder:g(`fwd${id}-folder`),repo:g(`fwd${id}-repo`),token:g(`fwd${id}-token`),st:g(`strat-val-fwd${id}`)||'full'})).filter(m=>m.folder&&m.repo&&m.token)}
+function getRev()  {return rowIds.rev.map(id=>({folder:g(`rev${id}-folder`),repo:g(`rev${id}-repo`),token:g(`rev${id}-token`),st:g(`strat-val-rev${id}`)||'full'})).filter(m=>m.folder&&m.repo&&m.token)}
+function getDir()  {return rowIds.dir.map(id=>({src:g(`dir${id}-src`),dest:g(`dir${id}-dest`),token:g(`dir${id}-token`),st:g(`strat-val-dir${id}`)||'full'})).filter(m=>m.src&&m.dest&&m.token)}
+function getSc()   {return rowIds.sc.map(id=>({folder:g(`sc${id}-folder`),repo:g(`sc${id}-repo`),token:g(`sc${id}-token`),st:g(`strat-val-sc${id}`)||'full'})).filter(m=>m.folder&&m.repo&&m.token)}
+function getScdir(){return rowIds.scdir.map(id=>({src:g(`sd${id}-src`),dest:g(`sd${id}-dest`),token:g(`sd${id}-token`),st:g(`strat-val-sd${id}`)||'full'})).filter(m=>m.src&&m.dest&&m.token)}
+
+/* ─── sync block helper ─── */
+function syncBlock(strategy,src,dest){
+  if(strategy==='diff')
+    return `              rsync -a --checksum --delete --exclude='.git' --exclude='.github' "${src}/" "${dest}/"`;
+  return `              find "${dest}" -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +\n              cp -r "${src}/." "${dest}/"`;
+}
+
+/* ═══ GENERATE ═══ */
+function generate(){
+  const fns={forward:genForward,reverse:genReverse,direct:genDirect,scheduled:genScheduled};
+  fns[mode]();
+  buildDiagram();
+  buildSetup();
+}
+
+function genForward(){
+  const src=g('f-src')||'main', tgt=g('f-tgt')||'main';
+  const maps=getFwd();
+  if(!maps.length){alert('Add at least one mapping.');return}
+  const tokens=[...new Set(maps.map(m=>m.token))];
+  const envL=tokens.map(t=>`          ${t}: \${{ secrets.${t} }}`).join('\n');
+  const mapL=maps.map(m=>`            "${m.folder}|${m.repo}|${m.token}|${m.st}"`).join('\n');
+  emit(`name: "Sync Monorepo Folders → Target Repos"
+
+on:
+  push:
+    branches: [ ${src} ]
+
+jobs:
+  sync-to-repos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Sync folders to repos
+        env:
+${envL}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+
+          MAPPINGS=(
+${mapL}
+          )
+
+          for ENTRY in "\${MAPPINGS[@]}"; do
+            FOLDER=\$(cut -d'|' -f1 <<< "\$ENTRY")
+            TARGET=\$(cut -d'|' -f2 <<< "\$ENTRY")
+            TK_NAME=\$(cut -d'|' -f3 <<< "\$ENTRY")
+            STRATEGY=\$(cut -d'|' -f4 <<< "\$ENTRY")
+            TOKEN="\${!TK_NAME}"
+
+            [ ! -d "\$FOLDER" ] && echo "⚠️ '\$FOLDER' not found" && continue
+            [ -z "\$TOKEN" ]    && echo "⚠️ token '\$TK_NAME' empty" && continue
+
+            echo "🚀 '\$FOLDER' → '\$TARGET' [strategy: \$STRATEGY]"
+            git clone "https://x-access-token:\${TOKEN}@github.com/\${TARGET}.git" _target
+
+            if [ "\$STRATEGY" = "diff" ]; then
+              rsync -a --checksum --delete --exclude='.git' --exclude='.github' "\$FOLDER/" _target/
+            else
+              find _target -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
+              cp -r "\$FOLDER/." _target/
+            fi
+
+            cd _target && git add -A
+            if git diff --cached --quiet; then echo "  ✅ no changes"
+            else
+              git commit -m "sync: monorepo/\$FOLDER [skip ci]"
+              git push --force origin ${tgt} && echo "  ✅ pushed → \$TARGET"
+            fi
+            cd .. && rm -rf _target
+            echo "────────────────────"
+          done
+          echo "✅ Done."
+`,'sync-forward.yml');
+}
+
+function genReverse(){
+  const branch=g('r-branch')||'main';
+  const folder=g('r-folder'), monoRepo=g('r-mono-repo'), monoToken=g('r-mono-token')||'MONO_SYNC_TOKEN';
+  const monoSt=g('strat-val-mono')||'full';
+  const sibs=getRev();
+  if(!folder||!monoRepo){alert('Fill in folder name and monorepo.');return}
+  const sibTokens=[...new Set(sibs.map(s=>s.token))];
+  const sibEnvL=sibTokens.map(t=>`          ${t}: \${{ secrets.${t} }}`).join('\n');
+  const sibL=sibs.map(s=>`            "${s.folder}|${s.repo}|${s.token}|${s.st}"`).join('\n');
+
+  const monoSyncCmd = monoSt==='diff'
+    ? `          rsync -a --checksum --exclude='.git' --exclude='.github' ./ "_mono/${folder}/"`
+    : `          rm -rf "_mono/${folder}" && mkdir -p "_mono/${folder}"\n          rsync -a --exclude='.git' --exclude='.github' ./ "_mono/${folder}/"`;
+
+  emit(`name: "Sync This Repo → Monorepo + Sibling Repos"
+# Place in each of the 15 target repos. Adjust folder name per repo.
+
+on:
+  push:
+    branches: [ ${branch} ]
+
+jobs:
+  broadcast-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "↩ Sync → monorepo/${folder}/ [${monoSt}]"
+        env:
+          MONO_TOKEN: \${{ secrets.${monoToken} }}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+          git clone "https://x-access-token:\${MONO_TOKEN}@github.com/${monoRepo}.git" _mono
+${monoSyncCmd}
+          cd _mono && git add -A
+          if git diff --cached --quiet; then echo "✅ monorepo up to date"
+          else git commit -m "sync: ${folder}→monorepo [skip ci]" && git push --force origin ${branch} && echo "✅ monorepo updated"
+          fi
+          cd .. && rm -rf _mono
+${sibs.length?`
+      - name: "📡 Broadcast → ${sibs.length} sibling repo(s)"
+        env:
+${sibEnvL}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+          SIBLINGS=(
+${sibL}
+          )
+          for ENTRY in "\${SIBLINGS[@]}"; do
+            SIB_FOLDER=\$(cut -d'|' -f1 <<< "\$ENTRY")
+            SIB_REPO=\$(cut -d'|' -f2 <<< "\$ENTRY")
+            TK_NAME=\$(cut -d'|' -f3 <<< "\$ENTRY")
+            STRATEGY=\$(cut -d'|' -f4 <<< "\$ENTRY")
+            TOKEN="\${!TK_NAME}"
+            [ -z "\$TOKEN" ] && echo "⚠️ token '\$TK_NAME' empty" && continue
+            echo "📡 → \$SIB_REPO [\$STRATEGY]"
+            git clone "https://x-access-token:\${TOKEN}@github.com/\${SIB_REPO}.git" _sib
+            if [ "\$STRATEGY" = "diff" ]; then
+              rsync -a --checksum --delete --exclude='.git' --exclude='.github' ./ _sib/
+            else
+              find _sib -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
+              rsync -a --exclude='.git' --exclude='.github' ./ _sib/
+            fi
+            cd _sib && git add -A
+            if git diff --cached --quiet; then echo "  ✅ no changes"
+            else git commit -m "sync: broadcast from ${folder} [skip ci]" && git push --force origin ${branch} && echo "  ✅ pushed"
+            fi
+            cd .. && rm -rf _sib
+            echo "────────────────────"
+          done
+          echo "✅ Broadcast done."
+`:'      # No sibling repos configured.'}
+`,'sync-reverse.yml');
+}
+
+function genDirect(){
+  const branch=g('d-branch')||'main', tgtBranch=g('d-tgt-branch')||'main';
+  const maps=getDir();
+  if(!maps.length){alert('Add at least one source → dest mapping.');return}
+  const tokens=[...new Set(maps.map(m=>m.token))];
+  const envL=tokens.map(t=>`          ${t}: \${{ secrets.${t} }}`).join('\n');
+  const mapL=maps.map(m=>`            "${m.src}|${m.dest}|${m.token}|${m.st}"`).join('\n');
+  emit(`name: "Direct Repo → Repo Sync"
+
+on:
+  push:
+    branches: [ ${branch} ]
+
+jobs:
+  direct-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Sync to destination repo(s)
+        env:
+${envL}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+
+          MAPPINGS=(
+${mapL}
+          )
+
+          for ENTRY in "\${MAPPINGS[@]}"; do
+            SRC=\$(cut -d'|' -f1 <<< "\$ENTRY")
+            DEST=\$(cut -d'|' -f2 <<< "\$ENTRY")
+            TK_NAME=\$(cut -d'|' -f3 <<< "\$ENTRY")
+            STRATEGY=\$(cut -d'|' -f4 <<< "\$ENTRY")
+            TOKEN="\${!TK_NAME}"
+            [ -z "\$TOKEN" ] && echo "⚠️ token empty" && continue
+            echo "🔗 → \$DEST [\$STRATEGY]"
+            git clone "https://x-access-token:\${TOKEN}@github.com/\${DEST}.git" _dest
+            if [ "\$STRATEGY" = "diff" ]; then
+              rsync -a --checksum --delete --exclude='.git' --exclude='.github' ./ _dest/
+            else
+              find _dest -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
+              rsync -a --exclude='.git' --exclude='.github' ./ _dest/
+            fi
+            cd _dest && git add -A
+            if git diff --cached --quiet; then echo "  ✅ no changes"
+            else git commit -m "sync: direct from \$SRC [skip ci]" && git push --force origin ${tgtBranch} && echo "  ✅ pushed"
+            fi
+            cd .. && rm -rf _dest
+            echo "────────────────────"
+          done
+          echo "✅ Direct sync done."
+`,'sync-direct.yml');
+}
+
+function genScheduled(){
+  const scType=g('sc-type')||'mono2repos';
+  const alsoPush=g('sc-also-push')==='yes';
+  const pushBranch=g('sc-push-branch')||'main';
+  const cron=selectedCron||'0 17 * * *';
+  const cronLbl=selectedCronLabel||'Daily 5 PM UTC';
+
+  const onBlock=`on:
+  schedule:
+    - cron: "${cron}"  # ${cronLbl}${alsoPush?`\n  push:\n    branches: [ ${pushBranch} ]`:''}
+  workflow_dispatch:  # Manual trigger from GitHub Actions tab`;
+
+  if(scType==='mono2repos'){
+    const src=g('sc-src-branch')||'main', tgt=g('sc-tgt-branch')||'main';
+    const maps=getSc();
+    if(!maps.length){alert('Add at least one mapping for the schedule.');return}
+    const tokens=[...new Set(maps.map(m=>m.token))];
+    const envL=tokens.map(t=>`          ${t}: \${{ secrets.${t} }}`).join('\n');
+    const mapL=maps.map(m=>`            "${m.folder}|${m.repo}|${m.token}|${m.st}"`).join('\n');
+    emit(`name: "Scheduled Sync — Monorepo → Target Repos"
+# Runs on schedule. Per-mapping strategy. Manual trigger available.
+
+${onBlock}
+
+jobs:
+  scheduled-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Sync all folders on schedule
+        env:
+${envL}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+          echo "⏰ Scheduled run: $(date -u)"
+
+          MAPPINGS=(
+${mapL}
+          )
+
+          for ENTRY in "\${MAPPINGS[@]}"; do
+            FOLDER=\$(cut -d'|' -f1 <<< "\$ENTRY")
+            TARGET=\$(cut -d'|' -f2 <<< "\$ENTRY")
+            TK_NAME=\$(cut -d'|' -f3 <<< "\$ENTRY")
+            STRATEGY=\$(cut -d'|' -f4 <<< "\$ENTRY")
+            TOKEN="\${!TK_NAME}"
+            [ ! -d "\$FOLDER" ] && echo "⚠️ '\$FOLDER' not found" && continue
+            [ -z "\$TOKEN" ]    && echo "⚠️ token '\$TK_NAME' empty" && continue
+            echo "🕐 '\$FOLDER' → '\$TARGET' [\$STRATEGY]"
+            git clone "https://x-access-token:\${TOKEN}@github.com/\${TARGET}.git" _target
+            if [ "\$STRATEGY" = "diff" ]; then
+              rsync -a --checksum --delete --exclude='.git' --exclude='.github' "\$FOLDER/" _target/
+            else
+              find _target -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
+              cp -r "\$FOLDER/." _target/
+            fi
+            cd _target && git add -A
+            if git diff --cached --quiet; then echo "  ✅ no changes — skipped push"
+            else git commit -m "sync: scheduled monorepo/\$FOLDER [skip ci]" && git push --force origin ${tgt} && echo "  ✅ pushed"
+            fi
+            cd .. && rm -rf _target
+            echo "────────────────────"
+          done
+          echo "✅ Scheduled sync complete."
+`,'sync-scheduled.yml');
+  } else {
+    const fromBranch=g('sc-d-branch')||'main', toBranch=g('sc-d-tgt')||'main';
+    const maps=getScdir();
+    if(!maps.length){alert('Add at least one mapping for the schedule.');return}
+    const tokens=[...new Set(maps.map(m=>m.token))];
+    const envL=tokens.map(t=>`          ${t}: \${{ secrets.${t} }}`).join('\n');
+    const mapL=maps.map(m=>`            "${m.src}|${m.dest}|${m.token}|${m.st}"`).join('\n');
+    emit(`name: "Scheduled Direct Repo → Repo Sync"
+
+${onBlock}
+
+jobs:
+  scheduled-direct-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Sync to destination repos on schedule
+        env:
+${envL}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+          echo "⏰ Scheduled run: $(date -u)"
+
+          MAPPINGS=(
+${mapL}
+          )
+
+          for ENTRY in "\${MAPPINGS[@]}"; do
+            SRC=\$(cut -d'|' -f1 <<< "\$ENTRY")
+            DEST=\$(cut -d'|' -f2 <<< "\$ENTRY")
+            TK_NAME=\$(cut -d'|' -f3 <<< "\$ENTRY")
+            STRATEGY=\$(cut -d'|' -f4 <<< "\$ENTRY")
+            TOKEN="\${!TK_NAME}"
+            [ -z "\$TOKEN" ] && echo "⚠️ token empty" && continue
+            echo "🕐 '\$SRC' → '\$DEST' [\$STRATEGY]"
+            git clone "https://x-access-token:\${TOKEN}@github.com/\${DEST}.git" _dest
+            if [ "\$STRATEGY" = "diff" ]; then
+              rsync -a --checksum --delete --exclude='.git' --exclude='.github' ./ _dest/
+            else
+              find _dest -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
+              rsync -a --exclude='.git' --exclude='.github' ./ _dest/
+            fi
+            cd _dest && git add -A
+            if git diff --cached --quiet; then echo "  ✅ no changes"
+            else git commit -m "sync: scheduled from \$SRC [skip ci]" && git push --force origin ${toBranch} && echo "  ✅ pushed"
+            fi
+            cd .. && rm -rf _dest
+            echo "────────────────────"
+          done
+          echo "✅ Scheduled direct sync done."
+`,'sync-scheduled.yml');
+  }
+}
+
+function emit(yaml,fname){
+  lastYaml=yaml; lastFile=fname;
+  document.getElementById('yaml-empty').style.display='none';
+  const w=document.getElementById('yaml-code');
+  Object.assign(w.style,{display:'flex',flexDirection:'column',overflow:'hidden',flex:'1'});
+  document.getElementById('yaml-fname').textContent=`.github/workflows/${fname}`;
+  document.getElementById('yaml-pre').textContent=yaml;
+}
+
+/* ═══ DIAGRAM ═══ */
+function buildDiagram(){
+  document.getElementById('diag-empty').style.display='none';
+  document.getElementById('diag-content').style.display='flex';
+  const n=document.getElementById('dflow-nodes');
+  n.innerHTML='';
+
+  if(mode==='forward'){
+    const maps=getFwd(); const src=g('f-src')||'main';
+    n.innerHTML=`
+      <div class="dnode g"><div class="dn-lbl g">MONOREPO</div><div class="dn-name">Single Repo</div><div class="dn-sub">Push to <strong>${src}</strong></div></div>
+      <div class="darrow"><div class="dline g"></div><div class="dlbl g">⚡ GitHub Actions</div><div class="dline g"></div><div class="dhead">▼</div></div>
+      <div class="dnode o"><div class="dn-lbl o">WORKFLOW</div><div class="dn-name">sync-forward.yml</div><div class="dn-sub">Per-mapping strategy — ${maps.length} target(s)</div></div>
+      <div class="darrow"><div class="dline b"></div><div class="dlbl b">🔀 force push per repo</div><div class="dline b"></div><div class="dhead">▼</div></div>
+      <div style="width:100%"><div class="dn-lbl b" style="text-align:center;margin-bottom:7px">TARGET REPOS (${maps.length})</div>
+      <div class="chips">${maps.map(m=>`<div class="chip"><div class="chip-f">📁 ${m.folder||'—'}</div><div class="chip-r">${m.repo||'—'}</div><span class="chip-s ${m.st==='diff'?'diff':'full'}">${m.st==='diff'?'📝 diff':'🔄 full'}</span></div>`).join('')}</div></div>`;
+  } else if(mode==='reverse'){
+    const folder=g('r-folder')||'this-repo', mono=g('r-mono-repo')||'your-org/monorepo', sibs=getRev();
+    n.innerHTML=`
+      <div class="dnode b"><div class="dn-lbl b">SOURCE REPO</div><div class="dn-name">${folder}/</div><div class="dn-sub">Push triggers 2-step broadcast</div></div>
+      <div class="darrow"><div class="dline p"></div><div class="dlbl p">⚡ 2 parallel steps</div><div class="dline p"></div><div class="dhead">▼</div></div>
+      <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="dnode g"><div class="dn-lbl g">STEP 1 · MONOREPO</div><div class="dn-name" style="font-size:.8rem">${mono}</div><div class="dn-sub">Folder: <strong>${folder}/</strong></div></div>
+        <div class="dnode b"><div class="dn-lbl b">STEP 2 · SIBLINGS</div><div class="dn-name" style="font-size:.8rem">${sibs.length} repo(s)</div><div class="dn-sub">Per-mapping strategy</div></div>
+      </div>
+      ${sibs.length?`<div style="width:100%;margin-top:10px"><div class="dn-lbl b" style="text-align:center;margin-bottom:6px">SIBLING REPOS</div>
+      <div class="chips">${sibs.map(s=>`<div class="chip"><div class="chip-f">📁 ${s.folder||'—'}</div><div class="chip-r">${s.repo||'—'}</div><span class="chip-s ${s.st==='diff'?'diff':'full'}">${s.st==='diff'?'📝 diff':'🔄 full'}</span></div>`).join('')}</div></div>`:''}`;
+  } else if(mode==='direct'){
+    const maps=getDir();
+    n.innerHTML=`
+      <div class="dnode o"><div class="dn-lbl o">SOURCE REPO</div><div class="dn-name">This Repo</div><div class="dn-sub">Push triggers direct sync</div></div>
+      <div class="darrow"><div class="dline o"></div><div class="dlbl o">🔗 direct repo-to-repo</div><div class="dline o"></div><div class="dhead">▼</div></div>
+      <div style="width:100%"><div class="dn-lbl o" style="text-align:center;margin-bottom:6px">DESTINATION REPOS (${maps.length})</div>
+      <div class="chips">${maps.map(m=>`<div class="chip"><div class="chip-f">🎯 dest</div><div class="chip-r">${m.dest||'—'}</div><span class="chip-s ${m.st==='diff'?'diff':'full'}">${m.st==='diff'?'📝 diff':'🔄 full'}</span></div>`).join('')}</div></div>`;
+  } else if(mode==='scheduled'){
+    n.innerHTML=`
+      <div class="dnode p"><div class="dn-lbl p">TRIGGER</div><div class="dn-name">🕐 ${selectedCronLabel}</div><div class="dn-sub">cron: "${selectedCron}" · manual dispatch</div></div>
+      <div class="darrow"><div class="dline p"></div><div class="dlbl p">⚡ scheduled workflow</div><div class="dline p"></div><div class="dhead">▼</div></div>
+      <div class="dnode o"><div class="dn-lbl o">WORKFLOW</div><div class="dn-name">sync-scheduled.yml</div><div class="dn-sub">Per-mapping strategy on every row</div></div>
+      <div class="darrow"><div class="dline b"></div><div class="dlbl b">syncs all configured targets</div><div class="dline b"></div><div class="dhead">▼</div></div>
+      <div class="dnode b"><div class="dn-lbl b">TARGET REPOS</div><div class="dn-name">All Mapped Repos</div><div class="dn-sub">Force pushed only if changes found</div></div>`;
+  }
+}
+
+/* ═══ SETUP ═══ */
+function buildSetup(){
+  const stratExplainer=`<div class="strat-explainer">
+    <div class="strat-row-ex"><span class="strat-tag full">🔄 Full Replace</span><div class="strat-desc">Wipes the destination and copies everything fresh every time. Simple, safe, no edge cases. Best for small repos or when you want guaranteed clean state.</div></div>
+    <div class="strat-row-ex"><span class="strat-tag diff">📝 Changed Only</span><div class="strat-desc">Uses <code>rsync --checksum</code> to skip unchanged files. Only pushes when content actually differs. Best for large repos, scheduled syncs, or frequent triggers where you want to save Actions minutes.</div></div>
+  </div>`;
+
+  const guides={
+    forward:`
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Generate a PAT per GitHub Account</h4><p>For each account owning a target repo: <strong>Settings → Developer Settings → Personal Access Tokens (classic)</strong> → scope: ✅ <code>repo</code></p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Add Secrets to Monorepo</h4><p><strong>Monorepo → Settings → Secrets → Actions → New secret</strong></p><div class="code-block">SYNC_TOKEN_ACCOUNT1  =  &lt;PAT from account 1&gt;\nSYNC_TOKEN_ACCOUNT2  =  &lt;PAT from account 2&gt;\n...one per account</div></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Create Workflow</h4><div class="code-block">.github/workflows/sync-forward.yml</div></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Per-Mapping Strategy</h4><p>Each folder row has its own strategy selector. Mix and match freely.</p>${stratExplainer}</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><h4>Prevent Loops</h4><p>All commits include <code>[skip ci]</code>. Add to target repo workflows:</p><div class="code-block">if: "!contains(github.event.head_commit.message, '[skip ci]')"</div></div></div>`,
+    reverse:`
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h4>PAT from Monorepo Account</h4><p>Classic PAT with <code>repo</code> scope from the monorepo's account.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Add Secrets to Each Target Repo</h4><div class="code-block">MONO_SYNC_TOKEN        =  &lt;PAT from monorepo account&gt;\nSYNC_TOKEN_ACCOUNT1   =  &lt;PAT for sibling account 1&gt;\n...</div></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h4>⚠️ Regenerate per repo</h4><p>Change "This Repo's Folder Name" for each of the 15 repos before generating — each needs a unique workflow pointing to its own monorepo folder.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Per-Row Strategy</h4><p>The monorepo sync and each sibling row each have their own strategy toggle.</p>${stratExplainer}</div></div>`,
+    direct:`
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h4>PAT for Each Destination Account</h4><p>Classic PAT with <code>repo</code> scope per destination account.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Add Secrets to Source Repo</h4><div class="code-block">SYNC_TOKEN_DEST  =  &lt;PAT with write access to destination&gt;</div></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Create Workflow in Source Repo</h4><div class="code-block">.github/workflows/sync-direct.yml</div></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Per-Row Strategy</h4>${stratExplainer}</div></div>`,
+    scheduled:`
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Cron Runs in UTC</h4><p>GitHub Actions always uses UTC. IST presets (5 PM IST, 9 AM IST) are pre-converted for you.</p><div class="code-block">IST 5:00 PM  →  UTC 11:30 AM  →  cron: "30 11 * * *"\nIST 9:00 AM  →  UTC  3:30 AM  →  cron: "30  3 * * *"</div></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Manual Trigger Available</h4><p><code>workflow_dispatch</code> is always included — trigger manually from the GitHub Actions tab anytime without waiting for schedule.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Add Secrets</h4><p>Same as other modes — one PAT per target account added as repo secrets.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Per-Row Strategy — Recommended for Scheduled</h4><p>Use <strong>📝 Changed Only</strong> for scheduled syncs to avoid unnecessary pushes and save Actions minutes.</p>${stratExplainer}</div></div>`
+  };
+  document.getElementById('setup-body').innerHTML=guides[mode]||'';
+}
+
+/* ─── copy / download ─── */
+function copyYaml(){
+  navigator.clipboard.writeText(lastYaml).then(()=>{
+    const t=document.getElementById('toast');
+    t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);
+  });
+}
+function dlYaml(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([lastYaml],{type:'text/yaml'}));
+  a.download=lastFile; a.click();
+}
+
+/* ─── init ─── */
+function init(){
+  addRow('fwd'); addRow('fwd'); addRow('fwd');
+  addRow('rev'); addRow('rev');
+  addRow('dir');
+  addRow('sc'); addRow('sc');
+  addRow('scdir');
+  buildSetup();
+}
+init();
+</script>
+</body>
+</html>

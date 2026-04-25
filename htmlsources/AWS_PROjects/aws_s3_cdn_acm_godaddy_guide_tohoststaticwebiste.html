@@ -1,0 +1,940 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f1117;--bg2:#161b27;--bg3:#1e2536;--border:#2a3350;
+    --text:#e8ecf4;--muted:#7a8aaa;--accent:#4f9cf9;
+    --green:#3ecf8e;--amber:#f59e0b;--red:#ef4444;--purple:#a78bfa;
+    --teal:#2dd4bf;--orange:#fb923c;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:14px;line-height:1.6}
+  .page{padding:2rem 1.5rem}
+  
+  .hero{text-align:center;padding:2.5rem 1rem 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;background:#1e2a1a;border:1px solid #2a4a2a;color:var(--green);font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;margin-bottom:1rem;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block}
+  .hero h1{font-size:clamp(1.4rem,3vw,2rem);font-weight:600;color:#fff;margin-bottom:.5rem}
+  .hero p{color:var(--muted);font-size:13px}
+  
+  .arch-flow{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:2rem 0;padding:1.5rem;background:var(--bg2);border-radius:12px;border:1px solid var(--border)}
+  .arch-node{display:flex;flex-direction:column;align-items:center;gap:6px;padding:.75rem 1rem;min-width:90px}
+  .arch-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-family:monospace}
+  .arch-label{font-size:11px;font-weight:500;color:var(--muted);text-align:center;line-height:1.3}
+  .arch-arrow{font-size:18px;color:var(--border);padding:0 .25rem;align-self:center}
+  .arch-http{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber)}
+  .arch-https{background:rgba(79,156,249,.12);border:1px solid rgba(79,156,249,.3);color:var(--accent)}
+  .arch-tag{font-size:9px;font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:4px;margin-top:2px}
+  .tag-http{background:rgba(245,158,11,.15);color:var(--amber)}
+  .tag-https{background:rgba(79,156,249,.15);color:var(--accent)}
+  
+  .sections{display:grid;gap:1.25rem}
+  .section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .section-header{display:flex;align-items:center;gap:10px;padding:1rem 1.25rem;background:var(--bg3);border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+  .section-header:hover{background:#232b3e}
+  .section-num{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+  .section-title{font-size:14px;font-weight:600;flex:1}
+  .chevron{color:var(--muted);font-size:12px;transition:.2s}
+  .section-body{padding:1.25rem}
+  
+  .setting-row{display:flex;align-items:flex-start;gap:10px;padding:.6rem 0;border-bottom:1px solid #1e2536}
+  .setting-row:last-child{border-bottom:none}
+  .setting-key{flex:1;font-size:13px;font-weight:500;color:var(--text)}
+  .setting-detail{font-size:12px;color:var(--muted);margin-top:2px}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;white-space:nowrap;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+  .b-on{background:rgba(62,207,142,.15);color:var(--green);border:1px solid rgba(62,207,142,.25)}
+  .b-off{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+  .b-warn{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+  .b-info{background:rgba(79,156,249,.12);color:var(--accent);border:1px solid rgba(79,156,249,.2)}
+  .b-opt{background:rgba(122,138,170,.1);color:var(--muted);border:1px solid var(--border)}
+  
+  .code-block{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:1rem;margin:.75rem 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;overflow-x:auto}
+  .code-block .key{color:#a78bfa}
+  .code-block .val{color:var(--green)}
+  .code-block .str{color:#fb923c}
+  .code-block .kw{color:var(--accent)}
+  .code-label{font-size:11px;color:var(--muted);margin-bottom:.4rem;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+  
+  .alert{border-radius:8px;padding:.75rem 1rem;margin:.75rem 0;font-size:13px;display:flex;gap:8px;align-items:flex-start}
+  .alert-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#fcd34d}
+  .alert-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+  .alert-info{background:rgba(79,156,249,.08);border:1px solid rgba(79,156,249,.2);color:#93c5fd}
+  .alert-success{background:rgba(62,207,142,.08);border:1px solid rgba(62,207,142,.2);color:#6ee7b7}
+  .alert-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+  
+  .mistakes-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .mistake-card{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:.75rem}
+  .mistake-card h4{font-size:12px;font-weight:600;color:#fca5a5;font-family:'JetBrains Mono',monospace;margin-bottom:.35rem}
+  .mistake-card p{font-size:11.5px;color:var(--muted);line-height:1.5}
+  
+  .checklist{display:grid;gap:.5rem;margin-top:.5rem}
+  .check-item{display:flex;align-items:center;gap:10px;padding:.5rem .75rem;background:var(--bg3);border-radius:8px;border:1px solid var(--border)}
+  .check-icon{width:18px;height:18px;border-radius:50%;background:rgba(62,207,142,.2);border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--green);flex-shrink:0}
+  .check-text{font-size:13px;flex:1}
+  .check-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+  
+  .dns-row{display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;padding:.5rem 0;border-bottom:1px solid #1e2536;align-items:start;font-size:12px}
+  .dns-row:last-child{border-bottom:none}
+  .dns-label{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 8px;border-radius:4px;text-align:center;font-weight:500}
+  .dns-cname{background:rgba(167,139,250,.15);color:var(--purple)}
+  .dns-mono{font-family:'JetBrains Mono',monospace;color:var(--orange);word-break:break-all}
+  .dns-val{color:var(--teal);word-break:break-all}
+  .dns-head{color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+  
+  .sec-s3{border-color:#2a3f2a}
+  .sec-cf{border-color:#1e3050}
+  .sec-acm{border-color:#2d2a40}
+  .sec-dns{border-color:#2a3040}
+  .sec-no{border-color:#3a2020}
+  .sec-final{border-color:#1e3530}
+  
+  .num-s3{background:rgba(62,207,142,.2);color:var(--green)}
+  .num-cf{background:rgba(79,156,249,.2);color:var(--accent)}
+  .num-acm{background:rgba(167,139,250,.2);color:var(--purple)}
+  .num-dns{background:rgba(45,212,191,.2);color:var(--teal)}
+  
+  @media(max-width:500px){
+    .arch-flow{gap:0;padding:1rem .5rem}
+    .arch-node{min-width:64px;padding:.5rem .5rem}
+    .arch-icon{width:36px;height:36px;font-size:16px}
+    .mistakes-grid{grid-template-columns:1fr}
+    .dns-row{grid-template-columns:70px 1fr;font-size:11px}
+    .dns-row>:last-child{grid-column:2}
+  }
+</style>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0b0e17;--bg2:#111520;--bg3:#171d2e;--bg4:#1c2338;
+    --border:#232c42;--border2:#2d3a56;
+    --text:#dde3f0;--muted:#6b7a99;--hint:#3d4d6e;
+    --green:#34d399;--green-bg:rgba(52,211,153,.1);--green-border:rgba(52,211,153,.25);
+    --blue:#60a5fa;--blue-bg:rgba(96,165,250,.1);--blue-border:rgba(96,165,250,.25);
+    --amber:#fbbf24;--amber-bg:rgba(251,191,36,.1);--amber-border:rgba(251,191,36,.25);
+    --red:#f87171;--red-bg:rgba(248,113,113,.1);--red-border:rgba(248,113,113,.25);
+    --purple:#a78bfa;--purple-bg:rgba(167,139,250,.1);--purple-border:rgba(167,139,250,.25);
+    --teal:#2dd4bf;--teal-bg:rgba(45,212,191,.1);--teal-border:rgba(45,212,191,.25);
+    --orange:#fb923c;
+  }
+
+  body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:14px;line-height:1.65;min-height:100vh}
+
+  .page{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+
+  /* ── HEADER ── */
+  .header{border-bottom:1px solid var(--border);padding-bottom:2rem;margin-bottom:2.5rem}
+  .header-tag{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);font-size:11px;font-family:'JetBrains Mono',monospace;padding:4px 12px;border-radius:20px;margin-bottom:1rem}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
+  .header h1{font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:600;color:#fff;line-height:1.25;margin-bottom:.5rem}
+  .header p{color:var(--muted);font-size:13px;max-width:560px}
+
+  /* ── OVERVIEW FLOW ── */
+  .flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:2.5rem}
+  .flow-node{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:90px;padding:.5rem}
+  .flow-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .flow-label{font-size:11px;color:var(--muted);text-align:center;line-height:1.35}
+  .flow-step{font-size:10px;font-family:'JetBrains Mono',monospace;padding:2px 7px;border-radius:4px;margin-top:2px}
+  .flow-arrow{color:var(--hint);font-size:20px;padding:0 .25rem;align-self:center;flex:0}
+
+  /* ── STEP SECTIONS ── */
+  .steps{display:flex;flex-direction:column;gap:2.5rem}
+
+  .step-block{position:relative}
+  .step-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:1.25rem}
+  .step-number{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;flex-shrink:0;margin-top:1px}
+  .n-acm{background:var(--purple-bg);border:1.5px solid var(--purple-border);color:var(--purple)}
+  .n-godaddy{background:var(--green-bg);border:1.5px solid var(--green-border);color:var(--green)}
+  .n-done{background:var(--teal-bg);border:1.5px solid var(--teal-border);color:var(--teal)}
+  .step-title-wrap{}
+  .step-where{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin-bottom:3px}
+  .step-title{font-size:16px;font-weight:600;color:#fff}
+
+  .step-body{margin-left:46px;display:flex;flex-direction:column;gap:1.25rem}
+
+  /* ── SCREEN MOCKUP ── */
+  .screen{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .screen-bar{background:var(--bg3);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;align-items:center;gap:8px}
+  .screen-dots{display:flex;gap:5px}
+  .dot-r{width:9px;height:9px;border-radius:50%;background:#f87171;opacity:.7}
+  .dot-y{width:9px;height:9px;border-radius:50%;background:#fbbf24;opacity:.7}
+  .dot-g{width:9px;height:9px;border-radius:50%;background:#34d399;opacity:.7}
+  .screen-url{flex:1;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-align:center}
+  .screen-body{padding:1.25rem}
+
+  /* ── AWS CONSOLE MOCK ── */
+  .aws-nav{background:#16191f;border-bottom:1px solid #2a2f3a;padding:.5rem 1rem;display:flex;align-items:center;gap:8px}
+  .aws-logo{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:#ff9900;letter-spacing:1px}
+  .aws-nav-text{font-size:12px;color:#8a929e}
+  .aws-breadcrumb{font-size:11px;font-family:'JetBrains Mono',monospace;padding:.6rem 1rem;color:var(--muted);border-bottom:1px solid var(--border)}
+  .aws-breadcrumb span{color:var(--blue)}
+
+  .cert-status-bar{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--bg3);border-bottom:1px solid var(--border)}
+  .cert-arn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+  .status-badge{font-size:11px;font-weight:500;padding:4px 12px;border-radius:6px}
+  .status-pending{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
+  .status-issued{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+
+  .domains-section{padding:1rem}
+  .domain-card{border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:.75rem}
+  .domain-card:last-child{margin-bottom:0}
+  .domain-card-header{background:var(--bg4);padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+  .domain-name{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--text)}
+  .val-type{font-size:11px;color:var(--muted)}
+  .cname-rows{padding:.75rem 1rem;display:flex;flex-direction:column;gap:.6rem}
+  .cname-field{display:flex;flex-direction:column;gap:3px}
+  .cname-label{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .cname-value{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--orange);background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 10px;word-break:break-all}
+  .cname-value.val{color:var(--teal)}
+
+  .highlight-arrow{display:flex;align-items:center;gap:8px;padding:.5rem .75rem;background:rgba(251,191,36,.06);border:1px solid var(--amber-border);border-radius:8px;font-size:12px;color:var(--amber)}
+  .highlight-arrow svg{flex-shrink:0}
+
+  /* ── COPY BUTTON ── */
+  .copy-btn{font-size:10px;font-family:'JetBrains Mono',monospace;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:5px;padding:3px 8px;cursor:pointer;transition:.15s;white-space:nowrap}
+  .copy-btn:hover{background:var(--bg4);color:var(--text)}
+  .cname-row-wrap{display:flex;align-items:flex-start;gap:8px}
+  .cname-row-wrap .cname-value{flex:1}
+
+  /* ── GODADDY MOCK ── */
+  .gd-nav{background:#1a1a1a;padding:.5rem 1rem;display:flex;align-items:center;gap:8px;border-bottom:1px solid #2a2a2a}
+  .gd-logo{font-size:14px;font-weight:700;color:#00b373;letter-spacing:.5px}
+  .gd-nav-text{font-size:12px;color:#999}
+  .gd-breadcrumb{font-size:11px;padding:.5rem 1rem;color:var(--muted);border-bottom:1px solid var(--border);background:var(--bg3)}
+  .gd-breadcrumb span{color:var(--green)}
+
+  .gd-toolbar{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+  .gd-add-btn{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);font-size:12px;font-weight:500;padding:6px 16px;border-radius:6px;cursor:pointer}
+  .gd-filter{display:flex;gap:6px}
+  .gd-pill{font-size:11px;font-family:'JetBrains Mono',monospace;padding:3px 10px;border-radius:12px;border:1px solid var(--border);color:var(--muted);cursor:pointer}
+  .gd-pill.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
+
+  .dns-table{width:100%;border-collapse:collapse;font-size:12px}
+  .dns-table th{text-align:left;padding:.5rem 1rem;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);font-weight:500}
+  .dns-table td{padding:.6rem 1rem;border-bottom:1px solid var(--border);vertical-align:top}
+  .dns-table tr:last-child td{border-bottom:none}
+  .dns-table tr.new-row td{background:rgba(52,211,153,.04)}
+  .dns-table tr.new-row td:first-child{border-left:2.5px solid var(--green)}
+  .type-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+  .mono-cell{font-family:'JetBrains Mono',monospace;color:var(--orange);word-break:break-all}
+  .mono-val{font-family:'JetBrains Mono',monospace;color:var(--teal);word-break:break-all}
+  .muted-cell{color:var(--muted)}
+  .new-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;margin-left:6px}
+
+  /* ── ALERT BOXES ── */
+  .alert{border-radius:8px;padding:.75rem 1rem;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+  .alert-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+  .alert-warn{background:var(--amber-bg);border:1px solid var(--amber-border);color:#fde68a}
+  .alert-info{background:var(--blue-bg);border:1px solid var(--blue-border);color:#bfdbfe}
+  .alert-danger{background:var(--red-bg);border:1px solid var(--red-border);color:#fecaca}
+  .alert-success{background:var(--green-bg);border:1px solid var(--green-border);color:#a7f3d0}
+  .alert strong{font-weight:500}
+
+  /* ── NUMBERED STEPS ── */
+  .micro-steps{display:flex;flex-direction:column;gap:.5rem}
+  .micro-step{display:flex;align-items:flex-start;gap:10px;padding:.5rem .75rem;background:var(--bg3);border-radius:8px;border:1px solid var(--border)}
+  .micro-num{width:20px;height:20px;border-radius:50%;background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .micro-text{font-size:13px;color:var(--text);line-height:1.5}
+  .micro-text code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--bg4);border:1px solid var(--border2);padding:1px 5px;border-radius:4px;color:var(--orange)}
+  .micro-text strong{font-weight:500;color:#fff}
+
+  /* ── FIELD MAPPING ── */
+  .mapping-grid{display:grid;grid-template-columns:1fr 40px 1fr;gap:8px;align-items:center}
+  .map-from{background:rgba(167,139,250,.07);border:1px solid var(--purple-border);border-radius:8px;padding:.75rem 1rem}
+  .map-to{background:rgba(52,211,153,.07);border:1px solid var(--green-border);border-radius:8px;padding:.75rem 1rem}
+  .map-label{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+  .map-title{font-size:12px;font-weight:500}
+  .map-note{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .map-arrow{text-align:center;color:var(--amber);font-size:18px}
+  .map-from .map-title{color:var(--purple)}
+  .map-to .map-title{color:var(--green)}
+
+  /* ── FINAL STATUS ── */
+  .status-timeline{display:flex;flex-direction:column;gap:0}
+  .st-item{display:flex;gap:12px;align-items:flex-start}
+  .st-left{display:flex;flex-direction:column;align-items:center;gap:0;width:28px;flex-shrink:0}
+  .st-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:600}
+  .st-line{width:2px;background:var(--border);flex:1;min-height:24px;margin:0 auto}
+  .st-content{padding:.25rem 0 1.5rem;flex:1}
+  .st-title{font-size:13px;font-weight:500;color:#fff;margin-bottom:3px}
+  .st-detail{font-size:12px;color:var(--muted);line-height:1.5}
+  .st-check{background:var(--green-bg);border:1.5px solid var(--green-border);color:var(--green)}
+  .st-wait{background:var(--amber-bg);border:1.5px solid var(--amber-border);color:var(--amber)}
+  .st-pending{background:var(--bg3);border:1.5px solid var(--border2);color:var(--muted)}
+
+  .divider{border:none;border-top:1px solid var(--border);margin:1rem 0}
+
+  @media print{body{background:#fff;color:#111}}
+</style>
+
+<div class="page">
+  <h2 class="sr-only">AWS S3 + CloudFront + SSL Static Website Hosting Configuration Guide</h2>
+
+  <div class="hero">
+    <div class="hero-badge"><span class="dot"></span> Production config guide</div>
+    <h1>S3 + CloudFront + SSL Setup</h1>
+    <p>Static website hosting with CDN and custom domain via GoDaddy</p>
+  </div>
+
+  <div class="arch-flow">
+    <div class="arch-node">
+      <div class="arch-icon arch-http">🌐</div>
+      <div class="arch-label">GoDaddy DNS<br>CNAME</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-icon arch-https">☁️</div>
+      <div class="arch-label">CloudFront<br>CDN + HTTPS</div>
+      <span class="arch-tag tag-https">HTTPS viewer</span>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-icon arch-http">🪣</div>
+      <div class="arch-label">S3 Website<br>Endpoint</div>
+      <span class="arch-tag tag-http">HTTP origin</span>
+    </div>
+    <div class="arch-arrow">⟵</div>
+    <div class="arch-node">
+      <div class="arch-icon" style="background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:var(--purple)">🔐</div>
+      <div class="arch-label">ACM Cert<br>us-east-1</div>
+    </div>
+  </div>
+
+  <div class="sections">
+
+    <!-- S3 -->
+    <div class="section sec-s3">
+      <div class="section-header">
+        <div class="section-num num-s3">1</div>
+        <span class="section-title">🪣 Amazon S3 — bucket settings</span>
+      </div>
+      <div class="section-body">
+
+        <div class="setting-row">
+          <div><div class="setting-key">Block public access</div><div class="setting-detail">All four options must be turned OFF</div></div>
+          <span class="badge b-off">✗ Disable</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Static website hosting</div><div class="setting-detail">Index: <code>index.html</code> &nbsp;|&nbsp; Error: <code>index.html</code></div></div>
+          <span class="badge b-on">✓ Enable</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Versioning</div><div class="setting-detail">Not needed for static sites</div></div>
+          <span class="badge b-opt">Optional</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Server-side encryption</div><div class="setting-detail">Not needed for public static content</div></div>
+          <span class="badge b-opt">Optional</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">CORS configuration</div><div class="setting-detail">Only needed if the site makes cross-origin API calls</div></div>
+          <span class="badge b-opt">If needed</span>
+        </div>
+
+        <div style="margin-top:1rem">
+          <div class="code-label">Bucket policy — paste into Permissions &gt; Bucket Policy</div>
+          <div class="code-block"><span class="kw">{</span><br>
+&nbsp;&nbsp;<span class="key">"Version"</span>: <span class="str">"2012-10-17"</span>,<br>
+&nbsp;&nbsp;<span class="key">"Statement"</span>: [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">{</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"Sid"</span>: <span class="str">"PublicRead"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"Effect"</span>: <span class="str">"Allow"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"Principal"</span>: <span class="str">"*"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"Action"</span>: [<span class="str">"s3:GetObject"</span>],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"Resource"</span>: [<span class="str">"arn:aws:s3:::YOUR-BUCKET/*"</span>]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">}</span><br>
+&nbsp;&nbsp;]<br>
+<span class="kw">}</span></div>
+          <div class="alert alert-warn"><span class="alert-icon">⚠</span><span>Replace <strong>YOUR-BUCKET</strong> with your actual bucket name before saving.</span></div>
+        </div>
+
+        <div class="alert alert-info"><span class="alert-icon">ℹ</span><span>After enabling static hosting, copy the website endpoint URL — it looks like <code>bucket-name.s3-website-us-east-1.amazonaws.com</code>. You'll need it as the CloudFront origin.</span></div>
+      </div>
+    </div>
+
+    <!-- CloudFront -->
+    <div class="section sec-cf">
+      <div class="section-header">
+        <div class="section-num num-cf">2</div>
+        <span class="section-title">☁️ CloudFront — distribution settings</span>
+      </div>
+      <div class="section-body">
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-key">Origin domain</div>
+            <div class="setting-detail">Use the S3 <strong>website endpoint</strong>, not the REST endpoint</div>
+          </div>
+          <span class="badge b-warn">website URL</span>
+        </div>
+
+        <div class="code-block" style="margin:.5rem 0 1rem"><span class="val">bucket-name.s3-website-region.amazonaws.com</span></div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Origin protocol policy</div><div class="setting-detail">S3 website endpoints only serve over HTTP</div></div>
+          <span class="badge b-warn">HTTP only ⚠</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Origin access (OAC / OAI)</div><div class="setting-detail">Website endpoint is already public — no OAC needed</div></div>
+          <span class="badge b-off">✗ None</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Viewer protocol policy</div><div class="setting-detail">Forces users to HTTPS automatically</div></div>
+          <span class="badge b-on">Redirect HTTP → HTTPS</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Allowed HTTP methods</div></div>
+          <span class="badge b-info">GET, HEAD</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Cache policy</div></div>
+          <span class="badge b-info">CachingOptimized</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Default root object</div></div>
+          <span class="badge b-on">index.html</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Alternate domain name (CNAME)</div><div class="setting-detail">Must match ACM certificate exactly</div></div>
+          <span class="badge b-info">mypublic.akhileshravuri.online</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Custom SSL certificate</div><div class="setting-detail">Select the ACM cert issued in us-east-1</div></div>
+          <span class="badge b-on">✓ Select ACM cert</span>
+        </div>
+
+        <div class="alert alert-warn" style="margin-top:.75rem"><span class="alert-icon">⚠</span><span>Setting origin protocol to HTTPS when pointing to an S3 website endpoint will cause a 504 error. Always use <strong>HTTP only</strong> for the origin — CloudFront handles the HTTPS on the viewer side.</span></div>
+      </div>
+    </div>
+
+    <!-- ACM -->
+    <div class="section sec-acm">
+      <div class="section-header">
+        <div class="section-num num-acm">3</div>
+        <span class="section-title">🔑 AWS Certificate Manager — SSL cert</span>
+      </div>
+      <div class="section-body">
+
+        <div class="setting-row">
+          <div><div class="setting-key">AWS Region</div><div class="setting-detail">CloudFront only reads ACM certs from this region</div></div>
+          <span class="badge b-warn">us-east-1 only</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Validation method</div></div>
+          <span class="badge b-info">DNS validation</span>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-key">Certificate status</div><div class="setting-detail">Must be Issued before attaching to CloudFront</div></div>
+          <span class="badge b-on">Issued ✓</span>
+        </div>
+
+        <div style="margin-top:1rem">
+          <div class="code-label">Domains to include in the certificate</div>
+          <div class="code-block"><span class="val">mypublic.akhileshravuri.online</span><br><span class="val">www.mypublic.akhileshravuri.online</span></div>
+        </div>
+
+        <div class="alert alert-danger" style="margin-top:.5rem"><span class="alert-icon">✗</span><span>If you create the ACM cert in any region other than <code>us-east-1</code>, CloudFront will not see it in the dropdown. You will need to recreate it.</span></div>
+      </div>
+    </div>
+
+      <!-- STEPS -->
+  <div class="steps">
+
+    <!-- ═══ STEP 1 ═══ -->
+    <div class="step-block">
+      <div class="step-header">
+        <div class="step-number n-acm">1</div>
+        <div class="step-title-wrap">
+          <div class="step-where">AWS Console · ACM</div>
+          <div class="step-title">Open your certificate in ACM</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="micro-steps">
+          <div class="micro-step"><div class="micro-num">a</div><div class="micro-text">Go to <strong>AWS Console</strong> and make sure you are in region <code>us-east-1 (N. Virginia)</code> — check the top-right region selector</div></div>
+          <div class="micro-step"><div class="micro-num">b</div><div class="micro-text">Search for <code>Certificate Manager</code> in the top search bar and open it</div></div>
+          <div class="micro-step"><div class="micro-num">c</div><div class="micro-text">In the list, find your certificate for <code>mypublic.akhileshravuri.online</code> — status will be <strong>Pending validation</strong></div></div>
+          <div class="micro-step"><div class="micro-num">d</div><div class="micro-text">Click the <strong>Certificate ID</strong> link to open the certificate detail page</div></div>
+        </div>
+
+        <div class="alert alert-danger">
+          <span class="alert-icon">⚠</span>
+          <span>If you do not see your certificate in this list, you are in the wrong region. CloudFront only works with ACM certs in <strong>us-east-1</strong>. Switch the region and check again.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 2 ═══ -->
+    <div class="step-block">
+      <div class="step-header">
+        <div class="step-number n-acm">2</div>
+        <div class="step-title-wrap">
+          <div class="step-where">AWS Console · ACM · Certificate Detail</div>
+          <div class="step-title">Find the "Domains" section — this is where the CNAME records live</div>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <!-- ACM Screen Mockup -->
+        <div class="screen">
+          <div class="aws-nav">
+            <span class="aws-logo">AWS</span>
+            <span class="aws-nav-text">Certificate Manager</span>
+          </div>
+          <div class="aws-breadcrumb">
+            Certificate Manager &rsaquo; <span>Certificates</span> &rsaquo; <span>arn:aws:acm:us-east-1:123456789:certificate/abc123</span>
+          </div>
+
+          <div class="cert-status-bar">
+            <span class="cert-arn">arn:aws:acm:us-east-1:123456789:certificate/abc-def-123</span>
+            <span class="status-badge status-pending">⏳ Pending validation</span>
+          </div>
+
+          <div class="domains-section">
+            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border)">Domains — validation records</div>
+
+            <!-- Domain 1 -->
+            <div class="domain-card">
+              <div class="domain-card-header">
+                <span class="domain-name">mypublic.akhileshravuri.online</span>
+                <span class="val-type">CNAME validation</span>
+              </div>
+              <div class="cname-rows">
+                <div class="cname-field">
+                  <div class="cname-label">CNAME name (copy this exactly)</div>
+                  <div class="cname-row-wrap">
+                    <div class="cname-value">_a1b2c3d4e5f6a1b2c3d4.mypublic.akhileshravuri.online.</div>
+                    <button class="copy-btn" onclick="navigator.clipboard.writeText('_a1b2c3d4e5f6a1b2c3d4.mypublic.akhileshravuri.online.')">Copy</button>
+                  </div>
+                </div>
+                <div class="cname-field">
+                  <div class="cname-label">CNAME value (copy this exactly)</div>
+                  <div class="cname-row-wrap">
+                    <div class="cname-value val">_x1y2z3a4b5c6x1y2z3a4.acm-validations.aws.</div>
+                    <button class="copy-btn" onclick="navigator.clipboard.writeText('_x1y2z3a4b5c6x1y2z3a4.acm-validations.aws.')">Copy</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Domain 2 -->
+            <div class="domain-card">
+              <div class="domain-card-header">
+                <span class="domain-name">www.mypublic.akhileshravuri.online</span>
+                <span class="val-type">CNAME validation</span>
+              </div>
+              <div class="cname-rows">
+                <div class="cname-field">
+                  <div class="cname-label">CNAME name (copy this exactly)</div>
+                  <div class="cname-row-wrap">
+                    <div class="cname-value">_q9r8s7t6u5v4q9r8s7t6.www.mypublic.akhileshravuri.online.</div>
+                    <button class="copy-btn" onclick="navigator.clipboard.writeText('_q9r8s7t6u5v4q9r8s7t6.www.mypublic.akhileshravuri.online.')">Copy</button>
+                  </div>
+                </div>
+                <div class="cname-field">
+                  <div class="cname-label">CNAME value (copy this exactly)</div>
+                  <div class="cname-row-wrap">
+                    <div class="cname-value val">_m1n2o3p4q5r6m1n2o3p4.acm-validations.aws.</div>
+                    <button class="copy-btn" onclick="navigator.clipboard.writeText('_m1n2o3p4q5r6m1n2o3p4.acm-validations.aws.')">Copy</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="alert alert-warn" style="margin-top:.75rem">
+          <span class="alert-icon">⚠</span>
+          <span>Your actual CNAME names and values will be different random strings — the ones shown above are examples. Copy from your own ACM console screen exactly as shown.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 3 ═══ -->
+    <div class="step-block">
+      <div class="step-header">
+        <div class="step-number n-acm">3</div>
+        <div class="step-title-wrap">
+          <div class="step-where">ACM → GoDaddy field mapping</div>
+          <div class="step-title">Understand what maps to what before you paste</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div style="display:flex;flex-direction:column;gap:.75rem">
+
+          <div class="mapping-grid">
+            <div class="map-from">
+              <div class="map-label">ACM field</div>
+              <div class="map-title">CNAME name</div>
+              <div class="map-note">e.g. <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--orange)">_a1b2c3.mypublic.akhileshravuri.online.</code></div>
+            </div>
+            <div class="map-arrow">→</div>
+            <div class="map-to">
+              <div class="map-label">GoDaddy field</div>
+              <div class="map-title">Name / Host</div>
+              <div class="map-note">Paste only the part <strong>before</strong> your domain. GoDaddy adds the domain automatically. e.g. <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green)">_a1b2c3.mypublic</code></div>
+            </div>
+          </div>
+
+          <div class="mapping-grid">
+            <div class="map-from">
+              <div class="map-label">ACM field</div>
+              <div class="map-title">CNAME value</div>
+              <div class="map-note">e.g. <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--orange)">_x1y2z3.acm-validations.aws.</code></div>
+            </div>
+            <div class="map-arrow">→</div>
+            <div class="map-to">
+              <div class="map-label">GoDaddy field</div>
+              <div class="map-title">Value / Points to</div>
+              <div class="map-note">Paste the full string but <strong>remove the trailing dot</strong>. e.g. <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green)">_x1y2z3.acm-validations.aws</code></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-warn" style="margin-top:.75rem">
+          <span class="alert-icon">⚠</span>
+          <span><strong>Critical GoDaddy gotcha:</strong> ACM shows the full domain in the CNAME name field (e.g. <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--orange)">_abc.mypublic.akhileshravuri.online.</code>). GoDaddy automatically appends your domain, so you must strip it. If your domain is <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--orange)">akhileshravuri.online</code>, only enter <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green)">_abc.mypublic</code> in the Name field.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 4 ═══ -->
+    <div class="step-block">
+      <div class="step-header">
+        <div class="step-number n-godaddy">4</div>
+        <div class="step-title-wrap">
+          <div class="step-where">GoDaddy · My Products</div>
+          <div class="step-title">Navigate to your domain's DNS settings</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="micro-steps">
+          <div class="micro-step"><div class="micro-num">a</div><div class="micro-text">Log in to <strong>GoDaddy</strong> and go to <code>My Products</code></div></div>
+          <div class="micro-step"><div class="micro-num">b</div><div class="micro-text">Find <code>akhileshravuri.online</code> in the list and click the <strong>three dots (⋯) menu</strong> next to it</div></div>
+          <div class="micro-step"><div class="micro-num">c</div><div class="micro-text">Click <strong>Manage DNS</strong> — this opens the DNS Records page</div></div>
+          <div class="micro-step"><div class="micro-num">d</div><div class="micro-text">You will see a table of existing DNS records. Scroll down past the default A records and MX records.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 5 ═══ -->
+    <div class="step-block">
+      <div class="step-header">
+        <div class="step-number n-godaddy">5</div>
+        <div class="step-title-wrap">
+          <div class="step-where">GoDaddy · DNS Manager · Add Record</div>
+          <div class="step-title">Add the first CNAME record (for the main domain)</div>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <!-- GoDaddy Screen Mockup -->
+        <div class="screen">
+          <div class="gd-nav">
+            <span class="gd-logo">GODADDY</span>
+            <span class="gd-nav-text">DNS Management</span>
+          </div>
+          <div class="gd-breadcrumb">
+            My Products &rsaquo; <span>akhileshravuri.online</span> &rsaquo; <span>DNS Management</span>
+          </div>
+          <div class="gd-toolbar">
+            <button class="gd-add-btn">+ Add New Record</button>
+            <div class="gd-filter">
+              <span class="gd-pill">All</span>
+              <span class="gd-pill active">CNAME</span>
+            </div>
+          </div>
+          <table class="dns-table">
+            <thead>
+              <tr>
+                <th style="width:80px">Type</th>
+                <th>Name</th>
+                <th>Value</th>
+                <th style="width:70px">TTL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="new-row">
+                <td><span class="type-badge">CNAME</span> <span class="new-badge">+ new</span></td>
+                <td class="mono-cell">_a1b2c3d4e5f6a1b2c3d4.mypublic</td>
+                <td class="mono-val">_x1y2z3a4b5c6x1y2z3a4.acm-validations.aws</td>
+                <td class="muted-cell">1 hr</td>
+              </tr>
+              <tr>
+                <td><span class="type-badge" style="background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.25);color:var(--blue)">A</span></td>
+                <td class="muted-cell">@</td>
+                <td class="muted-cell">Parked</td>
+                <td class="muted-cell">1 hr</td>
+              </tr>
+              <tr>
+                <td><span class="type-badge" style="background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.25);color:var(--blue)">CNAME</span></td>
+                <td class="muted-cell">www</td>
+                <td class="muted-cell">@</td>
+                <td class="muted-cell">1 hr</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.5rem">
+          <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:'JetBrains Mono',monospace">When adding this record, fill in:</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.75rem">
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Type</div>
+              <div style="font-size:13px;font-weight:500;color:var(--purple)">CNAME</div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.75rem">
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">TTL</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text)">1 Hour (default)</div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:.75rem;border-left:2.5px solid var(--purple)">
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Name / Host field</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--orange)">_a1b2c3d4.mypublic</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Strip <code style="font-family:'JetBrains Mono',monospace;font-size:10px">.akhileshravuri.online.</code> from the end</div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:.75rem;border-left:2.5px solid var(--teal)">
+              <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Value / Points to field</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal)">_x1y2z3.acm-validations.aws</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Remove the trailing dot at the end</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info" style="margin-top:.75rem">
+          <span class="alert-icon">ℹ</span>
+          <span>Click <strong>Save</strong> after filling in the fields. GoDaddy may warn you that you are adding a custom record — click Continue.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 6 ═══ -->
+    <div class="step-block">
+      <div class="step-header">
+        <div class="step-number n-godaddy">6</div>
+        <div class="step-title-wrap">
+          <div class="step-where">GoDaddy · DNS Manager · Add Second Record</div>
+          <div class="step-title">Add the second CNAME record (for www subdomain)</div>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="screen">
+          <div class="gd-nav">
+            <span class="gd-logo">GODADDY</span>
+            <span class="gd-nav-text">DNS Management — after adding both records</span>
+          </div>
+          <div class="gd-breadcrumb">
+            My Products &rsaquo; <span>akhileshravuri.online</span> &rsaquo; <span>DNS Management</span>
+          </div>
+          <table class="dns-table">
+            <thead>
+              <tr>
+                <th style="width:80px">Type</th>
+                <th>Name</th>
+                <th>Value</th>
+                <th style="width:70px">TTL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="new-row">
+                <td><span class="type-badge">CNAME</span> <span class="new-badge">✓ done</span></td>
+                <td class="mono-cell" style="font-size:11px">_a1b2c3d4e5f6.mypublic</td>
+                <td class="mono-val" style="font-size:11px">_x1y2z3a4b5c6.acm-validations.aws</td>
+                <td class="muted-cell">1 hr</td>
+              </tr>
+              <tr class="new-row">
+                <td><span class="type-badge">CNAME</span> <span class="new-badge">✓ done</span></td>
+                <td class="mono-cell" style="font-size:11px">_q9r8s7t6u5v4.www.mypublic</td>
+                <td class="mono-val" style="font-size:11px">_m1n2o3p4q5r6.acm-validations.aws</td>
+                <td class="muted-cell">1 hr</td>
+              </tr>
+              <tr>
+                <td><span class="type-badge" style="background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.25);color:var(--blue)">A</span></td>
+                <td class="muted-cell">@</td>
+                <td class="muted-cell">Parked</td>
+                <td class="muted-cell">1 hr</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="alert alert-info" style="margin-top:.75rem">
+          <span class="alert-icon">ℹ</span>
+          <span>Repeat the same Add Record process for the second domain (<code style="font-family:'JetBrains Mono',monospace;font-size:11px">www.mypublic.akhileshravuri.online</code>) using its own separate CNAME name and value from ACM. You must add both — one per domain on the certificate.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 7 ═══ -->
+    <div class="step-block">
+      <div class="step-header">
+        <div class="step-number n-done">7</div>
+        <div class="step-title-wrap">
+          <div class="step-where">AWS Console · ACM — wait for Issued status</div>
+          <div class="step-title">Go back to ACM and wait for validation</div>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="screen">
+          <div class="aws-nav">
+            <span class="aws-logo">AWS</span>
+            <span class="aws-nav-text">Certificate Manager</span>
+          </div>
+          <div class="cert-status-bar">
+            <span class="cert-arn">arn:aws:acm:us-east-1:123456789:certificate/abc-def-123</span>
+            <span class="status-badge status-issued">✓ Issued</span>
+          </div>
+          <div style="padding:1rem;display:flex;flex-direction:column;gap:.5rem">
+            <div style="display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid var(--border);padding:.4rem 0"><span style="color:var(--muted)">mypublic.akhileshravuri.online</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:11px">✓ Verified</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:.4rem 0"><span style="color:var(--muted)">www.mypublic.akhileshravuri.online</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:11px">✓ Verified</span></div>
+          </div>
+        </div>
+
+        <div class="status-timeline" style="margin-top:1.25rem">
+          <div class="st-item">
+            <div class="st-left"><div class="st-dot st-check">✓</div><div class="st-line"></div></div>
+            <div class="st-content"><div class="st-title">DNS records saved in GoDaddy</div><div class="st-detail">Both CNAME records are visible in the DNS Manager table</div></div>
+          </div>
+          <div class="st-item">
+            <div class="st-left"><div class="st-dot st-wait">⏳</div><div class="st-line"></div></div>
+            <div class="st-content"><div class="st-title">DNS propagates globally</div><div class="st-detail">Usually 5–30 minutes, worst case up to 48 hours. ACM polls for the records automatically.</div></div>
+          </div>
+          <div class="st-item">
+            <div class="st-left"><div class="st-dot st-check">✓</div><div class="st-line"></div></div>
+            <div class="st-content"><div class="st-title">ACM status changes to Issued</div><div class="st-detail">Refresh the ACM console page. Once both domains show Verified, the cert is Issued.</div></div>
+          </div>
+          <div class="st-item">
+            <div class="st-left"><div class="st-dot st-check">✓</div></div>
+            <div class="st-content"><div class="st-title">Attach cert to CloudFront</div><div class="st-detail">Go to CloudFront distribution → Edit → Custom SSL certificate → select this cert from the dropdown</div></div>
+          </div>
+        </div>
+
+        <div class="alert alert-success" style="margin-top:1rem">
+          <span class="alert-icon">✓</span>
+          <span>Once the cert is Issued, go to your CloudFront distribution settings, click <strong>Edit</strong>, scroll to <strong>Custom SSL certificate</strong>, and you will see your cert available to select. Pick it and save.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- DNS -->
+    <div class="section sec-dns">
+      <div class="section-header">
+        <div class="section-num num-dns">4</div>
+        <span class="section-title">🌐 GoDaddy DNS — records to add</span>
+      </div>
+      <div class="section-body">
+
+        <div class="dns-row">
+          <div class="dns-head">Type</div>
+          <div class="dns-head">Name</div>
+          <div class="dns-head">Value</div>
+        </div>
+
+        <div class="dns-row">
+          <div><span class="dns-label dns-cname">CNAME</span></div>
+          <div class="dns-mono">_xxx.mypublic</div>
+          <div class="dns-val">_yyy.acm-validations.aws</div>
+        </div>
+
+        <div class="dns-row">
+          <div><span class="dns-label dns-cname">CNAME</span></div>
+          <div class="dns-mono">_xxx.www.mypublic</div>
+          <div class="dns-val">_yyy.acm-validations.aws</div>
+        </div>
+
+        <div class="dns-row">
+          <div><span class="dns-label dns-cname">CNAME</span></div>
+          <div class="dns-mono">mypublic</div>
+          <div class="dns-val" style="color:var(--teal)">dxxxxx.cloudfront.net</div>
+        </div>
+
+        <div class="alert alert-info" style="margin-top:.75rem"><span class="alert-icon">ℹ</span><span>The first two records are ACM validation records — copy the exact names and values from the ACM console. The third record points your domain to CloudFront. DNS propagation may take up to 48 hours but usually completes within 30 minutes.</span></div>
+
+        <div class="alert alert-warn"><span class="alert-icon">⚠</span><span>GoDaddy strips the root domain from CNAME names. If your domain is <code>akhileshravuri.online</code>, enter only <code>mypublic</code> in the Name field — not the full domain.</span></div>
+      </div>
+    </div>
+
+    <!-- Mistakes -->
+    <div class="section sec-no">
+      <div class="section-header">
+        <div class="section-num" style="background:rgba(239,68,68,.2);color:var(--red)">✗</div>
+        <span class="section-title">Common mistakes to avoid</span>
+      </div>
+      <div class="section-body">
+        <div class="mistakes-grid">
+          <div class="mistake-card">
+            <h4>OAC / OAI enabled</h4>
+            <p>Origin Access Control breaks S3 website endpoints. Use it only with REST endpoints (private buckets), not website hosting.</p>
+          </div>
+          <div class="mistake-card">
+            <h4>Origin set to HTTPS</h4>
+            <p>S3 website endpoints serve HTTP only. Setting origin protocol to HTTPS causes CloudFront to throw 504 errors.</p>
+          </div>
+          <div class="mistake-card">
+            <h4>Wrong ACM region</h4>
+            <p>Creating the cert in any region other than us-east-1 makes it invisible to CloudFront. Always use us-east-1.</p>
+          </div>
+          <div class="mistake-card">
+            <h4>Block public access ON</h4>
+            <p>Leaving S3 Block Public Access enabled prevents the bucket policy from granting public read — your site returns 403.</p>
+          </div>
+          <div class="mistake-card">
+            <h4>Using REST endpoint as origin</h4>
+            <p>The REST endpoint (<code>.s3.amazonaws.com</code>) doesn't support website routing. Use the website endpoint (<code>.s3-website-region.amazonaws.com</code>).</p>
+          </div>
+          <div class="mistake-card">
+            <h4>ACM cert not yet Issued</h4>
+            <p>CloudFront won't let you attach a certificate with Pending Validation status. Add DNS records and wait for Issued state first.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final checklist -->
+    <div class="section sec-final">
+      <div class="section-header">
+        <div class="section-num" style="background:rgba(62,207,142,.2);color:var(--green)">✓</div>
+        <span class="section-title">Final deployment checklist</span>
+      </div>
+      <div class="section-body">
+        <div class="checklist">
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">S3 block public access</div><span class="check-val">All four OFF</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">S3 bucket policy applied</div><span class="check-val">PublicRead statement</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">S3 static website hosting</div><span class="check-val">index.html / index.html</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">CloudFront origin</div><span class="check-val">website endpoint URL</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">CloudFront origin protocol</div><span class="check-val">HTTP only</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">CloudFront viewer protocol</div><span class="check-val">Redirect HTTP → HTTPS</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">CloudFront default root object</div><span class="check-val">index.html</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">ACM certificate region</div><span class="check-val">us-east-1</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">ACM certificate status</div><span class="check-val">Issued</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">CloudFront SSL cert attached</div><span class="check-val">ACM cert selected</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">GoDaddy ACM validation records</div><span class="check-val">Both CNAMEs added</span></div>
+          <div class="check-item"><div class="check-icon">✓</div><div class="check-text">GoDaddy domain CNAME</div><span class="check-val">→ dxxxxx.cloudfront.net</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full-Stack DevOps Learning Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1f2d45;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --docker: #2496ed;
+    --k8s: #326ce5;
+    --aws: #ff9900;
+    --green: #10b981;
+    --red: #ef4444;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #0f1d35 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at center, rgba(59,130,246,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    color: var(--text2);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 24px;
+  }
+  .badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge-docker { background: rgba(36,150,237,0.15); color: var(--docker); border: 1px solid rgba(36,150,237,0.3); }
+  .badge-k8s { background: rgba(50,108,229,0.15); color: #6b9eff; border: 1px solid rgba(50,108,229,0.3); }
+  .badge-aws { background: rgba(255,153,0,0.15); color: var(--aws); border: 1px solid rgba(255,153,0,0.3); }
+  .badge-pg { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+
+  .layout {
+    display: flex;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    gap: 30px;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+  }
+  .sidebar-section { margin-bottom: 24px; }
+  .sidebar-title {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    padding: 0 12px;
+    margin-bottom: 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text2);
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(59,130,246,0.12); color: var(--accent); font-weight: 600; }
+  .nav-icon { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+
+  /* MAIN CONTENT */
+  .main { flex: 1; min-width: 0; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-icon { font-size: 2rem; }
+  .section-header h2 { font-size: 1.6rem; font-weight: 700; }
+  .section-header p { color: var(--text2); font-size: 0.9rem; margin-top: 2px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .card-title .dot.green { background: var(--green); }
+  .card-title .dot.amber { background: var(--accent4); }
+  .card-title .dot.purple { background: var(--accent2); }
+
+  /* CODE BLOCKS */
+  pre {
+    background: #070d1a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 12px 0;
+    position: relative;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #e2e8f0;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* SYNTAX HIGHLIGHT */
+  .c-comment { color: #4a5568; }
+  .c-cmd { color: #68d391; }
+  .c-key { color: #76e4f7; }
+  .c-val { color: #fbb6ce; }
+  .c-str { color: #fbd38d; }
+  .c-flag { color: #b794f4; }
+
+  /* STEPS */
+  .steps { counter-reset: step; }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.15);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-content { flex: 1; }
+  .step-content h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+  .step-content p { font-size: 0.85rem; color: var(--text2); }
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch-diagram {
+    background: #070d1a;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px 0;
+    text-align: center;
+  }
+  .arch-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+  }
+  .arch-box {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+  .ab-blue { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.4); color: #93c5fd; }
+  .ab-green { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); color: #6ee7b7; }
+  .ab-purple { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.4); color: #c4b5fd; }
+  .ab-orange { background: rgba(255,153,0,0.15); border: 1px solid rgba(255,153,0,0.4); color: #fcd34d; }
+  .ab-gray { background: rgba(100,116,139,0.15); border: 1px solid rgba(100,116,139,0.4); color: #94a3b8; }
+  .arrow { color: var(--text3); font-size: 1.2rem; }
+
+  /* AWS SERVICES GRID */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .service-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    transition: border-color 0.2s;
+  }
+  .service-card:hover { border-color: rgba(59,130,246,0.4); }
+  .service-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--aws);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .service-desc { font-size: 0.8rem; color: var(--text2); line-height: 1.5; }
+  .service-practice {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--accent3);
+    background: rgba(16,185,129,0.08);
+    border-radius: 5px;
+    padding: 4px 8px;
+  }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(31,45,69,0.5);
+    font-size: 0.85rem;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-icon { color: var(--green); font-size: 0.9rem; margin-top: 1px; flex-shrink: 0; }
+
+  /* FILE TREE */
+  .file-tree {
+    background: #070d1a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.9;
+  }
+  .ft-dir { color: #76e4f7; }
+  .ft-file { color: #e2e8f0; }
+  .ft-note { color: #4a5568; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab-btn {
+    padding: 7px 16px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-size: 0.8rem;
+    font-family: 'Sora', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* PROGRESS TRACKER */
+  .progress-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin: 8px 0 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* INFO BOXES */
+  .info-box {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .info-box.tip { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: #a7f3d0; }
+  .info-box.warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #fde68a; }
+  .info-box.note { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); color: #bfdbfe; }
+  .info-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; padding: 16px; }
+    .sidebar { width: 100%; position: static; }
+    .hero h1 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🚀 Full-Stack DevOps Masterclass</h1>
+  <p>Todo App — React + Node.js + PostgreSQL, fully containerized with Docker, orchestrated with Kubernetes, deployed on AWS</p>
+  <div class="badges">
+    <span class="badge badge-docker">🐳 Docker</span>
+    <span class="badge badge-k8s">☸️ Kubernetes</span>
+    <span class="badge badge-aws">☁️ AWS</span>
+    <span class="badge badge-pg">🐘 PostgreSQL</span>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">The Project</div>
+      <button class="nav-item active" onclick="showSection('overview')">
+        <span class="nav-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa">🗺</span> Overview
+      </button>
+      <button class="nav-item" onclick="showSection('structure')">
+        <span class="nav-icon" style="background:rgba(16,185,129,0.15);color:#34d399">📁</span> File Structure
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Docker</div>
+      <button class="nav-item" onclick="showSection('docker-basics')">
+        <span class="nav-icon" style="background:rgba(36,150,237,0.15);color:#2496ed">📦</span> Basics & Concepts
+      </button>
+      <button class="nav-item" onclick="showSection('docker-practice')">
+        <span class="nav-icon" style="background:rgba(36,150,237,0.15);color:#2496ed">⚙️</span> Practice Steps
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Kubernetes</div>
+      <button class="nav-item" onclick="showSection('k8s-basics')">
+        <span class="nav-icon" style="background:rgba(50,108,229,0.15);color:#6b9eff">☸️</span> Concepts
+      </button>
+      <button class="nav-item" onclick="showSection('k8s-practice')">
+        <span class="nav-icon" style="background:rgba(50,108,229,0.15);color:#6b9eff">🔧</span> Practice Steps
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">AWS</div>
+      <button class="nav-item" onclick="showSection('aws-services')">
+        <span class="nav-icon" style="background:rgba(255,153,0,0.15);color:#ff9900">☁️</span> All Services
+      </button>
+      <button class="nav-item" onclick="showSection('aws-deploy')">
+        <span class="nav-icon" style="background:rgba(255,153,0,0.15);color:#ff9900">🚀</span> Deploy to AWS
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Practice</div>
+      <button class="nav-item" onclick="showSection('roadmap')">
+        <span class="nav-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa">🗓</span> 30-Day Roadmap
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <div class="section active" id="section-overview">
+      <div class="section-header">
+        <span class="section-icon">🗺️</span>
+        <div>
+          <h2>Project Overview</h2>
+          <p>What you're building and how everything connects</p>
+        </div>
+      </div>
+
+      <div class="arch-diagram">
+        <div style="font-size:0.7rem;color:var(--text3);margin-bottom:20px;text-transform:uppercase;letter-spacing:0.1em">Architecture</div>
+        <div class="arch-row">
+          <div class="arch-box ab-gray">Browser</div>
+          <div class="arrow">→</div>
+          <div class="arch-box ab-blue">Nginx :80<br><span style="opacity:0.6;font-size:0.7rem">React Frontend</span></div>
+          <div class="arrow">→</div>
+          <div class="arch-box ab-green">Express :5000<br><span style="opacity:0.6;font-size:0.7rem">Node Backend</span></div>
+          <div class="arrow">→</div>
+          <div class="arch-box ab-purple">PostgreSQL :5432<br><span style="opacity:0.6;font-size:0.7rem">Database</span></div>
+        </div>
+        <div class="arch-row" style="margin-top:24px">
+          <div class="arch-box ab-orange">Docker / Docker Compose</div>
+          <div class="arrow">→</div>
+          <div class="arch-box ab-blue">Kubernetes (EKS)</div>
+          <div class="arrow">→</div>
+          <div class="arch-box ab-orange">AWS Cloud</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>What this project covers</div>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span>React frontend with full CRUD (Create, Read, Update, Delete)</li>
+          <li><span class="check-icon">✓</span>Node.js + Express REST API backend</li>
+          <li><span class="check-icon">✓</span>PostgreSQL database with persistent storage</li>
+          <li><span class="check-icon">✓</span>Docker multi-stage builds for frontend and backend</li>
+          <li><span class="check-icon">✓</span>Docker Compose for local development orchestration</li>
+          <li><span class="check-icon">✓</span>Kubernetes Deployments, Services, Ingress, Secrets, PVC</li>
+          <li><span class="check-icon">✓</span>Horizontal Pod Autoscaling (HPA)</li>
+          <li><span class="check-icon">✓</span>AWS EKS, ECR, RDS, ALB, Route53, CloudWatch</li>
+        </ul>
+      </div>
+
+      <div class="info-box tip">
+        <span class="info-icon">💡</span>
+        <div><strong>Learning approach:</strong> First get everything running locally with Docker Compose, then migrate to Kubernetes locally (minikube), then push to AWS EKS. Each step reinforces the previous one.</div>
+      </div>
+    </div>
+
+    <!-- FILE STRUCTURE -->
+    <div class="section" id="section-structure">
+      <div class="section-header">
+        <span class="section-icon">📁</span>
+        <div><h2>File Structure</h2><p>Every file you need to create</p></div>
+      </div>
+
+      <div class="file-tree">
+<span class="ft-dir">todo-app/</span>
+├── <span class="ft-dir">frontend/</span>
+│   ├── <span class="ft-dir">src/</span>
+│   │   └── <span class="ft-file">App.jsx</span>          <span class="ft-note"># React UI with CRUD</span>
+│   ├── <span class="ft-file">Dockerfile</span>           <span class="ft-note"># Multi-stage: build → nginx</span>
+│   ├── <span class="ft-file">nginx.conf</span>           <span class="ft-note"># Serve SPA + proxy /api</span>
+│   ├── <span class="ft-file">index.html</span>           <span class="ft-note"># Vite entry point</span>
+│   └── <span class="ft-file">package.json</span>
+│
+├── <span class="ft-dir">backend/</span>
+│   ├── <span class="ft-file">server.js</span>            <span class="ft-note"># Express + pg CRUD API</span>
+│   ├── <span class="ft-file">Dockerfile</span>           <span class="ft-note"># node:alpine image</span>
+│   └── <span class="ft-file">package.json</span>
+│
+├── <span class="ft-dir">k8s/</span>
+│   ├── <span class="ft-file">manifests.yaml</span>       <span class="ft-note"># Deployments, Services, Ingress</span>
+│   ├── <span class="ft-file">secret.yaml</span>          <span class="ft-note"># DB credentials (never commit!)</span>
+│   └── <span class="ft-file">hpa.yaml</span>             <span class="ft-note"># Auto-scaling config</span>
+│
+└── <span class="ft-file">docker-compose.yml</span>       <span class="ft-note"># Local 3-service orchestration</span>
+      </div>
+
+      <div class="info-box warn">
+        <span class="info-icon">⚠️</span>
+        <div>Add <code>secret.yaml</code> and any <code>.env</code> files to <code>.gitignore</code>. Never commit secrets to git!</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot green"></span>Frontend setup commands</div>
+        <pre><code><span class="c-comment"># Create React app with Vite</span>
+<span class="c-cmd">npm create vite@latest frontend -- --template react</span>
+<span class="c-cmd">cd frontend && npm install</span>
+
+<span class="c-comment"># Replace src/App.jsx with the provided file</span>
+<span class="c-comment"># Then test locally:</span>
+<span class="c-cmd">npm run dev</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot green"></span>Backend setup commands</div>
+        <pre><code><span class="c-cmd">mkdir backend && cd backend</span>
+<span class="c-cmd">npm init -y</span>
+<span class="c-cmd">npm install express pg cors</span>
+<span class="c-comment"># Add server.js from the provided file</span>
+<span class="c-cmd">node server.js</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+    </div>
+
+    <!-- DOCKER BASICS -->
+    <div class="section" id="section-docker-basics">
+      <div class="section-header">
+        <span class="section-icon">🐳</span>
+        <div><h2>Docker — Concepts</h2><p>The mental model you need before running commands</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Core concepts</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <h4>Image vs Container</h4>
+              <p>An <strong>Image</strong> is a blueprint (like a class). A <strong>Container</strong> is a running instance of that image (like an object). Images are immutable; containers are ephemeral.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <h4>Dockerfile</h4>
+              <p>A text file with instructions to build an image. Each instruction creates a layer. Layers are cached — only changed layers re-run.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <h4>Multi-stage builds</h4>
+              <p>Build your app in one stage (with all dev deps), copy only the output to a slim final stage. Our frontend uses this: Stage 1 = Node.js (builds React), Stage 2 = Nginx (serves static files).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <h4>Docker Compose</h4>
+              <p>Define and run multiple containers together. Handles networking (services find each other by name), volumes, and environment variables. Perfect for local dev.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <h4>Volumes</h4>
+              <p>Named volumes (like <code>pgdata</code>) persist data beyond a container's life. Bind mounts link host directories into containers for live reloading.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot amber"></span>Essential Docker commands</div>
+        <pre><code><span class="c-comment"># Build an image</span>
+<span class="c-cmd">docker build</span> <span class="c-flag">-t</span> <span class="c-str">myapp:latest</span> <span class="c-val">.</span>
+
+<span class="c-comment"># Run a container</span>
+<span class="c-cmd">docker run</span> <span class="c-flag">-p 3000:80 -d</span> <span class="c-str">myapp:latest</span>
+
+<span class="c-comment"># List running containers</span>
+<span class="c-cmd">docker ps</span>
+
+<span class="c-comment"># View logs</span>
+<span class="c-cmd">docker logs</span> <span class="c-val">&lt;container-id&gt;</span>
+
+<span class="c-comment"># Shell into container</span>
+<span class="c-cmd">docker exec</span> <span class="c-flag">-it</span> <span class="c-val">&lt;container-id&gt;</span> <span class="c-cmd">sh</span>
+
+<span class="c-comment"># Remove all stopped containers</span>
+<span class="c-cmd">docker container prune</span>
+
+<span class="c-comment"># Push to Docker Hub</span>
+<span class="c-cmd">docker tag</span> <span class="c-str">myapp:latest</span> <span class="c-val">username/myapp:latest</span>
+<span class="c-cmd">docker push</span> <span class="c-val">username/myapp:latest</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+    </div>
+
+    <!-- DOCKER PRACTICE -->
+    <div class="section" id="section-docker-practice">
+      <div class="section-header">
+        <span class="section-icon">⚙️</span>
+        <div><h2>Docker — Practice Steps</h2><p>Hands-on steps from zero to running app</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Step 1 — Install Docker</div>
+        <pre><code><span class="c-comment"># macOS</span>
+<span class="c-comment"># Download Docker Desktop from https://docker.com/products/docker-desktop</span>
+
+<span class="c-comment"># Ubuntu/Linux</span>
+<span class="c-cmd">sudo apt-get update</span>
+<span class="c-cmd">sudo apt-get install docker.io docker-compose-v2</span>
+<span class="c-cmd">sudo usermod -aG docker $USER</span>
+
+<span class="c-comment"># Verify</span>
+<span class="c-cmd">docker --version</span>
+<span class="c-cmd">docker compose version</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Step 2 — Build images individually</div>
+        <pre><code><span class="c-comment"># Build backend</span>
+<span class="c-cmd">cd backend</span>
+<span class="c-cmd">docker build</span> <span class="c-flag">-t</span> <span class="c-str">todo-backend:v1</span> <span class="c-val">.</span>
+
+<span class="c-comment"># Build frontend</span>
+<span class="c-cmd">cd ../frontend</span>
+<span class="c-cmd">docker build</span> <span class="c-flag">-t</span> <span class="c-str">todo-frontend:v1</span> <span class="c-val">.</span>
+
+<span class="c-comment"># List your images</span>
+<span class="c-cmd">docker images</span>
+
+<span class="c-comment"># Inspect image layers</span>
+<span class="c-cmd">docker history todo-backend:v1</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot green"></span>Step 3 — Run with Docker Compose</div>
+        <pre><code><span class="c-comment"># From the todo-app/ root directory</span>
+<span class="c-cmd">cd todo-app</span>
+
+<span class="c-comment"># Start all 3 services (db, backend, frontend)</span>
+<span class="c-cmd">docker compose up --build</span>
+
+<span class="c-comment"># Run in background</span>
+<span class="c-cmd">docker compose up -d --build</span>
+
+<span class="c-comment"># View logs for specific service</span>
+<span class="c-cmd">docker compose logs -f backend</span>
+
+<span class="c-comment"># Stop everything</span>
+<span class="c-cmd">docker compose down</span>
+
+<span class="c-comment"># Destroy including volumes (wipes db!)</span>
+<span class="c-cmd">docker compose down -v</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+        <div class="info-box tip" style="margin-top:12px">
+          <span class="info-icon">💡</span>
+          <div>App runs at <strong>http://localhost:3000</strong>. API at <strong>http://localhost:5000/api/todos</strong>.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot amber"></span>Step 4 — Practice exercises</div>
+        <ul class="checklist">
+          <li><span class="check-icon">→</span>Change the backend port from 5000 to 8080. Update docker-compose.yml. Rebuild.</li>
+          <li><span class="check-icon">→</span>Add a <code>.dockerignore</code> file. Put <code>node_modules</code> in it. Notice smaller build context.</li>
+          <li><span class="check-icon">→</span>Shell into the running postgres container and run <code>psql -U postgres tododb</code> to view data.</li>
+          <li><span class="check-icon">→</span>Kill the backend container. Watch the frontend get an error. Restart it. This is why health checks matter.</li>
+          <li><span class="check-icon">→</span>Add an environment variable <code>APP_VERSION=1.0.0</code> to the backend and print it in the /health endpoint.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- K8S BASICS -->
+    <div class="section" id="section-k8s-basics">
+      <div class="section-header">
+        <span class="section-icon">☸️</span>
+        <div><h2>Kubernetes — Concepts</h2><p>The building blocks of container orchestration</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot purple"></span>Core objects — what each file does</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">📦</div>
+            <div class="step-content">
+              <h4>Pod</h4>
+              <p>Smallest deployable unit. One or more containers sharing network and storage. You almost never create Pods directly — Deployments manage them.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">🔄</div>
+            <div class="step-content">
+              <h4>Deployment</h4>
+              <p>Declares desired state: "I want 2 replicas of this container image." K8s continuously reconciles reality to match. Auto-restarts crashed pods.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">🌐</div>
+            <div class="step-content">
+              <h4>Service</h4>
+              <p>Stable network endpoint for a set of pods. Types: <code>ClusterIP</code> (internal), <code>NodePort</code> (external via node), <code>LoadBalancer</code> (cloud LB).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">🚪</div>
+            <div class="step-content">
+              <h4>Ingress</h4>
+              <p>HTTP/HTTPS routing rules. Routes <code>/api</code> → backend service, <code>/</code> → frontend service. One external IP for multiple services.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">🔒</div>
+            <div class="step-content">
+              <h4>Secret</h4>
+              <p>Stores sensitive data (passwords, tokens) as base64. Injected as env vars or files. Never hard-code passwords in Deployments.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">💾</div>
+            <div class="step-content">
+              <h4>PersistentVolumeClaim</h4>
+              <p>Requests storage. The cluster provisions it. PostgreSQL uses this so data survives pod restarts.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">📈</div>
+            <div class="step-content">
+              <h4>HorizontalPodAutoscaler</h4>
+              <p>Watches CPU/memory metrics. Scales replica count up/down automatically. Our backend goes from 2 → 10 replicas under load.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- K8S PRACTICE -->
+    <div class="section" id="section-k8s-practice">
+      <div class="section-header">
+        <span class="section-icon">🔧</span>
+        <div><h2>Kubernetes — Practice Steps</h2><p>From local minikube to production cluster</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Step 1 — Setup local cluster with minikube</div>
+        <pre><code><span class="c-comment"># Install minikube</span>
+<span class="c-cmd">brew install minikube</span>      <span class="c-comment"># macOS</span>
+<span class="c-comment"># Linux: curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64</span>
+
+<span class="c-comment"># Start cluster</span>
+<span class="c-cmd">minikube start --driver=docker --memory=4g</span>
+
+<span class="c-comment"># Enable ingress addon</span>
+<span class="c-cmd">minikube addons enable ingress</span>
+<span class="c-cmd">minikube addons enable metrics-server</span>
+
+<span class="c-comment"># Check nodes</span>
+<span class="c-cmd">kubectl get nodes</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Step 2 — Push images and deploy</div>
+        <pre><code><span class="c-comment"># Load local images into minikube</span>
+<span class="c-cmd">minikube image load todo-backend:v1</span>
+<span class="c-cmd">minikube image load todo-frontend:v1</span>
+
+<span class="c-comment"># Create secret first!</span>
+<span class="c-cmd">kubectl apply -f k8s/secret.yaml</span>
+
+<span class="c-comment"># Deploy everything</span>
+<span class="c-cmd">kubectl apply -f k8s/manifests.yaml</span>
+<span class="c-cmd">kubectl apply -f k8s/hpa.yaml</span>
+
+<span class="c-comment"># Watch pods come up</span>
+<span class="c-cmd">kubectl get pods -w</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot green"></span>Step 3 — Key kubectl commands to practice</div>
+        <pre><code><span class="c-comment"># Get everything in default namespace</span>
+<span class="c-cmd">kubectl get all</span>
+
+<span class="c-comment"># Describe a pod (events, resource usage)</span>
+<span class="c-cmd">kubectl describe pod</span> <span class="c-val">&lt;pod-name&gt;</span>
+
+<span class="c-comment"># View logs</span>
+<span class="c-cmd">kubectl logs</span> <span class="c-flag">-f</span> <span class="c-val">&lt;pod-name&gt;</span>
+
+<span class="c-comment"># Shell into a running pod</span>
+<span class="c-cmd">kubectl exec</span> <span class="c-flag">-it</span> <span class="c-val">&lt;pod-name&gt;</span> <span class="c-flag">--</span> <span class="c-cmd">sh</span>
+
+<span class="c-comment"># Scale manually</span>
+<span class="c-cmd">kubectl scale deployment backend</span> <span class="c-flag">--replicas=4</span>
+
+<span class="c-comment"># Rolling update (zero-downtime deploy)</span>
+<span class="c-cmd">kubectl set image deployment/backend backend=todo-backend:v2</span>
+
+<span class="c-comment"># Rollback</span>
+<span class="c-cmd">kubectl rollout undo deployment/backend</span>
+
+<span class="c-comment"># View rollout history</span>
+<span class="c-cmd">kubectl rollout history deployment/backend</span>
+
+<span class="c-comment"># Port-forward to test locally</span>
+<span class="c-cmd">kubectl port-forward svc/backend 5000:5000</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot amber"></span>Practice exercises</div>
+        <ul class="checklist">
+          <li><span class="check-icon">→</span>Delete a backend pod manually. Watch K8s restart it automatically.</li>
+          <li><span class="check-icon">→</span>Update the backend image to v2. Observe rolling update. Rollback to v1.</li>
+          <li><span class="check-icon">→</span>Use <code>kubectl top pods</code> to see CPU/memory usage.</li>
+          <li><span class="check-icon">→</span>Add resource limits to the backend deployment: <code>cpu: 100m, memory: 128Mi</code>.</li>
+          <li><span class="check-icon">→</span>Create a ConfigMap for non-secret env vars (like DB_NAME) and use it in the deployment.</li>
+          <li><span class="check-icon">→</span>Run a load test with <code>hey</code> or <code>k6</code> and watch HPA scale the backend.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- AWS SERVICES -->
+    <div class="section" id="section-aws-services">
+      <div class="section-header">
+        <span class="section-icon">☁️</span>
+        <div><h2>AWS Services — Full Coverage</h2><p>Every major service, what it does, and how to practice it</p></div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab(this,'compute')">Compute</button>
+        <button class="tab-btn" onclick="showTab(this,'storage')">Storage</button>
+        <button class="tab-btn" onclick="showTab(this,'network')">Network</button>
+        <button class="tab-btn" onclick="showTab(this,'database')">Database</button>
+        <button class="tab-btn" onclick="showTab(this,'devops')">DevOps/CI</button>
+        <button class="tab-btn" onclick="showTab(this,'security')">Security</button>
+      </div>
+
+      <div class="tab-content active" id="tab-compute">
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-name">🖥️ EC2</div>
+            <div class="service-desc">Virtual machines in the cloud. You pick OS, CPU, RAM, storage. Full control. SSH in and run anything.</div>
+            <div class="service-practice">Practice: Deploy your backend directly on EC2. SSH in, install Node.js, run it as a systemd service.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">☸️ EKS</div>
+            <div class="service-desc">Managed Kubernetes control plane. AWS runs the masters, you manage worker nodes. Perfect for our K8s deployment.</div>
+            <div class="service-practice">Practice: Create an EKS cluster with eksctl and migrate your K8s manifests to it.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🐳 ECS</div>
+            <div class="service-desc">Managed container orchestration (alternative to K8s). Simpler than EKS. Fargate mode = serverless containers.</div>
+            <div class="service-practice">Practice: Run your Docker Compose app on ECS Fargate without managing servers.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">⚡ Lambda</div>
+            <div class="service-desc">Serverless functions. Run code without servers. Pay per invocation. Great for APIs, cron jobs, event processing.</div>
+            <div class="service-practice">Practice: Move the GET /todos endpoint to Lambda behind API Gateway.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🔧 Elastic Beanstalk</div>
+            <div class="service-desc">PaaS for web apps. Upload code, AWS handles deployment, scaling, load balancing. Good for quick deploys.</div>
+            <div class="service-practice">Practice: Deploy your Express backend with one command: eb deploy.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🌐 CloudFront</div>
+            <div class="service-desc">CDN with 400+ edge locations. Cache and serve your React build globally with low latency.</div>
+            <div class="service-practice">Practice: Put CloudFront in front of your S3-hosted React app.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-storage">
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-name">🪣 S3</div>
+            <div class="service-desc">Object storage. Store any file with near-infinite scale. Static website hosting, backups, data lakes, CI artifacts.</div>
+            <div class="service-practice">Practice: Build your React app, upload dist/ to S3, enable static hosting.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">💾 EBS</div>
+            <div class="service-desc">Block storage for EC2. Like a hard drive attached to your VM. Used for OS disks and databases on EC2.</div>
+            <div class="service-practice">Practice: Attach an EBS volume to EC2, format it, mount it, write data, detach, re-attach.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">📁 EFS</div>
+            <div class="service-desc">Elastic File System. NFS-compatible shared storage. Multiple EC2 instances can mount the same filesystem.</div>
+            <div class="service-practice">Practice: Share uploaded files across multiple backend EC2 instances with EFS.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🗄️ Glacier</div>
+            <div class="service-desc">Ultra-cheap archival storage. Retrieval takes minutes to hours. For compliance data, old backups.</div>
+            <div class="service-practice">Practice: Set up an S3 lifecycle policy to archive data to Glacier after 90 days.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-network">
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-name">🔒 VPC</div>
+            <div class="service-desc">Virtual Private Cloud. Your isolated network in AWS. Control subnets, routing, internet access, security groups.</div>
+            <div class="service-practice">Practice: Create a VPC with public subnet (frontend) and private subnet (DB). No direct internet to DB.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">⚖️ ALB/NLB</div>
+            <div class="service-desc">Application/Network Load Balancers. Distribute traffic across instances. ALB = HTTP/path routing. NLB = TCP/UDP.</div>
+            <div class="service-practice">Practice: Put an ALB in front of your EKS cluster. Route /api to backend, / to frontend.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🌍 Route 53</div>
+            <div class="service-desc">DNS service. Map your domain to AWS resources. Health checks, failover routing, latency routing.</div>
+            <div class="service-practice">Practice: Register a domain, create a hosted zone, point it to your ALB.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🛡️ WAF</div>
+            <div class="service-desc">Web Application Firewall. Block SQL injection, XSS, bot traffic. Attach to ALB or CloudFront.</div>
+            <div class="service-practice">Practice: Enable AWS-managed WAF rules on your ALB to block common attacks.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🔗 API Gateway</div>
+            <div class="service-desc">Managed API frontend. Rate limiting, authentication, request transformation. Pairs with Lambda for serverless APIs.</div>
+            <div class="service-practice">Practice: Create a REST API in API Gateway, connect it to your Lambda function.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-database">
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-name">🐘 RDS</div>
+            <div class="service-desc">Managed relational databases: PostgreSQL, MySQL, Aurora. Handles backups, patching, failover. Replace your K8s postgres with this.</div>
+            <div class="service-practice">Practice: Create an RDS PostgreSQL instance. Update your backend to connect to it.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">⚡ ElastiCache</div>
+            <div class="service-desc">Managed Redis or Memcached. Add caching to reduce DB load. Cache your GET /todos response.</div>
+            <div class="service-practice">Practice: Cache the todos list in Redis. Invalidate cache on POST/PUT/DELETE.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🔍 DynamoDB</div>
+            <div class="service-desc">Fully managed NoSQL. Single-digit ms latency at any scale. Serverless billing. Great for sessions, user data.</div>
+            <div class="service-practice">Practice: Migrate from PostgreSQL to DynamoDB. Handle missing JOINs differently.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🔎 OpenSearch</div>
+            <div class="service-desc">Managed Elasticsearch. Full-text search across todos. Analyze logs with Kibana.</div>
+            <div class="service-practice">Practice: Index your todos into OpenSearch. Add a search endpoint to your backend.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-devops">
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-name">📦 ECR</div>
+            <div class="service-desc">Elastic Container Registry. Private Docker registry in AWS. Push images here instead of Docker Hub for EKS.</div>
+            <div class="service-practice">Practice: Push backend and frontend images to ECR. Update K8s manifests to pull from ECR.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🔄 CodePipeline</div>
+            <div class="service-desc">CI/CD pipeline: source → build → test → deploy. Chain AWS services together.</div>
+            <div class="service-practice">Practice: Git push → CodePipeline triggers → CodeBuild builds image → deploys to EKS.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🛠️ CodeBuild</div>
+            <div class="service-desc">Managed build service. Runs your buildspec.yml: install deps, run tests, build Docker image, push to ECR.</div>
+            <div class="service-practice">Practice: Write a buildspec.yml that builds and pushes your Docker image.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🚀 CodeDeploy</div>
+            <div class="service-desc">Automate deployments to EC2, ECS, Lambda. Blue/green and rolling update strategies.</div>
+            <div class="service-practice">Practice: Blue/green deploy your backend — zero downtime by switching traffic between two environments.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🏗️ CloudFormation</div>
+            <div class="service-desc">Infrastructure as Code. Define all AWS resources in YAML/JSON. Like docker-compose but for cloud infrastructure.</div>
+            <div class="service-practice">Practice: Write a CloudFormation stack that creates VPC + RDS + EKS cluster.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-security">
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-name">🔑 IAM</div>
+            <div class="service-desc">Identity and Access Management. Users, groups, roles, policies. Every AWS action requires IAM permission.</div>
+            <div class="service-practice">Practice: Create an IAM role for your EKS pods with only the permissions they need (least privilege).</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🗝️ Secrets Manager</div>
+            <div class="service-desc">Store and rotate secrets (DB passwords, API keys). Access from code without hard-coding credentials.</div>
+            <div class="service-practice">Practice: Move your DB password from K8s secret to AWS Secrets Manager. Fetch it at runtime.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">🏢 KMS</div>
+            <div class="service-desc">Key Management Service. Create and manage encryption keys. Encrypt S3, EBS, RDS, Secrets Manager.</div>
+            <div class="service-practice">Practice: Enable RDS encryption with a KMS customer-managed key.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">📊 CloudWatch</div>
+            <div class="service-desc">Monitoring, logs, alarms. View container logs, set CPU alarms, create dashboards. Essential for production.</div>
+            <div class="service-practice">Practice: Set up a CloudWatch alarm that fires when backend CPU > 70%.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">📋 CloudTrail</div>
+            <div class="service-desc">Audit log of every AWS API call. Who did what, when, from where. Compliance and security investigation.</div>
+            <div class="service-practice">Practice: Find when and who last modified your RDS instance using CloudTrail.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AWS DEPLOY -->
+    <div class="section" id="section-aws-deploy">
+      <div class="section-header">
+        <span class="section-icon">🚀</span>
+        <div><h2>Deploy to AWS — End to End</h2><p>Complete production deployment walkthrough</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Phase 1 — Push images to ECR</div>
+        <pre><code><span class="c-comment"># Install AWS CLI and eksctl</span>
+<span class="c-cmd">brew install awscli eksctl</span>
+<span class="c-cmd">aws configure</span>   <span class="c-comment"># Enter Access Key, Secret, region</span>
+
+<span class="c-comment"># Create ECR repositories</span>
+<span class="c-cmd">aws ecr create-repository --repository-name todo-backend</span>
+<span class="c-cmd">aws ecr create-repository --repository-name todo-frontend</span>
+
+<span class="c-comment"># Authenticate Docker to ECR</span>
+<span class="c-cmd">aws ecr get-login-password --region ap-south-1 | \
+  docker login --username AWS --password-stdin \
+  123456789.dkr.ecr.ap-south-1.amazonaws.com</span>
+
+<span class="c-comment"># Tag and push images</span>
+<span class="c-cmd">docker tag todo-backend:v1 123456789.dkr.ecr.ap-south-1.amazonaws.com/todo-backend:v1</span>
+<span class="c-cmd">docker push 123456789.dkr.ecr.ap-south-1.amazonaws.com/todo-backend:v1</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Phase 2 — Create EKS cluster</div>
+        <pre><code><span class="c-comment"># Create cluster (takes ~15 mins)</span>
+<span class="c-cmd">eksctl create cluster \
+  --name todo-cluster \
+  --region ap-south-1 \
+  --nodegroup-name workers \
+  --node-type t3.small \
+  --nodes 2 \
+  --nodes-min 1 \
+  --nodes-max 4 \
+  --managed</span>
+
+<span class="c-comment"># Update kubeconfig</span>
+<span class="c-cmd">aws eks update-kubeconfig --name todo-cluster --region ap-south-1</span>
+
+<span class="c-comment"># Verify</span>
+<span class="c-cmd">kubectl get nodes</span>
+
+<span class="c-comment"># Install AWS Load Balancer Controller</span>
+<span class="c-cmd">helm repo add eks https://aws.github.io/eks-charts</span>
+<span class="c-cmd">helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=todo-cluster</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot green"></span>Phase 3 — Create RDS (production DB)</div>
+        <pre><code><span class="c-comment"># Create PostgreSQL RDS (instead of K8s postgres pod)</span>
+<span class="c-cmd">aws rds create-db-instance \
+  --db-instance-identifier tododb \
+  --db-instance-class db.t3.micro \
+  --engine postgres \
+  --master-username postgres \
+  --master-user-password YourPassword123 \
+  --allocated-storage 20 \
+  --no-publicly-accessible</span>
+
+<span class="c-comment"># Get the endpoint after creation (~5 mins)</span>
+<span class="c-cmd">aws rds describe-db-instances \
+  --query 'DBInstances[0].Endpoint.Address'</span>
+
+<span class="c-comment"># Store in Secrets Manager</span>
+<span class="c-cmd">aws secretsmanager create-secret \
+  --name prod/tododb \
+  --secret-string '{"username":"postgres","password":"YourPassword123"}'</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot amber"></span>Phase 4 — Deploy to EKS</div>
+        <pre><code><span class="c-comment"># Update manifests.yaml to use ECR images, then:</span>
+<span class="c-cmd">kubectl apply -f k8s/secret.yaml</span>
+<span class="c-cmd">kubectl apply -f k8s/manifests.yaml</span>
+<span class="c-cmd">kubectl apply -f k8s/hpa.yaml</span>
+
+<span class="c-comment"># Wait for LoadBalancer IP</span>
+<span class="c-cmd">kubectl get ingress -w</span>
+
+<span class="c-comment"># Set up CloudWatch Container Insights</span>
+<span class="c-cmd">aws eks create-addon \
+  --cluster-name todo-cluster \
+  --addon-name amazon-cloudwatch-observability</span>
+
+<span class="c-comment"># View logs in CloudWatch</span>
+<span class="c-cmd">aws logs tail /aws/containerinsights/todo-cluster/application</span></code><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+      </div>
+
+      <div class="info-box warn">
+        <span class="info-icon">⚠️</span>
+        <div><strong>Cost alert:</strong> EKS cluster costs ~$0.10/hr + EC2 nodes. Delete when done: <code>eksctl delete cluster --name todo-cluster</code></div>
+      </div>
+    </div>
+
+    <!-- ROADMAP -->
+    <div class="section" id="section-roadmap">
+      <div class="section-header">
+        <span class="section-icon">🗓️</span>
+        <div><h2>30-Day Learning Roadmap</h2><p>A structured path from zero to production</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Week 1 — Docker fundamentals</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span>Day 1–2: Docker concepts. Build backend image. Shell in, inspect layers.</li>
+          <li><span class="check-icon">✓</span>Day 3–4: Docker Compose. Run all 3 services. Practice env vars, volumes, networking.</li>
+          <li><span class="check-icon">✓</span>Day 5–7: Multi-stage builds. Optimize image sizes. Push to Docker Hub.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot amber"></span>Week 2 — Kubernetes locally</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span>Day 8–9: Minikube setup. Deploy all K8s manifests. Practice kubectl commands.</li>
+          <li><span class="check-icon">✓</span>Day 10–11: Services, Ingress, rolling updates, rollbacks.</li>
+          <li><span class="check-icon">✓</span>Day 12–14: HPA load testing. ConfigMaps. RBAC basics.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot purple"></span>Week 3 — AWS core services</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span>Day 15–16: IAM, VPC, Security Groups. Network design.</li>
+          <li><span class="check-icon">✓</span>Day 17–18: EC2 + RDS. Deploy app the "old school" way first.</li>
+          <li><span class="check-icon">✓</span>Day 19–21: S3 + CloudFront for frontend. ECR for images.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot green"></span>Week 4 — Production deployment</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span>Day 22–23: EKS cluster. Migrate from minikube to AWS.</li>
+          <li><span class="check-icon">✓</span>Day 24–25: ALB Ingress. Route53 domain. HTTPS with ACM.</li>
+          <li><span class="check-icon">✓</span>Day 26–27: CloudWatch monitoring. Alarms. Container Insights.</li>
+          <li><span class="check-icon">✓</span>Day 28–30: CI/CD with CodePipeline or GitHub Actions → ECR → EKS.</li>
+        </ul>
+      </div>
+
+      <div class="info-box tip">
+        <span class="info-icon">💡</span>
+        <div><strong>The key insight:</strong> Docker Compose and K8s manifests solve the same problem at different scales. docker-compose.yml ≈ a simplified version of Deployments + Services + Networks. Once you see the parallel, Kubernetes becomes much less intimidating.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function showTab(btn, tabName) {
+  const parent = btn.closest('.section') || document;
+  parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tabName).classList.add('active');
+}
+
+function copyCode(btn) {
+  const code = btn.previousElementSibling.textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+</script>
+</body>
+</html>

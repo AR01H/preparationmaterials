@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Telephonic Interview Prep – Akhilesh Ravuri</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --white: #ffffff;
+    --card: #ffffff;
+    --border: #e2dfd8;
+    --border2: #ccc9c0;
+    --accent: #2563eb;
+    --accent-bg: #eff6ff;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --green-border: #bbf7d0;
+    --yellow: #d97706;
+    --yellow-bg: #fffbeb;
+    --yellow-border: #fde68a;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --muted: #6b7280;
+    --text: #111827;
+    --text2: #374151;
+    --text3: #6b7280;
+    --sans: 'Plus Jakarta Sans', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* TOP BANNER */
+  .top-banner {
+    background: var(--text);
+    color: #fff;
+    padding: 28px 40px 24px;
+  }
+  .banner-inner { max-width: 860px; margin: 0 auto; }
+  .banner-row { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .banner-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+  .banner-title span { color: #93c5fd; }
+  .banner-sub { font-size: 0.8rem; color: #9ca3af; margin-top: 4px; font-family: var(--mono); }
+  .phone-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 0.75rem; color: #d1fae5; font-family: var(--mono);
+  }
+  .phone-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 40px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .stats-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .stat { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; }
+  .stat-num { font-weight: 700; font-family: var(--mono); }
+  .stat-num.total { color: var(--text); }
+  .stat-num.done-n { color: var(--green); }
+  .stat-num.later-n { color: var(--yellow); }
+  .stat-label { color: var(--muted); }
+  .progress-bar { flex: 1; min-width: 120px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s; width: 0%; }
+
+  /* FILTER BAR */
+  .filter-bar {
+    max-width: 860px; margin: 0 auto;
+    padding: 20px 40px 0;
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .fbtn {
+    font-size: 0.72rem; font-weight: 600; font-family: var(--sans);
+    padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--border2);
+    background: var(--white); color: var(--muted);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .fbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .fbtn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+  /* MAIN */
+  main { max-width: 860px; margin: 0 auto; padding: 24px 40px 60px; }
+
+  /* SECTION */
+  .sec-head {
+    display: flex; align-items: center; gap: 10px;
+    margin: 32px 0 12px;
+  }
+  .sec-head:first-child { margin-top: 0; }
+  .sec-label {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .sec-line { flex: 1; height: 1px; background: var(--border); }
+  .sec-count {
+    font-size: 0.65rem; font-family: var(--mono);
+    background: var(--border); color: var(--muted);
+    padding: 2px 8px; border-radius: 999px;
+  }
+
+  /* CARD */
+  .qcard {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s, box-shadow 0.15s;
+  }
+  .qcard:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .qcard.done  { border-left-color: var(--green); }
+  .qcard.later { border-left-color: var(--yellow); }
+
+  .qhead {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 15px 16px; cursor: pointer;
+  }
+  .qno {
+    font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+    color: var(--accent); min-width: 26px; padding-top: 2px;
+  }
+  .qtxt { font-size: 0.9rem; line-height: 1.5; flex: 1; color: var(--text2); }
+  .qtag {
+    font-size: 0.6rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px;
+    white-space: nowrap; align-self: flex-start; margin-top: 3px;
+  }
+  .tag-hr    { background: #ede9fe; color: #5b21b6; }
+  .tag-salary{ background: #fef3c7; color: #92400e; }
+  .tag-phone { background: #d1fae5; color: #065f46; }
+  .tag-work  { background: #dbeafe; color: #1e40af; }
+  .tag-behav { background: #fce7f3; color: #9d174d; }
+  .tag-offer { background: #ffedd5; color: #9a3412; }
+  .qarrow { color: var(--muted); font-size: 0.7rem; transition: transform 0.2s; padding-top: 4px; }
+  .qcard.open .qarrow { transform: rotate(180deg); }
+
+  /* BODY */
+  .qbody { display: none; padding: 0 16px 16px 54px; }
+  .qcard.open .qbody { display: block; }
+
+  /* TIP BOX */
+  .tip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .tip-label {
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--accent);
+    display: block; margin-bottom: 7px;
+  }
+  .tip p, .tip li { font-size: 0.8rem; color: var(--text3); line-height: 1.65; }
+  .tip ul { padding-left: 16px; }
+  .tip li { margin-bottom: 4px; }
+  .tip b { font-weight: 600; color: var(--text2); }
+  .tip code {
+    font-family: var(--mono); font-size: 0.74rem;
+    background: rgba(37,99,235,0.08); padding: 1px 5px; border-radius: 3px; color: var(--accent);
+  }
+
+  /* SAMPLE ANSWER */
+  .sample-head {
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--green);
+    display: block; margin: 10px 0 6px;
+  }
+  .sample-ans {
+    font-size: 0.82rem; line-height: 1.75; color: var(--text2);
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+
+  /* AVOID BOX */
+  .avoid {
+    background: var(--red-bg);
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+  .avoid-label {
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--red);
+    display: block; margin-bottom: 5px;
+  }
+  .avoid p { font-size: 0.8rem; color: #991b1b; }
+
+  /* SCRATCH */
+  .scratch-label {
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted);
+    display: block; margin: 10px 0 5px;
+  }
+  textarea.scratch {
+    width: 100%; min-height: 72px; resize: vertical;
+    background: var(--white); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 9px 11px;
+    font-family: var(--sans); font-size: 0.8rem;
+    color: var(--text); line-height: 1.5;
+  }
+  textarea.scratch::placeholder { color: #d1d5db; }
+  textarea.scratch:focus { outline: none; border-color: var(--accent); }
+
+  /* ACTIONS */
+  .actions { display: flex; gap: 8px; margin-top: 10px; }
+  .btn-done, .btn-later {
+    font-size: 0.72rem; font-weight: 700;
+    padding: 6px 16px; border-radius: 6px;
+    border: 1px solid; cursor: pointer;
+    transition: all 0.15s; font-family: var(--sans);
+  }
+  .btn-done  { border-color: var(--green-border); color: var(--green); background: transparent; }
+  .btn-done:hover, .btn-done.active { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn-later { border-color: var(--yellow-border); color: var(--yellow); background: transparent; }
+  .btn-later:hover, .btn-later.active { background: var(--yellow); color: #fff; border-color: var(--yellow); }
+
+  /* HIDDEN */
+  .qcard[style*="display:none"], .qcard[style*="display: none"] { display: none !important; }
+
+  @media (max-width: 600px) {
+    .top-banner, .stats-bar, .filter-bar, main { padding-left: 16px; padding-right: 16px; }
+    .filter-bar { padding-top: 16px; }
+  }
+
+  @media print {
+    .stats-bar { position: static; }
+    .qbody { display: block !important; }
+    .actions, textarea.scratch, .scratch-label { display: none !important; }
+    body { background: white; }
+    .top-banner { background: #111; -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-banner">
+  <div class="banner-inner">
+    <div class="banner-row">
+      <div>
+        <div class="banner-title">📞 Telephonic Interview Prep — <span>HR &amp; Personal</span></div>
+        <div class="banner-sub">// Akhilesh Ravuri · DevOps Engineer · TriByte Technologies · Sep 2022–Present</div>
+      </div>
+      <div class="phone-pill">
+        <span class="phone-dot"></span>
+        Telephonic Round Ready
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><span class="stat-num total" id="total-n">22</span><span class="stat-label">questions</span></div>
+    <div class="stat"><span class="stat-num done-n" id="done-n">0</span><span class="stat-label">ready</span></div>
+    <div class="stat"><span class="stat-num later-n" id="later-n">0</span><span class="stat-label">to practice</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <button class="fbtn active" onclick="filter('all',this)">All (32)</button>
+  <button class="fbtn" onclick="filter('phone',this)">📞 Call Etiquette</button>
+  <button class="fbtn" onclick="filter('hr',this)">👤 Introduction</button>
+  <button class="fbtn" onclick="filter('salary',this)">💰 Salary &amp; Notice</button>
+  <button class="fbtn" onclick="filter('work',this)">💼 Work &amp; Role</button>
+  <button class="fbtn" onclick="filter('behav',this)">🧠 Behavioural</button>
+  <button class="fbtn" onclick="filter('offer',this)">📄 Offer Stage</button>
+</div>
+
+<main id="main">
+
+<!-- =================== CALL ETIQUETTE =================== -->
+<div class="sec-head" data-cat="phone"><span class="sec-label">Call Etiquette</span><div class="sec-line"></div><span class="sec-count">4 Q</span></div>
+
+<div class="qcard" data-cat="phone">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">01</span>
+    <span class="qtxt">How to greet and open a telephonic interview call?</span>
+    <span class="qtag tag-phone">📞 Call</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Answer within 2 rings. Find a quiet place before the scheduled time.</li>
+        <li>Speak clearly, slightly slower than normal — they can't see your face.</li>
+        <li>Always introduce yourself first even before they ask.</li>
+        <li>Keep a glass of water nearby. Have your resume printed or open on screen.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Exact words to use</span>
+    <div class="sample-ans">
+      "Hello, good morning! This is Akhilesh speaking."<br><br>
+      [They say: "Hi Akhilesh, this is [Name] from [Company], calling for your interview."]<br><br>
+      "Hi [Name], great to connect with you! Yes, I'm all set. Please go ahead."
+    </div>
+    <span class="scratch-label">✏️ Practice notes</span>
+    <textarea class="scratch" placeholder="Write your opening line here and practice it out loud..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="phone">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">02</span>
+    <span class="qtxt">What if you didn't hear or understand a question clearly on the call?</span>
+    <span class="qtag tag-phone">📞 Call</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Never guess and answer the wrong question — it wastes everyone's time.</li>
+        <li>Politely ask them to repeat. It is completely professional to do this.</li>
+        <li>You can also repeat what you understood and confirm before answering.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ What to say</span>
+    <div class="sample-ans">
+      "I'm sorry, the line was a little unclear — could you please repeat that?"<br><br>
+      OR<br><br>
+      "Just to make sure I understood correctly — you're asking about [restate question]? Yes, so…"
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="phone">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">03</span>
+    <span class="qtxt">How to close and end the telephonic interview politely?</span>
+    <span class="qtag tag-phone">📞 Call</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Thank them by name — it shows you were paying attention.</li>
+        <li>Ask about next steps — shows you're serious about the process.</li>
+        <li>Don't hang up abruptly. Let them end the call first.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Closing words</span>
+    <div class="sample-ans">
+      "Thank you so much, [Name], for taking the time to speak with me today. I really enjoyed learning more about the role. Could you share what the next steps in the process look like? I look forward to hearing from you. Have a great day!"
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="phone">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">04</span>
+    <span class="qtxt">Do you have any questions for us? (End of interview)</span>
+    <span class="qtag tag-phone">📞 Call</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li><b>Never say "No, I'm fine."</b> — it signals low interest.</li>
+        <li>Have 2 questions ready. Focus on the role and team, not salary/leave in first round.</li>
+        <li>Good questions show you've done your homework about the company.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ 2 strong questions to ask</span>
+    <div class="sample-ans">
+      1. "Could you tell me about the current infrastructure setup and what the biggest DevOps challenges the team is working on in the next 6–12 months?"<br><br>
+      2. "What does success look like for someone in this role in the first 3 months?"
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =================== INTRODUCTION =================== -->
+<div class="sec-head" data-cat="hr"><span class="sec-label">Introduction &amp; Background</span><div class="sec-line"></div><span class="sec-count">5 Q</span></div>
+
+<div class="qcard" data-cat="hr">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">05</span>
+    <span class="qtxt">Tell me about yourself.</span>
+    <span class="qtag tag-hr">👤 Intro</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Structure (90 seconds)</span>
+      <ul>
+        <li><b>Who you are</b> → Name, current company, years of experience</li>
+        <li><b>What you do</b> → Your key responsibilities (CI/CD, AWS, K8s)</li>
+        <li><b>What you're good at</b> → Your unique strength (Dev + Ops both)</li>
+        <li><b>What you want</b> → Brief line about why you're exploring new opportunities</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "I'm Akhilesh Ravuri, a DevOps and Software Engineer with 3.5 years of experience at TriByte Technologies in Bangalore. In my current role, I handle the full CI/CD pipeline using Jenkins, manage AWS environments across Staging, UAT, and Production, and deploy microservices on Docker and Kubernetes. What makes me a bit different is that I also have strong backend development experience in PHP and Python — so I can work on both the application and infrastructure sides. I'm now looking to take on bigger cloud-native challenges and grow into a more senior platform engineering role."
+    </div>
+    <div class="avoid">
+      <span class="avoid-label">❌ Don't do this</span>
+      <p>Don't read your resume line by line. Don't just say "I am a hard worker." Don't go beyond 2 minutes.</p>
+    </div>
+    <span class="scratch-label">✏️ Your version</span>
+    <textarea class="scratch" placeholder="Write and rehearse your own 90-second intro..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="hr">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">06</span>
+    <span class="qtxt">Walk me through your career journey — from your diploma to now.</span>
+    <span class="qtag tag-hr">👤 Intro</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Points</span>
+      <ul>
+        <li>Diploma in EEE (2016–2019, 86.6%) → B.Tech EEE (2019–2022, 79.2%) → TriByte (Sep 2022–present)</li>
+        <li>Acknowledge the shift from Electrical to Software/DevOps — frame it positively as a deliberate choice</li>
+        <li>Mention how your engineering problem-solving mindset transferred well</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "I completed my Diploma in Electrical and Electronics Engineering with 86.6%, followed by my B.Tech from Vaagdevi Institute of Technology with 79.2%. During my final year of B.Tech, I developed a strong interest in software development and cloud technology. After graduating in 2022, I joined TriByte Technologies in Bangalore as a Software Developer with a DevOps focus — and over the past 3.5 years I've grown from writing backend code to owning the full cloud infrastructure and deployment pipelines for our products."
+    </div>
+    <span class="scratch-label">✏️ Your version</span>
+    <textarea class="scratch" placeholder="Adapt the timeline to sound natural..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="hr">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">07</span>
+    <span class="qtxt">What are your strengths?</span>
+    <span class="qtag tag-hr">👤 Intro</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Pick 2–3 strengths that are directly relevant to a DevOps role.</li>
+        <li>Back each one with a brief real example — don't just list adjectives.</li>
+        <li>Good strengths for your profile: Full-stack DevOps ownership, problem-solving under pressure, automation mindset.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "My biggest strength is end-to-end ownership — I can write the backend code, set up the CI/CD pipeline, provision the infrastructure with Terraform, and monitor it in Grafana. I don't need to hand things off between different teams. Another strength is automation thinking — if I do something manually twice, I write a script for it. And third, I stay calm during production incidents — I've handled critical system failures and know how to diagnose and fix under pressure."
+    </div>
+    <span class="scratch-label">✏️ Your version</span>
+    <textarea class="scratch" placeholder="Your 2-3 strengths with examples..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="hr">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">08</span>
+    <span class="qtxt">What is your biggest weakness?</span>
+    <span class="qtag tag-hr">👤 Intro</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li><b>Never say "I have no weakness"</b> — that's a red flag.</li>
+        <li>Pick a real but <b>non-critical</b> weakness for the role.</li>
+        <li>Always follow with what you're doing to improve it.</li>
+        <li>Good options: "I focus too much on details before delegating", "Public speaking / presentation skills", "I sometimes over-engineer solutions"</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "One area I'm working on is delegation. Because I'm comfortable handling both the development and infrastructure sides, I sometimes take on too much myself rather than distributing work. I've been consciously working on this — documenting processes so others can take ownership, and trusting teammates more with independent tasks."
+    </div>
+    <div class="avoid">
+      <span class="avoid-label">❌ Don't say</span>
+      <p>"I work too hard" or "I'm a perfectionist" — interviewers have heard these a thousand times and they sound fake.</p>
+    </div>
+    <span class="scratch-label">✏️ Your version</span>
+    <textarea class="scratch" placeholder="Pick a real weakness + what you're doing to improve..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="hr">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">09</span>
+    <span class="qtxt">Where do you see yourself in 3–5 years?</span>
+    <span class="qtag tag-hr">👤 Intro</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Show ambition but keep it realistic and relevant to this company's growth path.</li>
+        <li>Don't say you want to start your own company (signals you'll leave soon).</li>
+        <li>Tie your goal to the role — shows this job is part of your plan, not just a stop.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "In the next 3 years I want to grow into a Senior DevOps Engineer or Platform Engineer role — owning the full cloud infrastructure strategy for a product, not just individual pipelines. In 5 years, I'd love to be in a lead or architect position where I can mentor junior engineers and shape how teams build and deploy software. I see this role as a great step in that direction."
+    </div>
+    <span class="scratch-label">✏️ Your version</span>
+    <textarea class="scratch" placeholder="Your 3-year and 5-year goals..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =================== SALARY & NOTICE =================== -->
+<div class="sec-head" data-cat="salary"><span class="sec-label">Salary, Notice &amp; Logistics</span><div class="sec-line"></div><span class="sec-count">4 Q</span></div>
+
+<div class="qcard" data-cat="salary">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">10</span>
+    <span class="qtxt">What is your current CTC and expected CTC?</span>
+    <span class="qtag tag-salary">💰 Salary</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Be honest about current CTC — companies often verify with offer letters.</li>
+        <li>For expected: give a range, anchor slightly above your minimum acceptable.</li>
+        <li>Market range for 3.5 YoE DevOps Engineer in Bangalore: approx ₹10–20 LPA depending on company size.</li>
+        <li>You can say "I'm open to discussion based on the full package" — shows flexibility without underselling.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "My current CTC is ₹[X] LPA. For my next role, I'm expecting in the range of ₹[Y to Z] LPA, based on the scope of responsibility and the market rate for this level. That said, I'm open to a conversation — the role's growth potential and tech stack matter to me as much as the number."
+    </div>
+    <span class="scratch-label">✏️ Fill in your numbers</span>
+    <textarea class="scratch" placeholder="Current CTC: ₹ ___  |  Expected range: ₹ ___ to ₹ ___"></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="salary">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">11</span>
+    <span class="qtxt">What is your notice period? Can you join earlier?</span>
+    <span class="qtag tag-salary">💰 Notice</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>State your exact notice period clearly — don't be vague.</li>
+        <li>Mention buyout option if your company allows it — many good companies will fund this.</li>
+        <li>If notice is 90 days, most companies will wait. Don't panic or over-promise.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "My current notice period is [30 / 60 / 90] days. I can potentially negotiate an early release or explore a buyout option if the timeline is critical for your team. I'd be happy to discuss and find a joining date that works for both sides."
+    </div>
+    <span class="scratch-label">✏️ Fill in your notice period</span>
+    <textarea class="scratch" placeholder="My notice period is ___ days. Buyout possible? Yes / No. Earliest possible joining: ___"></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="salary">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">12</span>
+    <span class="qtxt">Are you currently interviewing with other companies?</span>
+    <span class="qtag tag-salary">💰 Offer</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Be honest but strategic. If you are interviewing elsewhere, saying so creates urgency.</li>
+        <li>If you have an offer, mention it without lying about the number — it gives you leverage.</li>
+        <li>Never say "No, only you" unless it's true — it weakens your negotiation position.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "Yes, I'm in the process with a couple of other companies as well. But I want to be honest — this role stood out to me because of [specific reason: tech stack / company scale / domain], and it's genuinely my top preference right now. I'm not in a rush and I want to make the right move."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="salary">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">13</span>
+    <span class="qtxt">Are you open to relocation or WFH / hybrid work?</span>
+    <span class="qtag tag-salary">💰 Logistics</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Be honest about your preference but stay flexible in your phrasing.</li>
+        <li>You're currently in Bangalore — most tech roles there won't need relocation.</li>
+        <li>If the company is in another city: be clear about whether you are or aren't open to moving.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer (if staying in Bangalore)</span>
+    <div class="sample-ans">
+      "I'm currently based in Bangalore and prefer to stay here. I'm comfortable with office, hybrid, or remote setups — whatever fits the team's working model. I'm flexible as long as I can contribute effectively."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =================== WORK & ROLE =================== -->
+<div class="sec-head" data-cat="work"><span class="sec-label">Work, Role &amp; Motivation</span><div class="sec-line"></div><span class="sec-count">5 Q</span></div>
+
+<div class="qcard" data-cat="work">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">14</span>
+    <span class="qtxt">Why do you want to leave your current company?</span>
+    <span class="qtag tag-work">💼 Work</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li><b>Never speak negatively</b> about your current employer, manager, or team.</li>
+        <li>Focus on <b>what you're moving towards</b>, not what you're running from.</li>
+        <li>Valid positive reasons: Bigger scale, different domain, stronger DevOps culture, more ownership, compensation growth, team size.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "TriByte has been a genuinely great place to build my foundation — I've had the chance to work on CI/CD, AWS infrastructure, Kubernetes, and backend development all in one role. But I feel I've reached a natural plateau in terms of scale and complexity. I'm looking for a role where I can work on larger distributed systems, a bigger engineering team, and where DevOps and platform engineering are more central to the product. This opportunity seems to align well with that direction."
+    </div>
+    <div class="avoid">
+      <span class="avoid-label">❌ Don't say</span>
+      <p>"No growth", "Bad management", "No appraisal", "Toxic environment" — even if true, never say these in an interview.</p>
+    </div>
+    <span class="scratch-label">✏️ Your version</span>
+    <textarea class="scratch" placeholder="Your positive reason for leaving..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="work">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">15</span>
+    <span class="qtxt">Why do you want to join our company specifically?</span>
+    <span class="qtag tag-work">💼 Work</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Research the company before every interview — their product, tech stack, size, recent news.</li>
+        <li>Mention something specific — generic answers like "great company" are weak.</li>
+        <li>Good angles: Product/domain you find interesting, their engineering blog, scale of infra, culture, team size.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer framework</span>
+    <div class="sample-ans">
+      "From what I've read about [Company], I'm particularly interested in [specific thing — their product scale / engineering challenges / domain / culture]. My experience with [Jenkins / AWS / Kubernetes] maps well to the kind of work your team is doing. I also believe a role at this scale will push me to grow in ways that my current setup doesn't — which is exactly what I'm looking for."
+    </div>
+    <span class="scratch-label">✏️ Customize per company before each call</span>
+    <textarea class="scratch" placeholder="Research the company and fill in specific reasons here before the call..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="work">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">16</span>
+    <span class="qtxt">What kind of work environment do you prefer?</span>
+    <span class="qtag tag-work">💼 Work</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Be honest but show adaptability. Most companies value people who can work in different setups.</li>
+        <li>Good answers: Fast-paced, collaborative, ownership-driven, autonomous with good mentorship.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "I work best in an environment where I have clear ownership of what I'm building — not just executing tickets, but understanding the 'why' behind the work. I enjoy collaborative teams where knowledge is shared openly, and I appreciate both independence and access to experienced people I can learn from. Fast-paced environments actually energize me — I've been handling CI/CD, cloud infra, and backend code simultaneously, so I'm used to context-switching."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="work">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">17</span>
+    <span class="qtxt">How do you handle pressure or tight deadlines?</span>
+    <span class="qtag tag-work">💼 Work</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Use a real example from your work — production incident is perfect here.</li>
+        <li>Show you stay calm, prioritize, communicate clearly, and deliver.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "I actually perform well under pressure. In my current role, handling production incidents is part of the job — we've had situations where services went down in the middle of the business day and I had to diagnose and fix while communicating status to stakeholders. I stay focused by breaking the problem into immediate fix vs root cause — patch the issue first, then do the proper fix. Pressure for me is a signal to prioritize, not to panic."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="work">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">18</span>
+    <span class="qtxt">Are you comfortable working in a startup vs a large company?</span>
+    <span class="qtag tag-work">💼 Work</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Your current company TriByte is a smaller company — you already have startup-style experience.</li>
+        <li>Tailor your answer based on whether the interviewing company is a startup or large enterprise.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "Having worked at a smaller company where I wear multiple hats — CI/CD, cloud infra, backend code, monitoring — I'm very comfortable with the ownership and pace of a startup. At the same time, I'm eager to see how large-scale engineering works in a bigger organization — the processes, the team structure, and the engineering standards. I'm genuinely excited about both, and I adapt quickly."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =================== BEHAVIOURAL =================== -->
+<div class="sec-head" data-cat="behav"><span class="sec-label">Behavioural Questions</span><div class="sec-line"></div><span class="sec-count">3 Q</span></div>
+
+<div class="qcard" data-cat="behav">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">19</span>
+    <span class="qtxt">Tell me about a time you made a mistake at work. How did you handle it?</span>
+    <span class="qtag tag-behav">🧠 Behavioural</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Use the STAR method</span>
+      <ul>
+        <li><b>Situation:</b> What was the context?</li>
+        <li><b>Task:</b> What was your responsibility?</li>
+        <li><b>Action:</b> What did you do (including the mistake and the fix)?</li>
+        <li><b>Result:</b> What was the outcome and what did you learn?</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "Early in my role, I accidentally ran a Terraform apply command targeting the production environment instead of staging. Fortunately, I caught it quickly and used Terraform's state management to roll back the changes before any real damage was done. After that incident, I set up separate state files with mandatory environment variable confirmation, and added a Jenkins approval gate before any infra changes touch production. It was an uncomfortable experience but it made our deployment process significantly safer."
+    </div>
+    <span class="scratch-label">✏️ Your own real example</span>
+    <textarea class="scratch" placeholder="Think of a real mistake, what you did, and what you learned..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="behav">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">20</span>
+    <span class="qtxt">Describe a situation where you had a conflict with a teammate. How did you resolve it?</span>
+    <span class="qtag tag-behav">🧠 Behavioural</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Keep the conflict professional — technical disagreement, not personal drama.</li>
+        <li>Show maturity: you listened, found common ground, and focused on the goal.</li>
+        <li>Don't blame the other person — own your part too.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "There was a situation where a developer and I disagreed on how a deployment should be handled — they wanted a direct FTP approach to keep it simple, while I wanted to go through the Jenkins pipeline for consistency and auditability. We had a direct conversation, I walked them through the risks of bypassing the pipeline — no rollback, no quality gate — and they agreed to try the proper approach. We ended up refining the pipeline together to make it faster so they didn't feel it was slowing them down. We've had zero deployment issues from that service since."
+    </div>
+    <span class="scratch-label">✏️ Your real example</span>
+    <textarea class="scratch" placeholder="Your professional conflict + resolution story..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="behav">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">21</span>
+    <span class="qtxt">How do you keep your technical skills up to date?</span>
+    <span class="qtag tag-behav">🧠 Behavioural</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Mention specific resources — not just "I read articles".</li>
+        <li>Good answers: AWS docs, Kubernetes release notes, YouTube (TechWorld with Nana), hands-on side projects, certifications in progress.</li>
+        <li>Bonus: mention AI tools you use for learning (you already do this per your resume).</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "I stay current in a few ways. I follow the official AWS and Kubernetes release notes for version changes. I also use YouTube channels like TechWorld with Nana for hands-on tutorials when I want to learn something new quickly. At work, I've been intentional about using AI tools to help build IaC templates and automation scripts — which also keeps me sharp on what's current. I'm currently preparing for [AWS Solutions Architect / CKA / any cert you're pursuing]."
+    </div>
+    <span class="scratch-label">✏️ Your real learning habits</span>
+    <textarea class="scratch" placeholder="Resources you actually use: YouTube / courses / docs / projects..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =================== OFFER STAGE =================== -->
+<div class="sec-head" data-cat="offer"><span class="sec-label">Offer Stage &amp; Tricky Questions</span><div class="sec-line"></div><span class="sec-count">1 Q</span></div>
+
+<div class="qcard" data-cat="offer">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">22</span>
+    <span class="qtxt">We have a counter-offer — if your current company matches our offer, will you still join us?</span>
+    <span class="qtag tag-offer">📄 Offer</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>This is a test of loyalty and seriousness. Most companies don't ask this early but some do.</li>
+        <li>Reassure them that your decision isn't purely money-driven.</li>
+        <li>Don't sound desperate either way — stay calm and confident.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "That's a fair question. If I were leaving only for money, a counter-offer would change things. But honestly, my primary motivation for this move is the scope of the role, the technical environment, and the growth opportunity — which my current company can't replicate just by matching a number. If I get to that point, my decision will be based on the full picture, and based on what I know so far, this opportunity is genuinely where I want to be."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =================== EXTRA 10 =================== -->
+<div class="sec-head" data-cat="extra"><span class="sec-label">More Important Questions</span><div class="sec-line"></div><span class="sec-count">10 Q</span></div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">23</span>
+    <span class="qtxt">What do you know about our company?</span>
+    <span class="qtag tag-work">💼 Research</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>This question tests if you prepared — not preparing is an instant red flag.</li>
+        <li>Research: Company website, LinkedIn, recent news, their product, team size, tech stack (Glassdoor/Naukri reviews often mention this).</li>
+        <li>Mention 2–3 specific things. Even one line about their product shows you care.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample framework</span>
+    <div class="sample-ans">
+      "I did some research before this call. [Company] builds [what they do], primarily serving [their customer segment]. I noticed you're working with [tech or cloud infra mentioned in JD]. I also read that you recently [any news — funding / product launch / expansion]. That's actually part of what got me excited — the scale of the problem and the engineering challenges that come with it seem very aligned with what I want to work on next."
+    </div>
+    <span class="scratch-label">✏️ Research notes per company (fill before each call)</span>
+    <textarea class="scratch" placeholder="Company name: ___&#10;What they do: ___&#10;Their tech stack (from JD): ___&#10;Recent news: ___&#10;Why it interests me: ___"></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">24</span>
+    <span class="qtxt">How would your current manager or teammates describe you?</span>
+    <span class="qtag tag-hr">👤 Intro</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>This is an indirect way of asking your self-awareness and how you work with others.</li>
+        <li>Pick 2–3 qualities that are genuine and backed by work examples.</li>
+        <li>Avoid generic words like "hardworking" or "dedicated" without evidence.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "I think they'd say I'm reliable and someone who takes ownership. If I say I'll fix something, it gets fixed — I don't leave issues half-solved. They'd also probably say I'm the person who automates things before anyone even asks — if I do something manually twice, I write a script for it. And I think they'd say I collaborate well — I make it a point to document what I build so others aren't blocked when I'm not around."
+    </div>
+    <span class="scratch-label">✏️ Your version</span>
+    <textarea class="scratch" placeholder="3 things your manager/team would say about you (be genuine)..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">25</span>
+    <span class="qtxt">Have you ever missed a deadline? What happened?</span>
+    <span class="qtag tag-behav">🧠 Behavioural</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Don't say "No, never" — it sounds dishonest. Everyone has missed something.</li>
+        <li>Own it briefly, focus on what you communicated, what you did to recover, and what changed after.</li>
+        <li>Keep the story professional and outcome-focused.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "Yes, there was a time I underestimated how long it would take to set up a Kubernetes cluster for UAT with all the service discovery and ingress configuration. I expected 2 days but it took 4. What I should have done — and didn't — was flag it early. I've since learned to give estimates with a buffer and to raise a flag as soon as I see a task going over time, not after it's already late. That experience changed how I plan infra work."
+    </div>
+    <span class="scratch-label">✏️ Your real example</span>
+    <textarea class="scratch" placeholder="A real deadline miss + what you learned from it..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">26</span>
+    <span class="qtxt">Are you applying for full-time or are you also open to contract roles?</span>
+    <span class="qtag tag-salary">💰 Logistics</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Be clear and direct. If you want full-time, say so confidently.</li>
+        <li>If you're open to contract, mention it only if the compensation and scope justify it.</li>
+        <li>Don't sound unsure — it makes you look like you'll take anything.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer (full-time preference)</span>
+    <div class="sample-ans">
+      "I'm looking for a full-time opportunity. I want to invest in a company long-term — contribute to the product roadmap, grow with the team, and build something meaningful over time. Contract roles don't align with that goal right now."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">27</span>
+    <span class="qtxt">What motivates you in your work every day?</span>
+    <span class="qtag tag-hr">👤 Intro</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Be genuine — interviewers can tell when it's fake.</li>
+        <li>Tie your answer to real things you enjoy: solving problems, automation, seeing systems run reliably, learning new tech.</li>
+        <li>Avoid saying "salary motivates me" — even if it's partly true, don't lead with it.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "Honestly, what gets me going is when I automate something that used to be manual and painful. There's a real satisfaction in watching a deployment that used to take an hour with human intervention run cleanly in 10 minutes through a pipeline. I also get motivated when production is stable and developers can ship fast without worrying about infra — that's the goal I'm always working toward. And I enjoy learning — every new service or tool I get to set up teaches me something."
+    </div>
+    <span class="scratch-label">✏️ Your genuine motivation</span>
+    <textarea class="scratch" placeholder="What actually motivates you? Write it honestly..."></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">28</span>
+    <span class="qtxt">How do you prioritize when you have multiple urgent tasks at the same time?</span>
+    <span class="qtag tag-behav">🧠 Behavioural</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Show a clear process — not "I just figure it out."</li>
+        <li>Good framework: Impact → Urgency → Dependencies. Fix what's blocking others first.</li>
+        <li>Mention communication — you tell your manager when you're stretched, rather than silently drowning.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "When I have multiple urgent things, I first ask: what is blocking someone else? That goes first. Then I look at impact — a production issue always beats a UAT deployment request. If I genuinely can't do both in time, I communicate early — I'd rather tell my manager at 10am that something will slip than say nothing and miss both. In DevOps, surprises are expensive. Clear status updates are part of the job."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">29</span>
+    <span class="qtxt">Do you have any certifications? Are you planning any?</span>
+    <span class="qtag tag-work">💼 Skills</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Be honest. If you don't have any yet, say so — but show you're working toward one.</li>
+        <li>Most relevant certs for your profile: <b>AWS Solutions Architect Associate</b>, <b>CKA (Certified Kubernetes Administrator)</b>, AWS DevOps Engineer Professional.</li>
+        <li>Even if you're only studying, mentioning it shows self-investment.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer (no cert yet)</span>
+    <div class="sample-ans">
+      "I don't have a formal certification yet, but I've been actively preparing for the AWS Solutions Architect Associate exam — most of my AWS work at TriByte maps directly to the exam content, so I want to formalize it. I'm also looking at the CKA since Kubernetes has been a big part of my work. I plan to clear at least one of these in the next few months."
+    </div>
+    <span class="scratch-label">✏️ Your certifications or plans</span>
+    <textarea class="scratch" placeholder="Certs you have: ___&#10;Certs you're studying for: ___&#10;Target date: ___"></textarea>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">30</span>
+    <span class="qtxt">Have you ever worked in an Agile or Scrum environment?</span>
+    <span class="qtag tag-work">💼 Work</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Most modern product companies use Agile/Scrum. Even if your company wasn't formal about it, you likely did sprint-like cycles.</li>
+        <li>Know basic terms: Sprint, Daily Standup, Sprint Planning, Retrospective, Backlog, Story Points.</li>
+        <li>If your team used Azure DevOps Boards (you do), mention it — that's an Agile tool.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "Yes, we followed a sprint-based workflow at TriByte. We used Azure DevOps Boards to manage tasks — features, bugs, and deployment tasks were all tracked there. We had sprint planning every 2 weeks and daily standups to sync on blockers. As the DevOps person, I also participated in retrospectives where we'd discuss what slowed down deployments and what we could improve in the pipeline. So I'm comfortable with Agile ceremonies and the tooling around it."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">31</span>
+    <span class="qtxt">Are you comfortable with on-call duties or after-hours support?</span>
+    <span class="qtag tag-work">💼 Work</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>DevOps roles often involve on-call rotations — interviewers want to know you're not surprised by this.</li>
+        <li>Show you've already done this — production incidents don't follow business hours.</li>
+        <li>Mention that you'd prefer well-structured on-call (rotation, runbooks, alerting) over chaos.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "Yes, I'm comfortable with it. At TriByte I've handled production issues outside business hours before — when a CloudWatch alarm fires at 11pm, it doesn't wait. What I'd look for in a new role is a reasonable on-call structure — clear rotation, proper alerting with Prometheus or CloudWatch so you're not getting false alarms, and runbooks so the fix is fast. I'm not afraid of on-call, I just prefer it to be organized rather than ad hoc."
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<div class="qcard" data-cat="extra">
+  <div class="qhead" onclick="tog(this)">
+    <span class="qno">32</span>
+    <span class="qtxt">If we give you an offer, how long will you take to decide?</span>
+    <span class="qtag tag-offer">📄 Offer</span>
+    <span class="qarrow">▼</span>
+  </div>
+  <div class="qbody">
+    <div class="tip">
+      <span class="tip-label">📌 Key Tips</span>
+      <ul>
+        <li>Don't say "I need a month" — it signals low interest or that you're shopping for a better offer.</li>
+        <li>2–3 business days is a professional, reasonable ask. 1 week max if you have other processes running.</li>
+        <li>If you have another offer coming, you can mention it — it creates honest urgency without playing games.</li>
+      </ul>
+    </div>
+    <span class="sample-head">✅ Sample answer</span>
+    <div class="sample-ans">
+      "I like to make decisions thoughtfully, not impulsively — so I'd appreciate 2 to 3 business days to review the offer carefully. If I have any questions about the terms, I'll reach out quickly. I'm not the kind of person who takes weeks to decide — if the role and numbers make sense, I move fast."
+    </div>
+    <div class="avoid">
+      <span class="avoid-label">❌ Don't say</span>
+      <p>"I'll let you know whenever I'm ready" — sounds arrogant. Always give a timeline.</p>
+    </div>
+    <div class="actions">
+      <button class="btn-done" onclick="mark(this,'done')">✓ Ready</button>
+      <button class="btn-later" onclick="mark(this,'later')">⚑ Practice more</button>
+    </div>
+  </div>
+</div>
+
+<br><br>
+</main>
+
+<script>
+  const TOTAL = 22;
+
+  function tog(header) {
+    const card = header.closest('.qcard');
+    card.classList.toggle('open');
+  }
+
+  function mark(btn, type) {
+    const card = btn.closest('.qcard');
+    const sibling = btn.parentElement.querySelector(type === 'done' ? '.btn-later' : '.btn-done');
+    // Toggle off if clicking same button
+    if (btn.classList.contains('active')) {
+      btn.classList.remove('active');
+      card.classList.remove('done', 'later');
+    } else {
+      btn.classList.add('active');
+      sibling.classList.remove('active');
+      card.classList.remove('done', 'later');
+      card.classList.add(type);
+    }
+    updateStats();
+  }
+
+  function updateStats() {
+    const visible = [...document.querySelectorAll('.qcard')].filter(c => c.style.display !== 'none');
+    const doneCards = visible.filter(c => c.classList.contains('done')).length;
+    const laterCards = visible.filter(c => c.classList.contains('later')).length;
+    const total = visible.length;
+    document.getElementById('done-n').textContent = doneCards;
+    document.getElementById('later-n').textContent = laterCards;
+    document.getElementById('total-n').textContent = total;
+    document.getElementById('prog-fill').style.width = total > 0 ? (doneCards / total * 100) + '%' : '0%';
+  }
+
+  function filter(cat, btn) {
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.qcard').forEach(c => {
+      c.style.display = (cat === 'all' || c.dataset.cat === cat) ? '' : 'none';
+    });
+    // Show/hide section headers
+    document.querySelectorAll('.sec-head').forEach(h => {
+      const hcat = h.dataset.cat;
+      h.style.display = (cat === 'all' || hcat === cat) ? '' : 'none';
+    });
+    updateStats();
+  }
+
+  updateStats();
+</script>
+</body>
+</html>

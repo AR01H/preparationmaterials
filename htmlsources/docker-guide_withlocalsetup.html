@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Setup Guide – PHP, MySQL, Python, Node.js, Drupal</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+  .sidebar { position: sticky; top: 20px; }
+  .nav-pills .nav-link { color: #495057; font-size: 0.875rem; }
+  .nav-pills .nav-link.active { background: #0d6efd; }
+  pre { background: #1e1e1e; color: #d4d4d4; border-radius: 8px; padding: 1rem; font-size: 0.82rem; overflow-x: auto; }
+  code.inline { background: #e9ecef; color: #c7254e; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+  .section-card { border: none; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 2rem; }
+  .section-card .card-header { border-radius: 12px 12px 0 0 !important; font-weight: 600; font-size: 1rem; }
+  .badge-service { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: #0d6efd; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; margin-right: 8px; flex-shrink: 0; }
+  .step-row { display: flex; align-items: flex-start; margin-bottom: 1rem; }
+  .copy-btn { cursor: pointer; font-size: 0.75rem; }
+  .hero { background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); color: #fff; border-radius: 16px; padding: 2.5rem 2rem; margin-bottom: 2rem; }
+  .service-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 4px 12px; font-size: 0.8rem; margin: 3px; }
+  .tab-content { padding-top: 1rem; }
+  .file-tree { background: #1e1e1e; color: #9cdcfe; border-radius: 8px; padding: 1rem; font-size: 0.82rem; font-family: monospace; line-height: 1.8; }
+  .file-tree .dir { color: #4ec9b0; }
+  .file-tree .file { color: #ce9178; }
+  .file-tree .comment { color: #6a9955; }
+  .alert-tip { border-left: 4px solid #0d6efd; background: #e7f1ff; border-radius: 0 8px 8px 0; }
+  .alert-warn { border-left: 4px solid #fd7e14; background: #fff3e0; border-radius: 0 8px 8px 0; }
+  table.cmd-table td:first-child { font-family: monospace; font-size: 0.82rem; background: #f1f3f5; border-radius: 4px; padding: 4px 8px; white-space: nowrap; }
+  @media(max-width:768px){ .sidebar { position: static; } }
+</style>
+</head>
+<body>
+
+<div class="container-fluid py-4 px-3 px-md-4">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <i class="bi bi-box-fill fs-2"></i>
+      <div>
+        <h1 class="h3 fw-bold mb-0">Docker on Windows — Complete Setup Guide</h1>
+        <p class="mb-0 opacity-75">Run PHP, MySQL, Python, Node.js, Drupal without installing them locally</p>
+      </div>
+    </div>
+    <div>
+      <span class="service-badge"><i class="bi bi-filetype-php"></i> PHP</span>
+      <span class="service-badge"><i class="bi bi-database"></i> MySQL</span>
+      <span class="service-badge"><i class="bi bi-filetype-py"></i> Python</span>
+      <span class="service-badge"><i class="bi bi-node-plus"></i> Node.js</span>
+      <span class="service-badge"><i class="bi bi-globe"></i> Drupal</span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- SIDEBAR -->
+    <div class="col-md-3 col-lg-2">
+      <div class="sidebar">
+        <p class="text-muted small fw-semibold mb-2 text-uppercase">On this page</p>
+        <nav class="nav flex-column nav-pills gap-1">
+          <a class="nav-link active" href="#how-it-works">How it works</a>
+          <a class="nav-link" href="#prerequisites">Prerequisites</a>
+          <a class="nav-link" href="#full-stack">Full Stack Setup</a>
+          <a class="nav-link" href="#single-service">Single Service Setup</a>
+          <a class="nav-link" href="#folder-structure">Folder Structure</a>
+          <a class="nav-link" href="#mysql-dump">MySQL Dump Import</a>
+          <a class="nav-link" href="#vscode-debug">VS Code Debugging</a>
+          <a class="nav-link" href="#commands">Useful Commands</a>
+          <a class="nav-link" href="#comparison">Local vs Docker</a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="col-md-9 col-lg-10">
+
+      <!-- HOW IT WORKS -->
+      <div id="how-it-works" class="card section-card">
+        <div class="card-header bg-primary text-white"><i class="bi bi-lightbulb me-2"></i>How Docker Works for You</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded-3 h-100 text-center">
+                <i class="bi bi-folder2-open text-primary fs-2 mb-2 d-block"></i>
+                <strong>Your Code</strong><br>
+                <small class="text-muted">Stays on your Windows folder (C:\myproject)</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded-3 h-100 text-center">
+                <i class="bi bi-arrow-left-right text-success fs-2 mb-2 d-block"></i>
+                <strong>Volume Mount</strong><br>
+                <small class="text-muted">Docker maps your folder into the container automatically</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded-3 h-100 text-center">
+                <i class="bi bi-box-seam text-warning fs-2 mb-2 d-block"></i>
+                <strong>Container Runs It</strong><br>
+                <small class="text-muted">PHP/Python/MySQL run inside Docker — not on Windows</small>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-tip mt-3 p-3">
+            <i class="bi bi-info-circle me-2 text-primary"></i>
+            <strong>Key idea:</strong> You edit code in VS Code on Windows. Docker runs it. You never install PHP, Python, or MySQL on your machine.
+          </div>
+        </div>
+      </div>
+
+      <!-- PREREQUISITES -->
+      <div id="prerequisites" class="card section-card">
+        <div class="card-header bg-dark text-white"><i class="bi bi-check2-square me-2"></i>Prerequisites</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="step-row">
+                <span class="step-num">1</span>
+                <div>
+                  <strong>Install Docker Desktop for Windows</strong><br>
+                  <small class="text-muted">Download from <a href="https://www.docker.com/products/docker-desktop/" target="_blank">docker.com</a> — make sure WSL2 backend is enabled</small>
+                </div>
+              </div>
+              <div class="step-row">
+                <span class="step-num">2</span>
+                <div>
+                  <strong>Install VS Code</strong><br>
+                  <small class="text-muted">Download from <a href="https://code.visualstudio.com" target="_blank">code.visualstudio.com</a></small>
+                </div>
+              </div>
+              <div class="step-row">
+                <span class="step-num">3</span>
+                <div>
+                  <strong>Install VS Code Extensions</strong><br>
+                  <small class="text-muted">Docker, PHP Debug, Python, Remote - Containers</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="alert alert-warn p-3">
+                <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                <strong>Check Docker is running:</strong> Open PowerShell and type:
+                <pre class="mt-2 mb-0">docker --version
+docker-compose --version</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FULL STACK SETUP -->
+      <div id="full-stack" class="card section-card">
+        <div class="card-header bg-success text-white"><i class="bi bi-stack me-2"></i>Full Stack Setup — All Services Together</div>
+        <div class="card-body">
+          <p class="text-muted">Create a file named <code class="inline">docker-compose.yml</code> in your project folder <code class="inline">C:\myproject\</code></p>
+
+          <ul class="nav nav-tabs" id="fullStackTabs">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-all">docker-compose.yml</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-drupal-compose">Drupal Config</button></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="tab-all">
+<pre>version: '3.8'
+
+services:
+
+  # ─── MySQL Database ───────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: my_mysql
+    ports:
+      - "3306:3306"        # Access on localhost:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - ./mysql-data:/var/lib/mysql          # Stores DB data
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql  # Auto-import dump
+
+  # ─── PHP with Apache ──────────────────────────
+  php:
+    build: ./php               # Custom Dockerfile with Xdebug
+    container_name: my_php
+    ports:
+      - "8080:80"              # Visit http://localhost:8080
+    volumes:
+      - ./php-code:/var/www/html   # Your PHP files here
+    environment:
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    depends_on:
+      - mysql
+
+  # ─── Python ───────────────────────────────────
+  python:
+    image: python:3.11
+    container_name: my_python
+    ports:
+      - "5000:5000"            # Flask or FastAPI
+      - "5678:5678"            # Debugpy port for VS Code
+    volumes:
+      - ./python-code:/app
+    working_dir: /app
+    command: pip install -r requirements.txt && python -m debugpy --listen 0.0.0.0:5678 --wait-for-client app.py
+    depends_on:
+      - mysql
+
+  # ─── Node.js ──────────────────────────────────
+  nodejs:
+    image: node:20
+    container_name: my_node
+    ports:
+      - "3000:3000"            # Visit http://localhost:3000
+      - "9229:9229"            # Node.js debug port
+    volumes:
+      - ./node-code:/app
+    working_dir: /app
+    command: sh -c "npm install && node --inspect=0.0.0.0:9229 index.js"
+
+  # ─── Drupal ───────────────────────────────────
+  drupal:
+    image: drupal:10-apache
+    container_name: my_drupal
+    ports:
+      - "8090:80"              # Visit http://localhost:8090
+    volumes:
+      - ./drupal-modules:/var/www/html/modules/custom
+      - ./drupal-themes:/var/www/html/themes/custom
+    depends_on:
+      - mysql
+
+  # ─── phpMyAdmin (optional, manage DB via browser) ─
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: my_phpmyadmin
+    ports:
+      - "8888:80"              # Visit http://localhost:8888
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - mysql</pre>
+            </div>
+            <div class="tab-pane fade" id="tab-drupal-compose">
+              <p class="text-muted small mt-2">For Drupal, during setup in browser use these DB settings:</p>
+              <table class="table table-sm table-bordered">
+                <tr><td><strong>Database host</strong></td><td><code class="inline">mysql</code> (not localhost!)</td></tr>
+                <tr><td><strong>Database name</strong></td><td><code class="inline">mydb</code></td></tr>
+                <tr><td><strong>Username</strong></td><td><code class="inline">root</code></td></tr>
+                <tr><td><strong>Password</strong></td><td><code class="inline">root</code></td></tr>
+                <tr><td><strong>Port</strong></td><td><code class="inline">3306</code></td></tr>
+              </table>
+              <div class="alert alert-tip p-3">
+                <i class="bi bi-info-circle me-2 text-primary"></i>
+                Inside Docker containers, services talk to each other using the <strong>service name</strong> (mysql), not localhost.
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <h6 class="fw-semibold">Start everything:</h6>
+            <pre>cd C:\myproject
+docker-compose up -d</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- SINGLE SERVICE SETUP -->
+      <div id="single-service" class="card section-card">
+        <div class="card-header bg-warning text-dark"><i class="bi bi-toggles me-2"></i>Single Service Setup — Run Only What You Need</div>
+        <div class="card-body">
+          <p class="text-muted">You don't have to run everything at once. Pick only what you need:</p>
+
+          <ul class="nav nav-tabs" id="singleTabs">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#s-php-mysql">PHP + MySQL</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#s-python">Python Only</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#s-node">Node.js Only</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#s-drupal">Drupal + MySQL</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#s-mysql">MySQL Only</button></li>
+          </ul>
+
+          <div class="tab-content">
+
+            <!-- PHP + MYSQL -->
+            <div class="tab-pane fade show active" id="s-php-mysql">
+              <p class="text-muted small mt-2">Save as <code class="inline">docker-compose.yml</code> in your project folder:</p>
+<pre>version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: my_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+
+  php:
+    build: ./php
+    container_name: my_php
+    ports:
+      - "8080:80"
+    volumes:
+      - ./php-code:/var/www/html
+    environment:
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    depends_on:
+      - mysql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: my_phpmyadmin
+    ports:
+      - "8888:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root</pre>
+              <div class="alert alert-tip p-2 mt-2">
+                <i class="bi bi-globe me-2 text-primary"></i>
+                PHP site → <strong>http://localhost:8080</strong> &nbsp;|&nbsp; phpMyAdmin → <strong>http://localhost:8888</strong>
+              </div>
+            </div>
+
+            <!-- PYTHON -->
+            <div class="tab-pane fade" id="s-python">
+<pre>version: '3.8'
+services:
+  python:
+    image: python:3.11
+    container_name: my_python
+    ports:
+      - "5000:5000"   # App port
+      - "5678:5678"   # VS Code debug port
+    volumes:
+      - ./python-code:/app
+    working_dir: /app
+    command: >
+      sh -c "pip install -r requirements.txt &&
+             python -m debugpy --listen 0.0.0.0:5678 --wait-for-client app.py"</pre>
+              <div class="alert alert-tip p-2 mt-2">
+                <i class="bi bi-bug me-2 text-primary"></i>
+                Debug from VS Code on port <strong>5678</strong> — set breakpoints and press F5!
+              </div>
+            </div>
+
+            <!-- NODE.JS -->
+            <div class="tab-pane fade" id="s-node">
+<pre>version: '3.8'
+services:
+  nodejs:
+    image: node:20
+    container_name: my_node
+    ports:
+      - "3000:3000"   # App port
+      - "9229:9229"   # VS Code debug port
+    volumes:
+      - ./node-code:/app
+    working_dir: /app
+    command: sh -c "npm install && node --inspect=0.0.0.0:9229 index.js"</pre>
+              <div class="alert alert-tip p-2 mt-2">
+                <i class="bi bi-globe me-2 text-primary"></i>
+                App → <strong>http://localhost:3000</strong> &nbsp;|&nbsp; Debug via port <strong>9229</strong>
+              </div>
+            </div>
+
+            <!-- DRUPAL -->
+            <div class="tab-pane fade" id="s-drupal">
+<pre>version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: drupal_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: drupal
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+
+  drupal:
+    image: drupal:10-apache
+    container_name: my_drupal
+    ports:
+      - "8090:80"
+    volumes:
+      - drupal_data:/var/www/html
+      - ./drupal-modules:/var/www/html/modules/custom
+      - ./drupal-themes:/var/www/html/themes/custom
+    depends_on:
+      - mysql
+
+volumes:
+  drupal_data:</pre>
+              <div class="alert alert-tip p-2 mt-2">
+                <i class="bi bi-globe me-2 text-primary"></i>
+                Drupal → <strong>http://localhost:8090</strong> &nbsp;|&nbsp; Use DB host: <code class="inline">mysql</code> during install
+              </div>
+            </div>
+
+            <!-- MYSQL ONLY -->
+            <div class="tab-pane fade" id="s-mysql">
+<pre>version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: my_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8888:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root</pre>
+              <div class="alert alert-tip p-2 mt-2">
+                <i class="bi bi-database me-2 text-primary"></i>
+                MySQL → <strong>localhost:3306</strong> &nbsp;|&nbsp; phpMyAdmin → <strong>http://localhost:8888</strong>
+              </div>
+            </div>
+
+          </div><!-- /tab-content -->
+
+          <div class="mt-3">
+            <h6 class="fw-semibold">To run specific services only (even from full compose file):</h6>
+            <pre># Only start PHP and MySQL (ignore other services)
+docker-compose up -d php mysql phpmyadmin
+
+# Only start Python
+docker-compose up -d python
+
+# Only start Node.js
+docker-compose up -d nodejs</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHP DOCKERFILE -->
+      <div id="php-dockerfile" class="card section-card">
+        <div class="card-header bg-secondary text-white"><i class="bi bi-file-code me-2"></i>PHP Dockerfile (needed for Xdebug)</div>
+        <div class="card-body">
+          <p class="text-muted">Create a folder <code class="inline">php/</code> inside your project and add this <code class="inline">Dockerfile</code>:</p>
+<pre>FROM php:8.2-apache
+
+# Install Xdebug for debugging in VS Code
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+
+# Install mysqli extension to connect to MySQL
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+# Xdebug config
+RUN echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini \
+ && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini \
+ && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/xdebug.ini \
+ && echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/xdebug.ini</pre>
+        </div>
+      </div>
+
+      <!-- FOLDER STRUCTURE -->
+      <div id="folder-structure" class="card section-card">
+        <div class="card-header bg-info text-white"><i class="bi bi-folder-fill me-2"></i>Folder Structure</div>
+        <div class="card-body">
+          <div class="file-tree">
+<span class="dir">C:\myproject\</span>
+│
+├── <span class="file">docker-compose.yml</span>     <span class="comment">&lt;-- main config file</span>
+├── <span class="file">dump.sql</span>               <span class="comment">&lt;-- your MySQL dump from staging</span>
+│
+├── <span class="dir">php/</span>                   <span class="comment">&lt;-- PHP Dockerfile folder</span>
+│     └── <span class="file">Dockerfile</span>
+│
+├── <span class="dir">php-code/</span>              <span class="comment">&lt;-- Your PHP files (edit in VS Code)</span>
+│     └── <span class="file">index.php</span>
+│
+├── <span class="dir">python-code/</span>           <span class="comment">&lt;-- Your Python files</span>
+│     ├── <span class="file">app.py</span>
+│     └── <span class="file">requirements.txt</span>
+│
+├── <span class="dir">node-code/</span>             <span class="comment">&lt;-- Your Node.js files</span>
+│     ├── <span class="file">index.js</span>
+│     └── <span class="file">package.json</span>
+│
+├── <span class="dir">drupal-modules/</span>        <span class="comment">&lt;-- Custom Drupal modules</span>
+├── <span class="dir">drupal-themes/</span>         <span class="comment">&lt;-- Custom Drupal themes</span>
+│
+└── <span class="dir">mysql-data/</span>            <span class="comment">&lt;-- Auto-created, stores MySQL data</span>
+          </div>
+          <div class="alert alert-tip p-3 mt-3">
+            <i class="bi bi-pencil me-2 text-primary"></i>
+            <strong>You only edit files in <code>php-code/</code>, <code>python-code/</code>, <code>node-code/</code></strong> — everything else is Docker managed.
+          </div>
+        </div>
+      </div>
+
+      <!-- MYSQL DUMP -->
+      <div id="mysql-dump" class="card section-card">
+        <div class="card-header bg-danger text-white"><i class="bi bi-database-fill-down me-2"></i>Import MySQL Dump from Staging</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <h6 class="fw-semibold">Method 1 — Auto import on first start</h6>
+              <p class="text-muted small">Put your <code class="inline">dump.sql</code> in your project folder. It's auto-imported when MySQL container starts for the first time.</p>
+              <div class="alert alert-warn p-2">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Only works on <strong>first start</strong>. If MySQL data already exists, it won't re-import.
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-semibold">Method 2 — Manual import anytime</h6>
+              <pre>docker exec -i my_mysql mysql -u root -proot mydb &lt; dump.sql</pre>
+              <p class="text-muted small">This is just like importing locally — same thing, different tool.</p>
+            </div>
+          </div>
+          <div class="mt-3">
+            <h6 class="fw-semibold">Take a dump FROM the container:</h6>
+            <pre>docker exec my_mysql mysqldump -u root -proot mydb > my_backup.sql</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- VS CODE DEBUGGING -->
+      <div id="vscode-debug" class="card section-card">
+        <div class="card-header bg-purple text-white" style="background:#6f42c1!important"><i class="bi bi-bug-fill me-2"></i>VS Code Debugging — Same as Your Current Workflow</div>
+        <div class="card-body">
+
+          <ul class="nav nav-tabs" id="debugTabs">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#d-php">PHP Debug</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#d-python">Python Debug</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#d-node">Node.js Debug</button></li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="d-php">
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <h6 class="fw-semibold">Step 1 — Install VS Code Extension</h6>
+                  <p class="text-muted small">Search for <code class="inline">PHP Debug</code> by Xdebug in VS Code extensions panel and install it.</p>
+                  <h6 class="fw-semibold mt-3">Step 2 — Create launch.json</h6>
+                  <p class="text-muted small">In VS Code press <kbd>Ctrl+Shift+P</kbd> → "Open launch.json" and paste:</p>
+                </div>
+                <div class="col-md-6">
+                  <pre>{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PHP Docker Debug",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "pathMappings": {
+        "/var/www/html": "${workspaceFolder}/php-code"
+      }
+    }
+  ]
+}</pre>
+                </div>
+              </div>
+              <div class="alert alert-tip p-2">
+                <i class="bi bi-check-circle me-2 text-success"></i>
+                Set a breakpoint in VS Code → Open <strong>http://localhost:8080</strong> in browser → Debugger pauses just like before!
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="d-python">
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <h6 class="fw-semibold">Step 1 — Install debugpy in container</h6>
+                  <p class="text-muted small">Add to your <code class="inline">requirements.txt</code>:</p>
+                  <pre>debugpy</pre>
+                  <h6 class="fw-semibold mt-3">Step 2 — launch.json</h6>
+                </div>
+                <div class="col-md-6">
+                  <pre>{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python Docker Debug",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/python-code",
+          "remoteRoot": "/app"
+        }
+      ]
+    }
+  ]
+}</pre>
+                </div>
+              </div>
+              <div class="alert alert-tip p-2">
+                <i class="bi bi-check-circle me-2 text-success"></i>
+                Container starts and waits. In VS Code press <strong>F5</strong> to attach → Set breakpoints → Same as local debug!
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="d-node">
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <h6 class="fw-semibold">launch.json for Node.js</h6>
+                  <p class="text-muted small">Node already runs with <code class="inline">--inspect</code> flag in the compose file above.</p>
+                </div>
+                <div class="col-md-6">
+                  <pre>{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Node.js Docker Debug",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "address": "localhost",
+      "localRoot": "${workspaceFolder}/node-code",
+      "remoteRoot": "/app",
+      "restart": true
+    }
+  ]
+}</pre>
+                </div>
+              </div>
+              <div class="alert alert-tip p-2">
+                <i class="bi bi-check-circle me-2 text-success"></i>
+                Start container → F5 in VS Code → Set breakpoints in your <code>index.js</code> → Works exactly like before!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMANDS -->
+      <div id="commands" class="card section-card">
+        <div class="card-header bg-dark text-white"><i class="bi bi-terminal-fill me-2"></i>Useful Commands</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <h6 class="fw-semibold text-muted text-uppercase small">Start / Stop</h6>
+              <table class="table table-sm cmd-table">
+                <tr><td>docker-compose up -d</td><td class="text-muted small">Start all containers</td></tr>
+                <tr><td>docker-compose down</td><td class="text-muted small">Stop all containers</td></tr>
+                <tr><td>docker-compose up -d php mysql</td><td class="text-muted small">Start only PHP + MySQL</td></tr>
+                <tr><td>docker-compose stop php</td><td class="text-muted small">Stop only PHP</td></tr>
+                <tr><td>docker-compose restart php</td><td class="text-muted small">Restart PHP</td></tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-semibold text-muted text-uppercase small">Logs & Shell</h6>
+              <table class="table table-sm cmd-table">
+                <tr><td>docker-compose logs php</td><td class="text-muted small">See PHP logs</td></tr>
+                <tr><td>docker-compose logs -f python</td><td class="text-muted small">Live Python logs</td></tr>
+                <tr><td>docker exec -it my_php bash</td><td class="text-muted small">Open PHP terminal</td></tr>
+                <tr><td>docker exec -it my_mysql bash</td><td class="text-muted small">Open MySQL terminal</td></tr>
+                <tr><td>docker ps</td><td class="text-muted small">See running containers</td></tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-semibold text-muted text-uppercase small">MySQL</h6>
+              <table class="table table-sm cmd-table">
+                <tr><td>docker exec -i my_mysql mysql -u root -proot mydb &lt; dump.sql</td><td class="text-muted small">Import dump</td></tr>
+                <tr><td>docker exec my_mysql mysqldump -u root -proot mydb > backup.sql</td><td class="text-muted small">Export dump</td></tr>
+                <tr><td>docker exec -it my_mysql mysql -u root -proot</td><td class="text-muted small">Open MySQL CLI</td></tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-semibold text-muted text-uppercase small">Rebuild & Cleanup</h6>
+              <table class="table table-sm cmd-table">
+                <tr><td>docker-compose up -d --build</td><td class="text-muted small">Rebuild after Dockerfile change</td></tr>
+                <tr><td>docker-compose down -v</td><td class="text-muted small">Stop + remove volumes</td></tr>
+                <tr><td>docker system prune</td><td class="text-muted small">Clean unused Docker data</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARISON TABLE -->
+      <div id="comparison" class="card section-card">
+        <div class="card-header bg-primary text-white"><i class="bi bi-arrow-left-right me-2"></i>Your Current Setup vs Docker</div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Task</th>
+                  <th><i class="bi bi-laptop me-1"></i>Your Current Local Setup</th>
+                  <th><i class="bi bi-box-seam me-1"></i>With Docker</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Code location</strong></td>
+                  <td>Windows folder</td>
+                  <td><span class="badge bg-success">Same Windows folder</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Edit code</strong></td>
+                  <td>VS Code</td>
+                  <td><span class="badge bg-success">Same VS Code</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Debug breakpoints</strong></td>
+                  <td>F5 in VS Code</td>
+                  <td><span class="badge bg-success">Same F5 in VS Code</span></td>
+                </tr>
+                <tr>
+                  <td><strong>MySQL dump import</strong></td>
+                  <td>mysql command locally</td>
+                  <td><span class="badge bg-success">docker exec + same mysql command</span></td>
+                </tr>
+                <tr>
+                  <td><strong>PHP installed on Windows</strong></td>
+                  <td><span class="badge bg-warning text-dark">Yes</span></td>
+                  <td><span class="badge bg-success">No — only in Docker</span></td>
+                </tr>
+                <tr>
+                  <td><strong>MySQL installed on Windows</strong></td>
+                  <td><span class="badge bg-warning text-dark">Yes</span></td>
+                  <td><span class="badge bg-success">No — only in Docker</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Switch PHP version</strong></td>
+                  <td>Reinstall PHP</td>
+                  <td><span class="badge bg-success">Change image tag in compose</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Share setup with team</strong></td>
+                  <td>Long setup docs</td>
+                  <td><span class="badge bg-success">Share docker-compose.yml — one command</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCESS URLS SUMMARY -->
+      <div class="card section-card">
+        <div class="card-header bg-success text-white"><i class="bi bi-globe me-2"></i>Quick Access URLs (after docker-compose up)</div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-6 col-md-4"><div class="p-3 border rounded-3 text-center"><i class="bi bi-filetype-php text-primary fs-4 d-block mb-1"></i><strong>PHP App</strong><br><a href="http://localhost:8080" target="_blank">localhost:8080</a></div></div>
+            <div class="col-6 col-md-4"><div class="p-3 border rounded-3 text-center"><i class="bi bi-node-plus text-success fs-4 d-block mb-1"></i><strong>Node.js App</strong><br><a href="http://localhost:3000" target="_blank">localhost:3000</a></div></div>
+            <div class="col-6 col-md-4"><div class="p-3 border rounded-3 text-center"><i class="bi bi-filetype-py text-warning fs-4 d-block mb-1"></i><strong>Python App</strong><br><a href="http://localhost:5000" target="_blank">localhost:5000</a></div></div>
+            <div class="col-6 col-md-4"><div class="p-3 border rounded-3 text-center"><i class="bi bi-globe text-info fs-4 d-block mb-1"></i><strong>Drupal</strong><br><a href="http://localhost:8090" target="_blank">localhost:8090</a></div></div>
+            <div class="col-6 col-md-4"><div class="p-3 border rounded-3 text-center"><i class="bi bi-table text-danger fs-4 d-block mb-1"></i><strong>phpMyAdmin</strong><br><a href="http://localhost:8888" target="_blank">localhost:8888</a></div></div>
+            <div class="col-6 col-md-4"><div class="p-3 border rounded-3 text-center"><i class="bi bi-database text-secondary fs-4 d-block mb-1"></i><strong>MySQL</strong><br><span class="text-muted">localhost:3306</span></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /col main -->
+  </div><!-- /row -->
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

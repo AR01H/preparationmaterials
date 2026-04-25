@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Cost Saving Guide — AWS, Azure, GCP & On-Premises</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:       #07080f;
+  --bg2:      #0e1018;
+  --bg3:      #161820;
+  --surface:  rgba(255,255,255,0.038);
+  --border:   rgba(255,255,255,0.07);
+  --text:     #dde3f0;
+  --muted:    #7a849a;
+  --dim:      #4a5368;
+
+  --gold:     #f5c842;
+  --gold2:    #e0a020;
+  --green:    #2ecc71;
+  --green2:   #1a9e55;
+  --red:      #e74c3c;
+  --blue:     #3b82f6;
+
+  --aws:      #FF9900;
+  --azure:    #0ea5e9;
+  --gcp:      #4285F4;
+  --onprem:   #2ecc71;
+
+  --font:     'DM Sans', sans-serif;
+  --display:  'Syne', sans-serif;
+  --mono:     'DM Mono', monospace;
+
+  --radius:   14px;
+  --shadow:   0 8px 32px rgba(0,0,0,0.4);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(24px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%,100% { opacity:1; }
+  50%      { opacity:0.6; }
+}
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+.fade-up { animation: fadeUp 0.6s ease both; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+
+/* ── TICKER ── */
+.ticker-wrap {
+  background: linear-gradient(90deg, rgba(245,200,66,0.1), rgba(245,200,66,0.04));
+  border-top: 1px solid rgba(245,200,66,0.2);
+  border-bottom: 1px solid rgba(245,200,66,0.2);
+  padding: 10px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ticker-inner {
+  display: inline-block;
+  animation: ticker 40s linear infinite;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--gold);
+}
+.ticker-inner span { padding: 0 40px; }
+.ticker-dot { color: var(--gold2); }
+
+/* ── NAV ── */
+.top-nav {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(7,8,15,0.92);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 0;
+}
+.nav-brand {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--gold);
+  text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-brand .icon {
+  width: 28px; height: 28px;
+  background: var(--gold);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  color: #000;
+  font-size: 0.75rem;
+}
+.nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav-links a {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 5px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.nav-links a:hover { color: var(--text); background: var(--surface); }
+
+/* ── HERO ── */
+.hero {
+  padding: 90px 0 70px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(245,200,66,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,200,66,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+.hero-glow {
+  position: absolute;
+  top: -200px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(245,200,66,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(245,200,66,0.08);
+  border: 1px solid rgba(245,200,66,0.25);
+  padding: 6px 16px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+.hero-eyebrow .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  margin-bottom: 22px;
+  letter-spacing: -0.02em;
+}
+.hero h1 .shimmer {
+  background: linear-gradient(135deg, var(--gold) 0%, #fff8d6 30%, var(--gold2) 60%, var(--gold) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+.hero-sub {
+  font-size: 1.05rem;
+  color: var(--muted);
+  max-width: 580px;
+  margin-bottom: 36px;
+  line-height: 1.7;
+}
+.hero-stats {
+  display: flex; flex-wrap: wrap; gap: 24px;
+}
+.hero-stat {
+  display: flex; flex-direction: column;
+}
+.hero-stat .num {
+  font-family: var(--display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+.hero-stat .label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ── SECTION ── */
+section { padding: 70px 0; border-bottom: 1px solid var(--border); }
+.sec-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.sec-title {
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.sec-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 48px; max-width: 640px; }
+
+/* ── CARDS ── */
+.card-base {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px;
+  height: 100%;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.card-base:hover { transform: translateY(-3px); }
+
+.card-aws   { border-top: 3px solid var(--aws); }
+.card-azure { border-top: 3px solid var(--azure); }
+.card-gcp   { border-top: 3px solid var(--gcp); }
+.card-onprem { border-top: 3px solid var(--onprem); }
+
+.card-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+.icon-aws   { background: rgba(255,153,0,0.12); color: var(--aws); }
+.icon-azure { background: rgba(14,165,233,0.12); color: var(--azure); }
+.icon-gcp   { background: rgba(66,133,244,0.12); color: var(--gcp); }
+.icon-onprem{ background: rgba(46,204,113,0.12); color: var(--onprem); }
+.icon-gold  { background: rgba(245,200,66,0.12); color: var(--gold); }
+.icon-green { background: rgba(46,204,113,0.12); color: var(--green); }
+.icon-red   { background: rgba(231,76,60,0.12);  color: var(--red); }
+
+.card-title { font-family: var(--display); font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+.card-sub   { color: var(--muted); font-size: 0.83rem; margin-bottom: 14px; }
+
+/* ── SAVINGS BADGE ── */
+.savings-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.savings-high   { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
+.savings-med    { background: rgba(245,200,66,0.12); color: var(--gold);  border: 1px solid rgba(245,200,66,0.25); }
+.savings-low    { background: rgba(59,130,246,0.12); color: #60a5fa;      border: 1px solid rgba(59,130,246,0.25); }
+.savings-effort { background: rgba(231,76,60,0.10);  color: #f87171;      border: 1px solid rgba(231,76,60,0.2); }
+
+/* ── TIP LIST ── */
+.tip-list { list-style: none; padding: 0; }
+.tip-list li {
+  padding: 6px 0;
+  font-size: 0.86rem;
+  color: var(--muted);
+  display: flex; align-items: flex-start; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.tip-list li:last-child { border-bottom: none; }
+.tip-list li .bullet {
+  width: 18px; height: 18px; min-width: 18px;
+  border-radius: 50%;
+  background: rgba(46,204,113,0.15);
+  color: var(--green);
+  font-size: 0.65rem;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 2px;
+  font-weight: 700;
+}
+.tip-list li .bullet.warn { background: rgba(245,200,66,0.12); color: var(--gold); }
+.tip-list li .bullet.info { background: rgba(59,130,246,0.12); color: #60a5fa; }
+
+/* ── CODE BLOCKS ── */
+.code-wrap {
+  background: #060810;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 12px;
+  font-size: 0.79rem;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.code-dots { display: flex; gap: 5px; }
+.code-dots span {
+  width: 9px; height: 9px; border-radius: 50%;
+}
+.code-dots .r { background: #e74c3c; }
+.code-dots .y { background: #f39c12; }
+.code-dots .g { background: #2ecc71; }
+.code-filename { font-family: var(--mono); font-size: 0.72rem; color: var(--dim); }
+.code-body {
+  padding: 14px 16px;
+  font-family: var(--mono);
+  line-height: 1.85;
+  overflow-x: auto;
+}
+.c  { color: #4a5568; } /* comment */
+.k  { color: #f97316; } /* keyword */
+.s  { color: #86efac; } /* string */
+.f  { color: #60a5fa; } /* function */
+.v  { color: #e2e8f0; } /* variable */
+.n  { color: #c084fc; } /* number */
+.hl { background: rgba(245,200,66,0.07); display: block; margin: 0 -16px; padding: 0 16px; }
+
+/* ── COMPARISON TABLE ── */
+.data-table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.data-table table { width: 100%; border-collapse: collapse; }
+.data-table thead { background: rgba(255,255,255,0.04); }
+.data-table th {
+  padding: 13px 16px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 12px 16px;
+  font-size: 0.84rem;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--muted);
+  vertical-align: middle;
+}
+.data-table td:first-child { color: var(--text); font-weight: 500; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.mono-cell { font-family: var(--mono); font-size: 0.78rem; }
+
+/* ── PLATFORM TABS ── */
+.platform-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.ptab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.ptab:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+.ptab.aws   { border-color: rgba(255,153,0,0.35);  background: rgba(255,153,0,0.08);  color: var(--aws); }
+.ptab.azure { border-color: rgba(14,165,233,0.35); background: rgba(14,165,233,0.08); color: var(--azure); }
+.ptab.gcp   { border-color: rgba(66,133,244,0.35); background: rgba(66,133,244,0.08); color: #7aadff; }
+.ptab.onprem{ border-color: rgba(46,204,113,0.35); background: rgba(46,204,113,0.08); color: var(--onprem); }
+
+/* ── ACCORDION ── */
+.acc-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) !important;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.acc-btn {
+  background: transparent !important;
+  color: var(--text) !important;
+  font-family: var(--font) !important;
+  font-weight: 600 !important;
+  font-size: 0.92rem !important;
+  padding: 16px 20px !important;
+  box-shadow: none !important;
+  border: none !important;
+  display: flex; align-items: center; gap: 12px;
+}
+.acc-btn:not(.collapsed) { color: var(--gold) !important; }
+.acc-btn::after { filter: invert(0.6); }
+.acc-body {
+  background: rgba(0,0,0,0.25) !important;
+  padding: 20px !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+/* ── PROGRESS BAR ── */
+.saving-bar-wrap { margin: 6px 0; }
+.saving-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.saving-bar-label .pct { color: var(--green); font-weight: 700; font-family: var(--mono); }
+.saving-bar-bg {
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.saving-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--green2), var(--green));
+  transition: width 1s ease;
+}
+.saving-bar-fill.gold { background: linear-gradient(90deg, var(--gold2), var(--gold)); }
+.saving-bar-fill.blue { background: linear-gradient(90deg, #1d4ed8, var(--blue)); }
+
+/* ── CALLOUT BOXES ── */
+.callout {
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 0.87rem;
+  display: flex; gap: 14px; align-items: flex-start;
+  margin: 16px 0;
+}
+.callout-gold  { background: rgba(245,200,66,0.06);  border: 1px solid rgba(245,200,66,0.2); }
+.callout-green { background: rgba(46,204,113,0.06);  border: 1px solid rgba(46,204,113,0.2); }
+.callout-red   { background: rgba(231,76,60,0.06);   border: 1px solid rgba(231,76,60,0.2); }
+.callout-blue  { background: rgba(59,130,246,0.06);  border: 1px solid rgba(59,130,246,0.2); }
+.callout-icon  { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.callout-gold  .callout-icon { color: var(--gold); }
+.callout-green .callout-icon { color: var(--green); }
+.callout-red   .callout-icon { color: var(--red); }
+.callout-blue  .callout-icon { color: #60a5fa; }
+.callout p { margin: 0; color: var(--muted); line-height: 1.6; }
+.callout strong { color: var(--text); }
+
+/* ── CHECKLIST ── */
+.checklist { list-style: none; padding: 0; }
+.checklist li {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0;
+  font-size: 0.86rem;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.checklist li:last-child { border-bottom: none; }
+.checklist li .chk {
+  width: 18px; height: 18px; min-width: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--green2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--green);
+  font-size: 0.65rem;
+  margin-top: 2px;
+}
+.checklist li .chk.warn { border-color: var(--gold2); color: var(--gold); }
+
+/* ── PILL TAGS ── */
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 6px;
+  margin: 2px;
+  font-family: var(--mono);
+}
+.pill-aws   { background: rgba(255,153,0,0.1);  color: var(--aws);   border: 1px solid rgba(255,153,0,0.2); }
+.pill-azure { background: rgba(14,165,233,0.1); color: var(--azure); border: 1px solid rgba(14,165,233,0.2); }
+.pill-gcp   { background: rgba(66,133,244,0.1); color: #7aadff;      border: 1px solid rgba(66,133,244,0.2); }
+.pill-onp   { background: rgba(46,204,113,0.1); color: var(--onprem); border: 1px solid rgba(46,204,113,0.2); }
+.pill-gold  { background: rgba(245,200,66,0.1); color: var(--gold);  border: 1px solid rgba(245,200,66,0.2); }
+
+/* ── ROI CALCULATOR ── */
+.calc-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+.calc-input-group { margin-bottom: 18px; }
+.calc-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: flex; justify-content: space-between;
+}
+.calc-label span { font-family: var(--mono); color: var(--gold); }
+input[type=range] {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg3);
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(245,200,66,0.4);
+}
+.calc-result {
+  background: rgba(46,204,113,0.06);
+  border: 1px solid rgba(46,204,113,0.2);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+.calc-result .big-num {
+  font-family: var(--display);
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--green);
+  line-height: 1;
+}
+.calc-result .big-label { color: var(--muted); font-size: 0.82rem; margin-top: 6px; }
+
+/* ── QUICK WIN GRID ── */
+.qw-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex; gap: 14px;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.qw-card:hover { border-color: rgba(245,200,66,0.3); transform: translateY(-2px); }
+.qw-num {
+  font-family: var(--display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: rgba(245,200,66,0.15);
+  line-height: 1;
+  min-width: 40px;
+}
+.qw-content h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+.qw-content p  { color: var(--muted); font-size: 0.82rem; margin: 0; }
+
+/* ── COMPARISON METER ── */
+.meter-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.meter-row:last-child { border-bottom: none; }
+.meter-label { width: 170px; min-width: 170px; font-size: 0.83rem; font-weight: 600; }
+.meter-bars { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.meter-bar-row { display: flex; align-items: center; gap: 8px; }
+.meter-bar-row .platform { font-family: var(--mono); font-size: 0.68rem; color: var(--dim); width: 45px; }
+.meter-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+.meter-fill { height: 100%; border-radius: 3px; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 48px 0 32px;
+  text-align: center;
+}
+footer .logo {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+footer p { color: var(--dim); font-size: 0.82rem; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px) {
+  section { padding: 48px 0; }
+  .hero { padding: 60px 0 50px; }
+  .nav-links { display: none; }
+  .meter-label { width: 100px; min-width: 100px; font-size: 0.78rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span>💡 Reserved Instances → up to 72% savings</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 Spot / Preemptible VMs → up to 90% cheaper</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 Right-sizing workloads → avg 30-40% reduction</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 Auto-scaling → stop paying for idle capacity</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 S3 Intelligent-Tiering → automatic storage savings</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 On-Prem breakeven vs cloud at ~3-5 years</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 Egress fees: the hidden cloud tax — plan carefully</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 Reserved Instances → up to 72% savings</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 Spot / Preemptible VMs → up to 90% cheaper</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 Right-sizing workloads → avg 30-40% reduction</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 Auto-scaling → stop paying for idle capacity</span>
+    <span class="ticker-dot">◆</span>
+    <span>💡 S3 Intelligent-Tiering → automatic storage savings</span>
+    <span class="ticker-dot">◆</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <div class="container d-flex align-items-center justify-content-between">
+    <a class="nav-brand" href="#top">
+      <div class="icon"><i class="fas fa-piggy-bank"></i></div>
+      FinOps Guide
+    </a>
+    <div class="nav-links">
+      <a href="#universal">Universal</a>
+      <a href="#aws-tips">AWS</a>
+      <a href="#azure-tips">Azure</a>
+      <a href="#gcp-tips">GCP</a>
+      <a href="#onprem-tips">On-Prem</a>
+      <a href="#calculator">Calculator</a>
+      <a href="#tools">Tools</a>
+      <a href="#checklist">Checklist</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="container position-relative">
+    <div class="hero-eyebrow fade-up">
+      <div class="dot"></div>
+      Complete FinOps & Cost Optimization Guide 2024
+    </div>
+    <h1 class="fade-up delay-1">
+      Stop Burning Money<br>on <span class="shimmer">Cloud & On-Prem</span>
+    </h1>
+    <p class="hero-sub fade-up delay-2">
+      Every practical cost-saving strategy across AWS, Azure, GCP, and On-Premises — from quick wins that take 5 minutes to architectural decisions that save millions. With CLI commands, real numbers, and tools.
+    </p>
+    <div class="hero-stats fade-up delay-3">
+      <div class="hero-stat">
+        <span class="num">72%</span>
+        <span class="label">Savings via Reserved Instances</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">90%</span>
+        <span class="label">Savings via Spot Instances</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">40%</span>
+        <span class="label">Avg Wasted Cloud Spend</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">35%</span>
+        <span class="label">Savings via Right-Sizing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 1: UNIVERSAL PRINCIPLES -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="universal">
+  <div class="container">
+    <div class="sec-label">Platform-Agnostic</div>
+    <h2 class="sec-title">Universal Cost-Saving Principles</h2>
+    <p class="sec-sub">These strategies apply across every platform — cloud or on-premises. Master these first before diving into platform-specific tips.</p>
+
+    <!-- Quick Win Grid -->
+    <div class="row g-3 mb-5">
+      <div class="col-12">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="card-icon icon-gold"><i class="fas fa-bolt"></i></div>
+          <div>
+            <div class="fw-bold" style="font-family:var(--display)">⚡ Quick Wins — Do These This Week</div>
+            <div style="color:var(--muted);font-size:0.82rem;">Each takes under 2 hours and typically saves thousands/month</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="qw-card"><div class="qw-num">01</div><div class="qw-content"><h6>Turn Off Idle Resources</h6><p>Dev/staging servers running nights & weekends = wasted money. Schedule auto-stop scripts. Saves 60%+ of dev environment costs.</p></div></div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="qw-card"><div class="qw-num">02</div><div class="qw-content"><h6>Delete Unattached Storage</h6><p>Orphaned disks, snapshots, and old AMIs silently rack up bills. Run a cleanup script monthly. Easy $100–$2000/month savings.</p></div></div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="qw-card"><div class="qw-num">03</div><div class="qw-content"><h6>Set Billing Alerts</h6><p>Configure budget alarms at 80% and 100% of expected spend. You can't manage what you can't measure. Free to set up.</p></div></div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="qw-card"><div class="qw-num">04</div><div class="qw-content"><h6>Tag Every Resource</h6><p>Without tags, you can't allocate costs to teams or projects. Mandatory tags: environment, team, project, owner. Enables chargeback.</p></div></div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="qw-card"><div class="qw-num">05</div><div class="qw-content"><h6>Review & Delete Unused LBs</h6><p>Load balancers with no registered targets still cost money. Often left behind after migrations. $15–40/month each.</p></div></div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="qw-card"><div class="qw-num">06</div><div class="qw-content"><h6>Compress & Cache Everything</h6><p>Enable gzip/brotli compression. Use CDN for static assets. Reduce data transfer costs by 60–80% and improve performance.</p></div></div>
+      </div>
+    </div>
+
+    <!-- Core Principles -->
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card-base h-100">
+          <div class="card-icon icon-gold"><i class="fas fa-chart-bar"></i></div>
+          <div class="card-title">Right-Sizing</div>
+          <div class="card-sub">Match compute to actual usage, not peak guesses</div>
+          <ul class="tip-list">
+            <li><div class="bullet">✓</div><div>Analyze 2-week CPU/memory utilization (aim for 60–80% target)</div></li>
+            <li><div class="bullet">✓</div><div>Downgrade oversized instances — common savings: 30–50%</div></li>
+            <li><div class="bullet">✓</div><div>Use ARM/Graviton processors: 20% cheaper on same specs</div></li>
+            <li><div class="bullet">✓</div><div>Review database instance sizes — often 2x overprovisioned</div></li>
+            <li><div class="bullet">✓</div><div>Containers/serverless: right-size memory allocations</div></li>
+          </ul>
+          <div class="saving-bar-wrap mt-3">
+            <div class="saving-bar-label"><span>Potential Savings</span><span class="pct">20–50%</span></div>
+            <div class="saving-bar-bg"><div class="saving-bar-fill" style="width:45%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card-base h-100">
+          <div class="card-icon icon-green"><i class="fas fa-clock"></i></div>
+          <div class="card-title">Reservation & Commitments</div>
+          <div class="card-sub">Pre-pay for predictable workloads at massive discounts</div>
+          <ul class="tip-list">
+            <li><div class="bullet">✓</div><div>1-year Reserved = ~40% savings vs on-demand</div></li>
+            <li><div class="bullet">✓</div><div>3-year Reserved = ~60–72% savings vs on-demand</div></li>
+            <li><div class="bullet">✓</div><div>Savings Plans (AWS): flexible, covers EC2, Lambda, Fargate</div></li>
+            <li><div class="bullet">✓</div><div>Committed Use Discounts (GCP): automatic after threshold</div></li>
+            <li><div class="bullet">✓</div><div>Azure Reservations: covers VMs, SQL, Cosmos DB, storage</div></li>
+          </ul>
+          <div class="saving-bar-wrap mt-3">
+            <div class="saving-bar-label"><span>Potential Savings</span><span class="pct">40–72%</span></div>
+            <div class="saving-bar-bg"><div class="saving-bar-fill" style="width:72%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card-base h-100">
+          <div class="card-icon icon-green"><i class="fas fa-layer-group"></i></div>
+          <div class="card-title">Storage Tiering</div>
+          <div class="card-sub">Hot data is expensive — automate the movement to cheaper tiers</div>
+          <ul class="tip-list">
+            <li><div class="bullet">✓</div><div>Tier 1 (Hot): Frequently accessed — Standard storage</div></li>
+            <li><div class="bullet">✓</div><div>Tier 2 (Cool): Accessed monthly — 50% cheaper than hot</div></li>
+            <li><div class="bullet">✓</div><div>Tier 3 (Cold/Archive): Rarely accessed — up to 95% cheaper</div></li>
+            <li><div class="bullet">✓</div><div>Lifecycle policies: auto-move after 30/90/365 days</div></li>
+            <li><div class="bullet">✓</div><div>Delete expired logs, old backups, stale dev snapshots</div></li>
+          </ul>
+          <div class="saving-bar-wrap mt-3">
+            <div class="saving-bar-label"><span>Potential Savings</span><span class="pct">40–90%</span></div>
+            <div class="saving-bar-bg"><div class="saving-bar-fill" style="width:65%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Transfer Warning -->
+    <div class="callout callout-red mt-4">
+      <div class="callout-icon"><i class="fas fa-exclamation-triangle"></i></div>
+      <div><p><strong>⚠️ The Egress Tax — The Hidden Cloud Killer:</strong> Transferring data OUT of any cloud costs money (typically $0.08–0.09/GB). Transferring BETWEEN regions costs extra too. Inbound is usually free. Design your architecture to keep data movement minimal. Egress fees can account for 20–30% of bills for data-heavy apps. Consider data gravity — put compute where your data lives, not the other way around.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 2: AWS COST SAVING -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="aws-tips">
+  <div class="container">
+    <div class="sec-label">Amazon Web Services</div>
+    <h2 class="sec-title" style="color:var(--aws)">AWS Cost Optimization</h2>
+    <p class="sec-sub">AWS has 200+ services — costs can spiral fast. Here's every lever to pull, with real CLI commands.</p>
+
+    <div class="row g-4 mb-4">
+
+      <!-- Spot Instances -->
+      <div class="col-lg-6">
+        <div class="card-base card-aws h-100">
+          <div class="d-flex align-items-center gap-12 mb-3">
+            <div class="card-icon icon-aws mb-0 me-3"><i class="fas fa-tag"></i></div>
+            <div>
+              <div class="card-title">Spot Instances — Up to 90% Off</div>
+              <div class="card-sub mb-0">Unused EC2 capacity sold at massive discounts. Use for fault-tolerant workloads.</div>
+            </div>
+          </div>
+          <div class="mb-2">
+            <span class="savings-badge savings-high">✦ Up to 90% savings</span>
+            <span class="savings-badge savings-effort" style="margin-left:4px">⚡ Medium setup</span>
+          </div>
+          <ul class="tip-list">
+            <li><div class="bullet">✓</div><div>Best for: batch jobs, ML training, data processing, rendering, CI/CD workers</div></li>
+            <li><div class="bullet warn">!</div><div>NOT for: databases, stateful apps, customer-facing services (can be interrupted)</div></li>
+            <li><div class="bullet">✓</div><div>Use Spot Fleet with multiple instance types for higher availability</div></li>
+            <li><div class="bullet">✓</div><div>Implement 2-minute interruption handler to save state gracefully</div></li>
+          </ul>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">aws-spot.sh</div></div>
+            <div class="code-body">
+              <span class="c"># Request Spot Instance</span><br>
+              <span class="f">aws ec2 request-spot-instances</span> \<br>
+              &nbsp;&nbsp;<span class="k">--instance-count</span> <span class="n">1</span> \<br>
+              &nbsp;&nbsp;<span class="k">--type</span> <span class="s">"one-time"</span> \<br>
+              &nbsp;&nbsp;<span class="k">--launch-specification</span> <span class="s">'{</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"ImageId":"ami-0c55b159cbfafe1f0",</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"InstanceType":"c5.2xlarge",</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"KeyName":"my-key"}'</span><br><br>
+              <span class="c"># Check current Spot prices</span><br>
+              <span class="f">aws ec2 describe-spot-price-history</span> \<br>
+              &nbsp;&nbsp;<span class="k">--instance-types</span> c5.2xlarge c5.4xlarge \<br>
+              &nbsp;&nbsp;<span class="k">--product-descriptions</span> <span class="s">"Linux/UNIX"</span> \<br>
+              &nbsp;&nbsp;<span class="k">--max-items</span> <span class="n">5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Savings Plans -->
+      <div class="col-lg-6">
+        <div class="card-base card-aws h-100">
+          <div class="d-flex align-items-center gap-12 mb-3">
+            <div class="card-icon icon-aws mb-0 me-3"><i class="fas fa-calendar-check"></i></div>
+            <div>
+              <div class="card-title">Savings Plans & Reserved Instances</div>
+              <div class="card-sub mb-0">Commit to hourly spend for guaranteed discounts.</div>
+            </div>
+          </div>
+          <div class="mb-2">
+            <span class="savings-badge savings-high">✦ 40–72% savings</span>
+          </div>
+
+          <div class="data-table mt-2">
+            <table>
+              <thead><tr><th>Plan Type</th><th>Flexibility</th><th>Max Savings</th></tr></thead>
+              <tbody>
+                <tr><td>Compute Savings Plan</td><td class="mono-cell" style="color:#86efac">EC2, Lambda, Fargate</td><td class="mono-cell" style="color:var(--green)">66%</td></tr>
+                <tr><td>EC2 Instance Savings</td><td class="mono-cell" style="color:var(--muted)">Specific family+region</td><td class="mono-cell" style="color:var(--green)">72%</td></tr>
+                <tr><td>1-yr No Upfront RI</td><td class="mono-cell" style="color:var(--muted)">Specific instance</td><td class="mono-cell" style="color:var(--gold)">40%</td></tr>
+                <tr><td>3-yr All Upfront RI</td><td class="mono-cell" style="color:var(--muted)">Specific instance</td><td class="mono-cell" style="color:var(--green)">62%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">aws-savings.sh</div></div>
+            <div class="code-body">
+              <span class="c"># List active Savings Plans</span><br>
+              <span class="f">aws savingsplans describe-savings-plans</span><br><br>
+              <span class="c"># Get RI recommendations</span><br>
+              <span class="f">aws ce get-reservation-purchase-recommendation</span> \<br>
+              &nbsp;&nbsp;<span class="k">--service</span> <span class="s">"Amazon EC2"</span> \<br>
+              &nbsp;&nbsp;<span class="k">--term-in-years</span> <span class="s">ONE_YEAR</span> \<br>
+              &nbsp;&nbsp;<span class="k">--payment-option</span> <span class="s">NO_UPFRONT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 Cost Optimization -->
+      <div class="col-lg-6">
+        <div class="card-base card-aws h-100">
+          <div class="d-flex align-items-center gap-12 mb-3">
+            <div class="card-icon icon-aws mb-0 me-3"><i class="fas fa-database"></i></div>
+            <div>
+              <div class="card-title">S3 Storage Cost Optimization</div>
+              <div class="card-sub mb-0">S3 looks cheap but adds up. Smart tiering saves 40–90%.</div>
+            </div>
+          </div>
+          <span class="savings-badge savings-high">✦ 40–90% storage savings</span>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">s3-lifecycle.json</div></div>
+            <div class="code-body">
+              <span class="c"># Apply lifecycle policy to S3 bucket</span><br>
+              <span class="f">aws s3api put-bucket-lifecycle-configuration</span> \<br>
+              &nbsp;&nbsp;<span class="k">--bucket</span> my-bucket \<br>
+              &nbsp;&nbsp;<span class="k">--lifecycle-configuration</span> <span class="s">'{</span><br>
+              &nbsp;&nbsp;<span class="s">"Rules":[{</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"ID":"AutoTier",</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"Status":"Enabled",</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"Transitions":[</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">{"Days":30,"StorageClass":"STANDARD_IA"},</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">{"Days":90,"StorageClass":"GLACIER"},</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">{"Days":365,"StorageClass":"DEEP_ARCHIVE"}],</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"Expiration":{"Days":2555},</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"Filter":{"Prefix":"logs/"}</span><br>
+              <span class="s">}]}'</span><br><br>
+              <span class="c"># Enable Intelligent-Tiering</span><br>
+              <span class="f">aws s3api put-bucket-intelligent-tiering-configuration</span> \<br>
+              &nbsp;&nbsp;<span class="k">--bucket</span> my-bucket \<br>
+              &nbsp;&nbsp;<span class="k">--id</span> EntireS3Bucket \<br>
+              &nbsp;&nbsp;<span class="k">--intelligent-tiering-configuration</span> <span class="s">'{"Id":"EntireS3Bucket","Status":"Enabled","Tierings":[{"AccessTier":"ARCHIVE_ACCESS","Days":90}]}'</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lambda & Fargate -->
+      <div class="col-lg-6">
+        <div class="card-base card-aws h-100">
+          <div class="d-flex align-items-center gap-12 mb-3">
+            <div class="card-icon icon-aws mb-0 me-3"><i class="fas fa-bolt"></i></div>
+            <div>
+              <div class="card-title">Lambda & Serverless Optimization</div>
+              <div class="card-sub mb-0">Serverless isn't free — optimize memory, duration, and architecture.</div>
+            </div>
+          </div>
+          <span class="savings-badge savings-med">✦ 20–60% savings</span>
+          <ul class="tip-list mt-3">
+            <li><div class="bullet">✓</div><div><strong>Right-size memory:</strong> Lambda charges for GB-seconds. Use AWS Lambda Power Tuning tool to find the cheapest memory/speed combo</div></li>
+            <li><div class="bullet">✓</div><div><strong>ARM64 (Graviton2):</strong> 20% cheaper than x86 + often faster. Switch with one config change</div></li>
+            <li><div class="bullet">✓</div><div><strong>Reduce cold starts:</strong> Enable Provisioned Concurrency only for latency-critical paths (costs money — only where needed)</div></li>
+            <li><div class="bullet">✓</div><div><strong>Batch SQS messages:</strong> Process 10 messages per invocation instead of 1 — 10x fewer invocations</div></li>
+            <li><div class="bullet">✓</div><div><strong>Avoid Lambda-to-Lambda sync calls:</strong> Use SQS/SNS async. Sync chains = double billing + timeout risk</div></li>
+          </ul>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">lambda-arm.sh</div></div>
+            <div class="code-body">
+              <span class="c"># Switch Lambda to ARM (Graviton) — 20% cheaper</span><br>
+              <span class="f">aws lambda update-function-configuration</span> \<br>
+              &nbsp;&nbsp;<span class="k">--function-name</span> MyFunction \<br>
+              &nbsp;&nbsp;<span class="k">--architectures</span> arm64<br><br>
+              <span class="c"># Also set optimal memory (tune with power-tuning tool)</span><br>
+              <span class="f">aws lambda update-function-configuration</span> \<br>
+              &nbsp;&nbsp;<span class="k">--function-name</span> MyFunction \<br>
+              &nbsp;&nbsp;<span class="k">--memory-size</span> <span class="n">512</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EC2 Scheduling -->
+      <div class="col-12">
+        <div class="card-base card-aws">
+          <div class="row g-4 align-items-start">
+            <div class="col-lg-5">
+              <div class="card-icon icon-aws"><i class="fas fa-power-off"></i></div>
+              <div class="card-title">EC2 Scheduler — Auto Stop Dev/Staging</div>
+              <div class="card-sub">Dev environments running 24/7 is pure waste. Auto-schedule stop/start.</div>
+              <span class="savings-badge savings-high">✦ 60–70% dev environment savings</span>
+              <div class="mt-3">
+                <div class="saving-bar-wrap">
+                  <div class="saving-bar-label"><span>Without scheduler (168 hrs/week)</span><span class="pct">$280/mo</span></div>
+                  <div class="saving-bar-bg"><div class="saving-bar-fill gold" style="width:100%"></div></div>
+                </div>
+                <div class="saving-bar-wrap">
+                  <div class="saving-bar-label"><span>With scheduler (50 hrs/week)</span><span class="pct">$83/mo</span></div>
+                  <div class="saving-bar-bg"><div class="saving-bar-fill" style="width:30%"></div></div>
+                </div>
+              </div>
+              <div class="callout callout-green mt-3">
+                <div class="callout-icon"><i class="fas fa-lightbulb"></i></div>
+                <p>Use <strong>AWS Instance Scheduler</strong> (free CloudFormation template) or EC2 Auto Scaling schedules. Can save $2,000+/month on a 10-server dev environment.</p>
+              </div>
+            </div>
+            <div class="col-lg-7">
+              <div class="code-wrap">
+                <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">ec2-scheduler-lambda.py</div></div>
+                <div class="code-body">
+<span class="c"># Lambda function: auto-stop dev instances at 7PM, start at 8AM</span><br>
+<span class="k">import</span> <span class="v">boto3</span><br>
+<span class="v">ec2</span> = boto3.<span class="f">client</span>(<span class="s">'ec2'</span>, region_name=<span class="s">'ap-south-1'</span>)<br><br>
+<span class="k">def</span> <span class="f">lambda_handler</span>(event, context):<br>
+&nbsp;&nbsp;<span class="v">action</span> = event.get(<span class="s">'action'</span>, <span class="s">'stop'</span>)<br><br>
+&nbsp;&nbsp;<span class="c"># Find all dev instances by tag</span><br>
+&nbsp;&nbsp;<span class="v">response</span> = ec2.<span class="f">describe_instances</span>(Filters=[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="s">'Name'</span>: <span class="s">'tag:Environment'</span>, <span class="s">'Values'</span>: [<span class="s">'dev'</span>, <span class="s">'staging'</span>]},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="s">'Name'</span>: <span class="s">'instance-state-name'</span>, <span class="s">'Values'</span>: [<span class="s">'running'</span>]}<br>
+&nbsp;&nbsp;])<br>
+&nbsp;&nbsp;<span class="v">ids</span> = [i[<span class="s">'InstanceId'</span>] <span class="k">for</span> r <span class="k">in</span> response[<span class="s">'Reservations'</span>] <span class="k">for</span> i <span class="k">in</span> r[<span class="s">'Instances'</span>]]<br><br>
+&nbsp;&nbsp;<span class="k">if</span> ids:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> action == <span class="s">'stop'</span>:  ec2.<span class="f">stop_instances</span>(InstanceIds=ids)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> action == <span class="s">'start'</span>: ec2.<span class="f">start_instances</span>(InstanceIds=ids)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">print</span>(<span class="f">f</span><span class="s">"{action}ped {len(ids)} instances"</span>)<br><br>
+<span class="c"># EventBridge Rule: cron(0 13 ? * MON-FRI *) = 7PM IST stop</span><br>
+<span class="c"># EventBridge Rule: cron(0 2 ? * MON-FRI *) = 8AM IST start</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AWS Cost Explorer -->
+      <div class="col-lg-6">
+        <div class="card-base card-aws">
+          <div class="card-icon icon-aws"><i class="fas fa-search-dollar"></i></div>
+          <div class="card-title">AWS Cost Explorer & Anomaly Detection</div>
+          <div class="card-sub">Visibility is the first step to savings.</div>
+          <ul class="tip-list">
+            <li><div class="bullet">✓</div><div>Enable Cost Anomaly Detection — catches unexpected spikes immediately</div></li>
+            <li><div class="bullet">✓</div><div>Use Cost Explorer to identify top 5 spending services monthly</div></li>
+            <li><div class="bullet">✓</div><div>Enable AWS Compute Optimizer — free rightsizing recommendations</div></li>
+            <li><div class="bullet">✓</div><div>Check Trusted Advisor weekly for cost optimization recommendations</div></li>
+          </ul>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">cost-explorer.sh</div></div>
+            <div class="code-body">
+<span class="c"># Get last month's cost by service</span><br>
+<span class="f">aws ce get-cost-and-usage</span> \<br>
+&nbsp;&nbsp;<span class="k">--time-period</span> Start=<span class="s">2024-01-01</span>,End=<span class="s">2024-02-01</span> \<br>
+&nbsp;&nbsp;<span class="k">--granularity</span> MONTHLY \<br>
+&nbsp;&nbsp;<span class="k">--metrics</span> <span class="s">"BlendedCost"</span> \<br>
+&nbsp;&nbsp;<span class="k">--group-by</span> Type=DIMENSION,Key=SERVICE<br><br>
+<span class="c"># Get Compute Optimizer EC2 recommendations</span><br>
+<span class="f">aws compute-optimizer get-ec2-instance-recommendations</span> \<br>
+&nbsp;&nbsp;<span class="k">--filters</span> name=Finding,values=OVER_PROVISIONED
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RDS Optimization -->
+      <div class="col-lg-6">
+        <div class="card-base card-aws">
+          <div class="card-icon icon-aws"><i class="fas fa-server"></i></div>
+          <div class="card-title">RDS & Database Cost Cuts</div>
+          <div class="card-sub">Databases are often the biggest bill after compute.</div>
+          <span class="savings-badge savings-high">✦ 30–60% savings possible</span>
+          <ul class="tip-list mt-2">
+            <li><div class="bullet">✓</div><div><strong>Aurora Serverless v2:</strong> Scales to 0 ACUs when idle. Perfect for dev/staging DBs with intermittent usage</div></li>
+            <li><div class="bullet">✓</div><div><strong>Multi-AZ only in prod:</strong> Dev/staging don't need Multi-AZ. 2x cost savings for non-prod</div></li>
+            <li><div class="bullet">✓</div><div><strong>Snapshot + delete dev DBs:</strong> Snapshots cost ~$0.021/GB vs running instance. Delete & restore when needed</div></li>
+            <li><div class="bullet">✓</div><div><strong>Reserved DB Instances:</strong> 1-year reserved RDS = 40% off on-demand</div></li>
+            <li><div class="bullet">✓</div><div><strong>Read replicas for reads:</strong> Direct reporting queries to read replicas, use cheaper instance class for them</div></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- end aws row -->
+
+    <div class="callout callout-gold">
+      <div class="callout-icon"><i class="fas fa-trophy"></i></div>
+      <div><p><strong>AWS FinOps Priority Order:</strong> (1) Turn off idle → (2) Right-size → (3) Reserve what's stable → (4) Spot for batch → (5) S3 lifecycle policies → (6) Auto-scaling → (7) Graviton/ARM instances → (8) Delete orphaned resources. Follow this order for fastest ROI.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 3: AZURE COST SAVING -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="azure-tips">
+  <div class="container">
+    <div class="sec-label">Microsoft Azure</div>
+    <h2 class="sec-title" style="color:var(--azure)">Azure Cost Optimization</h2>
+    <p class="sec-sub">Azure's cost structure rewards Microsoft ecosystem loyalty. Know the levers specific to Azure's pricing model.</p>
+
+    <div class="row g-4">
+
+      <!-- Azure Hybrid Benefit -->
+      <div class="col-lg-6">
+        <div class="card-base card-azure h-100">
+          <div class="card-icon icon-azure"><i class="fab fa-microsoft"></i></div>
+          <div class="card-title">Azure Hybrid Benefit (AHUB)</div>
+          <div class="card-sub">Already paying for Windows Server or SQL Server licenses? Use them on Azure for free.</div>
+          <span class="savings-badge savings-high">✦ Up to 40% VM savings</span>
+          <div class="callout callout-blue mt-3">
+            <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
+            <p><strong>Biggest Azure-specific saving:</strong> If you have Software Assurance for Windows Server or SQL Server, you get the OS/license for free on Azure VMs. A SQL Standard VM goes from $350/mo to $210/mo instantly.</p>
+          </div>
+          <div class="code-wrap mt-2">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">azure-hybrid.sh</div></div>
+            <div class="code-body">
+<span class="c"># Enable Hybrid Benefit on existing VM</span><br>
+<span class="f">az vm update</span> \<br>
+&nbsp;&nbsp;<span class="k">--resource-group</span> MyRG \<br>
+&nbsp;&nbsp;<span class="k">--name</span> MyWindowsVM \<br>
+&nbsp;&nbsp;<span class="k">--license-type</span> Windows_Server<br><br>
+<span class="c"># Apply to SQL VMs</span><br>
+<span class="f">az sql vm update</span> \<br>
+&nbsp;&nbsp;<span class="k">--resource-group</span> MyRG \<br>
+&nbsp;&nbsp;<span class="k">--name</span> MySQLVM \<br>
+&nbsp;&nbsp;<span class="k">--license-type</span> AHUB<br><br>
+<span class="c"># Bulk apply via Azure Policy (recommended)</span><br>
+<span class="c"># Policy: "Configure Azure Hybrid Benefit for Windows VMs"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Azure Spot VMs -->
+      <div class="col-lg-6">
+        <div class="card-base card-azure h-100">
+          <div class="card-icon icon-azure"><i class="fas fa-tag"></i></div>
+          <div class="card-title">Azure Spot VMs & Dev/Test Pricing</div>
+          <div class="card-sub">Two distinct discounting mechanisms for non-production workloads.</div>
+          <ul class="tip-list">
+            <li><div class="bullet">✓</div><div><strong>Spot VMs:</strong> Up to 90% off for evictable workloads (batch, ML, rendering)</div></li>
+            <li><div class="bullet">✓</div><div><strong>Dev/Test pricing:</strong> Visual Studio subscribers get Linux VMs at discounted Windows prices</div></li>
+            <li><div class="bullet">✓</div><div><strong>B-series burstable VMs:</strong> Pay for low baseline, burst when needed. 50–70% cheaper than D-series for dev</div></li>
+            <li><div class="bullet">✓</div><div><strong>Low priority VMs in Batch:</strong> 80% discount for Batch workloads</div></li>
+          </ul>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">azure-spot.sh</div></div>
+            <div class="code-body">
+<span class="c"># Create Spot VM with eviction policy</span><br>
+<span class="f">az vm create</span> \<br>
+&nbsp;&nbsp;<span class="k">--resource-group</span> MyRG \<br>
+&nbsp;&nbsp;<span class="k">--name</span> SpotVM \<br>
+&nbsp;&nbsp;<span class="k">--image</span> Ubuntu2204 \<br>
+&nbsp;&nbsp;<span class="k">--priority</span> Spot \<br>
+&nbsp;&nbsp;<span class="k">--eviction-policy</span> Deallocate \<br>
+&nbsp;&nbsp;<span class="k">--max-price</span> <span class="n">0.05</span> \<br>
+&nbsp;&nbsp;<span class="k">--size</span> Standard_D4s_v3
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Azure Reservations -->
+      <div class="col-lg-6">
+        <div class="card-base card-azure h-100">
+          <div class="card-icon icon-azure"><i class="fas fa-calendar-alt"></i></div>
+          <div class="card-title">Azure Reservations & Savings Plans</div>
+          <div class="card-sub">Predictable workloads should never pay on-demand rates.</div>
+          <span class="savings-badge savings-high">✦ 30–72% savings</span>
+          <div class="data-table mt-3">
+            <table>
+              <thead><tr><th>Resource</th><th>1yr Saving</th><th>3yr Saving</th></tr></thead>
+              <tbody>
+                <tr><td>Virtual Machines</td><td class="mono-cell" style="color:var(--gold)">~36%</td><td class="mono-cell" style="color:var(--green)">~57%</td></tr>
+                <tr><td>Azure SQL Database</td><td class="mono-cell" style="color:var(--gold)">~33%</td><td class="mono-cell" style="color:var(--green)">~55%</td></tr>
+                <tr><td>Cosmos DB (RUs)</td><td class="mono-cell" style="color:var(--gold)">~25%</td><td class="mono-cell" style="color:var(--green)">~45%</td></tr>
+                <tr><td>Azure Blob Storage</td><td class="mono-cell" style="color:var(--gold)">~18%</td><td class="mono-cell" style="color:var(--green)">~38%</td></tr>
+                <tr><td>Azure Compute Savings Plan</td><td class="mono-cell" style="color:var(--gold)">~15%</td><td class="mono-cell" style="color:var(--green)">~35%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Azure Monitoring Costs -->
+      <div class="col-lg-6">
+        <div class="card-base card-azure h-100">
+          <div class="card-icon icon-azure"><i class="fas fa-eye"></i></div>
+          <div class="card-title">Cut Azure Monitor & Log Analytics Costs</div>
+          <div class="card-sub">Logging is often 15–30% of Azure bills. Often overlooked.</div>
+          <span class="savings-badge savings-med">✦ 20–40% monitoring savings</span>
+          <ul class="tip-list mt-2">
+            <li><div class="bullet">✓</div><div>Set data retention to 30 days (default 90 is overkill for most)</div></li>
+            <li><div class="bullet">✓</div><div>Filter noisy logs at ingest — not after. Only ship ERROR/WARN in prod</div></li>
+            <li><div class="bullet">✓</div><div>Use Commitment Tiers for Log Analytics: 100GB/day commitment = 25% off vs pay-per-GB</div></li>
+            <li><div class="bullet">✓</div><div>Archive older logs to Azure Storage (10x cheaper) instead of Log Analytics workspace</div></li>
+            <li><div class="bullet">✓</div><div>Separate workspaces per environment — don't log dev noise into prod workspace</div></li>
+          </ul>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">azure-monitor.sh</div></div>
+            <div class="code-body">
+<span class="c"># Set Log Analytics retention to 30 days</span><br>
+<span class="f">az monitor log-analytics workspace update</span> \<br>
+&nbsp;&nbsp;<span class="k">--resource-group</span> MyRG \<br>
+&nbsp;&nbsp;<span class="k">--workspace-name</span> MyWorkspace \<br>
+&nbsp;&nbsp;<span class="k">--retention-time</span> <span class="n">30</span><br><br>
+<span class="c"># Set daily cap to prevent cost explosion</span><br>
+<span class="f">az monitor log-analytics workspace update</span> \<br>
+&nbsp;&nbsp;<span class="k">--resource-group</span> MyRG \<br>
+&nbsp;&nbsp;<span class="k">--workspace-name</span> MyWorkspace \<br>
+&nbsp;&nbsp;<span class="k">--quota</span> <span class="n">5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Azure Policy for Cost Governance -->
+      <div class="col-12">
+        <div class="card-base card-azure">
+          <div class="card-icon icon-azure"><i class="fas fa-shield-alt"></i></div>
+          <div class="card-title">Azure Policy — Enforce Cost Controls at Scale</div>
+          <div class="card-sub">Prevent expensive misconfigurations before they happen using Policy as guardrails.</div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-4">
+              <ul class="tip-list">
+                <li><div class="bullet">✓</div><div>Deny creation of expensive VM SKUs in dev subscriptions</div></li>
+                <li><div class="bullet">✓</div><div>Require tags on all resource creation (env, owner, project)</div></li>
+                <li><div class="bullet">✓</div><div>Enforce allowed regions — prevent accidental deployments in expensive regions</div></li>
+              </ul>
+            </div>
+            <div class="col-md-8">
+              <div class="code-wrap">
+                <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">deny-expensive-vms.json</div></div>
+                <div class="code-body">
+<span class="c">// Azure Policy: Block expensive VM SKUs in dev</span><br>
+{<br>
+&nbsp;&nbsp;<span class="s">"policyRule"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"if"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"allOf"</span>: [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="s">"field"</span>: <span class="s">"type"</span>, <span class="s">"equals"</span>: <span class="s">"Microsoft.Compute/virtualMachines"</span> },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="s">"field"</span>: <span class="s">"Microsoft.Compute/virtualMachines/sku.name"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"in"</span>: [<span class="s">"Standard_M128s"</span>, <span class="s">"Standard_E96s_v5"</span>, <span class="s">"Standard_H44rs"</span>] }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"then"</span>: { <span class="s">"effect"</span>: <span class="s">"Deny"</span> }<br>
+&nbsp;&nbsp;}<br>
+}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 4: GCP COST SAVING -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="gcp-tips">
+  <div class="container">
+    <div class="sec-label">Google Cloud Platform</div>
+    <h2 class="sec-title" style="color:#7aadff">GCP Cost Optimization</h2>
+    <p class="sec-sub">GCP has some of the most automatic cost savings built in — but there's still plenty to optimize manually.</p>
+
+    <div class="row g-4">
+
+      <!-- Sustained Use Discounts -->
+      <div class="col-lg-6">
+        <div class="card-base card-gcp h-100">
+          <div class="card-icon icon-gcp"><i class="fas fa-gift"></i></div>
+          <div class="card-title">Sustained Use Discounts (SUDs) — Automatic</div>
+          <div class="card-sub">GCP's unique advantage: discounts apply automatically the longer you run VMs.</div>
+          <span class="savings-badge savings-high">✦ Up to 30% — FREE, automatic</span>
+          <div class="data-table mt-3">
+            <table>
+              <thead><tr><th>Usage This Month</th><th>Discount</th><th>Effective Cost</th></tr></thead>
+              <tbody>
+                <tr><td>0–25% of month</td><td class="mono-cell" style="color:var(--muted)">0%</td><td class="mono-cell">Full price</td></tr>
+                <tr><td>25–50% of month</td><td class="mono-cell" style="color:var(--gold)">20% off</td><td class="mono-cell">0.8x</td></tr>
+                <tr><td>50–75% of month</td><td class="mono-cell" style="color:var(--gold)">40% off</td><td class="mono-cell">0.6x</td></tr>
+                <tr><td>75–100% of month</td><td class="mono-cell" style="color:var(--green)">60% off</td><td class="mono-cell">0.4x</td></tr>
+                <tr><td>Effective (full month)</td><td class="mono-cell" style="color:var(--green)"><strong>~30% off</strong></td><td class="mono-cell" style="color:var(--green)">Automatic!</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout callout-green mt-3">
+            <div class="callout-icon"><i class="fas fa-lightbulb"></i></div>
+            <p><strong>Note:</strong> SUDs only apply to N1/N2 VMs, not to Spot, preemptible, or custom machine types via Committed Use. Don't move these to CUDs unless it saves more.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Committed Use -->
+      <div class="col-lg-6">
+        <div class="card-base card-gcp h-100">
+          <div class="card-icon icon-gcp"><i class="fas fa-handshake"></i></div>
+          <div class="card-title">Committed Use Discounts (CUDs)</div>
+          <div class="card-sub">Commit to vCPU/RAM (not instance type) for flexible, deep discounts.</div>
+          <span class="savings-badge savings-high">✦ Up to 57% savings</span>
+          <ul class="tip-list mt-3">
+            <li><div class="bullet">✓</div><div><strong>Resource-based CUDs:</strong> Commit to specific vCPU/RAM amounts — applies across any instance type in that family</div></li>
+            <li><div class="bullet">✓</div><div><strong>Spend-based CUDs:</strong> Commit to $/hr spend for Cloud SQL, VMware Engine</div></li>
+            <li><div class="bullet">✓</div><div>1-year: ~37% off; 3-year: ~57% off on general-purpose</div></li>
+          </ul>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">gcp-cud.sh</div></div>
+            <div class="code-body">
+<span class="c"># Create 1-year CUD for N2 vCPUs</span><br>
+<span class="f">gcloud compute commitments create</span> my-commitment \<br>
+&nbsp;&nbsp;<span class="k">--plan</span>=12-month \<br>
+&nbsp;&nbsp;<span class="k">--region</span>=us-central1 \<br>
+&nbsp;&nbsp;<span class="k">--resources</span>=vcpu=<span class="n">100</span>,memory=<span class="n">200</span>GB \<br>
+&nbsp;&nbsp;<span class="k">--type</span>=GENERAL_PURPOSE_N2<br><br>
+<span class="c"># List existing commitments</span><br>
+<span class="f">gcloud compute commitments list</span> \<br>
+&nbsp;&nbsp;<span class="k">--filter</span>=<span class="s">"status=ACTIVE"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preemptible / Spot -->
+      <div class="col-lg-6">
+        <div class="card-base card-gcp h-100">
+          <div class="card-icon icon-gcp"><i class="fas fa-bolt"></i></div>
+          <div class="card-title">Preemptible / Spot VMs</div>
+          <div class="card-sub">GCP's answer to AWS Spot — 60–91% cheaper for batch & ML workloads.</div>
+          <span class="savings-badge savings-high">✦ 60–91% cheaper</span>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">gcp-spot.sh</div></div>
+            <div class="code-body">
+<span class="c"># Create Spot VM</span><br>
+<span class="f">gcloud compute instances create</span> my-spot-vm \<br>
+&nbsp;&nbsp;<span class="k">--zone</span>=us-central1-a \<br>
+&nbsp;&nbsp;<span class="k">--machine-type</span>=n2-standard-8 \<br>
+&nbsp;&nbsp;<span class="k">--provisioning-model</span>=SPOT \<br>
+&nbsp;&nbsp;<span class="k">--instance-termination-action</span>=STOP<br><br>
+<span class="c"># GKE Node Pool with Spot VMs</span><br>
+<span class="f">gcloud container node-pools create</span> spot-pool \<br>
+&nbsp;&nbsp;<span class="k">--cluster</span>=my-cluster \<br>
+&nbsp;&nbsp;<span class="k">--zone</span>=us-central1-a \<br>
+&nbsp;&nbsp;<span class="k">--machine-type</span>=n2-standard-4 \<br>
+&nbsp;&nbsp;<span class="k">--spot</span> \<br>
+&nbsp;&nbsp;<span class="k">--num-nodes</span>=<span class="n">5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BigQuery Cost Control -->
+      <div class="col-lg-6">
+        <div class="card-base card-gcp h-100">
+          <div class="card-icon icon-gcp"><i class="fas fa-table"></i></div>
+          <div class="card-title">BigQuery Cost Optimization</div>
+          <div class="card-sub">BigQuery charges per TB scanned. One bad query = big bill.</div>
+          <span class="savings-badge savings-high">✦ 50–90% query cost savings</span>
+          <ul class="tip-list mt-2">
+            <li><div class="bullet">✓</div><div><strong>SELECT specific columns NEVER *:</strong> BQ charges per column scanned. SELECT * on 10TB table when you need 2 columns = 5x overbilling</div></li>
+            <li><div class="bullet">✓</div><div><strong>Partition & cluster tables:</strong> Partition by date, cluster by frequently filtered columns. Reduces scanned data by 80–99%</div></li>
+            <li><div class="bullet">✓</div><div><strong>Use materialized views:</strong> Pre-aggregate frequently run reports. Scans cached result not raw data</div></li>
+            <li><div class="bullet">✓</div><div><strong>Set query cost caps:</strong> max_bytes_billed prevents runaway queries from billing you</div></li>
+            <li><div class="bullet">✓</div><div><strong>BigQuery BI Engine:</strong> For dashboards, pay flat rate for in-memory cache vs per-query cost</div></li>
+          </ul>
+          <div class="code-wrap mt-2">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">bigquery-save.sql</div></div>
+            <div class="code-body">
+<span class="c">-- ❌ BAD: Scans entire table</span><br>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="v">`project.dataset.events`</span><br>
+<span class="k">WHERE</span> user_id = <span class="s">'abc'</span>;<br><br>
+<span class="c">-- ✅ GOOD: Partition filter + specific columns</span><br>
+<span class="k">SELECT</span> user_id, event_type, created_at<br>
+<span class="k">FROM</span> <span class="v">`project.dataset.events`</span><br>
+<span class="k">WHERE</span> DATE(created_at) = <span class="s">'2024-01-15'</span> <span class="c">-- partition prune</span><br>
+&nbsp;&nbsp;<span class="k">AND</span> user_id = <span class="s">'abc'</span>;<br><br>
+<span class="c">-- Set max bytes billed per query (safety cap)</span><br>
+<span class="c">-- In API: set maximumBytesBilled = 10737418240 (10GB)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cloud Run & Serverless -->
+      <div class="col-12">
+        <div class="card-base card-gcp">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="card-icon icon-gcp"><i class="fas fa-running"></i></div>
+              <div class="card-title">Cloud Run — Pay Only for Request Time</div>
+              <div class="card-sub">Cloud Run scales to zero automatically. Perfect for APIs with variable traffic.</div>
+              <span class="savings-badge savings-high">✦ 80–100% idle cost savings</span>
+              <ul class="tip-list mt-3">
+                <li><div class="bullet">✓</div><div>Scale-to-zero: no requests = $0 billing</div></li>
+                <li><div class="bullet">✓</div><div>Set min-instances=0 for dev, min-instances=1 for latency-sensitive prod</div></li>
+                <li><div class="bullet">✓</div><div>Right-size CPU/memory per container: start at 256MB, tune up</div></li>
+                <li><div class="bullet">✓</div><div>Request-based billing: only pay for actual request processing time</div></li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <div class="code-wrap h-100">
+                <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">cloud-run-optimize.sh</div></div>
+                <div class="code-body">
+<span class="c"># Deploy Cloud Run with cost-optimized settings</span><br>
+<span class="f">gcloud run deploy</span> my-api \<br>
+&nbsp;&nbsp;<span class="k">--image</span>=gcr.io/project/api:latest \<br>
+&nbsp;&nbsp;<span class="k">--region</span>=us-central1 \<br>
+&nbsp;&nbsp;<span class="k">--min-instances</span>=<span class="n">0</span> \<br>
+&nbsp;&nbsp;<span class="k">--max-instances</span>=<span class="n">10</span> \<br>
+&nbsp;&nbsp;<span class="k">--cpu</span>=<span class="s">"1"</span> \<br>
+&nbsp;&nbsp;<span class="k">--memory</span>=<span class="s">"256Mi"</span> \<br>
+&nbsp;&nbsp;<span class="k">--concurrency</span>=<span class="n">80</span> \<br>
+&nbsp;&nbsp;<span class="k">--cpu-throttling</span> \<br>
+&nbsp;&nbsp;<span class="k">--no-allow-unauthenticated</span><br><br>
+<span class="c"># Update min-instances for prod (avoid cold starts)</span><br>
+<span class="f">gcloud run services update</span> my-api \<br>
+&nbsp;&nbsp;<span class="k">--min-instances</span>=<span class="n">1</span> \<br>
+&nbsp;&nbsp;<span class="k">--region</span>=us-central1
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 5: ON-PREMISES COST SAVING -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="onprem-tips">
+  <div class="container">
+    <div class="sec-label">On-Premises Data Center</div>
+    <h2 class="sec-title" style="color:var(--onprem)">On-Premises Cost Optimization</h2>
+    <p class="sec-sub">On-prem is capital-heavy but controllable. Optimization here is about efficiency, virtualization, and smart offloading.</p>
+
+    <div class="row g-4">
+
+      <!-- Virtualization -->
+      <div class="col-lg-4">
+        <div class="card-base card-onprem h-100">
+          <div class="card-icon icon-onprem"><i class="fas fa-clone"></i></div>
+          <div class="card-title">Maximize Virtualization Density</div>
+          <div class="card-sub">Bare metal servers running at 10–20% utilization is money burning.</div>
+          <span class="savings-badge savings-high">✦ 50–70% hardware savings</span>
+          <ul class="tip-list mt-2">
+            <li><div class="bullet">✓</div><div>Target 70–80% VM density per host (VMware/KVM/Proxmox)</div></li>
+            <li><div class="bullet">✓</div><div>Use memory ballooning & thin provisioning to pack more VMs</div></li>
+            <li><div class="bullet">✓</div><div>vSphere DRS: auto-rebalance VMs across hosts for efficiency</div></li>
+            <li><div class="bullet">✓</div><div>Decommission physical servers when VMs can absorb workloads</div></li>
+            <li><div class="bullet">✓</div><div>Kubernetes on-prem with bin-packing: eliminate half-empty nodes</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Power & Cooling -->
+      <div class="col-lg-4">
+        <div class="card-base card-onprem h-100">
+          <div class="card-icon icon-onprem"><i class="fas fa-thermometer-half"></i></div>
+          <div class="card-title">Power & Cooling — The Silent Killer</div>
+          <div class="card-sub">Power can be 40–50% of on-prem operational costs.</div>
+          <span class="savings-badge savings-high">✦ 20–40% power savings</span>
+          <ul class="tip-list mt-2">
+            <li><div class="bullet">✓</div><div>Target PUE (Power Usage Effectiveness) &lt; 1.5 (hyperscalers: 1.1)</div></li>
+            <li><div class="bullet">✓</div><div>Enable power capping on servers during off-peak (IPMI/iDRAC/iLO)</div></li>
+            <li><div class="bullet">✓</div><div>Hot/cold aisle containment: proper airflow can cut cooling 30%</div></li>
+            <li><div class="bullet">✓</div><div>Replace aging servers: modern CPUs use 40% less power for same perf</div></li>
+            <li><div class="bullet">✓</div><div>Schedule batch workloads at night (off-peak power tariffs)</div></li>
+          </ul>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">power-cap.sh</div></div>
+            <div class="code-body">
+<span class="c"># Cap server power via IPMI (iDRAC example)</span><br>
+<span class="f">ipmitool</span> -H 192.168.1.50 -U root -P pass \<br>
+&nbsp;&nbsp;dcmi power set_limit action <span class="s">"No Action"</span><br>
+<span class="f">ipmitool</span> -H 192.168.1.50 -U root -P pass \<br>
+&nbsp;&nbsp;dcmi power set_limit limit <span class="n">200</span><br>
+<span class="f">ipmitool</span> -H 192.168.1.50 -U root -P pass \<br>
+&nbsp;&nbsp;dcmi power activate
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Storage Tiering On-Prem -->
+      <div class="col-lg-4">
+        <div class="card-base card-onprem h-100">
+          <div class="card-icon icon-onprem"><i class="fas fa-hdd"></i></div>
+          <div class="card-title">On-Prem Storage Tiering</div>
+          <div class="card-sub">Not all data needs NVMe SAN. Tier by access frequency.</div>
+          <span class="savings-badge savings-high">✦ 60–80% storage cost reduction</span>
+          <div class="data-table mt-3">
+            <table>
+              <thead><tr><th>Tier</th><th>Technology</th><th>Cost/TB</th></tr></thead>
+              <tbody>
+                <tr><td>Hot (Tier 0)</td><td class="mono-cell" style="color:var(--azure)">NVMe SSD</td><td class="mono-cell" style="color:var(--red)">$200–400</td></tr>
+                <tr><td>Warm (Tier 1)</td><td class="mono-cell" style="color:var(--gold)">SAS SSD / SSD</td><td class="mono-cell" style="color:var(--gold)">$80–150</td></tr>
+                <tr><td>Cool (Tier 2)</td><td class="mono-cell" style="color:var(--muted)">SAS HDD / NL-SAS</td><td class="mono-cell" style="color:var(--green)">$20–40</td></tr>
+                <tr><td>Cold (Tier 3)</td><td class="mono-cell" style="color:var(--muted)">SATA HDD (JBOD)</td><td class="mono-cell" style="color:var(--green)">$5–15</td></tr>
+                <tr><td>Archive</td><td class="mono-cell" style="color:var(--muted)">Tape / LTO9</td><td class="mono-cell" style="color:var(--green)">$1–3</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kubernetes On-Prem -->
+      <div class="col-lg-6">
+        <div class="card-base card-onprem h-100">
+          <div class="card-icon icon-onprem"><i class="fas fa-dharmachakra"></i></div>
+          <div class="card-title">Kubernetes On-Prem Resource Optimization</div>
+          <div class="card-sub">K8s without resource limits = CPU/memory chaos and wasted spend.</div>
+          <div class="code-wrap mt-3">
+            <div class="code-header"><div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="code-filename">k8s-resources.yaml</div></div>
+            <div class="code-body">
+<span class="c"># Set resource requests AND limits on all pods</span><br>
+<span class="v">resources:</span><br>
+&nbsp;&nbsp;<span class="v">requests:</span>          <span class="c"># Scheduler uses this for bin-packing</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="v">cpu:</span>    <span class="s">"250m"</span>    <span class="c"># 0.25 cores minimum</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="v">memory:</span> <span class="s">"256Mi"</span>  <span class="c"># 256MB minimum</span><br>
+&nbsp;&nbsp;<span class="v">limits:</span>            <span class="c"># Hard cap — prevents runaway</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="v">cpu:</span>    <span class="s">"500m"</span>    <span class="c"># 0.5 cores max burst</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="v">memory:</span> <span class="s">"512Mi"</span>  <span class="c"># 512MB hard limit</span><br><br>
+<span class="c"># Use VPA (Vertical Pod Autoscaler) for auto rightsizing</span><br>
+<span class="f">kubectl apply</span> -f https://github.com/kubernetes/autoscaler/\<br>
+releases/download/vpa-1.0.0/vertical-pod-autoscaler.yaml<br><br>
+<span class="c"># VPA in recommendation mode (safe to start)</span><br>
+<span class="v">apiVersion:</span> autoscaling.k8s.io/v1<br>
+<span class="v">kind:</span> VerticalPodAutoscaler<br>
+<span class="v">spec:</span><br>
+&nbsp;&nbsp;<span class="v">updatePolicy:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="v">updateMode:</span> <span class="s">"Off"</span>   <span class="c"># Recommend only, don't auto-change</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hybrid Offload -->
+      <div class="col-lg-6">
+        <div class="card-base card-onprem h-100">
+          <div class="card-icon icon-onprem"><i class="fas fa-exchange-alt"></i></div>
+          <div class="card-title">Strategic Cloud Bursting (Hybrid)</div>
+          <div class="card-sub">Keep baseline on-prem; burst expensive peaks to cloud. Best of both worlds.</div>
+          <span class="savings-badge savings-high">✦ 40–60% vs pure cloud</span>
+          <ul class="tip-list mt-3">
+            <li><div class="bullet">✓</div><div><strong>Cloud bursting pattern:</strong> Run 80% load on-prem; use cloud spot/preemptible for the remaining 20% peak spikes</div></li>
+            <li><div class="bullet">✓</div><div><strong>Offload ML training:</strong> Keep inference on-prem (low latency), burst training to GCP TPUs or AWS P-instances</div></li>
+            <li><div class="bullet">✓</div><div><strong>Backup to cloud:</strong> On-prem tape backup is expensive (maintenance, media, labor). S3 Glacier is $0.004/GB/month</div></li>
+            <li><div class="bullet">✓</div><div><strong>DR in cloud:</strong> Maintain DR site in cloud (warm standby) instead of second DC. Saves 60–80% on DR costs</div></li>
+            <li><div class="bullet">✓</div><div><strong>Static assets to CDN:</strong> Offload images/video to cloud CDN. Remove this traffic from your on-prem bandwidth</div></li>
+          </ul>
+          <div class="callout callout-gold mt-3">
+            <div class="callout-icon"><i class="fas fa-calculator"></i></div>
+            <p><strong>On-Prem vs Cloud Breakeven:</strong> On-prem typically breaks even vs cloud at 3–5 years for stable, predictable workloads. Variable/seasonal workloads almost always favor cloud. Run a TCO analysis with: hardware, power, cooling, datacenter rent, staff salary, maintenance contracts.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 6: ROI CALCULATOR -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="calculator">
+  <div class="container">
+    <div class="sec-label">Interactive Tool</div>
+    <h2 class="sec-title">💰 Cloud Savings Calculator</h2>
+    <p class="sec-sub">Estimate how much you could save by applying key optimization strategies. Adjust sliders to match your situation.</p>
+
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="calc-wrap">
+          <div class="calc-input-group">
+            <div class="calc-label">Monthly Cloud Spend <span id="spendVal">$10,000</span></div>
+            <input type="range" id="monthlySpend" min="500" max="100000" value="10000" step="500" oninput="calcSavings()">
+          </div>
+          <div class="calc-input-group">
+            <div class="calc-label">% of resources that are idle / oversized <span id="idleVal">30%</span></div>
+            <input type="range" id="idlePct" min="5" max="70" value="30" step="5" oninput="calcSavings()">
+          </div>
+          <div class="calc-input-group">
+            <div class="calc-label">% of stable workload you can reserve <span id="reserveVal">50%</span></div>
+            <input type="range" id="reservePct" min="0" max="80" value="50" step="10" oninput="calcSavings()">
+          </div>
+          <div class="calc-input-group">
+            <div class="calc-label">% of batch jobs movable to Spot/Preemptible <span id="spotVal">20%</span></div>
+            <input type="range" id="spotPct" min="0" max="60" value="20" step="5" oninput="calcSavings()">
+          </div>
+          <div class="calc-input-group">
+            <div class="calc-label">Storage you can tier to Cold/Archive <span id="storageVal">40%</span></div>
+            <input type="range" id="storagePct" min="0" max="80" value="40" step="10" oninput="calcSavings()">
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="calc-result mb-3">
+          <div class="big-num" id="totalSavings">$3,840</div>
+          <div class="big-label">Estimated Monthly Savings</div>
+        </div>
+        <div class="card-base">
+          <div style="font-size:0.8rem;font-weight:700;font-family:var(--mono);color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Savings Breakdown</div>
+          <div id="breakdownArea">
+            <div class="saving-bar-wrap">
+              <div class="saving-bar-label"><span>Right-sizing idle resources</span><span class="pct" id="s1">$0</span></div>
+              <div class="saving-bar-bg"><div class="saving-bar-fill gold" id="b1" style="width:0%"></div></div>
+            </div>
+            <div class="saving-bar-wrap">
+              <div class="saving-bar-label"><span>Reserved Instances / CUDs</span><span class="pct" id="s2">$0</span></div>
+              <div class="saving-bar-bg"><div class="saving-bar-fill" id="b2" style="width:0%"></div></div>
+            </div>
+            <div class="saving-bar-wrap">
+              <div class="saving-bar-label"><span>Spot / Preemptible VMs</span><span class="pct" id="s3">$0</span></div>
+              <div class="saving-bar-bg"><div class="saving-bar-fill blue" id="b3" style="width:0%"></div></div>
+            </div>
+            <div class="saving-bar-wrap">
+              <div class="saving-bar-label"><span>Storage Tiering</span><span class="pct" id="s4">$0</span></div>
+              <div class="saving-bar-bg"><div class="saving-bar-fill" id="b4" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px;">
+            <div class="d-flex justify-content-between" style="font-size:0.82rem;color:var(--muted)">
+              <span>Annual savings estimate</span>
+              <span class="fw-bold" style="color:var(--green);font-family:var(--mono)" id="annualSavings">$46,080</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;color:var(--muted)">
+              <span>New monthly spend</span>
+              <span class="fw-bold" style="font-family:var(--mono)" id="newSpend">$6,160</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 7: TOOLS -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="tools">
+  <div class="container">
+    <div class="sec-label">FinOps Tooling</div>
+    <h2 class="sec-title">Cost Management Tools</h2>
+    <p class="sec-sub">The right tools give you visibility, automation, and recommendations to continuously optimize spend.</p>
+
+    <div class="row g-3">
+
+      <!-- Native Tools -->
+      <div class="col-12 mb-2">
+        <div style="font-family:var(--mono);font-size:0.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:2px;">Native Cloud Tools (Free)</div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card-base card-aws">
+          <div class="pill pill-aws mb-2">AWS</div>
+          <div class="fw-bold mb-2">AWS Cost Explorer</div>
+          <p style="color:var(--muted);font-size:0.82rem;">Visualize spend by service, account, region, tag. RI/Savings Plans recommendations built in.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">console.aws.amazon.com/cost-management</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card-base card-aws">
+          <div class="pill pill-aws mb-2">AWS</div>
+          <div class="fw-bold mb-2">AWS Compute Optimizer</div>
+          <p style="color:var(--muted);font-size:0.82rem;">ML-powered rightsizing recommendations for EC2, ECS, Lambda, EBS. Completely free.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">console.aws.amazon.com/compute-optimizer</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card-base card-azure">
+          <div class="pill pill-azure mb-2">Azure</div>
+          <div class="fw-bold mb-2">Azure Cost Management</div>
+          <p style="color:var(--muted);font-size:0.82rem;">Budgets, alerts, cost analysis by resource group. Advisor gives reservation recommendations.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">portal.azure.com → Cost Management</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card-base card-gcp">
+          <div class="pill pill-gcp mb-2">GCP</div>
+          <div class="fw-bold mb-2">GCP Billing Console</div>
+          <p style="color:var(--muted);font-size:0.82rem;">Budget alerts, cost breakdown by SKU, BigQuery export for advanced analysis, recommenders.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">console.cloud.google.com/billing</div>
+        </div>
+      </div>
+
+      <!-- Third-party Tools -->
+      <div class="col-12 mb-2 mt-2">
+        <div style="font-family:var(--mono);font-size:0.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:2px;">Third-Party Multi-Cloud FinOps Tools</div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card-base h-100">
+          <div class="d-flex gap-2 mb-2 flex-wrap">
+            <span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span>
+          </div>
+          <div class="fw-bold mb-1">Infracost</div>
+          <p style="color:var(--muted);font-size:0.82rem;">Open source. Shows cloud cost estimates in pull requests before code is deployed. Integrates with Terraform, GitHub Actions, GitLab CI. Prevents expensive misconfigurations before they reach prod.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">infracost.io · Open Source (free tier)</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card-base h-100">
+          <div class="d-flex gap-2 mb-2 flex-wrap">
+            <span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span>
+          </div>
+          <div class="fw-bold mb-1">Kubecost</div>
+          <p style="color:var(--muted);font-size:0.82rem;">Kubernetes-specific cost visibility. Shows cost per namespace, deployment, and pod. Works on any cloud or on-prem. Identifies idle/wasteful workloads in K8s clusters.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">kubecost.com · Free for 1 cluster</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card-base h-100">
+          <div class="d-flex gap-2 mb-2 flex-wrap">
+            <span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span>
+          </div>
+          <div class="fw-bold mb-1">OpenCost</div>
+          <p style="color:var(--muted);font-size:0.82rem;">CNCF sandbox project. Open-source Kubernetes cost monitoring. Real-time cost allocation. Integrates with Prometheus and Grafana for on-prem dashboards.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">opencost.io · Fully open source</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card-base h-100">
+          <div class="d-flex gap-2 mb-2 flex-wrap">
+            <span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span>
+          </div>
+          <div class="fw-bold mb-1">CloudHealth by VMware</div>
+          <p style="color:var(--muted);font-size:0.82rem;">Enterprise multi-cloud cost management, governance, and security. Chargeback reports, budget alerts, rightsizing across all clouds. Popular with large enterprises.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">cloudhealth.vmware.com · Paid</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card-base h-100">
+          <div class="d-flex gap-2 mb-2 flex-wrap">
+            <span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span>
+          </div>
+          <div class="fw-bold mb-1">Spot.io (NetApp)</div>
+          <p style="color:var(--muted);font-size:0.82rem;">Automatically moves workloads to Spot/preemptible instances with SLA guarantees. Elastigroup replaces ASGs with intelligent spot management. Typical savings: 60–80%.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">spot.io · Paid (SaaS)</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card-base h-100">
+          <div class="d-flex gap-2 mb-2">
+            <span class="pill pill-onp">On-Prem</span>
+          </div>
+          <div class="fw-bold mb-1">Grafana + Prometheus</div>
+          <p style="color:var(--muted);font-size:0.82rem;">For on-prem cost visibility: instrument servers with node_exporter, track utilization trends, build cost dashboards using resource × power × $. Completely free and self-hosted.</p>
+          <div class="mt-2" style="font-family:var(--mono);font-size:0.72rem;color:var(--dim)">grafana.com · Open Source</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 8: MASTER CHECKLIST -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="checklist">
+  <div class="container">
+    <div class="sec-label">Action Plan</div>
+    <h2 class="sec-title">🗂️ Master Cost Optimization Checklist</h2>
+    <p class="sec-sub">Your complete prioritized action list. Work through these in order — biggest savings first.</p>
+
+    <div class="row g-4">
+
+      <!-- Week 1 -->
+      <div class="col-lg-6">
+        <div class="card-base h-100">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="card-icon icon-gold mb-0"><i class="fas fa-rocket"></i></div>
+            <div>
+              <div class="fw-bold" style="font-family:var(--display)">Week 1 — Immediate Wins</div>
+              <div style="color:var(--muted);font-size:0.8rem;">Zero-risk, high-impact actions. Do these first.</div>
+            </div>
+          </div>
+          <ul class="checklist">
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Enable billing alerts & budget alarms (AWS/Azure/GCP)</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>List all running resources — identify anything unused</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Delete unattached EBS volumes / Azure Disks / GCP Persistent Disks</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Delete old snapshots older than 30 days in dev/staging</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Stop all dev & staging instances on nights and weekends</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Tag every resource with: env, team, project, owner</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Delete unused Load Balancers and Elastic IPs / Public IPs</div></li>
+            <li><div class="chk warn"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Enable Compute Optimizer (AWS) / Azure Advisor recommendations</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Month 1 -->
+      <div class="col-lg-6">
+        <div class="card-base h-100">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="card-icon icon-green mb-0"><i class="fas fa-chart-line"></i></div>
+            <div>
+              <div class="fw-bold" style="font-family:var(--display)">Month 1 — Structural Savings</div>
+              <div style="color:var(--muted);font-size:0.8rem;">Requires planning but generates significant long-term savings.</div>
+            </div>
+          </div>
+          <ul class="checklist">
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Analyze 2-week utilization metrics → right-size top 20 instances</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Switch Lambda functions to ARM64/Graviton (trivial config change)</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Apply S3 / Blob / GCS lifecycle policies to all buckets</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Enable S3 Intelligent-Tiering on buckets with unknown access patterns</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Move batch/ML training jobs to Spot/Preemptible instances</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Remove Multi-AZ from dev/staging databases</div></li>
+            <li><div class="chk warn"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Enable Azure Hybrid Benefit on all eligible Windows/SQL VMs</div></li>
+            <li><div class="chk warn"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Implement Auto Scaling for all web application tiers</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Quarter -->
+      <div class="col-lg-6">
+        <div class="card-base h-100">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="card-icon icon-azure mb-0"><i class="fas fa-cog"></i></div>
+            <div>
+              <div class="fw-bold" style="font-family:var(--display)">Quarter 1 — Strategic Commitments</div>
+              <div style="color:var(--muted);font-size:0.8rem;">Lock in long-term savings with financial commitments.</div>
+            </div>
+          </div>
+          <ul class="checklist">
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Purchase 1-year Reserved Instances for stable baseline workloads (40% savings)</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Commit to Savings Plans (AWS) or CUDs (GCP) for flexible compute</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Purchase Reserved Capacity for managed databases (RDS, Azure SQL, Cloud SQL)</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Implement FinOps culture: tag enforcement policy + monthly cost reviews</div></li>
+            <li><div class="chk warn"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Set up team-level cost dashboards and chargeback reports</div></li>
+            <li><div class="chk warn"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Implement cost anomaly detection with automated Slack/email alerts</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Architecture -->
+      <div class="col-lg-6">
+        <div class="card-base h-100">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="card-icon icon-gcp mb-0"><i class="fas fa-sitemap"></i></div>
+            <div>
+              <div class="fw-bold" style="font-family:var(--display)">Ongoing — Architecture Optimization</div>
+              <div style="color:var(--muted);font-size:0.8rem;">Deep architectural changes for maximum long-term efficiency.</div>
+            </div>
+          </div>
+          <ul class="checklist">
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Migrate monolith hot paths to serverless (Lambda/Cloud Run/Functions)</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Introduce caching layer (Redis/ElastiCache) to reduce DB queries by 80%</div></li>
+            <li><div class="chk"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Implement CDN for all static assets — reduce origin traffic + egress</div></li>
+            <li><div class="chk warn"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Containerize workloads on Kubernetes with proper resource requests/limits</div></li>
+            <li><div class="chk warn"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>VPA + HPA on K8s for automatic vertical + horizontal rightsizing</div></li>
+            <li><div class="chk warn"><i class="fas fa-check" style="font-size:0.6rem"></i></div><div>Evaluate multi-cloud or hybrid for workloads where cost arbitrage makes sense</div></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- end checklist row -->
+
+    <!-- Final Summary Table -->
+    <div class="mt-5">
+      <div class="fw-bold mb-3" style="font-family:var(--display);font-size:1.2rem;">📊 Expected Savings Summary</div>
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>Applies To</th>
+              <th>Effort</th>
+              <th>Time to Implement</th>
+              <th>Expected Savings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Stop idle dev/staging servers</td><td><span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span></td><td style="color:var(--green)">Low</td><td class="mono-cell">1–2 hours</td><td class="mono-cell" style="color:var(--green)">60–70% dev cost</td></tr>
+            <tr><td>Delete orphaned disks & snapshots</td><td><span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span></td><td style="color:var(--green)">Low</td><td class="mono-cell">2–4 hours</td><td class="mono-cell" style="color:var(--green)">$100–2000/mo</td></tr>
+            <tr><td>Right-size instances</td><td><span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span><span class="pill pill-onp">On-Prem</span></td><td style="color:var(--gold)">Medium</td><td class="mono-cell">1–2 weeks</td><td class="mono-cell" style="color:var(--green)">20–40%</td></tr>
+            <tr><td>S3/Blob/GCS lifecycle policies</td><td><span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span></td><td style="color:var(--green)">Low</td><td class="mono-cell">2–4 hours</td><td class="mono-cell" style="color:var(--green)">40–90% storage</td></tr>
+            <tr><td>Reserved Instances / CUDs</td><td><span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span></td><td style="color:var(--green)">Low</td><td class="mono-cell">1 hour analysis</td><td class="mono-cell" style="color:var(--green)">40–72%</td></tr>
+            <tr><td>Spot / Preemptible for batch</td><td><span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span></td><td style="color:var(--gold)">Medium</td><td class="mono-cell">1–3 days</td><td class="mono-cell" style="color:var(--green)">60–90% batch</td></tr>
+            <tr><td>Azure Hybrid Benefit</td><td><span class="pill pill-azure">Azure</span></td><td style="color:var(--green)">Low</td><td class="mono-cell">1 hour</td><td class="mono-cell" style="color:var(--green)">Up to 40%</td></tr>
+            <tr><td>Lambda ARM64 (Graviton)</td><td><span class="pill pill-aws">AWS</span></td><td style="color:var(--green)">Low</td><td class="mono-cell">30 minutes</td><td class="mono-cell" style="color:var(--green)">20% compute</td></tr>
+            <tr><td>BigQuery column selection + partitioning</td><td><span class="pill pill-gcp">GCP</span></td><td style="color:var(--gold)">Medium</td><td class="mono-cell">1–2 weeks</td><td class="mono-cell" style="color:var(--green)">50–90% queries</td></tr>
+            <tr><td>On-Prem server consolidation</td><td><span class="pill pill-onp">On-Prem</span></td><td style="color:var(--red)">High</td><td class="mono-cell">1–3 months</td><td class="mono-cell" style="color:var(--green)">50–70% HW cost</td></tr>
+            <tr><td>Cloud bursting (hybrid)</td><td><span class="pill pill-onp">On-Prem</span></td><td style="color:var(--red)">High</td><td class="mono-cell">3–6 months</td><td class="mono-cell" style="color:var(--green)">40–60% vs pure cloud</td></tr>
+            <tr><td>Kubernetes resource limits + VPA</td><td><span class="pill pill-aws">AWS</span><span class="pill pill-azure">Azure</span><span class="pill pill-gcp">GCP</span><span class="pill pill-onp">On-Prem</span></td><td style="color:var(--gold)">Medium</td><td class="mono-cell">1 week</td><td class="mono-cell" style="color:var(--green)">20–40% K8s</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="logo">💰 Cloud FinOps Guide</div>
+    <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+      <span class="pill pill-aws">AWS</span>
+      <span class="pill pill-azure">Azure</span>
+      <span class="pill pill-gcp">GCP</span>
+      <span class="pill pill-onp">On-Premises</span>
+      <span class="pill pill-gold">FinOps</span>
+    </div>
+    <p>Comprehensive Cloud Cost Optimization Reference — 2024</p>
+    <p class="mt-1">Prices and discounts vary by region and change over time. Always verify with official pricing calculators before making commitments.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── SAVINGS CALCULATOR ──
+function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+
+function calcSavings() {
+  const spend   = +document.getElementById('monthlySpend').value;
+  const idle    = +document.getElementById('idlePct').value / 100;
+  const reserve = +document.getElementById('reservePct').value / 100;
+  const spot    = +document.getElementById('spotPct').value / 100;
+  const storage = +document.getElementById('storagePct').value / 100;
+
+  document.getElementById('spendVal').textContent   = '$' + spend.toLocaleString();
+  document.getElementById('idleVal').textContent     = Math.round(idle*100) + '%';
+  document.getElementById('reserveVal').textContent  = Math.round(reserve*100) + '%';
+  document.getElementById('spotVal').textContent     = Math.round(spot*100) + '%';
+  document.getElementById('storageVal').textContent  = Math.round(storage*100) + '%';
+
+  // Assume storage = 20% of bill
+  const computeSpend = spend * 0.6;
+  const storageSpend = spend * 0.2;
+  const otherSpend   = spend * 0.2;
+
+  const s1 = computeSpend * idle * 0.4;                        // rightsizing saves 40% of idle
+  const s2 = computeSpend * (1-idle) * reserve * 0.50;         // 50% off reserved
+  const s3 = computeSpend * spot * 0.80;                       // 80% off spot
+  const s4 = storageSpend * storage * 0.70;                    // 70% off cold storage
+
+  const total = s1 + s2 + s3 + s4;
+  const maxSave = spend * 0.8; // cap at 80% savings
+
+  const capped = Math.min(total, maxSave);
+  const annual  = capped * 12;
+  const newSpend = spend - capped;
+
+  document.getElementById('totalSavings').textContent = fmt(capped);
+  document.getElementById('annualSavings').textContent = fmt(annual);
+  document.getElementById('newSpend').textContent = fmt(Math.max(newSpend, 0));
+
+  document.getElementById('s1').textContent = fmt(s1);
+  document.getElementById('s2').textContent = fmt(s2);
+  document.getElementById('s3').textContent = fmt(s3);
+  document.getElementById('s4').textContent = fmt(s4);
+
+  const maxBar = Math.max(s1, s2, s3, s4, 1);
+  document.getElementById('b1').style.width = Math.min(s1/maxBar*100, 100) + '%';
+  document.getElementById('b2').style.width = Math.min(s2/maxBar*100, 100) + '%';
+  document.getElementById('b3').style.width = Math.min(s3/maxBar*100, 100) + '%';
+  document.getElementById('b4').style.width = Math.min(s4/maxBar*100, 100) + '%';
+}
+
+calcSavings(); // init
+
+// ── ACTIVE NAV ──
+const sections = document.querySelectorAll('section[id]');
+const navAs    = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.id; });
+  navAs.forEach(a => {
+    const active = a.getAttribute('href') === '#' + cur;
+    a.style.color      = active ? 'var(--text)'    : '';
+    a.style.background = active ? 'var(--surface)' : '';
+  });
+});
+</script>
+</body>
+</html>

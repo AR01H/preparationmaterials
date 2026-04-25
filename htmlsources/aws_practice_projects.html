@@ -1,0 +1,512 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.container { padding: 1rem 0; }
+.top-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; }
+.filter-btn.active { background: #185FA5; color: #E6F1FB; border-color: #185FA5; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; cursor: pointer; transition: border-color 0.15s; }
+.card:hover { border-color: var(--color-border-primary); }
+.card.open { border-color: #185FA5; }
+.card-header { display: flex; align-items: flex-start; gap: 10px; }
+.num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.card-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); line-height: 1.4; }
+.card-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.tag { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
+.detail { display: none; border-top: 0.5px solid var(--color-border-tertiary); margin-top: 12px; padding-top: 12px; }
+.detail.show { display: block; }
+.section-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; margin-top: 12px; }
+.section-label:first-child { margin-top: 0; }
+.step { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+.step-num { width: 18px; height: 18px; border-radius: 50%; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--color-text-secondary); margin-top: 1px; }
+.step-text { font-size: 13px; color: var(--color-text-primary); line-height: 1.5; }
+.code-block { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; font-family: var(--font-mono); font-size: 11.5px; color: var(--color-text-primary); white-space: pre-wrap; margin: 6px 0; overflow-x: auto; line-height: 1.6; }
+.ask-btn { margin-top: 10px; width: 100%; padding: 7px; font-size: 13px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; transition: background 0.15s; }
+.ask-btn:hover { background: var(--color-background-secondary); }
+.chevron { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); transition: transform 0.2s; }
+.card.open .chevron { transform: rotate(180deg); }
+</style>
+
+<div class="container">
+<h2 class="sr-only">10 AWS Practice Projects with steps and code</h2>
+<div class="top-bar" id="filters">
+  <button class="filter-btn active" onclick="filterCards('all', this)">All (10)</button>
+  <button class="filter-btn" onclick="filterCards('serverless', this)">Serverless</button>
+  <button class="filter-btn" onclick="filterCards('storage', this)">Storage</button>
+  <button class="filter-btn" onclick="filterCards('networking', this)">Networking</button>
+  <button class="filter-btn" onclick="filterCards('data', this)">Data</button>
+</div>
+<div class="grid" id="grid"></div>
+</div>
+
+<script>
+const projects = [
+  {
+    id:1, category:"serverless",
+    title:"URL Shortener",
+    sub:"API Gateway + Lambda + DynamoDB",
+    color:"c-blue",
+    services:["API Gateway","Lambda","DynamoDB"],
+    steps:[
+      "Create DynamoDB table — name: urls, partition key: shortCode (String)",
+      "Create Lambda function (Python 3.12) — attach policy: AmazonDynamoDBFullAccess",
+      "Paste Lambda code (below) — it generates a random 6-char code and stores the long URL",
+      "Create REST API in API Gateway — POST /shorten and GET /{code}",
+      "Connect each route to the Lambda function (proxy integration)",
+      "Deploy the API to a stage called prod — copy the Invoke URL",
+      "Test with curl: POST {url}/prod/shorten with body {\"url\":\"https://google.com\"}"
+    ],
+    code:`import boto3, json, random, string
+
+db = boto3.resource('dynamodb').Table('urls')
+
+def lambda_handler(event, ctx):
+    method = event['httpMethod']
+    if method == 'POST':
+        body = json.loads(event['body'])
+        code = ''.join(random.choices(string.ascii_letters, k=6))
+        db.put_item(Item={'shortCode': code, 'longUrl': body['url']})
+        return {'statusCode': 200, 'body': json.dumps({'code': code})}
+    code = event['pathParameters']['code']
+    r = db.get_item(Key={'shortCode': code})
+    url = r['Item']['longUrl']
+    return {'statusCode': 301, 'headers': {'Location': url}, 'body': ''}`
+  },
+  {
+    id:2, category:"storage",
+    title:"Image Upload & Resize",
+    sub:"S3 + Lambda + S3 Trigger",
+    color:"c-teal",
+    services:["S3","Lambda","IAM"],
+    steps:[
+      "Create two S3 buckets: my-uploads-original and my-uploads-resized",
+      "Create Lambda function (Python 3.12) — add layer: Pillow (ARN from AWS public layers)",
+      "Give Lambda role permissions: AmazonS3FullAccess",
+      "Paste code below into Lambda",
+      "On the original bucket — add trigger: S3 event ObjectCreated, filter suffix .jpg",
+      "Test by uploading a .jpg to the original bucket",
+      "Check resized bucket — you'll find a 200x200 thumbnail"
+    ],
+    code:`import boto3
+from PIL import Image
+import io, urllib.parse
+
+s3 = boto3.client('s3')
+
+def lambda_handler(event, ctx):
+    bucket = event['Records'][0]['s3']['bucket']['name']
+    key = urllib.parse.unquote_plus(
+        event['Records'][0]['s3']['object']['key'])
+    
+    obj = s3.get_object(Bucket=bucket, Key=key)
+    img = Image.open(io.BytesIO(obj['Body'].read()))
+    img.thumbnail((200, 200))
+    
+    buf = io.BytesIO()
+    img.save(buf, 'JPEG')
+    buf.seek(0)
+    
+    s3.put_object(
+        Bucket='my-uploads-resized',
+        Key=key,
+        Body=buf,
+        ContentType='image/jpeg'
+    )`
+  },
+  {
+    id:3, category:"serverless",
+    title:"Contact Form Backend",
+    sub:"API Gateway + Lambda + SES",
+    color:"c-purple",
+    services:["API Gateway","Lambda","SES"],
+    steps:[
+      "Go to SES → Verified Identities → verify your email address",
+      "Create Lambda (Python 3.12) — attach policy: AmazonSESFullAccess",
+      "Paste code below — replace FROM_EMAIL and TO_EMAIL",
+      "Create REST API in API Gateway — POST /contact",
+      "Enable CORS on the /contact resource",
+      "Deploy to stage prod",
+      "From your HTML form, POST to the invoke URL with name/email/message in body"
+    ],
+    code:`import boto3, json
+
+ses = boto3.client('ses', region_name='us-east-1')
+FROM_EMAIL = 'you@example.com'
+TO_EMAIL   = 'you@example.com'
+
+def lambda_handler(event, ctx):
+    b = json.loads(event['body'])
+    ses.send_email(
+        Source=FROM_EMAIL,
+        Destination={'ToAddresses': [TO_EMAIL]},
+        Message={
+            'Subject': {'Data': f"Contact from {b['name']}"},
+            'Body': {'Text': {'Data':
+                f"From: {b['email']}\n\n{b['message']}"}}
+        }
+    )
+    return {
+        'statusCode': 200,
+        'headers': {'Access-Control-Allow-Origin': '*'},
+        'body': json.dumps({'status': 'sent'})
+    }`
+  },
+  {
+    id:4, category:"data",
+    title:"CSV to JSON ETL Pipeline",
+    sub:"S3 + Lambda + S3 + EventBridge",
+    color:"c-amber",
+    services:["S3","Lambda","EventBridge","IAM"],
+    steps:[
+      "Create two buckets: raw-data-csv and processed-data-json",
+      "Create Lambda (Python 3.12) with AmazonS3FullAccess policy",
+      "Paste the code below into Lambda",
+      "Add S3 trigger on raw-data-csv bucket — ObjectCreated, suffix .csv",
+      "Upload a test CSV: id,name,age\\n1,Alice,30\\n2,Bob,25",
+      "Lambda converts each row to JSON and writes to processed-data-json bucket",
+      "Optionally add EventBridge rule to notify on completion"
+    ],
+    code:`import boto3, csv, json, io, urllib.parse
+
+s3 = boto3.client('s3')
+
+def lambda_handler(event, ctx):
+    bucket = event['Records'][0]['s3']['bucket']['name']
+    key = urllib.parse.unquote_plus(
+        event['Records'][0]['s3']['object']['key'])
+    
+    obj = s3.get_object(Bucket=bucket, Key=key)
+    content = obj['Body'].read().decode('utf-8')
+    
+    reader = csv.DictReader(io.StringIO(content))
+    rows = [row for row in reader]
+    
+    out_key = key.replace('.csv', '.json')
+    s3.put_object(
+        Bucket='processed-data-json',
+        Key=out_key,
+        Body=json.dumps(rows, indent=2),
+        ContentType='application/json'
+    )
+    print(f"Converted {len(rows)} rows to {out_key}")`
+  },
+  {
+    id:5, category:"serverless",
+    title:"Todo App (REST API + DB)",
+    sub:"API Gateway + Lambda + DynamoDB",
+    color:"c-coral",
+    services:["API Gateway","Lambda","DynamoDB"],
+    steps:[
+      "Create DynamoDB table: todos — partition key: id (String)",
+      "Create Lambda (Python 3.12) with DynamoDB full access",
+      "Paste CRUD code below — handles GET, POST, DELETE",
+      "Create REST API: GET /todos, POST /todos, DELETE /todos/{id}",
+      "All three routes proxy to the same Lambda",
+      "Enable CORS on all resources",
+      "Deploy to stage v1 — test with Postman or curl"
+    ],
+    code:`import boto3, json, uuid
+from boto3.dynamodb.conditions import Key
+
+table = boto3.resource('dynamodb').Table('todos')
+
+def lambda_handler(event, ctx):
+    method = event['httpMethod']
+    
+    if method == 'GET':
+        items = table.scan()['Items']
+        return ok(items)
+    
+    if method == 'POST':
+        b = json.loads(event['body'])
+        item = {'id': str(uuid.uuid4()), 'task': b['task'], 'done': False}
+        table.put_item(Item=item)
+        return ok(item)
+    
+    if method == 'DELETE':
+        tid = event['pathParameters']['id']
+        table.delete_item(Key={'id': tid})
+        return ok({'deleted': tid})
+
+def ok(data):
+    return {'statusCode': 200,
+            'headers': {'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps(data)}`
+  },
+  {
+    id:6, category:"networking",
+    title:"Static Website + CDN",
+    sub:"S3 + CloudFront + Route 53",
+    color:"c-green",
+    services:["S3","CloudFront","Route 53"],
+    steps:[
+      "Create S3 bucket — uncheck 'Block all public access' — enable Static website hosting",
+      "Upload index.html with bucket policy allowing s3:GetObject to everyone",
+      "Go to CloudFront → Create distribution → Origin: your S3 website endpoint",
+      "Set default root object: index.html — create distribution (takes ~5 min)",
+      "Copy the CloudFront domain (xxx.cloudfront.net) — your site is live",
+      "Optional: Go to Route 53 → hosted zone → add A record (Alias) pointing to CloudFront",
+      "Push updates to S3 → invalidate CloudFront cache: /* to refresh"
+    ],
+    code:`# Bucket policy — paste in S3 bucket policy editor
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": "*",
+    "Action": "s3:GetObject",
+    "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME/*"
+  }]
+}
+
+# CloudFront invalidation (AWS CLI)
+aws cloudfront create-invalidation \\
+  --distribution-id YOUR_DIST_ID \\
+  --paths "/*"
+
+# Sample index.html
+<!DOCTYPE html>
+<html>
+  <body><h1>Hello from S3 + CloudFront!</h1></body>
+</html>`
+  },
+  {
+    id:7, category:"data",
+    title:"Real-time Notification System",
+    sub:"SNS + SQS + Lambda",
+    color:"c-pink",
+    services:["SNS","SQS","Lambda"],
+    steps:[
+      "Create SNS topic: order-events — copy the ARN",
+      "Create SQS queue: order-queue — in Access Policy allow SNS to send messages",
+      "Subscribe the SQS queue to the SNS topic",
+      "Create Lambda with AmazonSQSFullAccess + CloudWatchLogs policy",
+      "Add trigger to Lambda: source = order-queue, batch size = 1",
+      "Paste code below — Lambda prints and processes each message",
+      "Test: SNS → Publish message → check CloudWatch Logs for output"
+    ],
+    code:`import json
+
+def lambda_handler(event, ctx):
+    for record in event['Records']:
+        # SQS wraps the SNS message in 'body'
+        sqs_body = json.loads(record['body'])
+        
+        # SNS wraps actual message in 'Message'
+        message = json.loads(sqs_body['Message'])
+        
+        print(f"Order received: {message}")
+        
+        # Your processing logic here
+        order_id = message.get('orderId')
+        status   = message.get('status')
+        print(f"Processing order {order_id} — status: {status}")
+    
+    return {'statusCode': 200}`
+  },
+  {
+    id:8, category:"serverless",
+    title:"Auth with Cognito",
+    sub:"Cognito + API Gateway + Lambda",
+    color:"c-blue",
+    services:["Cognito","API Gateway","Lambda"],
+    steps:[
+      "Create Cognito User Pool — enable email sign-in — note the Pool ID",
+      "Add App Client (no secret) — note Client ID",
+      "Create Lambda (any simple response) — deploy it",
+      "Create REST API in API Gateway — create resource /protected",
+      "On /protected — create Authorizer: Cognito, select your user pool",
+      "Attach the authorizer to GET /protected method",
+      "Test: get token via Cognito hosted UI → call API with Authorization header"
+    ],
+    code:`# 1. Sign up a user (AWS CLI)
+aws cognito-idp sign-up \\
+  --client-id YOUR_CLIENT_ID \\
+  --username user@email.com \\
+  --password Pass@1234
+
+# 2. Confirm user (admin)
+aws cognito-idp admin-confirm-sign-up \\
+  --user-pool-id YOUR_POOL_ID \\
+  --username user@email.com
+
+# 3. Get ID token
+aws cognito-idp initiate-auth \\
+  --auth-flow USER_PASSWORD_AUTH \\
+  --client-id YOUR_CLIENT_ID \\
+  --auth-parameters USERNAME=user@email.com,PASSWORD=Pass@1234
+
+# 4. Call protected API
+curl -H "Authorization: Bearer ID_TOKEN" \\
+  https://YOUR_API.execute-api.us-east-1.amazonaws.com/prod/protected`
+  },
+  {
+    id:9, category:"data",
+    title:"Log Aggregator & Alerting",
+    sub:"CloudWatch + Lambda + SNS",
+    color:"c-amber",
+    services:["CloudWatch","Lambda","SNS"],
+    steps:[
+      "Create SNS topic: alert-topic — subscribe your email to it",
+      "Create Lambda function with CloudWatchLogsFullAccess + SNS publish policy",
+      "Paste code below — it parses log events and sends SNS alert for ERRORs",
+      "Go to CloudWatch Logs → choose a log group (e.g. /aws/lambda/your-fn)",
+      "Create Subscription Filter — destination: your alert Lambda",
+      "Filter pattern: ERROR (only ERROR logs will trigger Lambda)",
+      "Trigger an error in your other Lambda — check your email for the alert"
+    ],
+    code:`import boto3, base64, gzip, json
+
+sns = boto3.client('sns')
+TOPIC = 'arn:aws:sns:us-east-1:ACCOUNT_ID:alert-topic'
+
+def lambda_handler(event, ctx):
+    compressed = base64.b64decode(event['awslogs']['data'])
+    payload = json.loads(gzip.decompress(compressed))
+    
+    log_group = payload['logGroup']
+    events = payload['logEvents']
+    
+    errors = [e for e in events if 'ERROR' in e['message']]
+    
+    if errors:
+        msg = f"Errors in {log_group}:\n\n"
+        for e in errors:
+            msg += f"- {e['message']}\n"
+        
+        sns.publish(TopicArn=TOPIC,
+                    Subject=f"Alert: {len(errors)} error(s) found",
+                    Message=msg)
+    
+    return {'statusCode': 200}`
+  },
+  {
+    id:10, category:"networking",
+    title:"Serverless Scheduled Report",
+    sub:"EventBridge + Lambda + S3 + SES",
+    color:"c-teal",
+    services:["EventBridge","Lambda","S3","SES"],
+    steps:[
+      "Create S3 bucket: daily-reports — upload some sample .json data files",
+      "Verify your email in SES (SES → Verified Identities)",
+      "Create Lambda with S3ReadOnly + SESFullAccess policy",
+      "Paste code below — it reads latest S3 file and emails a summary",
+      "Go to EventBridge → Rules → Create rule",
+      "Set schedule: cron(0 8 * * ? *) — runs daily at 8am UTC",
+      "Target: your Lambda function — save the rule"
+    ],
+    code:`import boto3, json
+from datetime import datetime
+
+s3  = boto3.client('s3')
+ses = boto3.client('ses', region_name='us-east-1')
+BUCKET = 'daily-reports'
+EMAIL  = 'you@example.com'
+
+def lambda_handler(event, ctx):
+    # List latest file
+    objs = s3.list_objects_v2(Bucket=BUCKET)
+    latest = sorted(objs['Contents'],
+                    key=lambda x: x['LastModified'])[-1]
+    
+    data = json.loads(
+        s3.get_object(Bucket=BUCKET, Key=latest['Key'])
+        ['Body'].read()
+    )
+    
+    summary = f"Daily Report — {datetime.now().date()}\n"
+    summary += f"File: {latest['Key']}\n"
+    summary += f"Records: {len(data)}\n"
+    
+    ses.send_email(
+        Source=EMAIL,
+        Destination={'ToAddresses': [EMAIL]},
+        Message={
+            'Subject': {'Data': 'Daily AWS Report'},
+            'Body': {'Text': {'Data': summary}}
+        }
+    )`
+  }
+];
+
+const tagColors = {
+  "API Gateway": {bg:"#E6F1FB",color:"#0C447C"},
+  "Lambda":      {bg:"#EAF3DE",color:"#27500A"},
+  "DynamoDB":    {bg:"#EEEDFE",color:"#3C3489"},
+  "S3":          {bg:"#FAEEDA",color:"#633806"},
+  "SES":         {bg:"#FAECE7",color:"#712B13"},
+  "CloudFront":  {bg:"#E1F5EE",color:"#085041"},
+  "Route 53":    {bg:"#FBEAF0",color:"#72243E"},
+  "SNS":         {bg:"#FCEBEB",color:"#791F1F"},
+  "SQS":         {bg:"#EEEDFE",color:"#26215C"},
+  "Cognito":     {bg:"#EAF3DE",color:"#3B6D11"},
+  "CloudWatch":  {bg:"#FAEEDA",color:"#854F0B"},
+  "EventBridge": {bg:"#E1F5EE",color:"#0F6E56"},
+  "IAM":         {bg:"#F1EFE8",color:"#444441"}
+};
+
+const numColors = {
+  "c-blue":  {bg:"#185FA5",fg:"#E6F1FB"},
+  "c-teal":  {bg:"#0F6E56",fg:"#E1F5EE"},
+  "c-purple":{bg:"#534AB7",fg:"#EEEDFE"},
+  "c-amber": {bg:"#BA7517",fg:"#FAEEDA"},
+  "c-coral": {bg:"#993C1D",fg:"#FAECE7"},
+  "c-green": {bg:"#3B6D11",fg:"#EAF3DE"},
+  "c-pink":  {bg:"#993556",fg:"#FBEAF0"}
+};
+
+let currentFilter = 'all';
+let openCard = null;
+
+function filterCards(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+
+function renderCards() {
+  const grid = document.getElementById('grid');
+  const filtered = currentFilter === 'all' ? projects : projects.filter(p => p.category === currentFilter);
+  grid.innerHTML = filtered.map(p => {
+    const nc = numColors[p.color] || numColors['c-blue'];
+    const tagsHtml = p.services.map(s => {
+      const tc = tagColors[s] || {bg:'#F1EFE8',color:'#444441'};
+      return `<span class="tag" style="background:${tc.bg};color:${tc.color}">${s}</span>`;
+    }).join('');
+    const stepsHtml = p.steps.map((s,i) => `<div class="step"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('');
+    return `<div class="card" id="card-${p.id}" onclick="toggleCard(${p.id})">
+      <div class="card-header">
+        <div class="num" style="background:${nc.bg};color:${nc.fg}">${p.id}</div>
+        <div style="flex:1"><div class="card-title">${p.title}</div><div class="card-sub">${p.sub}</div></div>
+        <div class="chevron">▼</div>
+      </div>
+      <div class="tags">${tagsHtml}</div>
+      <div class="detail" id="detail-${p.id}">
+        <div class="section-label">Steps</div>
+        ${stepsHtml}
+        <div class="section-label" style="margin-top:14px">Code</div>
+        <div class="code-block">${p.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        <button class="ask-btn" onclick="event.stopPropagation();sendPrompt('Show me more detail about project ${p.id}: ${p.title} — explain each step deeper and how to debug common errors')">Ask Claude to explain deeper ↗</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(id) {
+  const card = document.getElementById('card-'+id);
+  const detail = document.getElementById('detail-'+id);
+  const isOpen = detail.classList.contains('show');
+  document.querySelectorAll('.detail').forEach(d => d.classList.remove('show'));
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('open'));
+  if (!isOpen) {
+    detail.classList.add('show');
+    card.classList.add('open');
+  }
+}
+
+renderCards();
+</script>

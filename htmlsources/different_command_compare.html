@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command Reference — Linux · Git Bash · PowerShell · Windows CMD · .sh · .bat</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0c10; --surface:#111318; --surface2:#181b22; --border:#23272f;
+  --linux:#22c55e; --gitbash:#f97316; --ps:#3b82f6; --cmd:#a855f7; --sh:#06b6d4; --bat:#f59e0b;
+  --text:#e2e8f0; --muted:#64748b; --white:#fff;
+  --accent:#00e5ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;line-height:1.6}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0a0c10 0%,#0d1525 60%,#0a0c10 100%);border-bottom:1px solid var(--border);padding:52px 0 36px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;left:-100px;width:380px;height:380px;background:radial-gradient(circle,rgba(0,229,255,0.06) 0%,transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-80px;right:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(59,130,246,0.07) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:12px}
+.hero p{color:var(--muted);font-size:0.95rem;max-width:580px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);color:var(--accent);padding:4px 14px;border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;letter-spacing:1px;margin-bottom:18px}
+
+/* SHELL PILLS */
+.shell-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.shell-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;border:1px solid}
+.sp-linux{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:var(--linux)}
+.sp-git{background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.3);color:var(--gitbash)}
+.sp-ps{background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);color:var(--ps)}
+.sp-cmd{background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);color:var(--cmd)}
+.sp-sh{background:rgba(6,182,212,0.1);border-color:rgba(6,182,212,0.3);color:var(--sh)}
+.sp-bat{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:var(--bat)}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* STICKY NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(10,12,16,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:10px 0}
+.nav-pills-custom{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.nav-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.72rem;padding:5px 12px;border-radius:100px;cursor:pointer;transition:all 0.15s}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.nav-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+
+/* MAIN TAB SWITCHER */
+.shell-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0;flex-wrap:wrap}
+.shell-tab{padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;font-weight:700;cursor:pointer;border:none;background:transparent;border-bottom:3px solid transparent;transition:all 0.15s;display:flex;align-items:center;gap:7px}
+.shell-tab.active-linux{color:var(--linux);border-bottom-color:var(--linux)}
+.shell-tab.active-git{color:var(--gitbash);border-bottom-color:var(--gitbash)}
+.shell-tab.active-ps{color:var(--ps);border-bottom-color:var(--ps)}
+.shell-tab.active-cmd{color:var(--cmd);border-bottom-color:var(--cmd)}
+.shell-tab.active-sh{color:var(--sh);border-bottom-color:var(--sh)}
+.shell-tab.active-bat{color:var(--bat);border-bottom-color:var(--bat)}
+.shell-tab:not(.active-linux):not(.active-git):not(.active-ps):not(.active-cmd):not(.active-sh):not(.active-bat){color:var(--muted)}
+.shell-tab:hover:not(.active-linux):not(.active-git):not(.active-ps):not(.active-cmd):not(.active-sh):not(.active-bat){color:var(--text)}
+
+/* SECTION */
+.section{padding:40px 0 0}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.step-badge{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,rgba(0,229,255,0.3),rgba(59,130,246,0.3));border:1px solid rgba(0,229,255,0.3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:0.9rem;color:var(--accent);flex-shrink:0}
+.section-title{font-size:1.25rem;font-weight:700;color:#fff}
+.section-sub{color:var(--muted);font-size:0.82rem;margin-top:2px}
+.section-divider{border:none;border-top:1px solid var(--border);margin:40px 0 0}
+
+/* CMD TABLE */
+.cmd-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.cmd-table{width:100%;border-collapse:collapse}
+.cmd-table thead tr{background:var(--surface2)}
+.cmd-table th{padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+.cmd-table td{padding:10px 14px;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:top}
+.cmd-table tr:last-child td{border-bottom:none}
+.cmd-table tr:hover td{background:rgba(255,255,255,0.02)}
+.cmd-table .col-desc{color:var(--text);font-size:0.82rem}
+.cmd-table .col-note{color:var(--muted);font-size:0.78rem}
+
+/* SHELL CELL BADGES */
+.shell-cell{font-family:'JetBrains Mono',monospace;font-size:0.78rem;padding:2px 8px;border-radius:5px;display:inline-block;margin:2px 1px;white-space:nowrap}
+.sc-linux{background:rgba(34,197,94,0.12);color:var(--linux)}
+.sc-git{background:rgba(249,115,22,0.12);color:var(--gitbash);display:none;}
+.sc-ps{background:rgba(59,130,246,0.12);color:var(--ps)}
+.sc-cmd{background:rgba(168,85,247,0.12);color:var(--cmd)}
+.sc-sh{background:rgba(6,182,212,0.12);color:var(--sh)}
+.sc-bat{background:rgba(245,158,11,0.12);color:var(--bat)}
+.sc-all{background:rgba(255,255,255,0.06);color:var(--text)}
+
+/* CODE CARD */
+.code-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.code-header{background:var(--surface2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:0.76rem;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ef4444}.dot-y{background:#f59e0b}.dot-g{background:#22c55e}
+pre{background:transparent!important;margin:0;padding:16px 18px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;line-height:1.85;overflow-x:auto;color:var(--text)}
+.cmd{color:var(--accent)}.cmt{color:var(--muted);font-style:italic}
+.str{color:#22c55e}.kw{color:#a855f7}.num{color:#f59e0b}.hi{color:#fff;font-weight:600}
+.c-linux{color:var(--linux)}.c-git{color:var(--gitbash)}.c-ps{color:var(--ps)}.c-cmd{color:var(--cmd)}.c-sh{color:var(--sh)}.c-bat{color:var(--bat)}
+
+/* ALERT */
+.alert-tip{background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.18);border-left:3px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:0.84rem;color:var(--text);display:flex;gap:11px;align-items:flex-start;margin-bottom:14px}
+.alert-warn{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.18);border-left:3px solid var(--bat);border-radius:10px;padding:12px 16px;font-size:0.84rem;color:var(--text);display:flex;gap:11px;align-items:flex-start;margin-bottom:14px}
+.alert-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+
+/* COPY BTN */
+.copy-btn{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);font-size:0.7rem;padding:3px 9px;border-radius:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all 0.15s;margin-left:auto}
+.copy-btn:hover{background:rgba(0,229,255,0.1);color:var(--accent);border-color:var(--accent)}
+
+/* SHELL FILTER TABS */
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+.filter-label{color:var(--muted);font-size:0.75rem;font-family:'JetBrains Mono',monospace;margin-right:4px}
+.filter-btn{font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:700;padding:4px 12px;border-radius:100px;border:1px solid;cursor:pointer;transition:all 0.15s;background:transparent}
+.fb-linux{border-color:rgba(34,197,94,0.3);color:var(--muted)}.fb-linux.on{background:rgba(34,197,94,0.15);color:var(--linux);border-color:var(--linux)}
+.fb-git{border-color:rgba(249,115,22,0.3);color:var(--muted)}.fb-git.on{background:rgba(249,115,22,0.15);color:var(--gitbash);border-color:var(--gitbash)}
+.fb-ps{border-color:rgba(59,130,246,0.3);color:var(--muted)}.fb-ps.on{background:rgba(59,130,246,0.15);color:var(--ps);border-color:var(--ps)}
+.fb-cmd{border-color:rgba(168,85,247,0.3);color:var(--muted)}.fb-cmd.on{background:rgba(168,85,247,0.15);color:var(--cmd);border-color:var(--cmd)}
+.fb-all{border-color:rgba(255,255,255,0.2);color:var(--muted)}.fb-all.on{background:rgba(255,255,255,0.1);color:#fff;border-color:#fff}
+
+/* HIDDEN FILTER */
+.row-hidden{display:none!important}
+
+/* SCRIPT FILE TABS */
+.file-tabs{display:flex;gap:0;margin-bottom:0;border-bottom:1px solid var(--border)}
+.file-tab{padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;cursor:pointer;border:none;border-bottom:3px solid transparent;background:transparent;transition:all 0.15s;color:var(--muted)}
+.file-tab.ft-sh{}.file-tab.ft-bat{}
+.file-tab.active-sh{color:var(--sh);border-bottom-color:var(--sh)}
+.file-tab.active-bat{color:var(--bat);border-bottom-color:var(--bat)}
+.file-tab-content{display:none}.file-tab-content.active{display:block}
+
+/* DIFF ROW HIGHLIGHT */
+.diff-add{background:rgba(34,197,94,0.06)}
+.diff-del{background:rgba(239,68,68,0.06)}
+
+/* FOOTER */
+footer{margin-top:60px;border-top:1px solid var(--border);padding:24px 0;color:var(--muted);font-size:0.8rem;text-align:center}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-badge"><i class="bi bi-terminal-fill"></i> COMPLETE COMMAND REFERENCE</div>
+    <h1>Commands — All Shells,<br>One Guide</h1>
+    <p>Linux · Git Bash · PowerShell · Windows CMD — from basics to advanced. Plus .sh and .bat script files with full examples.</p>
+    <div class="shell-pills">
+      <span class="shell-pill sp-linux"><span class="pill-dot"></span>Linux / macOS</span>
+      <span class="shell-pill sp-git"><span class="pill-dot"></span>Git Bash</span>
+      <span class="shell-pill sp-ps"><span class="pill-dot"></span>PowerShell</span>
+      <span class="shell-pill sp-cmd"><span class="pill-dot"></span>Windows CMD</span>
+      <span class="shell-pill sp-sh"><span class="pill-dot"></span>.sh Script</span>
+      <span class="shell-pill sp-bat"><span class="pill-dot"></span>.bat Script</span>
+    </div>
+  </div>
+</div>
+
+<!-- STICKY NAV -->
+<div class="sticky-nav">
+  <div class="container">
+    <div class="nav-pills-custom">
+      <span style="color:var(--muted);font-size:0.72rem;font-family:'JetBrains Mono',monospace;margin-right:4px">JUMP TO:</span>
+      <button class="nav-btn" onclick="scrollTo('nav','s-basic')">Basics</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-file')">Files &amp; Folders</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-process')">Processes</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-network')">Network</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-perms')">Permissions</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-env')">Env Variables</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-text')">Text Processing</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-archive')">Archives</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-advanced')">Advanced</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-sh')">Shell Scripts</button>
+      <button class="nav-btn" onclick="scrollTo('nav','s-bat')">Batch Files</button>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+<!-- ══════════════════ LEGEND ══════════════════ -->
+<div class="section" style="padding-top:28px">
+  <div class="alert-tip">
+    <span class="alert-icon" style="color:var(--accent)"><i class="bi bi-info-circle-fill"></i></span>
+    <span>
+      <strong>How to read this guide:</strong>
+      Each command row shows which shells support it.
+      <span class="sc-linux">Linux</span>
+      <span class="sc-git">Git Bash</span>
+      <span class="sc-ps">PowerShell</span>
+      <span class="sc-cmd">CMD</span> — if a badge is shown, that shell supports that command.
+      <strong>Git Bash on Windows supports most Linux commands</strong> because it bundles a Unix layer.
+    </span>
+  </div>
+</div>
+
+<!-- ══════════════════ S1: BASICS ══════════════════ -->
+<div id="s-basic" class="section">
+  <div class="section-header">
+    <div class="step-badge">01</div>
+    <div><div class="section-title">Basic Navigation</div><div class="section-sub">Moving around, clearing screen, getting help</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Print current directory</td><td><span class="sc-linux">pwd</span><span class="sc-git">pwd</span></td><td><span class="sc-ps">pwd</span> or <span class="sc-ps">Get-Location</span></td><td><span class="sc-cmd">cd</span> (no args)</td><td class="col-note">Shows where you are</td></tr>
+        <tr><td class="col-desc">Change directory</td><td><span class="sc-linux">cd /path/to/folder</span></td><td><span class="sc-ps">cd C:\path\folder</span></td><td><span class="sc-cmd">cd C:\path\folder</span></td><td class="col-note">Use / on Linux, \ on Windows</td></tr>
+        <tr><td class="col-desc">Go up one level</td><td><span class="sc-linux">cd ..</span><span class="sc-git">cd ..</span></td><td><span class="sc-ps">cd ..</span></td><td><span class="sc-cmd">cd ..</span></td><td class="col-note">Same in all shells</td></tr>
+        <tr><td class="col-desc">Go to home directory</td><td><span class="sc-linux">cd ~</span><span class="sc-git">cd ~</span></td><td><span class="sc-ps">cd ~</span></td><td><span class="sc-cmd">cd %USERPROFILE%</span></td><td class="col-note">~ = home shortcut</td></tr>
+        <tr><td class="col-desc">List files</td><td><span class="sc-linux">ls</span><span class="sc-git">ls</span></td><td><span class="sc-ps">ls</span> or <span class="sc-ps">dir</span></td><td><span class="sc-cmd">dir</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">List files (detailed)</td><td><span class="sc-linux">ls -la</span><span class="sc-git">ls -la</span></td><td><span class="sc-ps">ls -Force</span></td><td><span class="sc-cmd">dir /A</span></td><td class="col-note">Shows hidden files too</td></tr>
+        <tr><td class="col-desc">Clear screen</td><td><span class="sc-linux">clear</span><span class="sc-git">clear</span></td><td><span class="sc-ps">cls</span></td><td><span class="sc-cmd">cls</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Command help</td><td><span class="sc-linux">man ls</span><span class="sc-git">man ls</span></td><td><span class="sc-ps">Get-Help ls</span></td><td><span class="sc-cmd">help dir</span> or <span class="sc-cmd">dir /?</span></td><td class="col-note">Manual / help page</td></tr>
+        <tr><td class="col-desc">Command history</td><td><span class="sc-linux">history</span><span class="sc-git">history</span></td><td><span class="sc-ps">Get-History</span></td><td><span class="sc-cmd">doskey /history</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Print text to screen</td><td><span class="sc-linux">echo "Hello"</span><span class="sc-git">echo "Hello"</span></td><td><span class="sc-ps">Write-Host "Hello"</span></td><td><span class="sc-cmd">echo Hello</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Current date &amp; time</td><td><span class="sc-linux">date</span></td><td><span class="sc-ps">Get-Date</span></td><td><span class="sc-cmd">date /T</span> &amp; <span class="sc-cmd">time /T</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Who am I (username)</td><td><span class="sc-linux">whoami</span><span class="sc-git">whoami</span></td><td><span class="sc-ps">$env:USERNAME</span></td><td><span class="sc-cmd">whoami</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Exit terminal</td><td><span class="sc-linux">exit</span><span class="sc-git">exit</span></td><td><span class="sc-ps">exit</span></td><td><span class="sc-cmd">exit</span></td><td class="col-note">Same in all</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S2: FILES & FOLDERS ══════════════════ -->
+<div id="s-file" class="section">
+  <div class="section-header">
+    <div class="step-badge">02</div>
+    <div><div class="section-title">Files &amp; Folders</div><div class="section-sub">Create, copy, move, rename, delete</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Create a folder</td><td><span class="sc-linux">mkdir myfolder</span></td><td><span class="sc-ps">mkdir myfolder</span></td><td><span class="sc-cmd">mkdir myfolder</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Create nested folders</td><td><span class="sc-linux">mkdir -p a/b/c</span></td><td><span class="sc-ps">mkdir a\b\c -Force</span></td><td><span class="sc-cmd">mkdir a\b\c</span></td><td class="col-note">-p = make parents too</td></tr>
+        <tr><td class="col-desc">Create empty file</td><td><span class="sc-linux">touch file.txt</span><span class="sc-git">touch file.txt</span></td><td><span class="sc-ps">New-Item file.txt</span></td><td><span class="sc-cmd">type nul > file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Copy file</td><td><span class="sc-linux">cp src.txt dest.txt</span></td><td><span class="sc-ps">Copy-Item src.txt dest.txt</span></td><td><span class="sc-cmd">copy src.txt dest.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Copy folder (recursive)</td><td><span class="sc-linux">cp -r src/ dest/</span></td><td><span class="sc-ps">Copy-Item src -Recurse dest</span></td><td><span class="sc-cmd">xcopy src dest /E /I</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Move / Rename file</td><td><span class="sc-linux">mv old.txt new.txt</span></td><td><span class="sc-ps">Move-Item old.txt new.txt</span></td><td><span class="sc-cmd">move old.txt new.txt</span> or <span class="sc-cmd">ren</span></td><td class="col-note">mv works for rename too</td></tr>
+        <tr><td class="col-desc">Delete file</td><td><span class="sc-linux">rm file.txt</span></td><td><span class="sc-ps">Remove-Item file.txt</span></td><td><span class="sc-cmd">del file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Delete folder</td><td><span class="sc-linux">rm -rf myfolder</span></td><td><span class="sc-ps">Remove-Item myfolder -Recurse -Force</span></td><td><span class="sc-cmd">rmdir /S /Q myfolder</span></td><td class="col-note">⚠ -rf is permanent!</td></tr>
+        <tr><td class="col-desc">Print file contents</td><td><span class="sc-linux">cat file.txt</span><span class="sc-git">cat file.txt</span></td><td><span class="sc-ps">Get-Content file.txt</span></td><td><span class="sc-cmd">type file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Write text to file</td><td><span class="sc-linux">echo "text" > file.txt</span></td><td><span class="sc-ps">"text" | Out-File file.txt</span></td><td><span class="sc-cmd">echo text > file.txt</span></td><td class="col-note">> overwrites, >> appends</td></tr>
+        <tr><td class="col-desc">Append text to file</td><td><span class="sc-linux">echo "line" >> file.txt</span></td><td><span class="sc-ps">"line" | Add-Content file.txt</span></td><td><span class="sc-cmd">echo line >> file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Find files by name</td><td><span class="sc-linux">find . -name "*.txt"</span><span class="sc-git">find . -name "*.txt"</span></td><td><span class="sc-ps">Get-ChildItem -Recurse -Filter *.txt</span></td><td><span class="sc-cmd">dir /S /B *.txt</span></td><td class="col-note">Search recursively</td></tr>
+        <tr><td class="col-desc">Show file size</td><td><span class="sc-linux">ls -lh file.txt</span></td><td><span class="sc-ps">(Get-Item file.txt).length</span></td><td><span class="sc-cmd">dir file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Show folder size</td><td><span class="sc-linux">du -sh myfolder/</span></td><td><span class="sc-ps">(Get-ChildItem myfolder -Recurse | Measure-Object -Property Length -Sum).Sum</span></td><td><span class="sc-cmd">—</span></td><td class="col-note">du = disk usage</td></tr>
+        <tr><td class="col-desc">Check disk space</td><td><span class="sc-linux">df -h</span></td><td><span class="sc-ps">Get-PSDrive</span></td><td><span class="sc-cmd">wmic logicaldisk get size,freespace</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Scroll through file</td><td><span class="sc-linux">less file.txt</span></td><td><span class="sc-ps">Get-Content file.txt | more</span></td><td><span class="sc-cmd">more file.txt</span></td><td class="col-note">q to quit less</td></tr>
+        <tr><td class="col-desc">First N lines of file</td><td><span class="sc-linux">head -n 10 file.txt</span></td><td><span class="sc-ps">Get-Content file.txt | Select-Object -First 10</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Last N lines of file</td><td><span class="sc-linux">tail -n 10 file.txt</span></td><td><span class="sc-ps">Get-Content file.txt | Select-Object -Last 10</span></td><td><span class="sc-cmd">—</span></td><td class="col-note">tail -f = live follow</td></tr>
+        <tr><td class="col-desc">Compare two files</td><td><span class="sc-linux">diff file1.txt file2.txt</span></td><td><span class="sc-ps">Compare-Object (Get-Content f1) (Get-Content f2)</span></td><td><span class="sc-cmd">fc file1.txt file2.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Count lines in file</td><td><span class="sc-linux">wc -l file.txt</span></td><td><span class="sc-ps">(Get-Content file.txt).Count</span></td><td><span class="sc-cmd">find /C /V "" file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Create symlink</td><td><span class="sc-linux">ln -s target linkname</span></td><td><span class="sc-ps">New-Item -ItemType SymbolicLink -Name link -Target target</span></td><td><span class="sc-cmd">mklink link target</span></td><td class="col-note">PS/CMD need admin rights</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S3: PROCESSES ══════════════════ -->
+<div id="s-process" class="section">
+  <div class="section-header">
+    <div class="step-badge">03</div>
+    <div><div class="section-title">Processes &amp; System</div><div class="section-sub">View, kill, and manage running processes</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">List running processes</td><td><span class="sc-linux">ps aux</span></td><td><span class="sc-ps">Get-Process</span></td><td><span class="sc-cmd">tasklist</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Kill process by PID</td><td><span class="sc-linux">kill 1234</span></td><td><span class="sc-ps">Stop-Process -Id 1234</span></td><td><span class="sc-cmd">taskkill /PID 1234 /F</span></td><td class="col-note">/F = force</td></tr>
+        <tr><td class="col-desc">Kill process by name</td><td><span class="sc-linux">pkill node</span></td><td><span class="sc-ps">Stop-Process -Name node</span></td><td><span class="sc-cmd">taskkill /IM node.exe /F</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Live resource monitor</td><td><span class="sc-linux">top</span> or <span class="sc-linux">htop</span></td><td><span class="sc-ps">—</span></td><td><span class="sc-cmd">—</span></td><td class="col-note">htop is nicer, install separately</td></tr>
+        <tr><td class="col-desc">Run in background</td><td><span class="sc-linux">command &amp;</span></td><td><span class="sc-ps">Start-Job {command}</span></td><td><span class="sc-cmd">start /B command</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">See background jobs</td><td><span class="sc-linux">jobs</span></td><td><span class="sc-ps">Get-Job</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Bring job to foreground</td><td><span class="sc-linux">fg %1</span></td><td><span class="sc-ps">—</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Stop current process</td><td><span class="sc-all">Ctrl + C</span></td><td><span class="sc-all">Ctrl + C</span></td><td><span class="sc-all">Ctrl + C</span></td><td class="col-note">Universal interrupt</td></tr>
+        <tr><td class="col-desc">Show process port</td><td><span class="sc-linux">lsof -i :3000</span></td><td><span class="sc-ps">netstat -ano | findstr :3000</span></td><td><span class="sc-cmd">netstat -ano | findstr :3000</span></td><td class="col-note">Find what's using port 3000</td></tr>
+        <tr><td class="col-desc">System uptime</td><td><span class="sc-linux">uptime</span></td><td><span class="sc-ps">(Get-Date) - (gcim Win32_OperatingSystem).LastBootUpTime</span></td><td><span class="sc-cmd">systeminfo | find "Boot Time"</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Schedule task (one-time)</td><td><span class="sc-linux">at 10:00 command</span></td><td><span class="sc-ps">Register-ScheduledTask ...</span></td><td><span class="sc-cmd">schtasks /create ...</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Repeat command (cron)</td><td><span class="sc-linux">crontab -e</span></td><td><span class="sc-ps">Use Task Scheduler GUI</span></td><td><span class="sc-cmd">schtasks /create /sc DAILY</span></td><td class="col-note">Linux: cron syntax</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S4: NETWORK ══════════════════ -->
+<div id="s-network" class="section">
+  <div class="section-header">
+    <div class="step-badge">04</div>
+    <div><div class="section-title">Network Commands</div><div class="section-sub">Ping, download, ports, DNS, IP info</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Ping a host</td><td><span class="sc-linux">ping google.com</span></td><td><span class="sc-ps">ping google.com</span></td><td><span class="sc-cmd">ping google.com</span></td><td class="col-note">Linux pings forever, Ctrl+C to stop</td></tr>
+        <tr><td class="col-desc">Trace route</td><td><span class="sc-linux">traceroute google.com</span></td><td><span class="sc-ps">tracert google.com</span></td><td><span class="sc-cmd">tracert google.com</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Show IP address</td><td><span class="sc-linux">ip a</span> or <span class="sc-linux">ifconfig</span></td><td><span class="sc-ps">Get-NetIPAddress</span></td><td><span class="sc-cmd">ipconfig</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">DNS lookup</td><td><span class="sc-linux">nslookup domain.com</span></td><td><span class="sc-ps">Resolve-DnsName domain.com</span></td><td><span class="sc-cmd">nslookup domain.com</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Download a file</td><td><span class="sc-linux">wget https://url/file</span> or <span class="sc-linux">curl -O url</span></td><td><span class="sc-ps">Invoke-WebRequest url -OutFile file</span></td><td><span class="sc-cmd">curl -O url</span></td><td class="col-note">curl available in Win10+</td></tr>
+        <tr><td class="col-desc">Make HTTP GET</td><td><span class="sc-linux">curl https://api.example.com</span></td><td><span class="sc-ps">Invoke-RestMethod https://api.example.com</span></td><td><span class="sc-cmd">curl https://api.example.com</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Make HTTP POST</td><td><span class="sc-linux">curl -X POST -d '{"k":"v"}' url</span></td><td><span class="sc-ps">Invoke-RestMethod -Method Post -Body $data url</span></td><td><span class="sc-cmd">curl -X POST -d "{k:v}" url</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Active connections</td><td><span class="sc-linux">netstat -tulnp</span></td><td><span class="sc-ps">netstat -ano</span></td><td><span class="sc-cmd">netstat -ano</span></td><td class="col-note">Shows listening ports</td></tr>
+        <tr><td class="col-desc">SSH into server</td><td><span class="sc-linux">ssh user@host</span><span class="sc-git">ssh user@host</span></td><td><span class="sc-ps">ssh user@host</span></td><td><span class="sc-cmd">ssh user@host</span></td><td class="col-note">Win10+ has built-in SSH</td></tr>
+        <tr><td class="col-desc">Copy files over SSH</td><td><span class="sc-linux">scp file.txt user@host:/path/</span></td><td><span class="sc-ps">scp file.txt user@host:/path/</span></td><td><span class="sc-cmd">scp file.txt user@host:/path/</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Flush DNS cache</td><td><span class="sc-linux">sudo systemd-resolve --flush-caches</span></td><td><span class="sc-ps">Clear-DnsClientCache</span></td><td><span class="sc-cmd">ipconfig /flushdns</span></td><td class="col-note"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S5: PERMISSIONS ══════════════════ -->
+<div id="s-perms" class="section">
+  <div class="section-header">
+    <div class="step-badge">05</div>
+    <div><div class="section-title">Permissions &amp; Users</div><div class="section-sub">chmod, chown, sudo, user management</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Run as admin / root</td><td><span class="sc-linux">sudo command</span></td><td><span class="sc-ps">Run PS as Administrator</span></td><td><span class="sc-cmd">runas /user:Administrator cmd</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Change file permissions</td><td><span class="sc-linux">chmod 755 file</span></td><td><span class="sc-ps">icacls file /grant User:F</span></td><td><span class="sc-cmd">icacls file /grant User:F</span></td><td class="col-note">755 = rwxr-xr-x</td></tr>
+        <tr><td class="col-desc">Make file executable</td><td><span class="sc-linux">chmod +x script.sh</span></td><td><span class="sc-ps">—</span></td><td><span class="sc-cmd">—</span></td><td class="col-note">Linux only</td></tr>
+        <tr><td class="col-desc">Change file owner</td><td><span class="sc-linux">chown user:group file</span></td><td><span class="sc-ps">—</span></td><td><span class="sc-cmd">—</span></td><td class="col-note">Linux only</td></tr>
+        <tr><td class="col-desc">Show file permissions</td><td><span class="sc-linux">ls -l file</span></td><td><span class="sc-ps">Get-Acl file</span></td><td><span class="sc-cmd">icacls file</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Switch user</td><td><span class="sc-linux">su username</span></td><td><span class="sc-ps">—</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Add a user</td><td><span class="sc-linux">sudo useradd username</span></td><td><span class="sc-ps">New-LocalUser "username"</span></td><td><span class="sc-cmd">net user username /add</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Change password</td><td><span class="sc-linux">passwd username</span></td><td><span class="sc-ps">Set-LocalUser -Name "u" -Password $pw</span></td><td><span class="sc-cmd">net user username newpass</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">List groups</td><td><span class="sc-linux">groups username</span></td><td><span class="sc-ps">Get-LocalGroup</span></td><td><span class="sc-cmd">net localgroup</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Add to group</td><td><span class="sc-linux">sudo usermod -aG groupname user</span></td><td><span class="sc-ps">Add-LocalGroupMember -Group "grp" -Member "user"</span></td><td><span class="sc-cmd">net localgroup groupname user /add</span></td><td class="col-note"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S6: ENV VARIABLES ══════════════════ -->
+<div id="s-env" class="section">
+  <div class="section-header">
+    <div class="step-badge">06</div>
+    <div><div class="section-title">Environment Variables</div><div class="section-sub">Set, read, export, persist variables</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Set a variable</td><td><span class="sc-linux">MY_VAR="hello"</span></td><td><span class="sc-ps">$MY_VAR = "hello"</span></td><td><span class="sc-cmd">set MY_VAR=hello</span></td><td class="col-note">Temp — only current session</td></tr>
+        <tr><td class="col-desc">Export (child processes)</td><td><span class="sc-linux">export MY_VAR="hello"</span></td><td><span class="sc-ps">$env:MY_VAR = "hello"</span></td><td><span class="sc-cmd">set MY_VAR=hello</span></td><td class="col-note">$env: persists to child in PS</td></tr>
+        <tr><td class="col-desc">Read a variable</td><td><span class="sc-linux">echo $MY_VAR</span></td><td><span class="sc-ps">echo $env:MY_VAR</span></td><td><span class="sc-cmd">echo %MY_VAR%</span></td><td class="col-note">Syntax differs!</td></tr>
+        <tr><td class="col-desc">List all variables</td><td><span class="sc-linux">env</span> or <span class="sc-linux">printenv</span></td><td><span class="sc-ps">Get-ChildItem Env:</span></td><td><span class="sc-cmd">set</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Delete a variable</td><td><span class="sc-linux">unset MY_VAR</span></td><td><span class="sc-ps">Remove-Item Env:MY_VAR</span></td><td><span class="sc-cmd">set MY_VAR=</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Persist permanently</td><td><span class="sc-linux">echo 'export MY_VAR="hello"' >> ~/.bashrc</span></td><td><span class="sc-ps">[System.Environment]::SetEnvironmentVariable('MY_VAR','hello','User')</span></td><td><span class="sc-cmd">setx MY_VAR "hello"</span></td><td class="col-note">setx = permanent on Windows</td></tr>
+        <tr><td class="col-desc">Read from .env file</td><td><span class="sc-linux">export $(cat .env | xargs)</span></td><td><span class="sc-ps">Get-Content .env | ForEach-Object { $k,$v = $_ -split '='; [System.Environment]::SetEnvironmentVariable($k,$v) }</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">PATH — show current</td><td><span class="sc-linux">echo $PATH</span></td><td><span class="sc-ps">$env:PATH</span></td><td><span class="sc-cmd">echo %PATH%</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">PATH — add folder</td><td><span class="sc-linux">export PATH="$PATH:/new/dir"</span></td><td><span class="sc-ps">$env:PATH += ";C:\new\dir"</span></td><td><span class="sc-cmd">setx PATH "%PATH%;C:\new\dir"</span></td><td class="col-note"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S7: TEXT PROCESSING ══════════════════ -->
+<div id="s-text" class="section">
+  <div class="section-header">
+    <div class="step-badge">07</div>
+    <div><div class="section-title">Text Processing &amp; Search</div><div class="section-sub">grep, find in files, replace, sort, pipe</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Search text in file</td><td><span class="sc-linux">grep "word" file.txt</span></td><td><span class="sc-ps">Select-String "word" file.txt</span></td><td><span class="sc-cmd">findstr "word" file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Search recursively</td><td><span class="sc-linux">grep -r "word" ./</span></td><td><span class="sc-ps">Get-ChildItem -Recurse | Select-String "word"</span></td><td><span class="sc-cmd">findstr /S /R "word" *.*</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Case-insensitive search</td><td><span class="sc-linux">grep -i "word" file.txt</span></td><td><span class="sc-ps">Select-String -CaseSensitive:$false "word"</span></td><td><span class="sc-cmd">findstr /I "word" file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Show line numbers</td><td><span class="sc-linux">grep -n "word" file.txt</span></td><td><span class="sc-ps">Select-String "word" file.txt</span></td><td><span class="sc-cmd">findstr /N "word" file.txt</span></td><td class="col-note">PS shows line# by default</td></tr>
+        <tr><td class="col-desc">Pipe output to filter</td><td><span class="sc-linux">cat file.txt | grep "word"</span></td><td><span class="sc-ps">Get-Content file.txt | Select-String "word"</span></td><td><span class="sc-cmd">type file.txt | findstr "word"</span></td><td class="col-note">| = pipe</td></tr>
+        <tr><td class="col-desc">Sort lines</td><td><span class="sc-linux">sort file.txt</span></td><td><span class="sc-ps">Get-Content file.txt | Sort-Object</span></td><td><span class="sc-cmd">sort file.txt</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Remove duplicate lines</td><td><span class="sc-linux">sort -u file.txt</span></td><td><span class="sc-ps">Get-Content file.txt | Sort-Object -Unique</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Count matches</td><td><span class="sc-linux">grep -c "word" file.txt</span></td><td><span class="sc-ps">(Select-String "word" file.txt).Count</span></td><td><span class="sc-cmd">findstr "word" file.txt | find /C /V ""</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Replace in file (sed)</td><td><span class="sc-linux">sed -i 's/old/new/g' file.txt</span></td><td><span class="sc-ps">(Get-Content f.txt) -replace 'old','new' | Set-Content f.txt</span></td><td><span class="sc-cmd">—</span></td><td class="col-note">No native CMD equivalent</td></tr>
+        <tr><td class="col-desc">Cut column from CSV</td><td><span class="sc-linux">cut -d',' -f1 file.csv</span></td><td><span class="sc-ps">Import-Csv file.csv | Select col1</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Word / char count</td><td><span class="sc-linux">wc file.txt</span></td><td><span class="sc-ps">(Get-Content f.txt | Measure-Object -Word).Words</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Redirect stderr to file</td><td><span class="sc-linux">command 2> errors.log</span></td><td><span class="sc-ps">command 2> errors.log</span></td><td><span class="sc-cmd">command 2> errors.log</span></td><td class="col-note">2> = error stream</td></tr>
+        <tr><td class="col-desc">Redirect both stdout+err</td><td><span class="sc-linux">command &gt;&amp;2 > all.log</span></td><td><span class="sc-ps">command *> all.log</span></td><td><span class="sc-cmd">command > all.log 2>&amp;1</span></td><td class="col-note"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S8: ARCHIVES ══════════════════ -->
+<div id="s-archive" class="section">
+  <div class="section-header">
+    <div class="step-badge">08</div>
+    <div><div class="section-title">Archives &amp; Compression</div><div class="section-sub">zip, tar, extract, compress</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Create .tar.gz</td><td><span class="sc-linux">tar -czf archive.tar.gz folder/</span></td><td><span class="sc-ps">tar -czf archive.tar.gz folder/</span></td><td><span class="sc-cmd">—</span></td><td class="col-note">c=create z=gzip f=filename</td></tr>
+        <tr><td class="col-desc">Extract .tar.gz</td><td><span class="sc-linux">tar -xzf archive.tar.gz</span></td><td><span class="sc-ps">tar -xzf archive.tar.gz</span></td><td><span class="sc-cmd">—</span></td><td class="col-note">x=extract</td></tr>
+        <tr><td class="col-desc">List contents of tar</td><td><span class="sc-linux">tar -tzf archive.tar.gz</span></td><td><span class="sc-ps">tar -tzf archive.tar.gz</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Zip a folder</td><td><span class="sc-linux">zip -r archive.zip folder/</span></td><td><span class="sc-ps">Compress-Archive folder archive.zip</span></td><td><span class="sc-cmd">—</span> (use 7zip or PS)</td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Unzip a file</td><td><span class="sc-linux">unzip archive.zip</span></td><td><span class="sc-ps">Expand-Archive archive.zip -DestinationPath ./</span></td><td><span class="sc-cmd">—</span> (use PS or 7zip)</td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Unzip to specific folder</td><td><span class="sc-linux">unzip archive.zip -d /target/</span></td><td><span class="sc-ps">Expand-Archive archive.zip -DestinationPath C:\target</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S9: ADVANCED ══════════════════ -->
+<div id="s-advanced" class="section">
+  <div class="section-header">
+    <div class="step-badge">09</div>
+    <div><div class="section-title">Advanced Commands</div><div class="section-sub">Chaining, conditions, loops, aliases, scripting one-liners</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>What it does</th><th>Linux / Git Bash</th><th>PowerShell</th><th>Windows CMD</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Run A then B (always)</td><td><span class="sc-linux">cmd1 ; cmd2</span></td><td><span class="sc-ps">cmd1; cmd2</span></td><td><span class="sc-cmd">cmd1 &amp; cmd2</span></td><td class="col-note">Run both regardless of result</td></tr>
+        <tr><td class="col-desc">Run B only if A succeeds</td><td><span class="sc-linux">cmd1 &amp;&amp; cmd2</span></td><td><span class="sc-ps">cmd1 -and cmd2</span></td><td><span class="sc-cmd">cmd1 &amp;&amp; cmd2</span></td><td class="col-note">&amp;&amp; = AND chain</td></tr>
+        <tr><td class="col-desc">Run B only if A fails</td><td><span class="sc-linux">cmd1 || cmd2</span></td><td><span class="sc-ps">cmd1 -or cmd2</span></td><td><span class="sc-cmd">cmd1 || cmd2</span></td><td class="col-note">|| = OR chain</td></tr>
+        <tr><td class="col-desc">Create alias</td><td><span class="sc-linux">alias ll='ls -la'</span></td><td><span class="sc-ps">Set-Alias ll Get-ChildItem</span></td><td><span class="sc-cmd">doskey ll=dir /A</span></td><td class="col-note">Session-only unless saved</td></tr>
+        <tr><td class="col-desc">Save alias permanently</td><td><span class="sc-linux">echo "alias ll='ls -la'" >> ~/.bashrc</span></td><td><span class="sc-ps">Add to $PROFILE file</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">For loop over list</td><td><span class="sc-linux">for i in a b c; do echo $i; done</span></td><td><span class="sc-ps">foreach($i in 'a','b','c'){ Write-Host $i }</span></td><td><span class="sc-cmd">for %i in (a b c) do echo %i</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">For loop over files</td><td><span class="sc-linux">for f in *.txt; do echo $f; done</span></td><td><span class="sc-ps">Get-ChildItem *.txt | ForEach-Object { $_.Name }</span></td><td><span class="sc-cmd">for %f in (*.txt) do echo %f</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">While loop</td><td><span class="sc-linux">while true; do echo "hi"; sleep 1; done</span></td><td><span class="sc-ps">while($true){ Write-Host "hi"; Start-Sleep 1 }</span></td><td><span class="sc-cmd">:loop echo hi && goto loop</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">If condition</td><td><span class="sc-linux">if [ -f file.txt ]; then echo "exists"; fi</span></td><td><span class="sc-ps">if(Test-Path file.txt){ "exists" }</span></td><td><span class="sc-cmd">if exist file.txt echo exists</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Check exit code</td><td><span class="sc-linux">echo $?</span></td><td><span class="sc-ps">$LASTEXITCODE</span></td><td><span class="sc-cmd">echo %ERRORLEVEL%</span></td><td class="col-note">0 = success</td></tr>
+        <tr><td class="col-desc">Run command silently</td><td><span class="sc-linux">command > /dev/null 2>&amp;1</span></td><td><span class="sc-ps">command | Out-Null</span></td><td><span class="sc-cmd">command > nul 2>&amp;1</span></td><td class="col-note">Suppress all output</td></tr>
+        <tr><td class="col-desc">Time a command</td><td><span class="sc-linux">time command</span></td><td><span class="sc-ps">Measure-Command { command }</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Repeat command N times</td><td><span class="sc-linux">for i in {1..5}; do command; done</span></td><td><span class="sc-ps">1..5 | ForEach-Object { command }</span></td><td><span class="sc-cmd">for /L %i in (1,1,5) do command</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Read user input</td><td><span class="sc-linux">read -p "Enter: " VAR</span></td><td><span class="sc-ps">$VAR = Read-Host "Enter"</span></td><td><span class="sc-cmd">set /P VAR=Enter: </span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Source / reload config</td><td><span class="sc-linux">source ~/.bashrc</span></td><td><span class="sc-ps">. $PROFILE</span></td><td><span class="sc-cmd">—</span></td><td class="col-note"></td></tr>
+        <tr><td class="col-desc">Execute script</td><td><span class="sc-linux">bash script.sh</span></td><td><span class="sc-ps">.\script.ps1</span></td><td><span class="sc-cmd">script.bat</span></td><td class="col-note">See script sections below</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S10: .SH SCRIPTS ══════════════════ -->
+<div id="s-sh" class="section">
+  <div class="section-header">
+    <div class="step-badge" style="background:linear-gradient(135deg,rgba(6,182,212,0.3),rgba(34,197,94,0.3));border-color:rgba(6,182,212,0.3);color:var(--sh)">SH</div>
+    <div><div class="section-title">.sh Shell Script Files — Linux &amp; Git Bash</div><div class="section-sub">Create reusable scripts that run on Linux, macOS, and Git Bash on Windows</div></div>
+  </div>
+
+  <div class="alert-tip">
+    <span class="alert-icon" style="color:var(--sh)"><i class="bi bi-lightbulb-fill"></i></span>
+    <span>A <strong>.sh file</strong> is just a text file with shell commands. Save it as <code>myscript.sh</code>, make it executable with <code>chmod +x myscript.sh</code>, then run it with <code>./myscript.sh</code> or <code>bash myscript.sh</code>.</span>
+  </div>
+
+  <!-- SH Examples Tabs -->
+  <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px">
+    <div class="file-tabs">
+      <button class="file-tab ft-sh active-sh" onclick="switchShTab('sh-basic', this)">Basics</button>
+      <button class="file-tab ft-sh" onclick="switchShTab('sh-vars', this)">Variables &amp; Input</button>
+      <button class="file-tab ft-sh" onclick="switchShTab('sh-conditions', this)">Conditions</button>
+      <button class="file-tab ft-sh" onclick="switchShTab('sh-loops', this)">Loops</button>
+      <button class="file-tab ft-sh" onclick="switchShTab('sh-functions', this)">Functions</button>
+      <button class="file-tab ft-sh" onclick="switchShTab('sh-real', this)">Real-world Examples</button>
+    </div>
+    <div style="background:var(--surface)">
+      <div id="sh-basic" class="file-tab-content active">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>myscript.sh — structure &amp; basics</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="cmt">#!/bin/bash
+# ↑ ALWAYS first line — tells system which shell to use
+# Lines starting with # are comments</span>
+
+<span class="cmt"># Run this file:</span>
+<span class="cmt"># chmod +x myscript.sh   ← make it executable (once)</span>
+<span class="cmt"># ./myscript.sh           ← run it</span>
+<span class="cmt"># bash myscript.sh        ← also works</span>
+
+<span class="kw">echo</span> <span class="str">"Starting script..."</span>
+
+<span class="cmt"># Exit with code 0 = success, non-zero = error</span>
+<span class="kw">exit</span> <span class="num">0</span></pre>
+      </div>
+      <div id="sh-vars" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>variables.sh — variables, args, input</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="cmt">#!/bin/bash</span>
+
+<span class="cmt"># ── Set variables (NO spaces around =) ──</span>
+<span class="hi">NAME</span>=<span class="str">"Alice"</span>
+<span class="hi">AGE</span>=<span class="num">30</span>
+
+<span class="cmt"># ── Read variable with $ ──</span>
+<span class="kw">echo</span> <span class="str">"Hello, $NAME! You are $AGE years old."</span>
+
+<span class="cmt"># ── Command line arguments ──</span>
+<span class="cmt"># ./script.sh arg1 arg2</span>
+<span class="kw">echo</span> <span class="str">"Script name: $0"</span>
+<span class="kw">echo</span> <span class="str">"First arg:   $1"</span>
+<span class="kw">echo</span> <span class="str">"Second arg:  $2"</span>
+<span class="kw">echo</span> <span class="str">"All args:    $@"</span>
+<span class="kw">echo</span> <span class="str">"Arg count:   $#"</span>
+
+<span class="cmt"># ── Read user input ──</span>
+<span class="kw">read</span> -p <span class="str">"Enter your city: "</span> CITY
+<span class="kw">echo</span> <span class="str">"You are from $CITY"</span>
+
+<span class="cmt"># ── Capture command output into variable ──</span>
+<span class="hi">CURRENT_DATE</span>=$(<span class="cmd">date</span>)
+<span class="kw">echo</span> <span class="str">"Today is: $CURRENT_DATE"</span>
+
+<span class="cmt"># ── String operations ──</span>
+<span class="hi">FULL</span>=<span class="str">"Hello World"</span>
+<span class="kw">echo</span> ${#FULL}         <span class="cmt"># length = 11</span>
+<span class="kw">echo</span> ${FULL:0:5}      <span class="cmt"># substring = "Hello"</span>
+<span class="kw">echo</span> ${FULL/World/Bash} <span class="cmt"># replace = "Hello Bash"</span></pre>
+      </div>
+      <div id="sh-conditions" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>conditions.sh</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="cmt">#!/bin/bash</span>
+
+<span class="hi">NUM</span>=<span class="num">10</span>
+
+<span class="cmt"># ── Number comparisons ──</span>
+<span class="cmt"># -eq -ne -gt -lt -ge -le</span>
+<span class="kw">if</span> [ $NUM <span class="hi">-gt</span> 5 ]; <span class="kw">then</span>
+  <span class="kw">echo</span> <span class="str">"Greater than 5"</span>
+<span class="kw">elif</span> [ $NUM <span class="hi">-eq</span> 5 ]; <span class="kw">then</span>
+  <span class="kw">echo</span> <span class="str">"Equal to 5"</span>
+<span class="kw">else</span>
+  <span class="kw">echo</span> <span class="str">"Less than 5"</span>
+<span class="kw">fi</span>
+
+<span class="cmt"># ── String comparisons ──</span>
+<span class="hi">STR</span>=<span class="str">"hello"</span>
+<span class="kw">if</span> [ <span class="str">"$STR"</span> = <span class="str">"hello"</span> ]; <span class="kw">then</span>
+  <span class="kw">echo</span> <span class="str">"Strings match"</span>
+<span class="kw">fi</span>
+
+<span class="cmt"># ── File / folder checks ──</span>
+<span class="kw">if</span> [ <span class="hi">-f</span> <span class="str">"file.txt"</span> ]; <span class="kw">then</span>   <span class="cmt"># -f = file exists</span>
+  <span class="kw">echo</span> <span class="str">"File exists"</span>
+<span class="kw">fi</span>
+<span class="kw">if</span> [ <span class="hi">-d</span> <span class="str">"myfolder"</span> ]; <span class="kw">then</span>  <span class="cmt"># -d = directory exists</span>
+  <span class="kw">echo</span> <span class="str">"Folder exists"</span>
+<span class="kw">fi</span>
+<span class="kw">if</span> [ <span class="hi">-z</span> <span class="str">"$VAR"</span> ]; <span class="kw">then</span>       <span class="cmt"># -z = string is empty</span>
+  <span class="kw">echo</span> <span class="str">"VAR is empty"</span>
+<span class="kw">fi</span>
+
+<span class="cmt"># ── AND / OR conditions ──</span>
+<span class="kw">if</span> [ $NUM <span class="hi">-gt</span> 5 ] <span class="hi">&amp;&amp;</span> [ $NUM <span class="hi">-lt</span> 20 ]; <span class="kw">then</span>
+  <span class="kw">echo</span> <span class="str">"Between 5 and 20"</span>
+<span class="kw">fi</span>
+
+<span class="cmt"># ── Case statement ──</span>
+<span class="hi">DAY</span>=<span class="str">"Monday"</span>
+<span class="kw">case</span> $DAY <span class="kw">in</span>
+  Monday|Tuesday|Wednesday|Thursday|Friday)
+    <span class="kw">echo</span> <span class="str">"Weekday"</span> ;;
+  Saturday|Sunday)
+    <span class="kw">echo</span> <span class="str">"Weekend"</span> ;;
+  *) <span class="kw">echo</span> <span class="str">"Unknown"</span> ;;
+<span class="kw">esac</span></pre>
+      </div>
+      <div id="sh-loops" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>loops.sh</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="cmt">#!/bin/bash</span>
+
+<span class="cmt"># ── For loop over list ──</span>
+<span class="kw">for</span> FRUIT <span class="kw">in</span> apple banana mango; <span class="kw">do</span>
+  <span class="kw">echo</span> <span class="str">"Fruit: $FRUIT"</span>
+<span class="kw">done</span>
+
+<span class="cmt"># ── For loop with range ──</span>
+<span class="kw">for</span> i <span class="kw">in</span> {<span class="num">1</span>..<span class="num">5</span>}; <span class="kw">do</span>
+  <span class="kw">echo</span> <span class="str">"Count: $i"</span>
+<span class="kw">done</span>
+
+<span class="cmt"># ── For loop C-style ──</span>
+<span class="kw">for</span> (( i=<span class="num">0</span>; i&lt;<span class="num">5</span>; i++ )); <span class="kw">do</span>
+  <span class="kw">echo</span> <span class="str">"i = $i"</span>
+<span class="kw">done</span>
+
+<span class="cmt"># ── Loop over files ──</span>
+<span class="kw">for</span> FILE <span class="kw">in</span> *.txt; <span class="kw">do</span>
+  <span class="kw">echo</span> <span class="str">"Processing: $FILE"</span>
+<span class="kw">done</span>
+
+<span class="cmt"># ── While loop ──</span>
+<span class="hi">COUNT</span>=<span class="num">1</span>
+<span class="kw">while</span> [ $COUNT <span class="hi">-le</span> 3 ]; <span class="kw">do</span>
+  <span class="kw">echo</span> <span class="str">"Loop $COUNT"</span>
+  (( COUNT++ ))
+<span class="kw">done</span>
+
+<span class="cmt"># ── Until loop (opposite of while) ──</span>
+<span class="hi">N</span>=<span class="num">0</span>
+<span class="kw">until</span> [ $N <span class="hi">-ge</span> 3 ]; <span class="kw">do</span>
+  <span class="kw">echo</span> <span class="str">"N=$N"</span>
+  (( N++ ))
+<span class="kw">done</span>
+
+<span class="cmt"># ── break &amp; continue ──</span>
+<span class="kw">for</span> i <span class="kw">in</span> {<span class="num">1</span>..<span class="num">10</span>}; <span class="kw">do</span>
+  [ $i <span class="hi">-eq</span> 5 ] <span class="hi">&amp;&amp;</span> <span class="kw">break</span>    <span class="cmt"># stop at 5</span>
+  [ $i <span class="hi">-eq</span> 3 ] <span class="hi">&amp;&amp;</span> <span class="kw">continue</span> <span class="cmt"># skip 3</span>
+  <span class="kw">echo</span> $i
+<span class="kw">done</span></pre>
+      </div>
+      <div id="sh-functions" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>functions.sh</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="cmt">#!/bin/bash</span>
+
+<span class="cmt"># ── Define a function ──</span>
+<span class="kw">greet</span>() {
+  <span class="kw">echo</span> <span class="str">"Hello, $1!"</span>   <span class="cmt"># $1 = first arg passed to function</span>
+}
+
+<span class="cmt"># ── Call the function ──</span>
+greet <span class="str">"Alice"</span>
+greet <span class="str">"Bob"</span>
+
+<span class="cmt"># ── Function with return value ──</span>
+<span class="cmt"># (use echo + capture, not return — return is exit code only)</span>
+<span class="kw">add</span>() {
+  <span class="kw">echo</span> $(( $1 + $2 ))
+}
+<span class="hi">RESULT</span>=$(<span class="kw">add</span> <span class="num">5</span> <span class="num">3</span>)
+<span class="kw">echo</span> <span class="str">"5 + 3 = $RESULT"</span>
+
+<span class="cmt"># ── Function with error handling ──</span>
+<span class="kw">check_file</span>() {
+  <span class="kw">if</span> [ ! <span class="hi">-f</span> <span class="str">"$1"</span> ]; <span class="kw">then</span>
+    <span class="kw">echo</span> <span class="str">"ERROR: File '$1' not found"</span>
+    <span class="kw">return</span> <span class="num">1</span>   <span class="cmt"># non-zero = failure</span>
+  <span class="kw">fi</span>
+  <span class="kw">echo</span> <span class="str">"File '$1' found ✅"</span>
+  <span class="kw">return</span> <span class="num">0</span>
+}
+check_file <span class="str">"myfile.txt"</span>
+
+<span class="cmt"># ── Exit on any error (best practice) ──</span>
+<span class="kw">set</span> -e           <span class="cmt"># script stops if any command fails</span>
+<span class="kw">set</span> -u           <span class="cmt"># error if unset variable used</span>
+<span class="kw">set</span> -o pipefail  <span class="cmt"># catch errors in pipes</span></pre>
+      </div>
+      <div id="sh-real" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>deploy.sh — real-world deployment script</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="cmt">#!/bin/bash
+# Real-world example: project build + deploy script</span>
+<span class="kw">set</span> -e
+
+<span class="hi">PROJECT_DIR</span>=<span class="str">"/var/www/myapp"</span>
+<span class="hi">BACKUP_DIR</span>=<span class="str">"/var/backups/myapp"</span>
+<span class="hi">BRANCH</span>=<span class="str">"main"</span>
+<span class="hi">LOG_FILE</span>=<span class="str">"deploy.log"</span>
+
+<span class="cmt"># ── Logging function ──</span>
+<span class="kw">log</span>() {
+  <span class="kw">echo</span> <span class="str">"[$(date '+%Y-%m-%d %H:%M:%S')] $1"</span> | <span class="cmd">tee</span> -a $LOG_FILE
+}
+
+log <span class="str">"Starting deployment..."</span>
+
+<span class="cmt"># ── Check we're in right directory ──</span>
+<span class="kw">if</span> [ ! <span class="hi">-d</span> <span class="str">"$PROJECT_DIR"</span> ]; <span class="kw">then</span>
+  log <span class="str">"ERROR: Project dir not found"</span>
+  <span class="kw">exit</span> <span class="num">1</span>
+<span class="kw">fi</span>
+
+<span class="cmd">cd</span> $PROJECT_DIR
+
+<span class="cmt"># ── Backup current version ──</span>
+log <span class="str">"Backing up..."</span>
+<span class="cmd">mkdir</span> -p $BACKUP_DIR
+<span class="cmd">cp</span> -r . $BACKUP_DIR/backup_$(<span class="cmd">date</span> +%Y%m%d_%H%M%S)
+
+<span class="cmt"># ── Pull latest code ──</span>
+log <span class="str">"Pulling from $BRANCH..."</span>
+<span class="cmd">git</span> pull origin $BRANCH
+
+<span class="cmt"># ── Install dependencies ──</span>
+log <span class="str">"Installing dependencies..."</span>
+<span class="cmd">npm</span> install --production
+
+<span class="cmt"># ── Build ──</span>
+log <span class="str">"Building..."</span>
+<span class="cmd">npm</span> run build
+
+<span class="cmt"># ── Restart service ──</span>
+log <span class="str">"Restarting service..."</span>
+<span class="cmd">pm2</span> restart myapp || <span class="cmd">pm2</span> start dist/index.js --name myapp
+
+log <span class="str">"Deployment complete ✅"</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-warn">
+    <span class="alert-icon" style="color:var(--bat)"><i class="bi bi-exclamation-triangle-fill"></i></span>
+    <span><strong>On Windows with Git Bash:</strong> .sh scripts run fine in Git Bash terminal. Line endings must be Unix (LF), not Windows (CRLF). In VS Code: bottom-right corner → click "CRLF" → change to "LF" before saving your .sh file.</span>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ══════════════════ S11: .BAT SCRIPTS ══════════════════ -->
+<div id="s-bat" class="section">
+  <div class="section-header">
+    <div class="step-badge" style="background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(249,115,22,0.3));border-color:rgba(245,158,11,0.3);color:var(--bat)">BAT</div>
+    <div><div class="section-title">.bat Batch Files — Windows CMD</div><div class="section-sub">Windows-native automation scripts, double-click to run</div></div>
+  </div>
+
+  <div class="alert-tip">
+    <span class="alert-icon" style="color:var(--bat)"><i class="bi bi-lightbulb-fill"></i></span>
+    <span>A <strong>.bat file</strong> is a text file with Windows CMD commands. Save it as <code>script.bat</code> and double-click it — or run from CMD. Use <code>@echo off</code> at the top to hide command echo. Works on all Windows versions with no installation needed.</span>
+  </div>
+
+  <!-- BAT Examples Tabs -->
+  <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px">
+    <div class="file-tabs">
+      <button class="file-tab ft-bat active-bat" onclick="switchBatTab('bat-basic', this)">Basics</button>
+      <button class="file-tab ft-bat" onclick="switchBatTab('bat-vars', this)">Variables &amp; Input</button>
+      <button class="file-tab ft-bat" onclick="switchBatTab('bat-conditions', this)">Conditions</button>
+      <button class="file-tab ft-bat" onclick="switchBatTab('bat-loops', this)">Loops</button>
+      <button class="file-tab ft-bat" onclick="switchBatTab('bat-functions', this)">Functions (Subroutines)</button>
+      <button class="file-tab ft-bat" onclick="switchBatTab('bat-real', this)">Real-world Examples</button>
+    </div>
+    <div style="background:var(--surface)">
+      <div id="bat-basic" class="file-tab-content active">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>myscript.bat — structure &amp; basics</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="kw">@echo off</span>
+<span class="cmt">:: ↑ ALWAYS first line — hides command echo
+:: Lines starting with :: or REM are comments</span>
+<span class="kw">REM</span> <span class="cmt">This is also a comment</span>
+
+<span class="cmt">:: Pause at end so window doesn't close immediately</span>
+<span class="kw">echo</span> Starting script...
+<span class="kw">echo</span> Hello from Windows!
+
+<span class="cmt">:: Change to script's own directory</span>
+<span class="kw">cd</span> /D <span class="str">"%~dp0"</span>
+
+<span class="cmt">:: Set window title</span>
+<span class="kw">title</span> My Script
+
+<span class="cmt">:: Exit with code 0 = success</span>
+<span class="kw">exit</span> /B <span class="num">0</span>
+
+<span class="cmt">:: At end, add pause so console stays open:</span>
+<span class="cmt">:: pause</span></pre>
+      </div>
+      <div id="bat-vars" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>variables.bat</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="kw">@echo off</span>
+
+<span class="cmt">:: ── Set a variable ──</span>
+<span class="kw">set</span> <span class="hi">NAME</span>=Alice
+<span class="kw">set</span> <span class="hi">AGE</span>=30
+
+<span class="cmt">:: ── Read a variable — use %VAR% ──</span>
+<span class="kw">echo</span> Hello, <span class="hi">%NAME%</span>! You are <span class="hi">%AGE%</span> years old.
+
+<span class="cmt">:: ── Command line arguments ──</span>
+<span class="cmt">:: script.bat arg1 arg2</span>
+<span class="kw">echo</span> Script: <span class="hi">%0</span>
+<span class="kw">echo</span> First:  <span class="hi">%1</span>
+<span class="kw">echo</span> Second: <span class="hi">%2</span>
+<span class="kw">echo</span> All:    <span class="hi">%*</span>
+
+<span class="cmt">:: ── Read user input ──</span>
+<span class="kw">set</span> /P <span class="hi">CITY</span>=Enter your city: 
+<span class="kw">echo</span> You are from <span class="hi">%CITY%</span>
+
+<span class="cmt">:: ── Capture command output ──</span>
+<span class="kw">for</span> /F "tokens=*" %%i <span class="kw">in</span> ('<span class="cmd">date /T</span>') <span class="kw">do</span> <span class="kw">set</span> <span class="hi">TODAY</span>=%%i
+<span class="kw">echo</span> Today is: <span class="hi">%TODAY%</span>
+
+<span class="cmt">:: ── Arithmetic (use /A) ──</span>
+<span class="kw">set</span> /A <span class="hi">RESULT</span>=5+3
+<span class="kw">echo</span> 5+3 = <span class="hi">%RESULT%</span>
+
+<span class="cmt">:: ── String length (workaround) ──</span>
+<span class="kw">set</span> <span class="hi">STR</span>=HelloWorld
+<span class="kw">echo</span> String: <span class="hi">%STR%</span>
+
+<span class="cmt">:: ── Substring: %VAR:~start,length% ──</span>
+<span class="kw">echo</span> First 5 chars: <span class="hi">%STR:~0,5%</span>
+
+<span class="cmt">:: ── Replace: %VAR:old=new% ──</span>
+<span class="kw">echo</span> Replaced: <span class="hi">%STR:World=Batch%</span>
+
+<span class="kw">pause</span></pre>
+      </div>
+      <div id="bat-conditions" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>conditions.bat</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="kw">@echo off</span>
+
+<span class="kw">set</span> <span class="hi">NUM</span>=10
+
+<span class="cmt">:: ── Number comparison ──</span>
+<span class="kw">if</span> <span class="hi">%NUM%</span> <span class="hi">GTR</span> 5 (
+  <span class="kw">echo</span> Greater than 5
+) <span class="kw">else if</span> <span class="hi">%NUM%</span> <span class="hi">EQU</span> 5 (
+  <span class="kw">echo</span> Equal to 5
+) <span class="kw">else</span> (
+  <span class="kw">echo</span> Less than 5
+)
+<span class="cmt">:: EQU NEQ GTR LSS GEQ LEQ</span>
+
+<span class="cmt">:: ── String comparison ──</span>
+<span class="kw">set</span> <span class="hi">STR</span>=hello
+<span class="kw">if</span> <span class="str">"%STR%"</span>==<span class="str">"hello"</span> echo Strings match
+
+<span class="cmt">:: ── File / folder checks ──</span>
+<span class="kw">if</span> <span class="hi">exist</span> <span class="str">"file.txt"</span> (
+  <span class="kw">echo</span> File exists
+) <span class="kw">else</span> (
+  <span class="kw">echo</span> File not found
+)
+
+<span class="kw">if</span> <span class="hi">exist</span> <span class="str">"myfolder\"</span> echo Folder exists
+
+<span class="cmt">:: ── NOT condition ──</span>
+<span class="kw">if</span> <span class="hi">not</span> <span class="hi">exist</span> <span class="str">"file.txt"</span> echo File missing
+
+<span class="cmt">:: ── Check error level after command ──</span>
+<span class="cmd">somecommand.exe</span>
+<span class="kw">if</span> <span class="hi">%ERRORLEVEL%</span> <span class="hi">NEQ</span> 0 (
+  <span class="kw">echo</span> Command failed with error <span class="hi">%ERRORLEVEL%</span>
+  <span class="kw">exit</span> /B 1
+)
+<span class="kw">echo</span> Command succeeded
+
+<span class="kw">pause</span></pre>
+      </div>
+      <div id="bat-loops" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>loops.bat</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="kw">@echo off</span>
+
+<span class="cmt">:: ── For loop over list ──</span>
+<span class="kw">for</span> %%i <span class="kw">in</span> (apple banana mango) <span class="kw">do</span> (
+  <span class="kw">echo</span> Fruit: %%i
+)
+
+<span class="cmt">:: ── For loop with number range /L ──</span>
+<span class="cmt">:: for /L %%var in (start,step,end)</span>
+<span class="kw">for</span> /L %%i <span class="kw">in</span> (<span class="num">1</span>,<span class="num">1</span>,<span class="num">5</span>) <span class="kw">do</span> (
+  <span class="kw">echo</span> Count: %%i
+)
+
+<span class="cmt">:: ── For loop over files ──</span>
+<span class="kw">for</span> %%f <span class="kw">in</span> (*.txt) <span class="kw">do</span> (
+  <span class="kw">echo</span> File: %%f
+)
+
+<span class="cmt">:: ── For loop over files recursively ──</span>
+<span class="kw">for</span> /R . %%f <span class="kw">in</span> (*.log) <span class="kw">do</span> (
+  <span class="kw">echo</span> Found: %%f
+)
+
+<span class="cmt">:: ── While loop (via goto) ──</span>
+<span class="kw">set</span> /A <span class="hi">COUNT</span>=1
+<span class="hi">:loop</span>
+<span class="kw">if</span> <span class="hi">%COUNT%</span> <span class="hi">LEQ</span> 3 (
+  <span class="kw">echo</span> Loop <span class="hi">%COUNT%</span>
+  <span class="kw">set</span> /A <span class="hi">COUNT</span>+=1
+  <span class="kw">goto</span> <span class="hi">loop</span>
+)
+
+<span class="cmt">:: ── For /F — read lines from file ──</span>
+<span class="kw">for</span> /F "tokens=*" %%L <span class="kw">in</span> (data.txt) <span class="kw">do</span> (
+  <span class="kw">echo</span> Line: %%L
+)
+
+<span class="kw">pause</span></pre>
+      </div>
+      <div id="bat-functions" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>functions.bat — subroutines with :label</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="kw">@echo off</span>
+
+<span class="cmt">:: ── Call a subroutine ──</span>
+<span class="kw">call</span> <span class="hi">:greet</span> Alice
+<span class="kw">call</span> <span class="hi">:greet</span> Bob
+<span class="kw">call</span> <span class="hi">:add</span> 5 3
+
+<span class="cmt">:: ── End of main script — must have exit ──</span>
+<span class="kw">exit</span> /B 0
+
+<span class="cmt">:: ════════════════════════════
+:: SUBROUTINES (functions)
+:: ════════════════════════════</span>
+
+<span class="hi">:greet</span>
+  <span class="kw">echo</span> Hello, %1!     <span class="cmt">:: %1 = first argument</span>
+<span class="kw">exit</span> /B 0
+
+<span class="hi">:add</span>
+  <span class="kw">set</span> /A <span class="hi">SUM</span>=%1+%2
+  <span class="kw">echo</span> %1 + %2 = <span class="hi">%SUM%</span>
+<span class="kw">exit</span> /B 0
+
+<span class="cmt">:: ── Subroutine returning a value via variable ──</span>
+<span class="hi">:getdate</span>
+  <span class="kw">for</span> /F "tokens=*" %%d <span class="kw">in</span> ('<span class="cmd">date /T</span>') <span class="kw">do</span> <span class="kw">set</span> <span class="hi">RETURN_VAL</span>=%%d
+<span class="kw">exit</span> /B 0
+
+<span class="cmt">:: Call it:</span>
+<span class="cmt">:: call :getdate</span>
+<span class="cmt">:: echo Today: %RETURN_VAL%</span></pre>
+      </div>
+      <div id="bat-real" class="file-tab-content">
+        <div class="code-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span>deploy.bat — real-world project automation</span><button class="copy-btn" onclick="copyPre(this)">copy</button></div>
+        <pre><span class="kw">@echo off</span>
+<span class="kw">title</span> Project Deploy Script
+<span class="kw">cd</span> /D <span class="str">"%~dp0"</span>   <span class="cmt">:: go to script's own folder</span>
+
+<span class="kw">set</span> <span class="hi">PROJECT</span>=myapp
+<span class="kw">set</span> <span class="hi">LOG</span>=deploy.log
+
+<span class="cmt">:: ── Logging function ──</span>
+<span class="kw">call</span> <span class="hi">:log</span> <span class="str">"Starting deployment..."</span>
+
+<span class="cmt">:: ── Check Node installed ──</span>
+<span class="cmd">node</span> --version >nul 2>&amp;1
+<span class="kw">if</span> <span class="hi">%ERRORLEVEL%</span> <span class="hi">NEQ</span> 0 (
+  <span class="kw">echo</span> ERROR: Node.js not found. Install it first.
+  <span class="kw">pause</span> &amp; <span class="kw">exit</span> /B 1
+)
+
+<span class="cmt">:: ── Pull latest code ──</span>
+<span class="kw">call</span> <span class="hi">:log</span> <span class="str">"Pulling from git..."</span>
+<span class="cmd">git</span> pull origin main
+<span class="kw">if</span> <span class="hi">%ERRORLEVEL%</span> <span class="hi">NEQ</span> 0 <span class="kw">goto</span> <span class="hi">:error</span>
+
+<span class="cmt">:: ── Install packages ──</span>
+<span class="kw">call</span> <span class="hi">:log</span> <span class="str">"Installing packages..."</span>
+<span class="cmd">npm</span> install
+<span class="kw">if</span> <span class="hi">%ERRORLEVEL%</span> <span class="hi">NEQ</span> 0 <span class="kw">goto</span> <span class="hi">:error</span>
+
+<span class="cmt">:: ── Build ──</span>
+<span class="kw">call</span> <span class="hi">:log</span> <span class="str">"Building..."</span>
+<span class="cmd">npm</span> run build
+<span class="kw">if</span> <span class="hi">%ERRORLEVEL%</span> <span class="hi">NEQ</span> 0 <span class="kw">goto</span> <span class="hi">:error</span>
+
+<span class="kw">call</span> <span class="hi">:log</span> <span class="str">"Deploy complete!"</span>
+<span class="kw">pause</span> &amp; <span class="kw">exit</span> /B 0
+
+<span class="hi">:error</span>
+<span class="kw">echo</span> FAILED. Check <span class="hi">%LOG%</span> for details.
+<span class="kw">pause</span> &amp; <span class="kw">exit</span> /B 1
+
+<span class="hi">:log</span>
+  <span class="kw">echo</span> [%TIME%] %~1
+  <span class="kw">echo</span> [%TIME%] %~1 >> <span class="hi">%LOG%</span>
+<span class="kw">exit</span> /B 0</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ COMPARISON CHEATSHEET ══════════════════ -->
+<hr class="section-divider">
+<div class="section">
+  <div class="section-header">
+    <div class="step-badge" style="font-size:0.75rem">REF</div>
+    <div><div class="section-title">Quick Cheatsheet — Side by Side</div><div class="section-sub">Same task, all shells at a glance</div></div>
+  </div>
+  <div class="cmd-table-wrap">
+    <table class="cmd-table">
+      <thead><tr><th>Task</th><th><span class="c-linux">Linux/Bash</span></th><th><span class="c-ps">PowerShell</span></th><th><span class="c-cmd">CMD</span></th><th><span class="c-sh">.sh file</span></th><th><span class="c-bat">.bat file</span></th></tr></thead>
+      <tbody>
+        <tr><td class="col-desc">Print text</td><td><code>echo "hi"</code></td><td><code>Write-Host "hi"</code></td><td><code>echo hi</code></td><td><code>echo "hi"</code></td><td><code>echo hi</code></td></tr>
+        <tr><td class="col-desc">Set variable</td><td><code>VAR="val"</code></td><td><code>$VAR = "val"</code></td><td><code>set VAR=val</code></td><td><code>VAR="val"</code></td><td><code>set VAR=val</code></td></tr>
+        <tr><td class="col-desc">Read variable</td><td><code>echo $VAR</code></td><td><code>echo $VAR</code></td><td><code>echo %VAR%</code></td><td><code>echo $VAR</code></td><td><code>echo %VAR%</code></td></tr>
+        <tr><td class="col-desc">If condition</td><td><code>if [ ... ]; then</code></td><td><code>if(...){}</code></td><td><code>if %X% EQU Y ()</code></td><td><code>if [ ... ]; then</code></td><td><code>if %X%==Y ()</code></td></tr>
+        <tr><td class="col-desc">For loop</td><td><code>for i in list; do</code></td><td><code>foreach($i in $list){}</code></td><td><code>for %%i in (list) do</code></td><td><code>for i in list; do</code></td><td><code>for %%i in (list) do</code></td></tr>
+        <tr><td class="col-desc">Function</td><td><code>myfn() { ... }</code></td><td><code>function myfn { ... }</code></td><td><code>—</code></td><td><code>myfn() { ... }</code></td><td><code>:myfn ... exit /B</code></td></tr>
+        <tr><td class="col-desc">Comment</td><td><code># comment</code></td><td><code># comment</code></td><td><code>:: comment</code></td><td><code># comment</code></td><td><code>:: comment</code></td></tr>
+        <tr><td class="col-desc">Exit code</td><td><code>exit 0</code></td><td><code>exit 0</code></td><td><code>exit /B 0</code></td><td><code>exit 0</code></td><td><code>exit /B 0</code></td></tr>
+        <tr><td class="col-desc">Error check</td><td><code>$?</code></td><td><code>$LASTEXITCODE</code></td><td><code>%ERRORLEVEL%</code></td><td><code>$?</code></td><td><code>%ERRORLEVEL%</code></td></tr>
+        <tr><td class="col-desc">Script header</td><td><code>—</code></td><td><code>—</code></td><td><code>—</code></td><td><code>#!/bin/bash</code></td><td><code>@echo off</code></td></tr>
+        <tr><td class="col-desc">Run script</td><td><code>bash file.sh</code></td><td><code>.\file.ps1</code></td><td><code>file.bat</code></td><td><code>./file.sh</code></td><td><code>file.bat</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-weight:700">CMD REFERENCE</span>
+  <span class="mx-2" style="color:var(--border)">|</span>
+  Linux · Git Bash · PowerShell · CMD · .sh · .bat
+  <span class="mx-2" style="color:var(--border)">|</span>
+  Basics to Advanced
+</footer>
+
+</div><!-- /container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function scrollTo(type, id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function switchShTab(id, btn) {
+  document.querySelectorAll('[id^="sh-"]').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.ft-sh').forEach(b => {
+    b.classList.remove('active-sh');
+    b.style.color = '';
+  });
+  btn.classList.add('active-sh');
+}
+
+function switchBatTab(id, btn) {
+  document.querySelectorAll('[id^="bat-"]').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.ft-bat').forEach(b => {
+    b.classList.remove('active-bat');
+    b.style.color = '';
+  });
+  btn.classList.add('active-bat');
+}
+
+function copyPre(btn) {
+  const pre = btn.closest('.code-header').nextElementSibling;
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'copy'; btn.style.color = ''; }, 2000);
+  });
+}
+</script>
+</body>
+</html>

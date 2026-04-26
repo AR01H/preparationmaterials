@@ -1,0 +1,4164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Engineer — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #00ff9d;
+    --accent2: #ff6b35;
+    --accent3: #7b61ff;
+    --text: #e8e8f0;
+    --muted: #888899;
+    --code-bg: #0d1117;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0a0a0f 0%, #111128 60%, #0a1a0f 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 40px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,255,157,0.08) 0%, transparent 70%);
+  }
+
+  header h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    position: relative;
+  }
+
+  header h1 span { color: var(--accent); }
+
+  header p.subtitle {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-family: 'Space Mono', monospace;
+    position: relative;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    padding: 6px 14px;
+    border-radius: 2px;
+    border: 1px solid;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .badge.green  { border-color: var(--accent);  color: var(--accent);  background: rgba(0,255,157,0.07); }
+  .badge.orange { border-color: var(--accent2); color: var(--accent2); background: rgba(255,107,53,0.07); }
+  .badge.purple { border-color: var(--accent3); color: var(--accent3); background: rgba(123,97,255,0.07); }
+
+  /* NAV / TOC */
+  nav.toc {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+  }
+
+  nav.toc h2 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 14px;
+  }
+
+  nav.toc ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+
+  nav.toc ul li a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.2s;
+  }
+
+  nav.toc ul li a:hover { color: var(--accent); }
+
+  /* MAIN */
+  main { max-width: 960px; margin: 0 auto; padding: 60px 40px; }
+
+  /* SECTION */
+  section { margin-bottom: 80px; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  h2.section-title {
+    font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+  }
+
+  h2.section-title.orange { border-color: var(--accent2); }
+  h2.section-title.purple { border-color: var(--accent3); }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 32px 0 12px;
+    color: var(--accent);
+  }
+
+  h3.orange { color: var(--accent2); }
+  h3.purple { color: var(--accent3); }
+
+  p { margin-bottom: 14px; color: #ccccd8; }
+
+  ul, ol {
+    margin: 12px 0 18px 24px;
+    color: #ccccd8;
+  }
+
+  li { margin-bottom: 6px; }
+
+  /* CODE BLOCKS */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid #1e2a1e;
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 24px;
+    overflow-x: auto;
+    margin: 20px 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #a8ffcf;
+  }
+
+  pre.orange { border-left-color: var(--accent2); color: #ffd0b0; }
+  pre.purple { border-left-color: var(--accent3); color: #c8c0ff; }
+  pre.red    { border-left-color: #ff4466;        color: #ffa0b0; }
+
+  code { font-family: 'Space Mono', monospace; font-size: 0.85em; color: var(--accent); background: rgba(0,255,157,0.07); padding: 2px 6px; border-radius: 3px; }
+
+  /* CARD GRID */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 22px;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: var(--accent); }
+  .card.orange:hover { border-color: var(--accent2); }
+  .card.purple:hover { border-color: var(--accent3); }
+
+  .card .card-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+
+  .card.orange .card-title { color: var(--accent2); }
+  .card.purple .card-title { color: var(--accent3); }
+
+  .card p { font-size: 0.88rem; margin: 0; }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.88rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  th {
+    background: var(--surface);
+    color: var(--accent);
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--border);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: #ccccd8;
+    vertical-align: top;
+  }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 3px solid var(--accent3);
+    background: rgba(123,97,255,0.07);
+    padding: 18px 22px;
+    border-radius: 0 4px 4px 0;
+    margin: 20px 0;
+    font-size: 0.92rem;
+    color: #ccc8ff;
+  }
+
+  .callout.warn { border-color: var(--accent2); background: rgba(255,107,53,0.07); color: #ffd0b0; }
+  .callout.tip  { border-color: var(--accent);  background: rgba(0,255,157,0.06);  color: #a8ffcf; }
+
+  /* DIVIDER */
+  hr { border: none; border-top: 1px solid var(--border); margin: 60px 0; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 600px) {
+    main { padding: 40px 20px; }
+    header { padding: 50px 20px 40px; }
+    nav.toc { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Backend <span>Engineer</span><br>Complete Guide</h1>
+  <p class="subtitle">// beginner → advanced · end-to-end</p>
+  <div class="badge-row">
+    <span class="badge green">Fundamentals</span>
+    <span class="badge orange">APIs &amp; DBs</span>
+    <span class="badge purple">Security</span>
+    <span class="badge green">Performance</span>
+    <span class="badge orange">System Design</span>
+    <span class="badge purple">DevOps</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Table of Contents</h2>
+  <ul>
+    <li><a href="#s1">1. What is Backend?</a></li>
+    <li><a href="#s2">2. Core Languages</a></li>
+    <li><a href="#s3">3. HTTP &amp; APIs</a></li>
+    <li><a href="#s4">4. Databases</a></li>
+    <li><a href="#s5">5. Authentication</a></li>
+    <li><a href="#s6">6. Cybersecurity</a></li>
+    <li><a href="#s7">7. Performance &amp; Optimization</a></li>
+    <li><a href="#s8">8. System Design</a></li>
+    <li><a href="#s9">9. DevOps &amp; Deployment</a></li>
+    <li><a href="#s10">10. Advanced Patterns</a></li>
+    <li><a href="#s11">11. Roadmap</a></li>
+    <li><a href="#s12">12. Full Status Codes</a></li>
+    <li><a href="#s13">13. HTTP Headers</a></li>
+    <li><a href="#s14">14. WebSockets &amp; SSE</a></li>
+    <li><a href="#s15">15. Transactions &amp; ACID</a></li>
+    <li><a href="#s16">16. OAuth 2.0 &amp; OIDC</a></li>
+    <li><a href="#s17">17. Testing</a></li>
+    <li><a href="#s18">18. Middleware Deep Dive</a></li>
+    <li><a href="#s19">19. Advanced Security</a></li>
+    <li><a href="#s20">20. Observability</a></li>
+    <li><a href="#s21">21. Tools &amp; CLI</a></li>
+    <li><a href="#s22">22. Cheat Sheets</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ─────────────────────────────────── SECTION 1 -->
+<section id="s1">
+  <div class="section-label">Section 01</div>
+  <h2 class="section-title">What is Backend Engineering?</h2>
+
+  <p>The <strong>backend</strong> is everything the user never sees — the server, business logic, databases, authentication, APIs, caching layers, message queues, and infrastructure that power the product. A backend engineer architects, builds, secures, and scales these systems.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Frontend</div>
+      <p>What users interact with — HTML, CSS, JavaScript running in the browser or a mobile app.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Backend</div>
+      <p>Servers, APIs, databases, auth systems, queues, and logic. This guide covers all of it.</p>
+    </div>
+    <div class="card orange">
+      <div class="card-title">Full Stack</div>
+      <p>Engineers who work confidently on both sides. Backend knowledge is the harder half.</p>
+    </div>
+  </div>
+
+  <h3>Core Responsibilities</h3>
+  <ul>
+    <li>Design and expose <strong>APIs</strong> for frontends and third-party clients</li>
+    <li>Model and query <strong>databases</strong> efficiently</li>
+    <li>Implement <strong>authentication &amp; authorization</strong></li>
+    <li>Write <strong>secure code</strong> and harden services against attacks</li>
+    <li>Optimize for <strong>performance</strong> — latency, throughput, memory</li>
+    <li>Design systems that <strong>scale horizontally</strong></li>
+    <li>Deploy and monitor via <strong>CI/CD pipelines</strong></li>
+  </ul>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 2 -->
+<section id="s2">
+  <div class="section-label">Section 02</div>
+  <h2 class="section-title">Core Languages &amp; Runtimes</h2>
+
+  <p>Pick one language, go deep before branching. Every example in this guide uses Python and Node.js side by side — the most common beginner-friendly choices.</p>
+
+  <table>
+    <tr><th>Language</th><th>Best For</th><th>Key Frameworks</th></tr>
+    <tr><td>Python</td><td>Rapid dev, ML/AI backends, scripting</td><td>FastAPI, Django, Flask</td></tr>
+    <tr><td>Node.js (JS)</td><td>Real-time apps, microservices, JS full-stack</td><td>Express, Fastify, NestJS</td></tr>
+    <tr><td>Go</td><td>High-performance services, CLIs, infra tools</td><td>Gin, Echo, Fiber</td></tr>
+    <tr><td>Java / Kotlin</td><td>Enterprise, Android backend, large teams</td><td>Spring Boot, Micronaut</td></tr>
+    <tr><td>Rust</td><td>Systems, ultra-high performance, safety-critical</td><td>Actix, Axum</td></tr>
+  </table>
+
+  <h3>Hello World Server — Python (FastAPI)</h3>
+<pre>
+# pip install fastapi uvicorn
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"message": "Hello, Backend World!"}
+
+# Run: uvicorn main:app --reload
+</pre>
+
+  <h3>Hello World Server — Node.js (Express)</h3>
+<pre class="orange">
+// npm install express
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.json({ message: 'Hello, Backend World!' });
+});
+
+app.listen(3000, () => console.log('Server on :3000'));
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 3 -->
+<section id="s3">
+  <div class="section-label">Section 03</div>
+  <h2 class="section-title orange">HTTP &amp; API Design</h2>
+
+  <h3 class="orange">HTTP Fundamentals</h3>
+  <p>Every API lives on top of HTTP. You must understand it deeply.</p>
+
+  <table>
+    <tr><th>Method</th><th>Use</th><th>Idempotent?</th></tr>
+    <tr><td>GET</td><td>Read a resource</td><td>Yes</td></tr>
+    <tr><td>POST</td><td>Create a resource</td><td>No</td></tr>
+    <tr><td>PUT</td><td>Replace a resource entirely</td><td>Yes</td></tr>
+    <tr><td>PATCH</td><td>Partially update a resource</td><td>No</td></tr>
+    <tr><td>DELETE</td><td>Remove a resource</td><td>Yes</td></tr>
+  </table>
+
+  <h3 class="orange">REST API Design — CRUD Example (Python)</h3>
+<pre class="orange">
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Dict
+
+app = FastAPI()
+
+class User(BaseModel):
+    name: str
+    email: str
+
+db: Dict[int, User] = {}
+counter = 0
+
+@app.post("/users", status_code=201)
+def create_user(user: User):
+    global counter
+    counter += 1
+    db[counter] = user
+    return {"id": counter, **user.dict()}
+
+@app.get("/users/{user_id}")
+def get_user(user_id: int):
+    if user_id not in db:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"id": user_id, **db[user_id].dict()}
+
+@app.put("/users/{user_id}")
+def update_user(user_id: int, user: User):
+    if user_id not in db:
+        raise HTTPException(status_code=404, detail="User not found")
+    db[user_id] = user
+    return {"id": user_id, **user.dict()}
+
+@app.delete("/users/{user_id}", status_code=204)
+def delete_user(user_id: int):
+    if user_id not in db:
+        raise HTTPException(status_code=404, detail="User not found")
+    del db[user_id]
+</pre>
+
+  <h3 class="orange">Status Code Cheat Sheet</h3>
+  <table>
+    <tr><th>Code</th><th>Meaning</th></tr>
+    <tr><td>200 OK</td><td>Success</td></tr>
+    <tr><td>201 Created</td><td>Resource created successfully</td></tr>
+    <tr><td>204 No Content</td><td>Success, nothing to return (DELETE)</td></tr>
+    <tr><td>400 Bad Request</td><td>Client sent malformed data</td></tr>
+    <tr><td>401 Unauthorized</td><td>Not authenticated</td></tr>
+    <tr><td>403 Forbidden</td><td>Authenticated but not allowed</td></tr>
+    <tr><td>404 Not Found</td><td>Resource doesn't exist</td></tr>
+    <tr><td>422 Unprocessable</td><td>Validation failure</td></tr>
+    <tr><td>429 Too Many Requests</td><td>Rate limited</td></tr>
+    <tr><td>500 Internal Error</td><td>Server-side crash</td></tr>
+  </table>
+
+  <h3 class="orange">GraphQL vs REST vs gRPC</h3>
+  <div class="card-grid">
+    <div class="card orange">
+      <div class="card-title">REST</div>
+      <p>Simple, stateless, widely understood. Best for most CRUD applications and public APIs.</p>
+    </div>
+    <div class="card orange">
+      <div class="card-title">GraphQL</div>
+      <p>Client requests exactly the fields it needs. Ideal for complex frontends with varied data needs.</p>
+    </div>
+    <div class="card orange">
+      <div class="card-title">gRPC</div>
+      <p>Binary protocol using Protocol Buffers. High performance, typed contracts. Best for internal microservices.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 4 -->
+<section id="s4">
+  <div class="section-label">Section 04</div>
+  <h2 class="section-title">Databases</h2>
+
+  <h3>SQL vs NoSQL</h3>
+  <table>
+    <tr><th>Type</th><th>Examples</th><th>Use When</th></tr>
+    <tr><td>Relational (SQL)</td><td>PostgreSQL, MySQL, SQLite</td><td>Structured data, complex queries, transactions</td></tr>
+    <tr><td>Document</td><td>MongoDB, Firestore</td><td>Flexible schemas, JSON-like data, rapid iteration</td></tr>
+    <tr><td>Key-Value</td><td>Redis, DynamoDB</td><td>Caching, sessions, fast lookups</td></tr>
+    <tr><td>Columnar</td><td>Cassandra, ClickHouse</td><td>Time-series, analytics, write-heavy workloads</td></tr>
+    <tr><td>Graph</td><td>Neo4j, Neptune</td><td>Relationship-heavy data (social, recommendations)</td></tr>
+  </table>
+
+  <h3>SQL Fundamentals</h3>
+<pre>
+-- Create table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Insert
+INSERT INTO users (name, email) VALUES ('Arun', 'arun@example.com');
+
+-- Query with JOIN
+SELECT u.name, o.total
+FROM users u
+JOIN orders o ON o.user_id = u.id
+WHERE u.id = 1
+ORDER BY o.created_at DESC
+LIMIT 10;
+
+-- Index for performance
+CREATE INDEX idx_users_email ON users(email);
+</pre>
+
+  <h3>ORM Example — Python SQLAlchemy</h3>
+<pre>
+from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy.orm import declarative_base, Session
+
+Base = declarative_base()
+engine = create_engine("postgresql://user:pass@localhost/mydb")
+
+class User(Base):
+    __tablename__ = "users"
+    id      = Column(Integer, primary_key=True)
+    name    = Column(String(100), nullable=False)
+    email   = Column(String(255), unique=True, nullable=False)
+
+Base.metadata.create_all(engine)
+
+# Create a user
+with Session(engine) as session:
+    user = User(name="Priya", email="priya@example.com")
+    session.add(user)
+    session.commit()
+</pre>
+
+  <h3>Indexing Strategy</h3>
+  <ul>
+    <li>Index columns used in <code>WHERE</code>, <code>JOIN</code>, <code>ORDER BY</code></li>
+    <li>Composite index for multi-column queries: <code>(user_id, created_at)</code></li>
+    <li>Too many indexes slow down writes — measure before adding</li>
+    <li>Use <code>EXPLAIN ANALYZE</code> in Postgres to inspect query plans</li>
+  </ul>
+
+  <h3>Redis Caching Pattern (Node.js)</h3>
+<pre class="orange">
+const redis = require('redis');
+const client = redis.createClient();
+await client.connect();
+
+async function getUser(userId) {
+  const cacheKey = `user:${userId}`;
+
+  // 1. Check cache first
+  const cached = await client.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  // 2. Miss — query DB
+  const user = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
+
+  // 3. Store in cache for 5 minutes
+  await client.setEx(cacheKey, 300, JSON.stringify(user.rows[0]));
+
+  return user.rows[0];
+}
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 5 -->
+<section id="s5">
+  <div class="section-label">Section 05</div>
+  <h2 class="section-title purple">Authentication &amp; Authorization</h2>
+
+  <h3 class="purple">Authentication vs Authorization</h3>
+  <div class="card-grid">
+    <div class="card purple">
+      <div class="card-title">Authentication (AuthN)</div>
+      <p><em>Who are you?</em> — Verifying identity via password, token, biometric, SSO, etc.</p>
+    </div>
+    <div class="card purple">
+      <div class="card-title">Authorization (AuthZ)</div>
+      <p><em>What can you do?</em> — Checking permissions after identity is confirmed.</p>
+    </div>
+  </div>
+
+  <h3 class="purple">JWT Authentication Flow</h3>
+<pre class="purple">
+import jwt, bcrypt
+from datetime import datetime, timedelta
+
+SECRET = "supersecretkey"  # store in env variable!
+
+# 1 — Hash password on registration
+def hash_password(plain: str) -> str:
+    return bcrypt.hashpw(plain.encode(), bcrypt.gensalt()).decode()
+
+# 2 — Verify password on login
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode(), hashed.encode())
+
+# 3 — Issue JWT token
+def create_token(user_id: int) -> str:
+    payload = {
+        "sub": str(user_id),
+        "exp": datetime.utcnow() + timedelta(hours=24)
+    }
+    return jwt.encode(payload, SECRET, algorithm="HS256")
+
+# 4 — Verify JWT on protected routes
+def decode_token(token: str) -> dict:
+    try:
+        return jwt.decode(token, SECRET, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        raise Exception("Token expired")
+    except jwt.InvalidTokenError:
+        raise Exception("Invalid token")
+</pre>
+
+  <h3 class="purple">Role-Based Access Control (RBAC)</h3>
+<pre class="purple">
+# Middleware pattern: check user role before route handler
+from functools import wraps
+from flask import request, jsonify, g
+
+def require_role(*roles):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            user = g.current_user  # set by auth middleware
+            if user.role not in roles:
+                return jsonify({"error": "Forbidden"}), 403
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
+# Usage
+@app.get("/admin/users")
+@require_role("admin", "superadmin")
+def list_all_users():
+    ...
+</pre>
+
+  <div class="callout">
+    <strong>Best Practice:</strong> Never store plain-text passwords. Always use bcrypt, Argon2, or scrypt with a salt. Never roll your own crypto.
+  </div>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 6 -->
+<section id="s6">
+  <div class="section-label">Section 06</div>
+  <h2 class="section-title orange">Cybersecurity for Backend Engineers</h2>
+
+  <p>Security is not a feature — it is a discipline baked into every line of code. Learn the OWASP Top 10. These are the most exploited vulnerabilities in web apps worldwide.</p>
+
+  <h3 class="orange">1. SQL Injection — Prevention</h3>
+<pre class="orange">
+# ❌ VULNERABLE — never do this
+query = f"SELECT * FROM users WHERE email = '{user_input}'"
+
+# ✅ SAFE — use parameterized queries / prepared statements
+cursor.execute("SELECT * FROM users WHERE email = %s", (user_input,))
+
+# With SQLAlchemy ORM — automatically safe
+user = session.query(User).filter(User.email == user_input).first()
+</pre>
+
+  <h3 class="orange">2. XSS (Cross-Site Scripting) — Prevention</h3>
+<pre class="orange">
+# Backend: always escape / sanitize output
+import html
+
+user_input = '<script>alert("xss")</script>'
+safe = html.escape(user_input)
+# Result: &lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;
+
+# Set Content-Security-Policy header in all responses
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["Content-Security-Policy"] = "default-src 'self'"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        return response
+</pre>
+
+  <h3 class="orange">3. Rate Limiting — Brute Force Protection</h3>
+<pre class="orange">
+// Node.js — express-rate-limit
+const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,                   // max 10 attempts per window
+  message: { error: 'Too many login attempts, try later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.post('/auth/login', loginLimiter, handleLogin);
+</pre>
+
+  <h3 class="orange">4. Environment Variables — Secrets Management</h3>
+<pre class="orange">
+# ❌ NEVER hardcode secrets in source code
+DB_PASSWORD = "mysecretpassword123"
+
+# ✅ Load from environment / secret manager
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # reads .env file (never commit .env!)
+
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+JWT_SECRET  = os.getenv("JWT_SECRET")
+</pre>
+
+  <h3 class="orange">5. CORS Configuration</h3>
+<pre class="orange">
+// Express — configure CORS properly
+const cors = require('cors');
+
+app.use(cors({
+  origin: ['https://yourapp.com', 'https://admin.yourapp.com'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
+// Never use origin: '*' on authenticated APIs!
+</pre>
+
+  <h3 class="orange">6. Input Validation</h3>
+<pre class="orange">
+from pydantic import BaseModel, EmailStr, validator
+import re
+
+class RegisterRequest(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+    @validator('username')
+    def username_valid(cls, v):
+        if not re.match(r'^[a-zA-Z0-9_]{3,30}$', v):
+            raise ValueError('Invalid username')
+        return v
+
+    @validator('password')
+    def password_strong(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password too short')
+        if not re.search(r'[A-Z]', v):
+            raise ValueError('Must contain uppercase')
+        return v
+</pre>
+
+  <h3 class="orange">Security Checklist</h3>
+  <ul>
+    <li>✅ Use HTTPS everywhere (TLS 1.2+)</li>
+    <li>✅ Parameterized queries — never string-format SQL</li>
+    <li>✅ Hash passwords with bcrypt/argon2 (min cost factor 12)</li>
+    <li>✅ Validate and sanitize all inputs server-side</li>
+    <li>✅ Set security headers (CSP, HSTS, X-Frame-Options)</li>
+    <li>✅ Rate limit authentication endpoints</li>
+    <li>✅ Keep dependencies updated — use <code>pip audit</code> / <code>npm audit</code></li>
+    <li>✅ Log security events (failed logins, permission denials)</li>
+    <li>✅ Never expose stack traces to clients</li>
+    <li>✅ Use short-lived JWTs + refresh token rotation</li>
+  </ul>
+
+  <div class="callout warn">
+    <strong>OWASP Top 10 to Study:</strong> Injection, Broken Auth, Insecure Deserialization, Security Misconfiguration, Vulnerable Components, XXE, IDOR, SSRF, Logging Failures, Cryptographic Failures.
+  </div>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 7 -->
+<section id="s7">
+  <div class="section-label">Section 07</div>
+  <h2 class="section-title">Performance &amp; Optimization</h2>
+
+  <h3>N+1 Query Problem — The Classic Killer</h3>
+<pre>
+# ❌ BAD — fires 1 + N SQL queries
+users = session.query(User).all()
+for user in users:
+    orders = session.query(Order).filter_by(user_id=user.id).all()
+    # N separate queries!
+
+# ✅ GOOD — eager load with JOIN in one query
+from sqlalchemy.orm import joinedload
+users = session.query(User).options(joinedload(User.orders)).all()
+</pre>
+
+  <h3>Database Connection Pooling</h3>
+<pre>
+# SQLAlchemy connection pool configuration
+engine = create_engine(
+    "postgresql://user:pass@localhost/mydb",
+    pool_size=10,          # maintain 10 connections
+    max_overflow=20,       # allow burst to 30
+    pool_pre_ping=True,    # validate connections before use
+    pool_recycle=3600,     # recycle connections every hour
+)
+</pre>
+
+  <h3>Async I/O — Don't Block the Event Loop</h3>
+<pre>
+import asyncio
+import httpx
+
+# ❌ Sequential — waits for each request
+async def fetch_sequential(urls):
+    results = []
+    async with httpx.AsyncClient() as client:
+        for url in urls:
+            r = await client.get(url)
+            results.append(r.json())
+    return results
+
+# ✅ Concurrent — all requests fire simultaneously
+async def fetch_concurrent(urls):
+    async with httpx.AsyncClient() as client:
+        tasks = [client.get(url) for url in urls]
+        responses = await asyncio.gather(*tasks)
+    return [r.json() for r in responses]
+</pre>
+
+  <h3>Pagination — Never Return Unbounded Results</h3>
+<pre>
+# Cursor-based pagination (scalable)
+@app.get("/users")
+def list_users(cursor: int = 0, limit: int = 20):
+    limit = min(limit, 100)  # cap max page size
+    users = (
+        session.query(User)
+        .filter(User.id > cursor)
+        .order_by(User.id)
+        .limit(limit)
+        .all()
+    )
+    next_cursor = users[-1].id if len(users) == limit else None
+    return {"data": users, "next_cursor": next_cursor}
+</pre>
+
+  <h3>Caching Strategies</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Cache-Aside</div>
+      <p>App checks cache → miss → load DB → write cache. Most flexible. You control TTL and invalidation.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Write-Through</div>
+      <p>Write to DB and cache simultaneously. Cache always fresh but adds write latency.</p>
+    </div>
+    <div class="card orange">
+      <div class="card-title">Write-Behind</div>
+      <p>Write to cache first, async flush to DB. Fastest writes, risk of data loss on crash.</p>
+    </div>
+  </div>
+
+  <h3>Background Jobs &amp; Task Queues</h3>
+<pre class="orange">
+# Celery + Redis for background tasks (Python)
+from celery import Celery
+
+app = Celery('tasks', broker='redis://localhost:6379/0')
+
+@app.task(bind=True, max_retries=3)
+def send_welcome_email(self, user_id: int):
+    try:
+        user = get_user(user_id)
+        mailer.send(user.email, "Welcome!")
+    except Exception as exc:
+        raise self.retry(exc=exc, countdown=60)
+
+# Trigger from API handler (non-blocking)
+@app.post("/users")
+def create_user(data: UserRequest):
+    user = db.create_user(data)
+    send_welcome_email.delay(user.id)  # queued, returns instantly
+    return {"id": user.id}
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 8 -->
+<section id="s8">
+  <div class="section-label">Section 08</div>
+  <h2 class="section-title purple">System Design</h2>
+
+  <h3 class="purple">Scalability Patterns</h3>
+  <div class="card-grid">
+    <div class="card purple">
+      <div class="card-title">Vertical Scaling</div>
+      <p>Bigger machine (more CPU/RAM). Simple, but has limits and creates a single point of failure.</p>
+    </div>
+    <div class="card purple">
+      <div class="card-title">Horizontal Scaling</div>
+      <p>More machines behind a load balancer. Stateless services required. Standard for production.</p>
+    </div>
+    <div class="card purple">
+      <div class="card-title">Database Sharding</div>
+      <p>Split data across multiple DB instances by key (e.g., user_id % N). Complex but necessary at scale.</p>
+    </div>
+    <div class="card purple">
+      <div class="card-title">Read Replicas</div>
+      <p>Replicate DB reads to secondary nodes. Write to primary, read from replicas. Reduces load.</p>
+    </div>
+  </div>
+
+  <h3 class="purple">Microservices vs Monolith</h3>
+  <table>
+    <tr><th></th><th>Monolith</th><th>Microservices</th></tr>
+    <tr><td>Team Size</td><td>Small–medium</td><td>Large, multiple teams</td></tr>
+    <tr><td>Deployment</td><td>Simple, single unit</td><td>Complex, independent</td></tr>
+    <tr><td>Scaling</td><td>Scale everything together</td><td>Scale individual services</td></tr>
+    <tr><td>Start With</td><td>✅ Yes</td><td>Only when needed</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>Advice:</strong> Start with a well-structured monolith. Extract microservices only when a specific part needs independent scaling or a different team owns it.
+  </div>
+
+  <h3 class="purple">Message Queues — Decouple Services</h3>
+<pre class="purple">
+# RabbitMQ / Kafka producer (Python — pika)
+import pika, json
+
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+channel = connection.channel()
+channel.queue_declare(queue='order.created', durable=True)
+
+def publish_order_event(order: dict):
+    channel.basic_publish(
+        exchange='',
+        routing_key='order.created',
+        body=json.dumps(order),
+        properties=pika.BasicProperties(delivery_mode=2)  # persistent
+    )
+
+# Consumer in a separate service
+def handle_order(ch, method, props, body):
+    order = json.loads(body)
+    print(f"Processing order {order['id']}")
+    # do work ...
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+channel.basic_consume(queue='order.created', on_message_callback=handle_order)
+channel.start_consuming()
+</pre>
+
+  <h3 class="purple">Circuit Breaker Pattern</h3>
+<pre class="purple">
+import time
+
+class CircuitBreaker:
+    def __init__(self, threshold=5, timeout=30):
+        self.failures = 0
+        self.threshold = threshold
+        self.timeout = timeout
+        self.opened_at = None
+
+    def call(self, fn, *args, **kwargs):
+        # If circuit is open, check timeout
+        if self.opened_at:
+            if time.time() - self.opened_at < self.timeout:
+                raise Exception("Circuit is OPEN — service unavailable")
+            else:
+                self.opened_at = None  # half-open: try again
+        try:
+            result = fn(*args, **kwargs)
+            self.failures = 0  # reset on success
+            return result
+        except Exception as e:
+            self.failures += 1
+            if self.failures >= self.threshold:
+                self.opened_at = time.time()  # trip the breaker
+            raise e
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 9 -->
+<section id="s9">
+  <div class="section-label">Section 09</div>
+  <h2 class="section-title">DevOps &amp; Deployment</h2>
+
+  <h3>Docker — Containerize Your App</h3>
+<pre>
+# Dockerfile for a Python FastAPI app
+FROM python:3.12-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Non-root user for security
+RUN adduser --disabled-password appuser
+USER appuser
+
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+</pre>
+
+<pre class="orange">
+# docker-compose.yml — app + postgres + redis
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/mydb
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mydb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  pgdata:
+</pre>
+
+  <h3>CI/CD Pipeline — GitHub Actions</h3>
+<pre class="purple">
+# .github/workflows/deploy.yml
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install -r requirements.txt
+      - run: pytest --cov=app tests/
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build & push Docker image
+        run: |
+          docker build -t myapp:${{ github.sha }} .
+          docker push myregistry/myapp:${{ github.sha }}
+      - name: Deploy to server
+        run: ssh deploy@server "docker pull myapp && docker restart app"
+</pre>
+
+  <h3>Logging Best Practices</h3>
+<pre>
+import logging, json
+from datetime import datetime
+
+# Structured JSON logging
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            "time": datetime.utcnow().isoformat(),
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "module": record.module,
+        })
+
+logger = logging.getLogger("app")
+handler = logging.StreamHandler()
+handler.setFormatter(JSONFormatter())
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+# Usage
+logger.info("User logged in", extra={"user_id": 42})
+logger.error("DB connection failed", extra={"host": "localhost"})
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 10 -->
+<section id="s10">
+  <div class="section-label">Section 10</div>
+  <h2 class="section-title orange">Advanced Patterns</h2>
+
+  <h3 class="orange">Repository Pattern — Decouple Business Logic from DB</h3>
+<pre class="orange">
+from abc import ABC, abstractmethod
+
+class UserRepository(ABC):
+    @abstractmethod
+    def find_by_id(self, user_id: int): ...
+
+    @abstractmethod
+    def save(self, user): ...
+
+class PostgresUserRepository(UserRepository):
+    def __init__(self, session):
+        self.session = session
+
+    def find_by_id(self, user_id: int):
+        return self.session.query(User).get(user_id)
+
+    def save(self, user):
+        self.session.add(user)
+        self.session.commit()
+
+# Business logic has no idea about the DB
+class UserService:
+    def __init__(self, repo: UserRepository):
+        self.repo = repo
+
+    def promote_to_admin(self, user_id: int):
+        user = self.repo.find_by_id(user_id)
+        if not user:
+            raise ValueError("User not found")
+        user.role = "admin"
+        self.repo.save(user)
+</pre>
+
+  <h3 class="orange">Event-Driven Architecture</h3>
+<pre class="orange">
+# Simple in-process event bus
+from collections import defaultdict
+from typing import Callable
+
+class EventBus:
+    def __init__(self):
+        self._listeners = defaultdict(list)
+
+    def subscribe(self, event: str, handler: Callable):
+        self._listeners[event].append(handler)
+
+    def publish(self, event: str, payload: dict):
+        for handler in self._listeners[event]:
+            handler(payload)
+
+bus = EventBus()
+
+# Subscriber
+def on_user_registered(event):
+    send_welcome_email(event["user_id"])
+
+bus.subscribe("user.registered", on_user_registered)
+
+# Publisher
+bus.publish("user.registered", {"user_id": 42})
+</pre>
+
+  <h3 class="orange">API Versioning Strategy</h3>
+<pre class="orange">
+# Version in URL path — most common
+GET /api/v1/users
+GET /api/v2/users
+
+# Version in header
+Accept: application/vnd.myapi.v2+json
+
+# FastAPI versioning example
+from fastapi import APIRouter
+
+v1 = APIRouter(prefix="/api/v1")
+v2 = APIRouter(prefix="/api/v2")
+
+@v1.get("/users")
+def list_users_v1():
+    return {"format": "v1", "users": [...]}
+
+@v2.get("/users")
+def list_users_v2():
+    return {"format": "v2", "data": [...], "meta": {...}}
+
+app.include_router(v1)
+app.include_router(v2)
+</pre>
+
+  <h3 class="orange">Idempotency Keys — Safe Retries</h3>
+<pre class="orange">
+# Prevent duplicate payments / operations on retry
+@app.post("/payments")
+async def create_payment(request: Request, payment: PaymentRequest):
+    idempotency_key = request.headers.get("Idempotency-Key")
+
+    if idempotency_key:
+        # Check if we've seen this key before
+        cached = await redis.get(f"idem:{idempotency_key}")
+        if cached:
+            return json.loads(cached)  # return cached result
+
+    result = await process_payment(payment)
+
+    if idempotency_key:
+        # Cache result for 24 hours
+        await redis.setex(f"idem:{idempotency_key}", 86400, json.dumps(result))
+
+    return result
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 11 -->
+<section id="s11">
+  <div class="section-label">Section 11</div>
+  <h2 class="section-title purple">Learning Roadmap</h2>
+
+  <h3 class="purple">Phase 1 — Beginner (0–3 months)</h3>
+  <ul>
+    <li>Pick Python or Node.js. Build 3 CRUD REST APIs</li>
+    <li>Learn SQL: SELECT, JOIN, GROUP BY, indexes</li>
+    <li>Understand HTTP methods, headers, status codes</li>
+    <li>Use Git properly: branches, PRs, meaningful commits</li>
+    <li>Deploy something to the internet (Railway, Render, Fly.io)</li>
+  </ul>
+
+  <h3 class="purple">Phase 2 — Intermediate (3–9 months)</h3>
+  <ul>
+    <li>Authentication: JWT, sessions, OAuth 2.0</li>
+    <li>Caching with Redis, understand TTL and invalidation</li>
+    <li>Containerize apps with Docker</li>
+    <li>Write tests: unit, integration, API tests</li>
+    <li>Learn basic security: OWASP Top 10, input validation, secrets management</li>
+    <li>Work with background jobs (Celery, BullMQ)</li>
+  </ul>
+
+  <h3 class="purple">Phase 3 — Advanced (9–18 months)</h3>
+  <ul>
+    <li>Design systems that handle 10x, 100x growth</li>
+    <li>Message queues: RabbitMQ or Kafka</li>
+    <li>Kubernetes basics: pods, services, deployments</li>
+    <li>Observability: structured logs, metrics (Prometheus), traces (OpenTelemetry)</li>
+    <li>Database internals: B-tree indexes, MVCC, WAL</li>
+    <li>Advanced security: SSRF, deserialization attacks, pen testing basics</li>
+  </ul>
+
+  <h3 class="purple">Key Projects to Build</h3>
+  <div class="card-grid">
+    <div class="card purple"><div class="card-title">URL Shortener</div><p>Redis, DB design, redirects, analytics. Simple but covers the fundamentals deeply.</p></div>
+    <div class="card purple"><div class="card-title">Auth System</div><p>Registration, login, JWT, refresh tokens, email verification, password reset.</p></div>
+    <div class="card purple"><div class="card-title">Job Queue System</div><p>Background workers, retry logic, dead letter queues. Teaches async patterns.</p></div>
+    <div class="card purple"><div class="card-title">E-Commerce API</div><p>Products, carts, orders, payments, inventory. Covers transactions and complex queries.</p></div>
+  </div>
+
+  <div class="callout tip">
+    <strong>The real skill is judgment.</strong> Knowing when NOT to use microservices, when NOT to cache, when NOT to scale. Master the fundamentals until they're automatic, then learn to question everything.
+  </div>
+</section>
+
+
+<!-- ─────────────────────────────────── SECTION 12 -->
+<section id="s12">
+  <div class="section-label">Section 12</div>
+  <h2 class="section-title orange">Complete HTTP Status Code Reference</h2>
+
+  <p>Every status code a backend engineer must know — grouped by class, with when to use each one.</p>
+
+  <h3 class="orange">1xx — Informational</h3>
+  <table>
+    <tr><th>Code</th><th>Name</th><th>When to Use</th></tr>
+    <tr><td>100</td><td>Continue</td><td>Server received headers, client should continue sending body (large uploads)</td></tr>
+    <tr><td>101</td><td>Switching Protocols</td><td>Upgrading from HTTP to WebSocket</td></tr>
+    <tr><td>102</td><td>Processing</td><td>Server is working, long operation in progress (WebDAV)</td></tr>
+    <tr><td>103</td><td>Early Hints</td><td>Preload resources before the full response is ready</td></tr>
+  </table>
+
+  <h3 class="orange">2xx — Success</h3>
+  <table>
+    <tr><th>Code</th><th>Name</th><th>When to Use</th></tr>
+    <tr><td>200</td><td>OK</td><td>Standard success for GET, PUT, PATCH responses</td></tr>
+    <tr><td>201</td><td>Created</td><td>Resource was created — POST that creates a new record</td></tr>
+    <tr><td>202</td><td>Accepted</td><td>Request accepted but processing async (background job queued)</td></tr>
+    <tr><td>203</td><td>Non-Authoritative</td><td>Response from a proxy/cache, not origin server</td></tr>
+    <tr><td>204</td><td>No Content</td><td>Success but nothing to return — DELETE, or PUT with no response body</td></tr>
+    <tr><td>205</td><td>Reset Content</td><td>Tell client to reset the form/view</td></tr>
+    <tr><td>206</td><td>Partial Content</td><td>Range request — streaming video, resumable downloads</td></tr>
+    <tr><td>207</td><td>Multi-Status</td><td>Multiple operations, each with own status (WebDAV, batch APIs)</td></tr>
+    <tr><td>208</td><td>Already Reported</td><td>Members already enumerated in earlier part of multi-status</td></tr>
+    <tr><td>226</td><td>IM Used</td><td>Delta encoding applied (HTTP delta encoding)</td></tr>
+  </table>
+
+  <h3 class="orange">3xx — Redirection</h3>
+  <table>
+    <tr><th>Code</th><th>Name</th><th>When to Use</th></tr>
+    <tr><td>300</td><td>Multiple Choices</td><td>Multiple representations available (rare)</td></tr>
+    <tr><td>301</td><td>Moved Permanently</td><td>URL has permanently changed — browsers cache this forever</td></tr>
+    <tr><td>302</td><td>Found</td><td>Temporary redirect — common in OAuth flows</td></tr>
+    <tr><td>303</td><td>See Other</td><td>Redirect to GET after a POST (Post/Redirect/Get pattern)</td></tr>
+    <tr><td>304</td><td>Not Modified</td><td>Cache is still valid — ETag/If-None-Match matched, no body returned</td></tr>
+    <tr><td>307</td><td>Temporary Redirect</td><td>Same as 302 but method is preserved (POST stays POST)</td></tr>
+    <tr><td>308</td><td>Permanent Redirect</td><td>Same as 301 but method is preserved</td></tr>
+  </table>
+
+  <h3 class="orange">4xx — Client Errors</h3>
+  <table>
+    <tr><th>Code</th><th>Name</th><th>When to Use</th></tr>
+    <tr><td>400</td><td>Bad Request</td><td>Malformed JSON, missing required fields, invalid data types</td></tr>
+    <tr><td>401</td><td>Unauthorized</td><td>No auth token provided, or token is invalid/expired</td></tr>
+    <tr><td>402</td><td>Payment Required</td><td>Paywall — free tier limit hit, subscription required</td></tr>
+    <tr><td>403</td><td>Forbidden</td><td>Authenticated but lacks permission to perform this action</td></tr>
+    <tr><td>404</td><td>Not Found</td><td>Resource doesn't exist — also used to hide 403s for security</td></tr>
+    <tr><td>405</td><td>Method Not Allowed</td><td>POST to a GET-only endpoint</td></tr>
+    <tr><td>406</td><td>Not Acceptable</td><td>Server can't produce content matching Accept header</td></tr>
+    <tr><td>407</td><td>Proxy Auth Required</td><td>Must authenticate with a proxy first</td></tr>
+    <tr><td>408</td><td>Request Timeout</td><td>Client took too long to send the request</td></tr>
+    <tr><td>409</td><td>Conflict</td><td>State conflict — duplicate email, version conflict, optimistic locking failure</td></tr>
+    <tr><td>410</td><td>Gone</td><td>Resource permanently deleted (stronger signal than 404)</td></tr>
+    <tr><td>411</td><td>Length Required</td><td>Content-Length header missing</td></tr>
+    <tr><td>412</td><td>Precondition Failed</td><td>If-Match or If-Unmodified-Since condition failed</td></tr>
+    <tr><td>413</td><td>Content Too Large</td><td>Request body exceeds server size limit</td></tr>
+    <tr><td>414</td><td>URI Too Long</td><td>URL longer than server will process</td></tr>
+    <tr><td>415</td><td>Unsupported Media Type</td><td>Wrong Content-Type — sent XML when server expects JSON</td></tr>
+    <tr><td>416</td><td>Range Not Satisfiable</td><td>Requested range outside resource bounds</td></tr>
+    <tr><td>417</td><td>Expectation Failed</td><td>Expect header value can't be met</td></tr>
+    <tr><td>418</td><td>I'm a Teapot</td><td>April Fools RFC 2324 — sometimes used for fun easter eggs</td></tr>
+    <tr><td>421</td><td>Misdirected Request</td><td>Request sent to wrong server in a cluster</td></tr>
+    <tr><td>422</td><td>Unprocessable Entity</td><td>Syntactically valid but semantically wrong (validation errors)</td></tr>
+    <tr><td>423</td><td>Locked</td><td>Resource is locked (WebDAV)</td></tr>
+    <tr><td>424</td><td>Failed Dependency</td><td>Depends on a failed action (WebDAV batch)</td></tr>
+    <tr><td>425</td><td>Too Early</td><td>Replay attack risk — TLS early data</td></tr>
+    <tr><td>426</td><td>Upgrade Required</td><td>Must upgrade to a different protocol (e.g., TLS)</td></tr>
+    <tr><td>428</td><td>Precondition Required</td><td>Must use conditional request (If-Match) to prevent lost updates</td></tr>
+    <tr><td>429</td><td>Too Many Requests</td><td>Rate limit exceeded — include Retry-After header</td></tr>
+    <tr><td>431</td><td>Headers Too Large</td><td>Request headers exceed server limit</td></tr>
+    <tr><td>451</td><td>Unavailable For Legal</td><td>Resource blocked due to legal demand (DMCA, court order)</td></tr>
+  </table>
+
+  <h3 class="orange">5xx — Server Errors</h3>
+  <table>
+    <tr><th>Code</th><th>Name</th><th>When to Use</th></tr>
+    <tr><td>500</td><td>Internal Server Error</td><td>Unhandled exception — catch-all for crashes. Never expose stack traces.</td></tr>
+    <tr><td>501</td><td>Not Implemented</td><td>Endpoint stub — method not yet implemented</td></tr>
+    <tr><td>502</td><td>Bad Gateway</td><td>Reverse proxy got invalid response from upstream</td></tr>
+    <tr><td>503</td><td>Service Unavailable</td><td>Server overloaded or down for maintenance</td></tr>
+    <tr><td>504</td><td>Gateway Timeout</td><td>Upstream took too long — DB query timeout, microservice slow</td></tr>
+    <tr><td>505</td><td>HTTP Version Not Supported</td><td>Server doesn't support the HTTP version in the request</td></tr>
+    <tr><td>506</td><td>Variant Also Negotiates</td><td>Circular content negotiation (misconfiguration)</td></tr>
+    <tr><td>507</td><td>Insufficient Storage</td><td>Server out of disk space (WebDAV)</td></tr>
+    <tr><td>508</td><td>Loop Detected</td><td>Infinite redirect loop detected (WebDAV)</td></tr>
+    <tr><td>510</td><td>Not Extended</td><td>Further extensions required to fulfill the request</td></tr>
+    <tr><td>511</td><td>Network Auth Required</td><td>Must authenticate on the network (captive portal)</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>Golden Rule:</strong> 4xx = client's fault. 5xx = your fault. Return 4xx with a descriptive JSON error body. Never return 5xx with internal details — log them server-side only.
+  </div>
+
+  <h3 class="orange">Error Response Body Standard</h3>
+<pre class="orange">
+// Standard error response format your API should always return
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "Request validation failed",
+    "details": [
+      { "field": "email", "issue": "Must be a valid email address" },
+      { "field": "password", "issue": "Must be at least 8 characters" }
+    ],
+    "request_id": "req_abc123xyz",   // for log correlation
+    "timestamp": "2025-04-25T10:30:00Z"
+  }
+}
+
+// FastAPI global exception handler
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled error: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"error": {"code": "INTERNAL_ERROR", "message": "Something went wrong"}}
+    )
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 13 -->
+<section id="s13">
+  <div class="section-label">Section 13</div>
+  <h2 class="section-title">HTTP Headers — Complete Reference</h2>
+
+  <h3>Request Headers</h3>
+  <table>
+    <tr><th>Header</th><th>Purpose</th><th>Example</th></tr>
+    <tr><td>Authorization</td><td>Send auth credentials</td><td><code>Bearer eyJhbGci...</code></td></tr>
+    <tr><td>Content-Type</td><td>Format of request body</td><td><code>application/json</code></td></tr>
+    <tr><td>Accept</td><td>Format client expects back</td><td><code>application/json</code></td></tr>
+    <tr><td>Accept-Language</td><td>Preferred response language</td><td><code>en-US, hi;q=0.8</code></td></tr>
+    <tr><td>Accept-Encoding</td><td>Compression support</td><td><code>gzip, deflate, br</code></td></tr>
+    <tr><td>Cache-Control</td><td>Caching directives</td><td><code>no-cache</code></td></tr>
+    <tr><td>Cookie</td><td>Send stored cookies</td><td><code>session=abc; theme=dark</code></td></tr>
+    <tr><td>Host</td><td>Target server hostname</td><td><code>api.myapp.com</code></td></tr>
+    <tr><td>If-None-Match</td><td>Conditional GET (ETag)</td><td><code>"abc123"</code></td></tr>
+    <tr><td>If-Modified-Since</td><td>Conditional GET (date)</td><td><code>Tue, 01 Jan 2025 00:00:00 GMT</code></td></tr>
+    <tr><td>Origin</td><td>Source of the request (CORS)</td><td><code>https://myapp.com</code></td></tr>
+    <tr><td>Referer</td><td>Previous page URL</td><td><code>https://myapp.com/dashboard</code></td></tr>
+    <tr><td>User-Agent</td><td>Client software info</td><td><code>Mozilla/5.0 ...</code></td></tr>
+    <tr><td>X-Request-ID</td><td>Trace ID for distributed logging</td><td><code>req_abc123</code></td></tr>
+    <tr><td>Idempotency-Key</td><td>Safe retry identifier</td><td><code>idem_xyz789</code></td></tr>
+  </table>
+
+  <h3>Response Headers</h3>
+  <table>
+    <tr><th>Header</th><th>Purpose</th><th>Example</th></tr>
+    <tr><td>Content-Type</td><td>Format of response body</td><td><code>application/json; charset=utf-8</code></td></tr>
+    <tr><td>Content-Length</td><td>Size of response body in bytes</td><td><code>1234</code></td></tr>
+    <tr><td>Cache-Control</td><td>How client/proxy should cache</td><td><code>max-age=3600, public</code></td></tr>
+    <tr><td>ETag</td><td>Version hash for conditional requests</td><td><code>"abc123def456"</code></td></tr>
+    <tr><td>Last-Modified</td><td>When resource last changed</td><td><code>Mon, 01 Apr 2025 12:00:00 GMT</code></td></tr>
+    <tr><td>Location</td><td>Redirect URL or new resource URL</td><td><code>/users/42</code></td></tr>
+    <tr><td>Set-Cookie</td><td>Store cookie on client</td><td><code>session=abc; HttpOnly; Secure; SameSite=Strict</code></td></tr>
+    <tr><td>Retry-After</td><td>Seconds until rate limit resets</td><td><code>60</code></td></tr>
+    <tr><td>X-RateLimit-Limit</td><td>Max requests per window</td><td><code>100</code></td></tr>
+    <tr><td>X-RateLimit-Remaining</td><td>Requests remaining this window</td><td><code>42</code></td></tr>
+    <tr><td>X-RateLimit-Reset</td><td>Unix timestamp when limit resets</td><td><code>1714046400</code></td></tr>
+    <tr><td>X-Request-ID</td><td>Echo back trace ID for debugging</td><td><code>req_abc123</code></td></tr>
+    <tr><td>X-Response-Time</td><td>Server processing time in ms</td><td><code>42ms</code></td></tr>
+  </table>
+
+  <h3>Security Response Headers</h3>
+  <table>
+    <tr><th>Header</th><th>Value</th><th>What it Does</th></tr>
+    <tr><td>Strict-Transport-Security</td><td><code>max-age=31536000; includeSubDomains</code></td><td>Force HTTPS for 1 year (HSTS)</td></tr>
+    <tr><td>Content-Security-Policy</td><td><code>default-src 'self'</code></td><td>Whitelist which sources JS/CSS/images can load from</td></tr>
+    <tr><td>X-Content-Type-Options</td><td><code>nosniff</code></td><td>Prevent MIME-type sniffing attacks</td></tr>
+    <tr><td>X-Frame-Options</td><td><code>DENY</code></td><td>Block clickjacking via iframes</td></tr>
+    <tr><td>X-XSS-Protection</td><td><code>1; mode=block</code></td><td>Legacy XSS filter (deprecated but harmless)</td></tr>
+    <tr><td>Referrer-Policy</td><td><code>strict-origin-when-cross-origin</code></td><td>Control what Referer header is sent</td></tr>
+    <tr><td>Permissions-Policy</td><td><code>camera=(), microphone=(), geolocation=()</code></td><td>Disable browser features you don't use</td></tr>
+    <tr><td>Access-Control-Allow-Origin</td><td><code>https://myapp.com</code></td><td>CORS — which origins can access this API</td></tr>
+  </table>
+
+  <h3>Setting All Security Headers — Python Middleware</h3>
+<pre>
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers.update({
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "Content-Security-Policy":   "default-src 'self'",
+            "X-Content-Type-Options":    "nosniff",
+            "X-Frame-Options":           "DENY",
+            "Referrer-Policy":           "strict-origin-when-cross-origin",
+            "Permissions-Policy":        "camera=(), microphone=(), geolocation=()",
+        })
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+</pre>
+
+  <h3>Cache-Control Values Explained</h3>
+  <table>
+    <tr><th>Directive</th><th>Meaning</th></tr>
+    <tr><td><code>no-store</code></td><td>Never cache this response anywhere</td></tr>
+    <tr><td><code>no-cache</code></td><td>Can store, but must revalidate with server before using</td></tr>
+    <tr><td><code>private</code></td><td>Browser can cache, CDN/proxy must not</td></tr>
+    <tr><td><code>public</code></td><td>Anyone (CDN, proxy, browser) can cache</td></tr>
+    <tr><td><code>max-age=3600</code></td><td>Cache is fresh for 3600 seconds (1 hour)</td></tr>
+    <tr><td><code>s-maxage=86400</code></td><td>Shared caches (CDN) use this TTL, overrides max-age</td></tr>
+    <tr><td><code>must-revalidate</code></td><td>Must check server once stale, never serve expired</td></tr>
+    <tr><td><code>immutable</code></td><td>Content will never change — use for versioned assets</td></tr>
+    <tr><td><code>stale-while-revalidate=60</code></td><td>Serve stale for 60s while fetching fresh in background</td></tr>
+  </table>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 14 -->
+<section id="s14">
+  <div class="section-label">Section 14</div>
+  <h2 class="section-title purple">WebSockets &amp; Real-Time</h2>
+
+  <p>HTTP is request/response — the client always initiates. WebSockets create a persistent, full-duplex connection. Use for: live chat, notifications, dashboards, multiplayer, collaborative editing.</p>
+
+  <h3 class="purple">WebSocket Server — Python (FastAPI)</h3>
+<pre class="purple">
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from typing import List
+
+app = FastAPI()
+
+class ConnectionManager:
+    def __init__(self):
+        self.active: List[WebSocket] = []
+
+    async def connect(self, ws: WebSocket):
+        await ws.accept()
+        self.active.append(ws)
+
+    def disconnect(self, ws: WebSocket):
+        self.active.remove(ws)
+
+    async def broadcast(self, message: str):
+        for ws in self.active:
+            await ws.send_text(message)
+
+manager = ConnectionManager()
+
+@app.websocket("/ws/{room_id}")
+async def websocket_endpoint(ws: WebSocket, room_id: str):
+    await manager.connect(ws)
+    try:
+        while True:
+            data = await ws.receive_text()
+            await manager.broadcast(f"[{room_id}] {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(ws)
+        await manager.broadcast(f"[{room_id}] A user left")
+</pre>
+
+  <h3 class="purple">WebSocket Client — JavaScript</h3>
+<pre class="purple">
+const ws = new WebSocket('wss://api.myapp.com/ws/room1');
+
+ws.onopen    = () => ws.send('Hello room!');
+ws.onmessage = (e) => console.log('Received:', e.data);
+ws.onerror   = (e) => console.error('WS error:', e);
+ws.onclose   = ()  => console.log('Connection closed');
+
+// Send structured data
+ws.send(JSON.stringify({ type: 'message', content: 'Hi everyone' }));
+</pre>
+
+  <h3 class="purple">Server-Sent Events (SSE) — Simpler One-Way Streaming</h3>
+<pre class="purple">
+from fastapi.responses import StreamingResponse
+import asyncio
+
+@app.get("/events")
+async def event_stream():
+    async def generate():
+        count = 0
+        while True:
+            count += 1
+            yield f"data: {{\"count\": {count}}}\n\n"
+            await asyncio.sleep(1)
+    return StreamingResponse(generate(), media_type="text/event-stream")
+
+# Client-side JavaScript
+const es = new EventSource('/events');
+es.onmessage = (e) => {
+  const data = JSON.parse(e.data);
+  console.log('Count:', data.count);
+};
+</pre>
+
+  <div class="callout">
+    <strong>When to use what:</strong> SSE for server→client only (notifications, live feeds). WebSockets for bidirectional (chat, games, collab). Long polling if WebSockets aren't possible (legacy clients).
+  </div>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 15 -->
+<section id="s15">
+  <div class="section-label">Section 15</div>
+  <h2 class="section-title">Database Transactions &amp; ACID</h2>
+
+  <h3>ACID Properties</h3>
+  <div class="card-grid">
+    <div class="card"><div class="card-title">Atomicity</div><p>All operations in a transaction succeed or all are rolled back. No partial writes.</p></div>
+    <div class="card"><div class="card-title">Consistency</div><p>Transaction brings DB from one valid state to another. Constraints always satisfied.</p></div>
+    <div class="card orange"><div class="card-title">Isolation</div><p>Concurrent transactions don't interfere with each other. Multiple levels available.</p></div>
+    <div class="card orange"><div class="card-title">Durability</div><p>Committed transactions survive crashes. Written to disk (WAL).</p></div>
+  </div>
+
+  <h3>Transaction Isolation Levels</h3>
+  <table>
+    <tr><th>Level</th><th>Dirty Read</th><th>Non-Repeatable Read</th><th>Phantom Read</th><th>Use When</th></tr>
+    <tr><td>Read Uncommitted</td><td>✅ Possible</td><td>✅ Possible</td><td>✅ Possible</td><td>Almost never — dangerous</td></tr>
+    <tr><td>Read Committed</td><td>❌ Safe</td><td>✅ Possible</td><td>✅ Possible</td><td>Default in most DBs</td></tr>
+    <tr><td>Repeatable Read</td><td>❌ Safe</td><td>❌ Safe</td><td>✅ Possible</td><td>Financial reads</td></tr>
+    <tr><td>Serializable</td><td>❌ Safe</td><td>❌ Safe</td><td>❌ Safe</td><td>Bank transfers, audits</td></tr>
+  </table>
+
+  <h3>Transaction Examples — Python</h3>
+<pre>
+from sqlalchemy.orm import Session
+
+# Transfer money — both operations must succeed or both fail
+def transfer_funds(from_id: int, to_id: int, amount: float):
+    with Session(engine) as session:
+        with session.begin():  # auto-commit or rollback
+            sender = session.query(Account).filter_by(id=from_id).with_for_update().one()
+            receiver = session.query(Account).filter_by(id=to_id).with_for_update().one()
+
+            if sender.balance < amount:
+                raise ValueError("Insufficient funds")
+
+            sender.balance -= amount
+            receiver.balance += amount
+            # session.commit() called automatically on context exit
+            # session.rollback() called automatically on exception
+
+# Savepoints — partial rollback inside a transaction
+def create_order_with_items(session, order_data, items):
+    with session.begin():
+        order = Order(**order_data)
+        session.add(order)
+        session.flush()  # get order.id without committing
+
+        for item in items:
+            try:
+                sp = session.begin_nested()  # savepoint
+                line = OrderLine(order_id=order.id, **item)
+                session.add(line)
+                sp.commit()
+            except Exception:
+                sp.rollback()  # skip bad item, keep the rest
+</pre>
+
+  <h3>Optimistic vs Pessimistic Locking</h3>
+<pre>
+# PESSIMISTIC — lock row immediately (SELECT FOR UPDATE)
+user = session.query(User).filter_by(id=1).with_for_update().one()
+user.credits -= 10
+session.commit()  # lock released
+
+# OPTIMISTIC — use version number, detect conflict at commit
+class Product(Base):
+    __tablename__ = 'products'
+    id      = Column(Integer, primary_key=True)
+    stock   = Column(Integer)
+    version = Column(Integer, default=0)
+
+def decrement_stock(product_id, quantity):
+    product = session.query(Product).get(product_id)
+    old_version = product.version
+    product.stock -= quantity
+    product.version += 1
+
+    updated = session.query(Product)\
+        .filter_by(id=product_id, version=old_version)\
+        .update({"stock": product.stock, "version": product.version})
+
+    if updated == 0:
+        session.rollback()
+        raise Exception("Conflict — product was modified by another transaction")
+    session.commit()
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 16 -->
+<section id="s16">
+  <div class="section-label">Section 16</div>
+  <h2 class="section-title orange">OAuth 2.0 &amp; OpenID Connect</h2>
+
+  <p>OAuth 2.0 is the industry standard for delegated authorization. OpenID Connect (OIDC) adds identity on top. This is how "Login with Google / GitHub / Facebook" works.</p>
+
+  <h3 class="orange">OAuth 2.0 Flows</h3>
+  <table>
+    <tr><th>Flow</th><th>Use Case</th><th>How</th></tr>
+    <tr><td>Authorization Code + PKCE</td><td>Web apps, mobile apps</td><td>Redirect → code → exchange for token</td></tr>
+    <tr><td>Client Credentials</td><td>Machine-to-machine (M2M)</td><td>Client ID + Secret → access token</td></tr>
+    <tr><td>Device Code</td><td>TVs, CLI tools, IoT</td><td>Show code to user → poll for token</td></tr>
+    <tr><td>Implicit (deprecated)</td><td>Old SPAs</td><td>Don't use — replaced by Auth Code + PKCE</td></tr>
+  </table>
+
+  <h3 class="orange">Authorization Code Flow — Step by Step</h3>
+<pre class="orange">
+# Step 1 — Redirect user to auth provider
+import secrets, hashlib, base64
+
+def build_auth_url():
+    state = secrets.token_urlsafe(32)
+    code_verifier = secrets.token_urlsafe(64)
+    code_challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(code_verifier.encode()).digest()
+    ).rstrip(b'=').decode()
+
+    params = {
+        "client_id":             "YOUR_CLIENT_ID",
+        "redirect_uri":          "https://myapp.com/callback",
+        "response_type":         "code",
+        "scope":                 "openid profile email",
+        "state":                 state,              # CSRF protection
+        "code_challenge":        code_challenge,     # PKCE
+        "code_challenge_method": "S256",
+    }
+    return "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
+
+# Step 2 — Handle callback, exchange code for token
+import httpx
+
+async def handle_callback(code: str, code_verifier: str):
+    response = await httpx.post("https://oauth2.googleapis.com/token", data={
+        "client_id":     "YOUR_CLIENT_ID",
+        "client_secret": "YOUR_CLIENT_SECRET",
+        "code":          code,
+        "code_verifier": code_verifier,
+        "redirect_uri":  "https://myapp.com/callback",
+        "grant_type":    "authorization_code",
+    })
+    tokens = response.json()
+    # tokens.access_token  — use to call APIs
+    # tokens.id_token      — JWT with user identity (OIDC)
+    # tokens.refresh_token — get new access tokens
+    return tokens
+
+# Step 3 — Decode ID token to get user info
+import jwt
+
+def get_user_from_id_token(id_token: str) -> dict:
+    # In production: verify signature against provider's JWKS endpoint
+    payload = jwt.decode(id_token, options={"verify_signature": False})
+    return {
+        "sub":   payload["sub"],    # unique user ID from provider
+        "email": payload["email"],
+        "name":  payload.get("name"),
+    }
+</pre>
+
+  <h3 class="orange">Client Credentials Flow — M2M</h3>
+<pre class="orange">
+# Service A calls Service B using OAuth client credentials
+async def get_service_token():
+    response = await httpx.post("https://auth.myapp.com/oauth/token", data={
+        "client_id":     "service-a-client-id",
+        "client_secret": "service-a-secret",
+        "grant_type":    "client_credentials",
+        "scope":         "service-b:read service-b:write",
+    })
+    return response.json()["access_token"]
+
+# Cache the token, refresh before expiry
+token_cache = {"token": None, "expires_at": 0}
+
+async def get_cached_token():
+    if time.time() < token_cache["expires_at"] - 60:
+        return token_cache["token"]
+    token_data = await get_service_token()
+    token_cache["token"] = token_data["access_token"]
+    token_cache["expires_at"] = time.time() + token_data["expires_in"]
+    return token_cache["token"]
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 17 -->
+<section id="s17">
+  <div class="section-label">Section 17</div>
+  <h2 class="section-title purple">Testing Backend Systems</h2>
+
+  <h3 class="purple">Testing Pyramid</h3>
+  <div class="card-grid">
+    <div class="card purple"><div class="card-title">Unit Tests (most)</div><p>Test one function in isolation. Mock all dependencies. Fast, cheap, run on every save.</p></div>
+    <div class="card purple"><div class="card-title">Integration Tests</div><p>Test components together — service + real DB. Slower but catches wiring bugs.</p></div>
+    <div class="card purple"><div class="card-title">E2E / API Tests (least)</div><p>Full HTTP requests against a running server. Slowest but highest confidence.</p></div>
+  </div>
+
+  <h3 class="purple">Unit Tests — Python (pytest)</h3>
+<pre class="purple">
+import pytest
+from unittest.mock import Mock, patch
+from app.services import UserService
+
+def test_create_user_sends_welcome_email():
+    # Arrange
+    mock_repo = Mock()
+    mock_email = Mock()
+    mock_repo.save.return_value = Mock(id=1, email="test@example.com")
+
+    service = UserService(repo=mock_repo, mailer=mock_email)
+
+    # Act
+    user = service.create_user(name="Arjun", email="test@example.com")
+
+    # Assert
+    mock_repo.save.assert_called_once()
+    mock_email.send_welcome.assert_called_once_with("test@example.com")
+    assert user.id == 1
+
+def test_create_user_duplicate_email_raises():
+    mock_repo = Mock()
+    mock_repo.find_by_email.return_value = Mock()  # email exists
+
+    service = UserService(repo=mock_repo, mailer=Mock())
+
+    with pytest.raises(ValueError, match="Email already in use"):
+        service.create_user(name="Arjun", email="duplicate@example.com")
+</pre>
+
+  <h3 class="purple">Integration Tests — FastAPI TestClient</h3>
+<pre class="purple">
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.main import app
+from app.db import get_db, Base
+
+# Use in-memory SQLite for tests
+TEST_ENGINE = create_engine("sqlite:///:memory:")
+TestSession = sessionmaker(bind=TEST_ENGINE)
+Base.metadata.create_all(TEST_ENGINE)
+
+def override_db():
+    session = TestSession()
+    try:
+        yield session
+    finally:
+        session.close()
+
+app.dependency_overrides[get_db] = override_db
+client = TestClient(app)
+
+def test_create_and_get_user():
+    # Create user
+    r = client.post("/users", json={"name": "Meera", "email": "meera@example.com"})
+    assert r.status_code == 201
+    user_id = r.json()["id"]
+
+    # Fetch created user
+    r = client.get(f"/users/{user_id}")
+    assert r.status_code == 200
+    assert r.json()["email"] == "meera@example.com"
+
+def test_get_nonexistent_user_returns_404():
+    r = client.get("/users/99999")
+    assert r.status_code == 404
+    assert r.json()["error"]["code"] == "NOT_FOUND"
+</pre>
+
+  <h3 class="purple">API Contract Testing</h3>
+<pre class="purple">
+# Test that response shape matches expected contract
+def test_user_response_contract():
+    r = client.post("/users", json={"name": "Test", "email": "t@t.com"})
+    body = r.json()
+
+    # Verify every expected field exists and has correct type
+    assert isinstance(body["id"], int)
+    assert isinstance(body["name"], str)
+    assert isinstance(body["email"], str)
+    assert isinstance(body["created_at"], str)
+
+    # Verify no unexpected sensitive fields leaked
+    assert "password" not in body
+    assert "password_hash" not in body
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 18 -->
+<section id="s18">
+  <div class="section-label">Section 18</div>
+  <h2 class="section-title">Middleware Deep Dive</h2>
+
+  <p>Middleware is code that wraps every request and response. It runs before your route handlers and after they return. Essential for: logging, auth, rate limiting, tracing, compression.</p>
+
+  <h3>Request Lifecycle with Middleware</h3>
+<pre>
+# Request flow:
+# Client → Middleware 1 → Middleware 2 → Route Handler → Middleware 2 → Middleware 1 → Client
+
+# Building a full middleware stack (FastAPI)
+from fastapi import Request
+import time, uuid
+
+class RequestTracingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # ── BEFORE handler ──
+        request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        start = time.perf_counter()
+
+        # Attach to request state for downstream use
+        request.state.request_id = request_id
+
+        logger.info({
+            "event":      "request_start",
+            "request_id": request_id,
+            "method":     request.method,
+            "path":       request.url.path,
+        })
+
+        # ── CALL handler ──
+        try:
+            response = await call_next(request)
+        except Exception as exc:
+            logger.error({"event": "request_error", "error": str(exc)})
+            raise
+
+        # ── AFTER handler ──
+        duration_ms = (time.perf_counter() - start) * 1000
+        response.headers["X-Request-ID"]    = request_id
+        response.headers["X-Response-Time"] = f"{duration_ms:.1f}ms"
+
+        logger.info({
+            "event":      "request_end",
+            "request_id": request_id,
+            "status":     response.status_code,
+            "duration_ms": round(duration_ms, 1),
+        })
+
+        return response
+
+app.add_middleware(RequestTracingMiddleware)
+</pre>
+
+  <h3>Authentication Middleware</h3>
+<pre>
+class AuthMiddleware(BaseHTTPMiddleware):
+    EXEMPT_PATHS = {"/health", "/docs", "/openapi.json", "/auth/login", "/auth/register"}
+
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path in self.EXEMPT_PATHS:
+            return await call_next(request)
+
+        token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+        if not token:
+            return JSONResponse({"error": "Missing token"}, status_code=401)
+
+        try:
+            payload = decode_token(token)
+            request.state.user_id = int(payload["sub"])
+        except Exception:
+            return JSONResponse({"error": "Invalid token"}, status_code=401)
+
+        return await call_next(request)
+</pre>
+
+  <h3>Express Middleware Chain (Node.js)</h3>
+<pre class="orange">
+// Middleware runs in order — call next() to pass to next layer
+const express = require('express');
+const app = express();
+
+// 1. Parse JSON bodies
+app.use(express.json({ limit: '1mb' }));
+
+// 2. Request tracing
+app.use((req, res, next) => {
+  req.requestId = req.headers['x-request-id'] || crypto.randomUUID();
+  req.startTime = Date.now();
+  res.setHeader('X-Request-ID', req.requestId);
+
+  res.on('finish', () => {
+    console.log(JSON.stringify({
+      method: req.method,
+      path:   req.path,
+      status: res.statusCode,
+      ms:     Date.now() - req.startTime,
+      id:     req.requestId,
+    }));
+  });
+  next();
+});
+
+// 3. Auth check
+app.use('/api', (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    req.user = verifyToken(token);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// 4. Routes
+app.get('/api/profile', (req, res) => {
+  res.json({ userId: req.user.sub });
+});
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 19 -->
+<section id="s19">
+  <div class="section-label">Section 19</div>
+  <h2 class="section-title orange">Advanced Security — Attack &amp; Defence</h2>
+
+  <h3 class="orange">CSRF (Cross-Site Request Forgery) Attack &amp; Prevention</h3>
+<pre class="orange">
+# A malicious site can trick a logged-in user's browser into making
+# requests to your API using their cookies.
+
+# Prevention 1 — CSRF Token
+import secrets
+
+@app.get("/csrf-token")
+def get_csrf_token(session: dict = Depends(get_session)):
+    token = secrets.token_urlsafe(32)
+    session["csrf_token"] = token
+    return {"csrf_token": token}
+
+@app.post("/sensitive-action")
+def sensitive_action(
+    request: Request,
+    session: dict = Depends(get_session)
+):
+    csrf = request.headers.get("X-CSRF-Token")
+    if not csrf or csrf != session.get("csrf_token"):
+        raise HTTPException(status_code=403, detail="CSRF token invalid")
+    # proceed...
+
+# Prevention 2 — SameSite Cookies (simpler)
+# Set-Cookie: session=abc; SameSite=Strict; Secure; HttpOnly
+# SameSite=Strict: browser won't send cookie on cross-site requests
+</pre>
+
+  <h3 class="orange">SSRF (Server-Side Request Forgery) Prevention</h3>
+<pre class="orange">
+import ipaddress, socket
+from urllib.parse import urlparse
+
+BLOCKED_HOSTS = {'localhost', '0.0.0.0'}
+PRIVATE_RANGES = [
+    ipaddress.ip_network('10.0.0.0/8'),
+    ipaddress.ip_network('172.16.0.0/12'),
+    ipaddress.ip_network('192.168.0.0/16'),
+    ipaddress.ip_network('127.0.0.0/8'),
+    ipaddress.ip_network('169.254.0.0/16'),  # link-local
+]
+
+def is_safe_url(url: str) -> bool:
+    parsed = urlparse(url)
+    host = parsed.hostname
+
+    if not host or host in BLOCKED_HOSTS:
+        return False
+
+    try:
+        ip = ipaddress.ip_address(socket.gethostbyname(host))
+        for private_range in PRIVATE_RANGES:
+            if ip in private_range:
+                return False  # block internal IPs
+    except Exception:
+        return False
+
+    return True
+
+@app.post("/fetch-url")
+async def fetch_external(url: str):
+    if not is_safe_url(url):
+        raise HTTPException(status_code=400, detail="URL not allowed")
+    # Now safe to fetch
+    async with httpx.AsyncClient() as client:
+        return await client.get(url)
+</pre>
+
+  <h3 class="orange">Timing Attack Prevention</h3>
+<pre class="orange">
+import hmac
+
+# ❌ BAD — early exit leaks timing info (allows token enumeration)
+def verify_token_bad(token: str, stored: str) -> bool:
+    return token == stored  # short-circuits at first mismatch!
+
+# ✅ GOOD — constant-time comparison
+def verify_token_safe(token: str, stored: str) -> bool:
+    return hmac.compare_digest(
+        token.encode('utf-8'),
+        stored.encode('utf-8')
+    )
+</pre>
+
+  <h3 class="orange">Directory Traversal Prevention</h3>
+<pre class="orange">
+import os
+from pathlib import Path
+
+ALLOWED_DIR = Path("/var/app/uploads").resolve()
+
+def safe_read_file(filename: str) -> bytes:
+    # Sanitize: strip path components
+    safe_name = os.path.basename(filename)
+
+    target = (ALLOWED_DIR / safe_name).resolve()
+
+    # Ensure resolved path is still inside allowed dir
+    if not str(target).startswith(str(ALLOWED_DIR)):
+        raise PermissionError("Path traversal detected")
+
+    return target.read_bytes()
+
+# e.g., filename = "../../etc/passwd" → blocked
+</pre>
+
+  <h3 class="orange">Dependency Security Scanning</h3>
+<pre class="orange">
+# Python — check for known vulnerabilities
+pip install pip-audit
+pip-audit
+
+# Node.js — built-in audit
+npm audit
+npm audit fix
+
+# GitHub Dependabot — auto-raises PRs for vulnerable deps
+# Add to .github/dependabot.yml:
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 20 -->
+<section id="s20">
+  <div class="section-label">Section 20</div>
+  <h2 class="section-title purple">Observability — Logs, Metrics, Traces</h2>
+
+  <p>You can't fix what you can't see. Observability is the three pillars: logs, metrics, and distributed traces.</p>
+
+  <h3 class="purple">Structured Logging Best Practices</h3>
+<pre class="purple">
+import structlog
+
+log = structlog.get_logger()
+
+# Good — structured, searchable, parseable by log aggregators
+log.info("payment.processed",
+    user_id=42,
+    amount=99.99,
+    currency="INR",
+    payment_method="upi",
+    duration_ms=142,
+)
+
+# Bad — free text, unsearchable
+print(f"Payment processed for user 42: ₹99.99")
+
+# Log levels and when to use each
+log.debug(...)   # Dev only — fine-grained flow details
+log.info(...)    # Normal operations — user actions, API calls
+log.warning(...) # Unexpected but handled — retries, fallbacks
+log.error(...)   # Something failed — investigate soon
+log.critical(...)# Service is down — page someone now
+</pre>
+
+  <h3 class="purple">Prometheus Metrics (Python)</h3>
+<pre class="purple">
+from prometheus_client import Counter, Histogram, Gauge, start_http_server
+import time
+
+# Define metrics
+REQUEST_COUNT = Counter(
+    'http_requests_total',
+    'Total HTTP requests',
+    ['method', 'endpoint', 'status_code']
+)
+
+REQUEST_LATENCY = Histogram(
+    'http_request_duration_seconds',
+    'HTTP request duration',
+    ['method', 'endpoint'],
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
+)
+
+DB_CONNECTIONS = Gauge('db_connections_active', 'Active DB connections')
+
+# Use in middleware
+class MetricsMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        start = time.time()
+        response = await call_next(request)
+        duration = time.time() - start
+
+        REQUEST_COUNT.labels(
+            method=request.method,
+            endpoint=request.url.path,
+            status_code=response.status_code
+        ).inc()
+
+        REQUEST_LATENCY.labels(
+            method=request.method,
+            endpoint=request.url.path
+        ).observe(duration)
+
+        return response
+
+start_http_server(9090)  # expose /metrics for Prometheus to scrape
+</pre>
+
+  <h3 class="purple">Distributed Tracing — OpenTelemetry</h3>
+<pre class="purple">
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+
+# Setup once at app start
+provider = TracerProvider()
+jaeger_exporter = JaegerExporter(agent_host_name="jaeger", agent_port=6831)
+provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
+trace.set_tracer_provider(provider)
+tracer = trace.get_tracer("myapp")
+
+# Instrument your code
+async def process_order(order_id: int):
+    with tracer.start_as_current_span("process_order") as span:
+        span.set_attribute("order.id", order_id)
+
+        with tracer.start_as_current_span("fetch_order"):
+            order = await db.get_order(order_id)
+
+        with tracer.start_as_current_span("charge_payment"):
+            span.set_attribute("order.amount", order.total)
+            await payment_service.charge(order)
+
+        span.set_status(trace.StatusCode.OK)
+</pre>
+
+  <h3 class="purple">Health Check Endpoints</h3>
+<pre class="purple">
+from enum import Enum
+
+class HealthStatus(str, Enum):
+    UP   = "up"
+    DOWN = "down"
+
+@app.get("/health")
+async def health():
+    """Basic liveness probe — just returns 200."""
+    return {"status": HealthStatus.UP}
+
+@app.get("/health/ready")
+async def readiness():
+    """Readiness probe — checks all dependencies."""
+    checks = {}
+
+    # Check DB
+    try:
+        await db.execute("SELECT 1")
+        checks["database"] = HealthStatus.UP
+    except Exception:
+        checks["database"] = HealthStatus.DOWN
+
+    # Check Redis
+    try:
+        await redis.ping()
+        checks["redis"] = HealthStatus.UP
+    except Exception:
+        checks["redis"] = HealthStatus.DOWN
+
+    overall = HealthStatus.UP if all(v == HealthStatus.UP for v in checks.values()) else HealthStatus.DOWN
+    status_code = 200 if overall == HealthStatus.UP else 503
+
+    return JSONResponse({"status": overall, "checks": checks}, status_code=status_code)
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 21 -->
+<section id="s21">
+  <div class="section-label">Section 21</div>
+  <h2 class="section-title">Essential Tools &amp; CLI Commands</h2>
+
+  <h3>cURL — Test Any API</h3>
+<pre>
+# GET request
+curl https://api.myapp.com/users/1
+
+# POST with JSON body
+curl -X POST https://api.myapp.com/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN" \
+  -d '{"name":"Kiran","email":"kiran@example.com"}'
+
+# View response headers
+curl -I https://api.myapp.com/health
+
+# Verbose — see request + response headers
+curl -v https://api.myapp.com/users/1
+
+# Follow redirects
+curl -L https://short.url/abc
+
+# Upload a file
+curl -F "file=@photo.jpg" https://api.myapp.com/uploads
+</pre>
+
+  <h3>PostgreSQL — Essential Commands</h3>
+<pre>
+-- Connect
+psql -U user -d mydb
+
+-- Show all tables
+\dt
+
+-- Describe table schema
+\d users
+
+-- Show running queries
+SELECT pid, query, state, now() - query_start AS duration
+FROM pg_stat_activity
+WHERE state != 'idle'
+ORDER BY duration DESC;
+
+-- Kill slow query
+SELECT pg_terminate_backend(pid);
+
+-- Check index usage
+SELECT indexname, idx_scan, idx_tup_read
+FROM pg_stat_user_indexes
+WHERE relname = 'users';
+
+-- Find missing indexes (sequential scans on large tables)
+SELECT relname, seq_scan, seq_tup_read, idx_scan
+FROM pg_stat_user_tables
+ORDER BY seq_tup_read DESC;
+
+-- Analyze query plan
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT * FROM orders WHERE user_id = 42;
+</pre>
+
+  <h3>Redis CLI</h3>
+<pre class="orange">
+# Connect
+redis-cli
+
+# Basic operations
+SET  key "value"     EX 300    # set with 300s TTL
+GET  key
+DEL  key
+TTL  key                        # seconds remaining
+KEYS "user:*"                   # find keys by pattern (careful in prod!)
+
+# Hash (object-like)
+HSET  user:42 name "Priya" email "p@ex.com"
+HGET  user:42 name
+HGETALL user:42
+
+# List (queue-like)
+RPUSH  queue:jobs '{"job":"send_email"}'
+LPOP   queue:jobs
+
+# Monitor all commands in real-time (dev only!)
+MONITOR
+
+# Check memory usage
+INFO memory
+
+# Flush all keys (DANGEROUS — dev only)
+FLUSHDB
+</pre>
+
+  <h3>Git for Backend Engineers</h3>
+<pre>
+# Feature branch workflow
+git checkout -b feature/add-payment-api
+git add -p                          # interactive add — review each chunk
+git commit -m "feat: add Stripe payment endpoint"
+
+# View what changed
+git diff HEAD~1                     # vs previous commit
+git log --oneline -10               # last 10 commits
+
+# Undo last commit (keep changes)
+git reset --soft HEAD~1
+
+# Stash for quick context switch
+git stash push -m "WIP: auth middleware"
+git stash pop
+
+# Squash messy commits before PR
+git rebase -i HEAD~4
+
+# Find which commit introduced a bug
+git bisect start
+git bisect bad                      # current = broken
+git bisect good v1.2.0              # last known good tag
+# Git will binary search — mark each commit good/bad
+</pre>
+
+  <h3>Docker Commands</h3>
+<pre>
+# Build and run
+docker build -t myapp:latest .
+docker run -p 8000:8000 -e DATABASE_URL=... myapp:latest
+
+# Compose
+docker compose up -d                # start all services detached
+docker compose logs -f app          # tail logs
+docker compose exec app bash        # shell into running container
+docker compose down -v              # stop + remove volumes
+
+# Debug running container
+docker stats                        # live CPU/memory
+docker inspect <container_id>       # full config
+docker exec -it <id> sh             # interactive shell
+
+# Prune unused resources
+docker system prune -af
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 22 -->
+<section id="s22">
+  <div class="section-label">Section 22</div>
+  <h2 class="section-title orange">Quick Reference Cheat Sheets</h2>
+
+  <h3 class="orange">Python vs Node.js Async Patterns</h3>
+  <table>
+    <tr><th>Pattern</th><th>Python</th><th>Node.js</th></tr>
+    <tr><td>Async function</td><td><code>async def fn():</code></td><td><code>async function fn() {}</code></td></tr>
+    <tr><td>Await call</td><td><code>result = await fn()</code></td><td><code>const result = await fn()</code></td></tr>
+    <tr><td>Parallel</td><td><code>asyncio.gather(a(), b())</code></td><td><code>Promise.all([a(), b()])</code></td></tr>
+    <tr><td>Timeout</td><td><code>asyncio.wait_for(fn(), 5)</code></td><td><code>Promise.race([fn(), timeout(5)])</code></td></tr>
+    <tr><td>Error handling</td><td><code>try/except Exception</code></td><td><code>try/catch (err)</code></td></tr>
+    <tr><td>Run at startup</td><td><code>asyncio.run(main())</code></td><td><code>main().catch(console.error)</code></td></tr>
+  </table>
+
+  <h3 class="orange">SQL Cheat Sheet</h3>
+<pre class="orange">
+-- Aggregations
+SELECT status, COUNT(*), AVG(total), SUM(total)
+FROM orders
+GROUP BY status
+HAVING COUNT(*) > 10;
+
+-- Window functions
+SELECT
+  user_id, amount,
+  SUM(amount) OVER (PARTITION BY user_id ORDER BY created_at) AS running_total,
+  RANK() OVER (PARTITION BY user_id ORDER BY amount DESC) AS rank_in_user
+FROM payments;
+
+-- Common Table Expression (CTE)
+WITH high_value AS (
+  SELECT user_id FROM orders WHERE total > 10000
+)
+SELECT u.name, u.email
+FROM users u
+JOIN high_value hv ON hv.user_id = u.id;
+
+-- UPSERT (insert or update)
+INSERT INTO users (email, name)
+VALUES ('a@b.com', 'Arjun')
+ON CONFLICT (email) DO UPDATE
+  SET name = EXCLUDED.name, updated_at = NOW();
+
+-- Delete with returning
+DELETE FROM sessions
+WHERE expires_at < NOW()
+RETURNING id, user_id;
+</pre>
+
+  <h3 class="orange">JSON:API Error Format Reference</h3>
+<pre class="orange">
+// Always return consistent errors — never raw exceptions
+// 400 Bad Request
+{ "error": { "code": "VALIDATION_FAILED", "message": "...", "details": [...] } }
+
+// 401 Unauthorized
+{ "error": { "code": "UNAUTHORIZED", "message": "Authentication required" } }
+
+// 403 Forbidden
+{ "error": { "code": "FORBIDDEN", "message": "Insufficient permissions" } }
+
+// 404 Not Found
+{ "error": { "code": "NOT_FOUND", "message": "User 42 does not exist" } }
+
+// 409 Conflict
+{ "error": { "code": "CONFLICT", "message": "Email already registered" } }
+
+// 422 Validation
+{ "error": { "code": "INVALID_INPUT", "message": "...",
+    "details": [{ "field": "email", "issue": "Invalid email format" }] } }
+
+// 429 Rate Limited
+{ "error": { "code": "RATE_LIMIT_EXCEEDED", "message": "Try again in 60s",
+    "retry_after": 60 } }
+
+// 500 Server Error — NEVER expose internal detail
+{ "error": { "code": "INTERNAL_ERROR", "message": "Something went wrong",
+    "request_id": "req_abc123" } }
+</pre>
+
+  <h3 class="orange">Environment Variables Reference</h3>
+  <table>
+    <tr><th>Variable</th><th>Example</th><th>Notes</th></tr>
+    <tr><td>DATABASE_URL</td><td><code>postgresql://user:pass@host:5432/db</code></td><td>Full connection string</td></tr>
+    <tr><td>REDIS_URL</td><td><code>redis://localhost:6379/0</code></td><td>DB number 0–15</td></tr>
+    <tr><td>JWT_SECRET</td><td><code>random 64-char hex string</code></td><td>Generate: <code>openssl rand -hex 32</code></td></tr>
+    <tr><td>APP_ENV</td><td><code>development | staging | production</code></td><td>Controls logging, debug mode</td></tr>
+    <tr><td>PORT</td><td><code>8000</code></td><td>Injected by most PaaS platforms</td></tr>
+    <tr><td>ALLOWED_ORIGINS</td><td><code>https://myapp.com,https://admin.myapp.com</code></td><td>Comma-separated for CORS</td></tr>
+    <tr><td>LOG_LEVEL</td><td><code>INFO</code></td><td>DEBUG in dev, WARNING in prod</td></tr>
+    <tr><td>SENTRY_DSN</td><td><code>https://xxx@sentry.io/yyy</code></td><td>Error tracking</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>Reminder:</strong> Never commit <code>.env</code> files. Add to <code>.gitignore</code>. Provide a <code>.env.example</code> with all keys (no values) so teammates know what's needed.
+  </div>
+</section>
+
+
+<!-- ─────────────────────────────────── SECTION 23 -->
+<section id="s23">
+  <div class="section-label">Section 23</div>
+  <h2 class="section-title purple">Networking Fundamentals for Backend Engineers</h2>
+
+  <h3 class="purple">OSI Model — What Every Layer Means to You</h3>
+  <table>
+    <tr><th>Layer</th><th>Name</th><th>What It Does</th><th>Relevant Tech</th></tr>
+    <tr><td>7</td><td>Application</td><td>Protocols your code speaks</td><td>HTTP, gRPC, WebSocket, DNS, SMTP</td></tr>
+    <tr><td>6</td><td>Presentation</td><td>Encoding, encryption, compression</td><td>TLS/SSL, JSON, Protobuf, gzip</td></tr>
+    <tr><td>5</td><td>Session</td><td>Connection management, auth sessions</td><td>Sessions, cookies, OAuth tokens</td></tr>
+    <tr><td>4</td><td>Transport</td><td>Reliable delivery, port numbers</td><td>TCP (reliable), UDP (fast)</td></tr>
+    <tr><td>3</td><td>Network</td><td>Routing between machines</td><td>IP, ICMP, routing tables</td></tr>
+    <tr><td>2</td><td>Data Link</td><td>Node-to-node delivery on same network</td><td>Ethernet, MAC addresses, ARP</td></tr>
+    <tr><td>1</td><td>Physical</td><td>Bits on the wire</td><td>Cables, fiber, WiFi signals</td></tr>
+  </table>
+
+  <h3 class="purple">TCP vs UDP — When to Choose Each</h3>
+  <table>
+    <tr><th></th><th>TCP</th><th>UDP</th></tr>
+    <tr><td>Reliability</td><td>✅ Guaranteed delivery, retransmits</td><td>❌ Fire-and-forget</td></tr>
+    <tr><td>Order</td><td>✅ Packets arrive in order</td><td>❌ May arrive out of order</td></tr>
+    <tr><td>Speed</td><td>Slower (handshake overhead)</td><td>✅ Faster (no setup)</td></tr>
+    <tr><td>Connection</td><td>Stateful (3-way handshake)</td><td>Stateless</td></tr>
+    <tr><td>Use For</td><td>APIs, DBs, file transfer, email</td><td>Video streaming, gaming, DNS, VoIP</td></tr>
+  </table>
+
+  <h3 class="purple">DNS Resolution — What Happens When You Call an API</h3>
+<pre class="purple">
+# Full journey of: curl https://api.myapp.com/users
+
+# Step 1 — Browser/OS checks local DNS cache
+# Step 2 — Queries recursive resolver (e.g., 8.8.8.8)
+# Step 3 — Resolver queries root nameserver → .com TLD → authoritative NS
+# Step 4 — Gets IP: 104.21.45.67
+# Step 5 — TCP 3-way handshake to port 443
+# Step 6 — TLS handshake (certificate verification, cipher negotiation)
+# Step 7 — HTTP request sent over encrypted connection
+# Step 8 — Response returned
+
+# Common DNS record types
+A      → domain → IPv4 address         api.myapp.com → 104.21.45.67
+AAAA   → domain → IPv6 address
+CNAME  → alias → another domain        www → myapp.com
+MX     → mail server for domain
+TXT    → arbitrary text (SPF, DKIM, domain verification)
+NS     → nameservers for domain
+SRV    → service location (used by Kubernetes, gRPC)
+
+# Debug DNS from terminal
+nslookup api.myapp.com
+dig api.myapp.com
+dig MX myapp.com
+</pre>
+
+  <h3 class="purple">TCP 3-Way Handshake &amp; TLS</h3>
+<pre class="purple">
+# TCP Connection Setup
+Client → Server: SYN (seq=x)
+Server → Client: SYN-ACK (seq=y, ack=x+1)
+Client → Server: ACK (ack=y+1)
+# Connection established ✅
+
+# TLS 1.3 Handshake (simplified)
+Client → Server: ClientHello (supported ciphers, key share)
+Server → Client: ServerHello + Certificate + Finished
+Client → Server: Finished
+# Encrypted channel ready in 1 round trip ✅
+
+# HTTP/2 vs HTTP/1.1
+# HTTP/1.1: one request per TCP connection (connection: keep-alive helps but limited)
+# HTTP/2:   multiplexing — multiple requests on one TCP connection simultaneously
+#           header compression, server push
+# HTTP/3:   runs over QUIC (UDP-based) — faster handshake, no head-of-line blocking
+</pre>
+
+  <h3 class="purple">Load Balancing Algorithms</h3>
+  <table>
+    <tr><th>Algorithm</th><th>How It Works</th><th>Best For</th></tr>
+    <tr><td>Round Robin</td><td>Each server gets requests in turn</td><td>Uniform stateless services</td></tr>
+    <tr><td>Least Connections</td><td>Route to server with fewest active conns</td><td>Variable request duration</td></tr>
+    <tr><td>IP Hash</td><td>Same client IP → same server</td><td>Sticky sessions (stateful)</td></tr>
+    <tr><td>Weighted RR</td><td>More powerful servers get more traffic</td><td>Heterogeneous server fleets</td></tr>
+    <tr><td>Random</td><td>Random server selection</td><td>Large identical fleets</td></tr>
+    <tr><td>Consistent Hash</td><td>Hash-based — minimizes re-routing on scale changes</td><td>Caches, sharded DBs</td></tr>
+  </table>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 24 -->
+<section id="s24">
+  <div class="section-label">Section 24</div>
+  <h2 class="section-title">File Handling, Uploads &amp; Storage</h2>
+
+  <h3>Multipart File Upload — FastAPI</h3>
+<pre>
+from fastapi import FastAPI, UploadFile, File, HTTPException
+import aiofiles, os, hashlib, mimetypes
+
+app = FastAPI()
+
+UPLOAD_DIR = "/var/app/uploads"
+ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
+MAX_SIZE = 10 * 1024 * 1024  # 10 MB
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    # Validate MIME type
+    content_type = file.content_type
+    if content_type not in ALLOWED_TYPES:
+        raise HTTPException(400, f"File type {content_type} not allowed")
+
+    # Read in chunks to avoid memory exhaustion
+    size = 0
+    chunks = []
+    hasher = hashlib.sha256()
+
+    async for chunk in file:
+        size += len(chunk)
+        if size > MAX_SIZE:
+            raise HTTPException(413, "File too large")
+        chunks.append(chunk)
+        hasher.update(chunk)
+
+    file_hash = hasher.hexdigest()
+    ext = mimetypes.guess_extension(content_type) or ".bin"
+    filename = f"{file_hash}{ext}"
+    dest = os.path.join(UPLOAD_DIR, filename)
+
+    async with aiofiles.open(dest, "wb") as f:
+        for chunk in chunks:
+            await f.write(chunk)
+
+    return {"filename": filename, "size": size, "sha256": file_hash}
+</pre>
+
+  <h3>AWS S3 Upload (Presigned URLs)</h3>
+<pre>
+import boto3
+from botocore.exceptions import ClientError
+
+s3 = boto3.client("s3", region_name="ap-south-1")
+BUCKET = "my-app-uploads"
+
+# Generate presigned URL — client uploads directly to S3 (no server middleman)
+def create_upload_url(object_key: str, content_type: str, expires: int = 300):
+    url = s3.generate_presigned_url(
+        "put_object",
+        Params={
+            "Bucket": BUCKET,
+            "Key": object_key,
+            "ContentType": content_type,
+        },
+        ExpiresIn=expires,
+    )
+    return url
+
+# Generate presigned download URL
+def create_download_url(object_key: str, expires: int = 3600):
+    return s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": BUCKET, "Key": object_key},
+        ExpiresIn=expires,
+    )
+
+# Flow:
+# 1. Client requests upload URL from your API
+# 2. API returns presigned URL
+# 3. Client uploads directly to S3 with PUT
+# 4. Client notifies API of completed upload
+# 5. API records the S3 key in DB
+</pre>
+
+  <h3>Image Processing Pipeline</h3>
+<pre>
+from PIL import Image
+import io
+
+def process_avatar(file_bytes: bytes) -> dict:
+    img = Image.open(io.BytesIO(file_bytes))
+
+    # Validate dimensions
+    if img.width < 100 or img.height < 100:
+        raise ValueError("Image too small — minimum 100x100")
+
+    # Convert to RGB (handles RGBA PNGs, CMYK JPEGs)
+    img = img.convert("RGB")
+
+    sizes = {
+        "thumbnail": (64, 64),
+        "small":     (128, 128),
+        "medium":    (256, 256),
+        "large":     (512, 512),
+    }
+    outputs = {}
+    for name, size in sizes.items():
+        resized = img.copy()
+        resized.thumbnail(size, Image.LANCZOS)
+        buf = io.BytesIO()
+        resized.save(buf, format="JPEG", quality=85, optimize=True)
+        outputs[name] = buf.getvalue()
+
+    return outputs
+</pre>
+
+  <h3>Streaming Large File Downloads</h3>
+<pre>
+from fastapi.responses import StreamingResponse
+import aiofiles
+
+@app.get("/files/{filename}")
+async def download_file(filename: str):
+    filepath = safe_path(filename)  # validate path
+
+    async def file_stream():
+        async with aiofiles.open(filepath, "rb") as f:
+            while chunk := await f.read(64 * 1024):  # 64KB chunks
+                yield chunk
+
+    return StreamingResponse(
+        file_stream(),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 25 -->
+<section id="s25">
+  <div class="section-label">Section 25</div>
+  <h2 class="section-title orange">Email, SMS &amp; Notifications</h2>
+
+  <h3 class="orange">Sending Email — Python (SMTP + Templates)</h3>
+<pre class="orange">
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from jinja2 import Environment, FileSystemLoader
+
+jinja = Environment(loader=FileSystemLoader("templates/email"))
+
+def send_email(to: str, subject: str, template: str, ctx: dict):
+    html_body = jinja.get_template(f"{template}.html").render(**ctx)
+    text_body = jinja.get_template(f"{template}.txt").render(**ctx)
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = "noreply@myapp.com"
+    msg["To"]      = to
+
+    msg.attach(MIMEText(text_body, "plain"))
+    msg.attach(MIMEText(html_body, "html"))  # HTML takes priority
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login("user@gmail.com", os.getenv("SMTP_PASSWORD"))
+        server.send_message(msg)
+
+# Usage
+send_email(
+    to="user@example.com",
+    subject="Welcome to MyApp!",
+    template="welcome",
+    ctx={"name": "Arun", "activation_link": "https://..."}
+)
+</pre>
+
+  <h3 class="orange">Transactional Email via API (SendGrid)</h3>
+<pre class="orange">
+import httpx
+
+async def send_via_sendgrid(to: str, subject: str, html: str):
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            "https://api.sendgrid.com/v3/mail/send",
+            headers={"Authorization": f"Bearer {os.getenv('SENDGRID_API_KEY')}"},
+            json={
+                "personalizations": [{"to": [{"email": to}]}],
+                "from": {"email": "noreply@myapp.com", "name": "MyApp"},
+                "subject": subject,
+                "content": [{"type": "text/html", "value": html}],
+            }
+        )
+        r.raise_for_status()
+</pre>
+
+  <h3 class="orange">Email Delivery Best Practices</h3>
+  <table>
+    <tr><th>Record</th><th>Purpose</th><th>Example Value</th></tr>
+    <tr><td>SPF</td><td>Which servers can send on your behalf</td><td><code>v=spf1 include:sendgrid.net ~all</code></td></tr>
+    <tr><td>DKIM</td><td>Cryptographic signature on emails</td><td>Public key in TXT record</td></tr>
+    <tr><td>DMARC</td><td>Policy: what to do if SPF/DKIM fail</td><td><code>v=DMARC1; p=reject; rua=mailto:dmarc@myapp.com</code></td></tr>
+  </table>
+
+  <h3 class="orange">SMS via Twilio (Node.js)</h3>
+<pre class="orange">
+const twilio = require('twilio');
+const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+
+async function sendSMS(to, body) {
+  return await client.messages.create({
+    body,
+    from: process.env.TWILIO_NUMBER,
+    to,
+  });
+}
+
+// OTP generation + SMS
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+app.post('/auth/otp', async (req, res) => {
+  const otp = generateOTP();
+  const ttl = 300; // 5 minutes
+
+  await redis.setEx(`otp:${req.body.phone}`, ttl, otp);
+  await sendSMS(req.body.phone, `Your OTP is: ${otp}. Valid for 5 minutes.`);
+
+  res.json({ message: 'OTP sent' });
+});
+
+app.post('/auth/verify-otp', async (req, res) => {
+  const stored = await redis.get(`otp:${req.body.phone}`);
+  if (!stored || stored !== req.body.otp)
+    return res.status(400).json({ error: 'Invalid or expired OTP' });
+
+  await redis.del(`otp:${req.body.phone}`);
+  const token = createToken(req.body.phone);
+  res.json({ token });
+});
+</pre>
+
+  <h3 class="orange">Push Notifications — Firebase FCM</h3>
+<pre class="orange">
+import firebase_admin
+from firebase_admin import credentials, messaging
+
+cred = credentials.Certificate("firebase-service-account.json")
+firebase_admin.initialize_app(cred)
+
+def send_push(device_token: str, title: str, body: str, data: dict = None):
+    message = messaging.Message(
+        notification=messaging.Notification(title=title, body=body),
+        data=data or {},
+        token=device_token,
+        android=messaging.AndroidConfig(priority="high"),
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(sound="default")
+            )
+        ),
+    )
+    response = messaging.send(message)
+    return response
+
+def send_push_to_topic(topic: str, title: str, body: str):
+    """Send to all devices subscribed to a topic"""
+    message = messaging.Message(
+        notification=messaging.Notification(title=title, body=body),
+        topic=topic,
+    )
+    return messaging.send(message)
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 26 -->
+<section id="s26">
+  <div class="section-label">Section 26</div>
+  <h2 class="section-title purple">Kafka &amp; Event Streaming</h2>
+
+  <p>Kafka is a distributed, persistent, high-throughput event log. Unlike RabbitMQ (which deletes messages after consumption), Kafka retains messages for a configurable period — any consumer can replay from the beginning.</p>
+
+  <h3 class="purple">Core Concepts</h3>
+  <div class="card-grid">
+    <div class="card purple"><div class="card-title">Topic</div><p>Named stream of records. Think of it as a database table for events. Partitioned for parallelism.</p></div>
+    <div class="card purple"><div class="card-title">Partition</div><p>Ordered, immutable log within a topic. Each partition can be consumed independently by one consumer per group.</p></div>
+    <div class="card purple"><div class="card-title">Consumer Group</div><p>Multiple consumers sharing the work of reading a topic. Each partition goes to exactly one consumer in the group.</p></div>
+    <div class="card purple"><div class="card-title">Offset</div><p>Position of a message in a partition. Consumers commit offsets to track progress. Replay by resetting offset.</p></div>
+  </div>
+
+  <h3 class="purple">Producer — Python (kafka-python)</h3>
+<pre class="purple">
+from kafka import KafkaProducer
+import json
+
+producer = KafkaProducer(
+    bootstrap_servers=['kafka:9092'],
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    key_serializer=lambda k: k.encode('utf-8') if k else None,
+    acks='all',         # wait for all replicas to confirm
+    retries=3,
+    max_in_flight_requests_per_connection=1,  # preserve ordering
+)
+
+def publish_event(topic: str, event: dict, key: str = None):
+    future = producer.send(topic, value=event, key=key)
+    record_metadata = future.get(timeout=10)
+    return {
+        "partition": record_metadata.partition,
+        "offset":    record_metadata.offset,
+    }
+
+# Example: publish order created event
+publish_event(
+    topic="order.events",
+    key=str(order.id),   # same order ID → same partition → ordered
+    event={
+        "event_type": "order.created",
+        "order_id":   order.id,
+        "user_id":    order.user_id,
+        "total":      order.total,
+        "timestamp":  datetime.utcnow().isoformat(),
+    }
+)
+</pre>
+
+  <h3 class="purple">Consumer — Python</h3>
+<pre class="purple">
+from kafka import KafkaConsumer
+import json
+
+consumer = KafkaConsumer(
+    "order.events",
+    bootstrap_servers=['kafka:9092'],
+    group_id='order-processor',        # consumer group
+    auto_offset_reset='earliest',      # start from beginning if no committed offset
+    enable_auto_commit=False,          # manual commit for at-least-once delivery
+    value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+)
+
+for message in consumer:
+    event = message.value
+    try:
+        if event["event_type"] == "order.created":
+            process_new_order(event)
+        elif event["event_type"] == "order.cancelled":
+            handle_cancellation(event)
+
+        # Commit only after successful processing
+        consumer.commit()
+
+    except Exception as e:
+        logger.error(f"Failed to process event: {e}", extra={"event": event})
+        # Don't commit — message will be redelivered
+        # Send to dead-letter topic after N retries
+</pre>
+
+  <h3 class="purple">Kafka vs RabbitMQ — When to Choose</h3>
+  <table>
+    <tr><th></th><th>Kafka</th><th>RabbitMQ</th></tr>
+    <tr><td>Throughput</td><td>Millions/sec</td><td>Thousands/sec</td></tr>
+    <tr><td>Message Retention</td><td>Days/weeks (configurable)</td><td>Deleted after consumption</td></tr>
+    <tr><td>Replay</td><td>✅ Yes — reset offset</td><td>❌ No</td></tr>
+    <tr><td>Ordering</td><td>Per-partition</td><td>Per-queue</td></tr>
+    <tr><td>Routing</td><td>Topic + partition key</td><td>Exchange + routing key</td></tr>
+    <tr><td>Use For</td><td>Event sourcing, analytics pipelines, audit logs</td><td>Task queues, RPC, simple pub/sub</td></tr>
+  </table>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 27 -->
+<section id="s27">
+  <div class="section-label">Section 27</div>
+  <h2 class="section-title">Kubernetes for Backend Engineers</h2>
+
+  <h3>Core Objects</h3>
+  <table>
+    <tr><th>Object</th><th>What It Is</th><th>Analogy</th></tr>
+    <tr><td>Pod</td><td>Smallest unit — one or more containers sharing a network</td><td>A process</td></tr>
+    <tr><td>Deployment</td><td>Manages pods — handles rolling updates, replicas, rollbacks</td><td>Process manager</td></tr>
+    <tr><td>Service</td><td>Stable network endpoint for a set of pods (load balancing)</td><td>Load balancer</td></tr>
+    <tr><td>Ingress</td><td>HTTP routing rules — maps URLs to services</td><td>Nginx config</td></tr>
+    <tr><td>ConfigMap</td><td>Non-sensitive configuration as key-value pairs</td><td>.env file</td></tr>
+    <tr><td>Secret</td><td>Base64-encoded sensitive config (passwords, tokens)</td><td>Encrypted .env</td></tr>
+    <tr><td>PersistentVolume</td><td>Persistent storage attached to a pod</td><td>Mounted disk</td></tr>
+    <tr><td>CronJob</td><td>Scheduled job — runs on a cron schedule</td><td>Cron tab</td></tr>
+    <tr><td>HPA</td><td>Horizontal Pod Autoscaler — scale pods based on CPU/memory</td><td>Auto-scaling group</td></tr>
+  </table>
+
+  <h3>Deployment YAML</h3>
+<pre>
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1     # at most 1 pod down during update
+      maxSurge: 1           # at most 1 extra pod during update
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp
+          image: myregistry/myapp:v1.2.3
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: database-url
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+</pre>
+
+  <h3>Service &amp; Ingress YAML</h3>
+<pre>
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: ClusterIP  # internal only
+
+---
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts: [api.myapp.com]
+      secretName: myapp-tls
+  rules:
+    - host: api.myapp.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: myapp-service
+                port:
+                  number: 80
+</pre>
+
+  <h3>Essential kubectl Commands</h3>
+<pre>
+# Cluster overview
+kubectl get nodes
+kubectl get pods -A                  # all namespaces
+kubectl get pods -l app=myapp        # filter by label
+
+# Deploy
+kubectl apply -f deployment.yaml
+kubectl rollout status deployment/myapp
+kubectl rollout undo deployment/myapp  # rollback
+
+# Debug
+kubectl logs myapp-abc123 -f          # tail logs
+kubectl exec -it myapp-abc123 -- sh   # shell into pod
+kubectl describe pod myapp-abc123     # events + config
+kubectl top pods                      # CPU/memory usage
+
+# Scale
+kubectl scale deployment myapp --replicas=5
+
+# Port forward for local debugging
+kubectl port-forward svc/myapp-service 8080:80
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 28 -->
+<section id="s28">
+  <div class="section-label">Section 28</div>
+  <h2 class="section-title orange">API Gateway &amp; Reverse Proxy</h2>
+
+  <p>An API gateway sits in front of all your services — routing, auth, rate limiting, SSL termination, logging — so individual services don't repeat this work.</p>
+
+  <h3 class="orange">What an API Gateway Does</h3>
+  <div class="card-grid">
+    <div class="card orange"><div class="card-title">Routing</div><p>Routes <code>/api/users/*</code> to user-service, <code>/api/orders/*</code> to order-service.</p></div>
+    <div class="card orange"><div class="card-title">Auth</div><p>Validates JWT before requests reach services — services trust the gateway.</p></div>
+    <div class="card orange"><div class="card-title">Rate Limiting</div><p>Enforces per-client limits before load hits your services.</p></div>
+    <div class="card orange"><div class="card-title">Observability</div><p>Centralized access logs, request tracing, metrics for every service.</p></div>
+  </div>
+
+  <h3 class="orange">Nginx as Reverse Proxy — Config</h3>
+<pre class="orange">
+# /etc/nginx/sites-available/myapp.conf
+
+upstream api_backend {
+    least_conn;                          # least-connections load balancing
+    server app1:8000 weight=3;           # gets 3x more traffic
+    server app2:8000 weight=1;
+    keepalive 32;                        # reuse connections
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.myapp.com;
+
+    ssl_certificate     /etc/letsencrypt/live/api.myapp.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.myapp.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options nosniff always;
+
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=api:10m rate=30r/m;
+    limit_req zone=api burst=10 nodelay;
+
+    location /api/ {
+        proxy_pass         http://api_backend;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection 'upgrade';
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 5s;
+        proxy_read_timeout    30s;
+
+        # Don't expose upstream errors
+        proxy_intercept_errors on;
+        error_page 502 503 504 /errors/gateway_error.json;
+    }
+
+    # Static files directly from Nginx
+    location /static/ {
+        alias /var/app/static/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+
+# HTTP → HTTPS redirect
+server {
+    listen 80;
+    server_name api.myapp.com;
+    return 301 https://$host$request_uri;
+}
+</pre>
+
+  <h3 class="orange">Kong API Gateway — Declarative Config</h3>
+<pre class="orange">
+# kong.yaml — declarative config for Kong
+_format_version: "3.0"
+
+services:
+  - name: user-service
+    url: http://user-service:8000
+    routes:
+      - name: user-routes
+        paths: ["/api/v1/users"]
+        methods: [GET, POST, PUT, DELETE]
+    plugins:
+      - name: jwt
+        config:
+          secret_is_base64: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          policy: redis
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Gateway-Source:kong"
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 29 -->
+<section id="s29">
+  <div class="section-label">Section 29</div>
+  <h2 class="section-title purple">Serverless &amp; Edge Functions</h2>
+
+  <p>Serverless means you deploy functions, not servers. The cloud provider handles scaling, availability, and infrastructure. You pay per invocation, not for idle time.</p>
+
+  <h3 class="purple">When to Use Serverless</h3>
+  <div class="card-grid">
+    <div class="card purple"><div class="card-title">✅ Good For</div><p>Webhooks, scheduled jobs, image processing, email/SMS triggers, event-driven pipelines with spiky traffic.</p></div>
+    <div class="card purple"><div class="card-title">❌ Not Good For</div><p>Long-running processes, warm persistent connections (WebSockets), DB-heavy workloads with cold start latency concerns.</p></div>
+  </div>
+
+  <h3 class="purple">AWS Lambda — Python Handler</h3>
+<pre class="purple">
+import json, boto3
+
+def lambda_handler(event, context):
+    """
+    Triggered by: API Gateway, S3 events, SQS, EventBridge, etc.
+    event: dict with trigger-specific data
+    context: runtime info (function name, timeout remaining, etc.)
+    """
+
+    # If triggered by API Gateway
+    if "httpMethod" in event:
+        body = json.loads(event.get("body") or "{}")
+        user_id = event["pathParameters"].get("userId")
+
+        # Do work
+        result = process_user(user_id, body)
+
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps(result),
+        }
+
+    # If triggered by SQS
+    if "Records" in event:
+        for record in event["Records"]:
+            message = json.loads(record["body"])
+            process_message(message)
+        return {"statusCode": 200}
+
+# Cold start optimization: initialize heavy objects outside handler
+# They persist across invocations within the same container
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table("users")  # ← outside handler = reused
+</pre>
+
+  <h3 class="purple">Vercel / Netlify Edge Function (Node.js)</h3>
+<pre class="purple">
+// api/webhook.js — Vercel serverless function
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { event, data } = req.body;
+
+  switch (event) {
+    case 'payment.success':
+      await handlePaymentSuccess(data);
+      break;
+    case 'user.signup':
+      await sendWelcomeEmail(data.email);
+      break;
+    default:
+      console.log('Unknown event:', event);
+  }
+
+  res.status(200).json({ received: true });
+}
+</pre>
+
+  <h3 class="purple">Serverless Framework — Deploy Config</h3>
+<pre class="purple">
+# serverless.yml
+service: my-backend
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: ap-south-1
+  environment:
+    DB_URL: ${ssm:/myapp/prod/db_url}
+
+functions:
+  api:
+    handler: app.lambda_handler
+    events:
+      - httpApi:
+          path: /api/{proxy+}
+          method: ANY
+    timeout: 29
+    memorySize: 512
+
+  processUpload:
+    handler: workers.process_upload
+    events:
+      - s3:
+          bucket: my-app-uploads
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: raw/
+
+  dailyReport:
+    handler: jobs.daily_report
+    events:
+      - schedule: cron(0 6 * * ? *)  # 6 AM UTC daily
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 30 -->
+<section id="s30">
+  <div class="section-label">Section 30</div>
+  <h2 class="section-title">Data Formats &amp; Serialization</h2>
+
+  <h3>JSON — Deep Dive</h3>
+<pre>
+import json
+from datetime import datetime
+from decimal import Decimal
+from uuid import UUID
+
+# Custom encoder for non-serializable types
+class AppJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat() + "Z"
+        if isinstance(obj, Decimal):
+            return float(obj)
+        if isinstance(obj, UUID):
+            return str(obj)
+        if isinstance(obj, bytes):
+            return obj.decode("utf-8")
+        if hasattr(obj, "__dict__"):
+            return obj.__dict__
+        return super().default(obj)
+
+# Usage
+data = {
+    "id": UUID("550e8400-e29b-41d4-a716-446655440000"),
+    "price": Decimal("99.99"),
+    "created_at": datetime.utcnow(),
+}
+json.dumps(data, cls=AppJSONEncoder)
+</pre>
+
+  <h3>Protocol Buffers (Protobuf) — Binary Serialization</h3>
+<pre>
+# user.proto
+syntax = "proto3";
+
+message User {
+  int32  id    = 1;
+  string name  = 2;
+  string email = 3;
+  repeated string roles = 4;
+  UserStatus status = 5;
+}
+
+enum UserStatus {
+  ACTIVE   = 0;
+  INACTIVE = 1;
+  BANNED   = 2;
+}
+
+# Generate Python code:
+# protoc --python_out=. user.proto
+
+# Use in Python
+from user_pb2 import User, UserStatus
+
+user = User(id=1, name="Priya", email="p@ex.com", roles=["admin"])
+serialized = user.SerializeToString()    # binary — much smaller than JSON
+restored = User()
+restored.ParseFromString(serialized)
+print(restored.name)  # Priya
+
+# Protobuf vs JSON:
+# - 3–10x smaller wire size
+# - 5–10x faster serialization
+# - Schema-enforced (breaking changes caught at compile time)
+# - Not human-readable
+</pre>
+
+  <h3>MessagePack — Binary JSON Alternative</h3>
+<pre>
+import msgpack
+
+data = {"user_id": 42, "roles": ["admin", "user"], "active": True}
+
+packed = msgpack.packb(data, use_bin_type=True)
+print(f"JSON:    {len(str(data))} bytes")
+print(f"MsgPack: {len(packed)} bytes")  # typically 30-50% smaller
+
+unpacked = msgpack.unpackb(packed, raw=False)
+</pre>
+
+  <h3>CSV, Excel &amp; Data Import/Export</h3>
+<pre>
+import csv, io
+
+# Read CSV from upload
+def parse_csv_upload(file_bytes: bytes) -> list[dict]:
+    reader = csv.DictReader(io.StringIO(file_bytes.decode("utf-8")))
+    rows = []
+    for i, row in enumerate(reader):
+        if i > 10_000:
+            raise ValueError("CSV too large — max 10,000 rows")
+        rows.append(row)
+    return rows
+
+# Generate CSV response
+@app.get("/export/users")
+async def export_users():
+    users = session.query(User).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["id", "name", "email", "created_at"])
+
+    for u in users:
+        writer.writerow([u.id, u.name, u.email, u.created_at.isoformat()])
+
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=users.csv"}
+    )
+</pre>
+
+  <h3>XML Parsing &amp; Generation</h3>
+<pre>
+import xml.etree.ElementTree as ET
+
+# Parse XML
+xml_string = """
+&lt;order id="123"&gt;
+  &lt;customer&gt;Arun Kumar&lt;/customer&gt;
+  &lt;items&gt;
+    &lt;item sku="ABC" qty="2" price="99.99"/&gt;
+  &lt;/items&gt;
+&lt;/order&gt;
+"""
+root = ET.fromstring(xml_string)
+order_id = root.attrib["id"]
+customer = root.find("customer").text
+items = [
+    {"sku": i.attrib["sku"], "qty": int(i.attrib["qty"])}
+    for i in root.findall("items/item")
+]
+
+# Generate XML
+def build_response_xml(order_id: int, status: str) -> str:
+    root = ET.Element("response")
+    ET.SubElement(root, "order_id").text = str(order_id)
+    ET.SubElement(root, "status").text = status
+    return ET.tostring(root, encoding="unicode", xml_declaration=True)
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 31 -->
+<section id="s31">
+  <div class="section-label">Section 31</div>
+  <h2 class="section-title orange">Regex for Backend Engineers</h2>
+
+  <p>Regular expressions appear everywhere in backend: input validation, log parsing, URL routing, data extraction.</p>
+
+  <h3 class="orange">Regex Syntax Cheat Sheet</h3>
+  <table>
+    <tr><th>Pattern</th><th>Matches</th></tr>
+    <tr><td><code>.</code></td><td>Any character except newline</td></tr>
+    <tr><td><code>\d</code></td><td>Digit [0-9]</td></tr>
+    <tr><td><code>\w</code></td><td>Word character [a-zA-Z0-9_]</td></tr>
+    <tr><td><code>\s</code></td><td>Whitespace (space, tab, newline)</td></tr>
+    <tr><td><code>\D \W \S</code></td><td>Negations of above</td></tr>
+    <tr><td><code>^</code></td><td>Start of string</td></tr>
+    <tr><td><code>$</code></td><td>End of string</td></tr>
+    <tr><td><code>*</code></td><td>Zero or more</td></tr>
+    <tr><td><code>+</code></td><td>One or more</td></tr>
+    <tr><td><code>?</code></td><td>Zero or one (optional)</td></tr>
+    <tr><td><code>{3}</code></td><td>Exactly 3 times</td></tr>
+    <tr><td><code>{2,5}</code></td><td>Between 2 and 5 times</td></tr>
+    <tr><td><code>[abc]</code></td><td>One of: a, b, c</td></tr>
+    <tr><td><code>[^abc]</code></td><td>Not a, b, or c</td></tr>
+    <tr><td><code>(a|b)</code></td><td>a or b</td></tr>
+    <tr><td><code>(?:...)</code></td><td>Non-capturing group</td></tr>
+    <tr><td><code>(?P&lt;name&gt;...)</code></td><td>Named capture group (Python)</td></tr>
+    <tr><td><code>(?=...)</code></td><td>Positive lookahead</td></tr>
+    <tr><td><code>(?!...)</code></td><td>Negative lookahead</td></tr>
+  </table>
+
+  <h3 class="orange">Common Validation Patterns</h3>
+<pre class="orange">
+import re
+
+PATTERNS = {
+    # Email (simplified — use a proper library for production)
+    "email":    r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$',
+
+    # Phone: E.164 international format
+    "phone":    r'^\+[1-9]\d{7,14}$',
+
+    # Indian mobile number
+    "in_phone": r'^[6-9]\d{9}$',
+
+    # UUID v4
+    "uuid":     r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+
+    # Slug (URL-safe)
+    "slug":     r'^[a-z0-9]+(?:-[a-z0-9]+)*$',
+
+    # Strong password
+    "password": r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+
+    # IPv4
+    "ipv4":     r'^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$',
+
+    # URL
+    "url":      r'^https?://[^\s/$.?#].[^\s]*$',
+
+    # Credit card (Luhn check needed separately)
+    "card":     r'^\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}$',
+
+    # Date: YYYY-MM-DD
+    "date":     r'^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$',
+
+    # JWT token structure
+    "jwt":      r'^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]*$',
+}
+
+def validate(value: str, pattern_name: str) -> bool:
+    pattern = PATTERNS.get(pattern_name)
+    if not pattern:
+        raise ValueError(f"Unknown pattern: {pattern_name}")
+    return bool(re.fullmatch(pattern, value, re.IGNORECASE))
+</pre>
+
+  <h3 class="orange">Log Parsing with Regex</h3>
+<pre class="orange">
+import re
+from datetime import datetime
+
+# Parse Nginx access log
+NGINX_LOG = re.compile(
+    r'(?P&lt;ip&gt;\S+) \S+ \S+ \[(?P&lt;time&gt;[^\]]+)\] '
+    r'"(?P&lt;method&gt;\w+) (?P&lt;path&gt;\S+) \S+" '
+    r'(?P&lt;status&gt;\d{3}) (?P&lt;bytes&gt;\d+)'
+)
+
+def parse_nginx_line(line: str) -> dict:
+    m = NGINX_LOG.match(line)
+    if not m:
+        return None
+    return {
+        "ip":     m.group("ip"),
+        "time":   m.group("time"),
+        "method": m.group("method"),
+        "path":   m.group("path"),
+        "status": int(m.group("status")),
+        "bytes":  int(m.group("bytes")),
+    }
+
+# Extract all IPs from a log file
+def find_4xx_ips(log_text: str) -> set:
+    pattern = re.compile(r'(\d+\.\d+\.\d+\.\d+).*?" [45]\d\d ')
+    return set(pattern.findall(log_text))
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 32 -->
+<section id="s32">
+  <div class="section-label">Section 32</div>
+  <h2 class="section-title purple">Algorithms &amp; Data Structures for Backend</h2>
+
+  <p>You won't implement sorting algorithms in production, but knowing complexity and the right data structure changes everything about how you design systems.</p>
+
+  <h3 class="purple">Big-O Complexity — What Matters in Practice</h3>
+  <table>
+    <tr><th>Complexity</th><th>Name</th><th>Example</th><th>1M items</th></tr>
+    <tr><td>O(1)</td><td>Constant</td><td>Hash table lookup, Redis GET</td><td>1 op</td></tr>
+    <tr><td>O(log n)</td><td>Logarithmic</td><td>Binary search, B-tree index</td><td>20 ops</td></tr>
+    <tr><td>O(n)</td><td>Linear</td><td>Full table scan, loop through list</td><td>1,000,000 ops</td></tr>
+    <tr><td>O(n log n)</td><td>Linearithmic</td><td>Sorting (merge sort)</td><td>20,000,000 ops</td></tr>
+    <tr><td>O(n²)</td><td>Quadratic</td><td>Nested loops, bubble sort</td><td>10¹² ops ← never</td></tr>
+  </table>
+
+  <h3 class="purple">Choosing the Right Data Structure</h3>
+  <table>
+    <tr><th>Need</th><th>Use</th><th>Why</th></tr>
+    <tr><td>Fast key lookup</td><td>Hash map / dict</td><td>O(1) average</td></tr>
+    <tr><td>Ordered data, range queries</td><td>Sorted set / B-tree</td><td>O(log n) range scan</td></tr>
+    <tr><td>Unique membership check</td><td>Set / Bloom filter</td><td>O(1), no duplicates</td></tr>
+    <tr><td>FIFO queue</td><td>Deque / Queue</td><td>O(1) push/pop from both ends</td></tr>
+    <tr><td>Priority queue (job scheduler)</td><td>Heap</td><td>O(log n) insert, O(1) peek</td></tr>
+    <tr><td>Prefix matching, autocomplete</td><td>Trie</td><td>O(k) where k = prefix length</td></tr>
+    <tr><td>Graph traversal, relationships</td><td>Adjacency list + BFS/DFS</td><td>O(V+E)</td></tr>
+    <tr><td>Approximate count (HyperLogLog)</td><td>Probabilistic struct</td><td>O(1), tiny memory</td></tr>
+  </table>
+
+  <h3 class="purple">Practical Algorithm Patterns</h3>
+<pre class="purple">
+# 1. Sliding Window — rate limiting, moving average
+from collections import deque
+import time
+
+class SlidingWindowRateLimiter:
+    def __init__(self, max_requests: int, window_seconds: int):
+        self.max = max_requests
+        self.window = window_seconds
+        self.timestamps: dict[str, deque] = {}
+
+    def is_allowed(self, client_id: str) -> bool:
+        now = time.time()
+        if client_id not in self.timestamps:
+            self.timestamps[client_id] = deque()
+
+        dq = self.timestamps[client_id]
+        cutoff = now - self.window
+
+        while dq and dq[0] < cutoff:   # remove expired
+            dq.popleft()
+
+        if len(dq) >= self.max:
+            return False               # over limit
+
+        dq.append(now)
+        return True
+
+# 2. LRU Cache — evict least recently used (O(1) get + put)
+from functools import lru_cache
+from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.cap = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)  # mark as recently used
+        return self.cache[key]
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.cap:
+            self.cache.popitem(last=False)  # evict oldest
+
+# 3. Two-pointer — detect duplicates in sorted list O(n)
+def find_duplicate_emails(emails: list[str]) -> list[str]:
+    emails.sort()
+    duplicates = []
+    for i in range(1, len(emails)):
+        if emails[i] == emails[i-1] and emails[i] not in duplicates:
+            duplicates.append(emails[i])
+    return duplicates
+</pre>
+
+  <h3 class="purple">Hashing Algorithms — When to Use What</h3>
+  <table>
+    <tr><th>Algorithm</th><th>Output</th><th>Use For</th><th>NOT For</th></tr>
+    <tr><td>MD5</td><td>128-bit</td><td>Checksums, dedup detection</td><td>Passwords, security</td></tr>
+    <tr><td>SHA-256</td><td>256-bit</td><td>File integrity, digital signatures</td><td>Passwords</td></tr>
+    <tr><td>SHA-512</td><td>512-bit</td><td>High-security signatures, HMAC</td><td>Passwords</td></tr>
+    <tr><td>bcrypt</td><td>60-char string</td><td>✅ Password hashing</td><td>Large data (slow by design)</td></tr>
+    <tr><td>Argon2id</td><td>Variable</td><td>✅ Best password hashing (2025)</td><td>Large data</td></tr>
+    <tr><td>HMAC-SHA256</td><td>256-bit</td><td>JWT signatures, webhook verification</td><td>Passwords</td></tr>
+    <tr><td>xxHash / MurmurHash</td><td>32/64-bit</td><td>Fast hash tables, partitioning</td><td>Cryptographic use</td></tr>
+  </table>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 33 -->
+<section id="s33">
+  <div class="section-label">Section 33</div>
+  <h2 class="section-title">Dependency Injection &amp; Clean Architecture</h2>
+
+  <h3>Dependency Injection — Why It Matters</h3>
+  <p>Instead of creating dependencies inside a class, inject them from outside. This makes code testable, replaceable, and decoupled.</p>
+
+<pre>
+# ❌ TIGHTLY COUPLED — hard to test, hard to swap
+class UserService:
+    def __init__(self):
+        self.db = PostgresDB()       # hardwired!
+        self.mailer = SmtpMailer()   # hardwired!
+
+# ✅ DEPENDENCY INJECTED — easy to test with mocks
+class UserService:
+    def __init__(self, db: UserRepository, mailer: Mailer):
+        self.db = db
+        self.mailer = mailer
+
+# Test: inject mocks
+service = UserService(db=MockDB(), mailer=MockMailer())
+
+# Production: inject real implementations
+service = UserService(db=PostgresUserRepo(session), mailer=SmtpMailer())
+</pre>
+
+  <h3>FastAPI Dependency Injection System</h3>
+<pre>
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+# DB session dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Auth dependency
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> User:
+    payload = decode_token(token)
+    user = db.query(User).get(int(payload["sub"]))
+    if not user:
+        raise HTTPException(401, "User not found")
+    return user
+
+# Admin dependency builds on auth dependency
+def require_admin(user: User = Depends(get_current_user)) -> User:
+    if user.role != "admin":
+        raise HTTPException(403, "Admin access required")
+    return user
+
+# Route — FastAPI auto-resolves the whole chain
+@app.get("/admin/dashboard")
+def admin_dashboard(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    return {"admin": admin.name, "stats": get_stats(db)}
+</pre>
+
+  <h3>Clean Architecture Layers</h3>
+<pre>
+# Layer 1: Domain / Entities — pure business logic, no framework dependencies
+class Order:
+    def __init__(self, user_id: int, items: list):
+        self.user_id = user_id
+        self.items = items
+        self.status = "pending"
+
+    def calculate_total(self) -> float:
+        return sum(i.price * i.qty for i in self.items)
+
+    def can_cancel(self) -> bool:
+        return self.status in ("pending", "processing")
+
+# Layer 2: Use Cases / Application — orchestrates domain objects
+class PlaceOrderUseCase:
+    def __init__(self, order_repo, payment_service, event_bus):
+        self.order_repo = order_repo
+        self.payment_service = payment_service
+        self.event_bus = event_bus
+
+    def execute(self, user_id: int, items: list) -> Order:
+        order = Order(user_id=user_id, items=items)
+        self.payment_service.charge(user_id, order.calculate_total())
+        self.order_repo.save(order)
+        self.event_bus.publish("order.placed", {"order_id": order.id})
+        return order
+
+# Layer 3: Interface / Controllers — HTTP, CLI, gRPC
+@app.post("/orders")
+def create_order(body: OrderRequest, user=Depends(get_current_user)):
+    use_case = PlaceOrderUseCase(
+        order_repo=PostgresOrderRepo(db),
+        payment_service=StripePaymentService(),
+        event_bus=KafkaEventBus(),
+    )
+    order = use_case.execute(user.id, body.items)
+    return OrderResponse.from_domain(order)
+
+# Layer 4: Infrastructure — DB, HTTP clients, message brokers
+# (PostgresOrderRepo, StripePaymentService, KafkaEventBus)
+# These implement the interfaces defined in Layer 2
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 34 -->
+<section id="s34">
+  <div class="section-label">Section 34</div>
+  <h2 class="section-title orange">Database Migrations &amp; Schema Management</h2>
+
+  <h3 class="orange">Alembic — Python Database Migrations</h3>
+<pre class="orange">
+# Setup
+pip install alembic
+alembic init migrations
+
+# alembic/env.py — point to your models
+from myapp.models import Base
+target_metadata = Base.metadata
+
+# Create a migration (auto-detect changes)
+alembic revision --autogenerate -m "add users table"
+
+# Generated migration file
+def upgrade():
+    op.create_table(
+        'users',
+        sa.Column('id',         sa.Integer(), primary_key=True),
+        sa.Column('email',      sa.String(255), nullable=False),
+        sa.Column('created_at', sa.DateTime(), server_default=sa.func.now()),
+    )
+    op.create_index('ix_users_email', 'users', ['email'], unique=True)
+
+def downgrade():
+    op.drop_index('ix_users_email', 'users')
+    op.drop_table('users')
+
+# Apply migrations
+alembic upgrade head
+
+# Rollback one step
+alembic downgrade -1
+
+# Check current version
+alembic current
+
+# Show migration history
+alembic history --verbose
+</pre>
+
+  <h3 class="orange">Zero-Downtime Migration Patterns</h3>
+<pre class="orange">
+# Pattern 1: Adding a column — safe, always backwards compatible
+def upgrade():
+    op.add_column('users',
+        sa.Column('phone', sa.String(20), nullable=True)  # nullable first!
+    )
+
+# Pattern 2: Renaming a column — requires 3 steps over 3 deploys
+# Step 1: Add new column, write to both
+op.add_column('users', sa.Column('full_name', sa.String(200)))
+
+# Step 2: Backfill data in background job
+# UPDATE users SET full_name = name WHERE full_name IS NULL
+
+# Step 3: Remove old column after all deploys are stable
+op.drop_column('users', 'name')
+
+# Pattern 3: Adding NOT NULL constraint — fill defaults first
+def upgrade():
+    # 1. Add column as nullable
+    op.add_column('orders', sa.Column('currency', sa.String(3), nullable=True))
+    # 2. Backfill
+    op.execute("UPDATE orders SET currency = 'INR' WHERE currency IS NULL")
+    # 3. Apply constraint
+    op.alter_column('orders', 'currency', nullable=False)
+
+# Pattern 4: Creating index — without locking the table (Postgres)
+def upgrade():
+    op.execute("CREATE INDEX CONCURRENTLY idx_orders_user_id ON orders(user_id)")
+</pre>
+
+  <h3 class="orange">Prisma Schema (Node.js)</h3>
+<pre class="orange">
+// schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  role      Role     @default(USER)
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    Int
+  status    OrderStatus @default(PENDING)
+  total     Decimal     @db.Decimal(10, 2)
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+}
+
+enum Role        { USER ADMIN SUPERADMIN }
+enum OrderStatus { PENDING PROCESSING SHIPPED DELIVERED CANCELLED }
+
+// Generate migration
+// npx prisma migrate dev --name add_orders_table
+// npx prisma migrate deploy  (production)
+</pre>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 35 -->
+<section id="s35">
+  <div class="section-label">Section 35</div>
+  <h2 class="section-title purple">Interview Preparation — Backend Engineering</h2>
+
+  <h3 class="purple">System Design Interview — Framework</h3>
+  <div class="card-grid">
+    <div class="card purple"><div class="card-title">1. Clarify Requirements</div><p>Functional (what it does) vs non-functional (scale, latency, availability). Ask: DAU, read/write ratio, data size, SLA.</p></div>
+    <div class="card purple"><div class="card-title">2. Capacity Estimation</div><p>QPS, storage, bandwidth. 1M DAU × 10 requests = 10M req/day ≈ 115 req/sec.</p></div>
+    <div class="card purple"><div class="card-title">3. High-Level Design</div><p>Clients → LB → App servers → Cache → DB. Draw the boxes. Identify data flow.</p></div>
+    <div class="card purple"><div class="card-title">4. Deep Dive</div><p>Pick the hardest part. DB schema, API design, concurrency, failure handling. Go deep.</p></div>
+  </div>
+
+  <h3 class="purple">Classic System Design Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Key Concepts</th></tr>
+    <tr><td>Design URL Shortener</td><td>Base62 encoding, hash collision handling, Redis cache, DB sharding by short code</td></tr>
+    <tr><td>Design Twitter Feed</td><td>Fan-out on write vs read, celebrity problem, timeline cache, pub/sub</td></tr>
+    <tr><td>Design Rate Limiter</td><td>Token bucket, sliding window, Redis INCR + EXPIRE, distributed sync</td></tr>
+    <tr><td>Design Notification System</td><td>Push/email/SMS, fan-out, priority queues, delivery tracking, retry</td></tr>
+    <tr><td>Design File Storage (Dropbox)</td><td>Chunked upload, dedup with hash, CDN, metadata DB, presigned URLs</td></tr>
+    <tr><td>Design Chat System</td><td>WebSocket, message ordering, read receipts, group chats, offline storage</td></tr>
+    <tr><td>Design Payment System</td><td>Idempotency, ACID, two-phase commit, eventual consistency, audit log</td></tr>
+    <tr><td>Design Search Autocomplete</td><td>Trie, top-K tracking, Redis sorted sets, CDN for popular prefixes</td></tr>
+  </table>
+
+  <h3 class="purple">Coding Interview — Common Backend Patterns</h3>
+<pre class="purple">
+# ── Pattern: Rate Limiter with Token Bucket ──
+class TokenBucket:
+    def __init__(self, capacity: int, refill_rate: float):
+        """capacity: max tokens; refill_rate: tokens per second"""
+        self.capacity = capacity
+        self.tokens = capacity
+        self.refill_rate = refill_rate
+        self.last_refill = time.monotonic()
+
+    def consume(self, tokens: int = 1) -> bool:
+        now = time.monotonic()
+        elapsed = now - self.last_refill
+        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
+        self.last_refill = now
+
+        if self.tokens >= tokens:
+            self.tokens -= tokens
+            return True   # allowed
+        return False      # denied
+
+# ── Pattern: Consistent Hashing ──
+import hashlib, bisect
+
+class ConsistentHash:
+    def __init__(self, nodes: list[str], replicas: int = 100):
+        self.replicas = replicas
+        self.ring: dict[int, str] = {}
+        self.sorted_keys: list[int] = []
+        for node in nodes:
+            self.add_node(node)
+
+    def add_node(self, node: str):
+        for i in range(self.replicas):
+            key = self._hash(f"{node}:{i}")
+            self.ring[key] = node
+            bisect.insort(self.sorted_keys, key)
+
+    def get_node(self, key: str) -> str:
+        h = self._hash(key)
+        idx = bisect.bisect_right(self.sorted_keys, h) % len(self.sorted_keys)
+        return self.ring[self.sorted_keys[idx]]
+
+    def _hash(self, key: str) -> int:
+        return int(hashlib.md5(key.encode()).hexdigest(), 16)
+
+# ── Pattern: Distributed Lock with Redis ──
+import uuid
+
+def acquire_lock(redis_client, lock_name: str, ttl: int = 30) -> str | None:
+    lock_id = str(uuid.uuid4())
+    acquired = redis_client.set(
+        f"lock:{lock_name}", lock_id,
+        nx=True,        # only set if not exists
+        ex=ttl,         # auto-expire
+    )
+    return lock_id if acquired else None
+
+def release_lock(redis_client, lock_name: str, lock_id: str):
+    # Lua script for atomic check-and-delete
+    script = """
+    if redis.call('GET', KEYS[1]) == ARGV[1] then
+        return redis.call('DEL', KEYS[1])
+    else
+        return 0
+    end
+    """
+    redis_client.eval(script, 1, f"lock:{lock_name}", lock_id)
+</pre>
+
+  <h3 class="purple">Behavioural Questions — Backend Focus</h3>
+  <table>
+    <tr><th>Question</th><th>What They're Testing</th></tr>
+    <tr><td>Tell me about a performance issue you solved</td><td>Systematic debugging, metrics-driven, root cause analysis</td></tr>
+    <tr><td>Describe a production incident you handled</td><td>Calm under pressure, communication, post-mortems</td></tr>
+    <tr><td>How do you decide between SQL and NoSQL?</td><td>Trade-off thinking, not dogmatic</td></tr>
+    <tr><td>When would you NOT use microservices?</td><td>Mature judgment — they want engineers who've felt the pain</td></tr>
+    <tr><td>How did you ensure a critical migration had no downtime?</td><td>Planning, rollback strategy, monitoring</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>Interview tip:</strong> Always think out loud. State your assumptions. Propose multiple approaches before picking one. Interviewers value reasoning over memorized answers.
+  </div>
+</section>
+
+<!-- ─────────────────────────────────── SECTION 36 -->
+<section id="s36">
+  <div class="section-label">Section 36</div>
+  <h2 class="section-title">Webhooks, Polling &amp; Third-Party Integrations</h2>
+
+  <h3>Webhook Receiver — Verify Signature</h3>
+<pre>
+import hmac, hashlib
+
+# Every major provider (Stripe, GitHub, Twilio) signs webhook payloads
+# Always verify the signature before processing!
+
+def verify_stripe_webhook(payload: bytes, sig_header: str, secret: str) -> bool:
+    """Stripe sends: Stripe-Signature: t=timestamp,v1=hash"""
+    parts = dict(item.split("=", 1) for item in sig_header.split(","))
+    timestamp = parts.get("t")
+    signature = parts.get("v1")
+
+    signed_payload = f"{timestamp}.{payload.decode()}"
+    expected = hmac.new(
+        secret.encode(), signed_payload.encode(), hashlib.sha256
+    ).hexdigest()
+
+    # Constant-time comparison to prevent timing attacks
+    if not hmac.compare_digest(expected, signature):
+        raise ValueError("Invalid webhook signature")
+
+    # Reject replays older than 5 minutes
+    if abs(time.time() - int(timestamp)) > 300:
+        raise ValueError("Webhook timestamp too old")
+
+    return True
+
+@app.post("/webhooks/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig = request.headers.get("stripe-signature", "")
+
+    try:
+        verify_stripe_webhook(payload, sig, os.getenv("STRIPE_WEBHOOK_SECRET"))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+    event = json.loads(payload)
+
+    # Idempotency: skip if already processed
+    if await redis.get(f"webhook:{event['id']}"):
+        return {"status": "already_processed"}
+
+    await redis.setex(f"webhook:{event['id']}", 86400, "1")
+
+    # Process asynchronously
+    handle_stripe_event.delay(event)
+
+    return {"status": "ok"}  # Return 200 FAST — Stripe retries on timeout
+</pre>
+
+  <h3>Polling vs Webhooks vs WebSockets</h3>
+  <table>
+    <tr><th>Pattern</th><th>How</th><th>Latency</th><th>Server Load</th><th>Use When</th></tr>
+    <tr><td>Short Polling</td><td>Client asks every N seconds</td><td>Up to N seconds</td><td>High (wasted calls)</td><td>Simple, infrequent updates</td></tr>
+    <tr><td>Long Polling</td><td>Server holds connection until data available</td><td>Near-real-time</td><td>Medium (open connections)</td><td>Can't use WebSockets</td></tr>
+    <tr><td>Webhooks</td><td>Third party pushes to your endpoint</td><td>Near-real-time</td><td>Low (event-driven)</td><td>Receiving events from 3rd parties</td></tr>
+    <tr><td>SSE</td><td>Server streams to client</td><td>Real-time</td><td>Low-medium</td><td>Server→client only (live feeds)</td></tr>
+    <tr><td>WebSocket</td><td>Persistent bidirectional socket</td><td>Real-time</td><td>Medium (connections)</td><td>Chat, gaming, collab editing</td></tr>
+  </table>
+
+  <h3>Outbound Webhook Delivery System</h3>
+<pre>
+# Reliable webhook delivery with retries and exponential backoff
+import httpx, asyncio
+
+RETRY_DELAYS = [10, 30, 60, 300, 1800]  # seconds: 10s, 30s, 1m, 5m, 30m
+
+async def deliver_webhook(endpoint_url: str, payload: dict, attempt: int = 0):
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(
+                endpoint_url,
+                json=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Webhook-ID": payload["webhook_id"],
+                    "X-Signature":  sign_payload(payload),
+                }
+            )
+            if response.status_code < 300:
+                await log_delivery_success(payload["webhook_id"])
+                return
+
+            # 4xx — don't retry (endpoint misconfigured)
+            if 400 <= response.status_code < 500:
+                await log_delivery_failed(payload["webhook_id"], "4xx error", final=True)
+                return
+
+    except (httpx.TimeoutException, httpx.ConnectError) as e:
+        pass  # fall through to retry logic
+
+    # Retry with exponential backoff
+    if attempt < len(RETRY_DELAYS):
+        delay = RETRY_DELAYS[attempt]
+        await asyncio.sleep(delay)
+        await deliver_webhook(endpoint_url, payload, attempt + 1)
+    else:
+        await log_delivery_failed(payload["webhook_id"], "max retries", final=True)
+</pre>
+</section>
+
+</main>
+
+<footer>
+  Backend Engineer Complete Guide · Built for deep study · All code examples for educational purposes
+</footer>
+
+</body>
+</html>

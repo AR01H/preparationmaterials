@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat System Architecture – End to End</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d12;
+    --surface: #111520;
+    --surface2: #161c2b;
+    --border: #1f2d45;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --accent5: #ef4444;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --nav-w: 280px;
+    --header-h: 60px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--nav-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 10;
+  }
+
+  .sidebar-logo h1 {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .sidebar-logo p { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+  .nav-group { padding: 12px 0 4px; }
+
+  .nav-group-label {
+    padding: 4px 20px 6px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: var(--text);
+    background: rgba(0,229,255,0.05);
+    border-left-color: var(--accent);
+  }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  #main {
+    margin-left: var(--nav-w);
+    flex: 1;
+    max-width: calc(100vw - var(--nav-w));
+  }
+
+  .top-bar {
+    position: sticky;
+    top: 0;
+    background: rgba(10,13,18,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    z-index: 50;
+    gap: 12px;
+  }
+
+  .top-bar-title { font-size: 14px; font-weight: 600; color: var(--text-dim); }
+  .top-bar-title span { color: var(--accent); }
+
+  .badge {
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.25);
+    color: var(--accent);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 60px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .section-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .section-title { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.1; }
+  .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── ARCH DIAGRAM ── */
+  .arch-diagram {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: 700px;
+    flex-wrap: nowrap;
+  }
+
+  .arch-layer {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .arch-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .arch-box:hover { border-color: var(--accent); }
+
+  .arch-box-icon { font-size: 22px; margin-bottom: 6px; }
+  .arch-box-title { font-size: 12px; font-weight: 700; color: var(--text); }
+  .arch-box-sub { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+
+  .arch-arrow {
+    flex-shrink: 0;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 18px;
+  }
+
+  /* ── CARDS GRID ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .card-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  .card ul { margin-top: 10px; padding-left: 0; list-style: none; }
+  .card ul li {
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 3px 0;
+    padding-left: 14px;
+    position: relative;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .card ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 9px; top: 4px; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  td {
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+  td:first-child { color: var(--text); font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── FLOW STEPS ── */
+  .flow { display: flex; flex-direction: column; gap: 0; }
+
+  .flow-step {
+    display: flex;
+    gap: 16px;
+    position: relative;
+  }
+
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 40px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .flow-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    flex: 1;
+    margin-bottom: 10px;
+  }
+
+  .flow-content h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .flow-content p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .flow-content code {
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.15);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── DB SCHEMA ── */
+  .schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+  .schema-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .schema-table-head {
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .schema-table-head span { font-size: 14px; }
+
+  .schema-col {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 14px;
+    font-size: 11px;
+    border-bottom: 1px solid rgba(31,45,69,0.5);
+  }
+
+  .schema-col:last-child { border-bottom: none; }
+
+  .col-name { font-family: 'JetBrains Mono', monospace; color: var(--text-dim); }
+  .col-type { font-family: 'JetBrains Mono', monospace; color: var(--accent4); font-size: 10px; }
+  .col-pk { color: var(--accent); font-size: 9px; font-weight: 700; }
+  .col-fk { color: var(--accent2); font-size: 9px; }
+
+  /* ── INFRA LAYERS ── */
+  .infra-stack { display: flex; flex-direction: column; gap: 12px; }
+  
+  .infra-layer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .infra-layer-icon { font-size: 24px; flex-shrink: 0; }
+  .infra-layer-name { font-size: 13px; font-weight: 700; flex: 0 0 180px; }
+  .infra-layer-tech {
+    display: flex; flex-wrap: wrap; gap: 6px; flex: 1;
+  }
+
+  .tech-chip {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    border: 1px solid;
+  }
+
+  /* colors */
+  .c-cyan { color: var(--accent); border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.07); }
+  .c-purple { color: #a78bfa; border-color: rgba(124,58,237,0.35); background: rgba(124,58,237,0.08); }
+  .c-green { color: var(--accent3); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.07); }
+  .c-amber { color: var(--accent4); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); }
+  .c-red { color: var(--accent5); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.07); }
+  .c-blue { color: #60a5fa; border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.07); }
+
+  /* ── SCALE CALC ── */
+  .scale-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+
+  .scale-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+
+  .scale-card .num { font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+  .scale-card .label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── SECURITY ── */
+  .sec-list { display: flex; flex-direction: column; gap: 10px; }
+  .sec-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .sec-item-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .sec-item-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .sec-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── HERO ── */
+  #hero {
+    padding: 60px 40px 50px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(0,229,255,0.03) 0%, rgba(124,58,237,0.03) 100%);
+  }
+
+  .hero-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #e2e8f0 40%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-desc { font-size: 15px; color: var(--text-muted); max-width: 600px; line-height: 1.6; margin-bottom: 28px; }
+
+  .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .hero-tag {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── HIGHLIGHT BOX ── */
+  .highlight-box {
+    background: rgba(0,229,255,0.05);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .highlight-box h4 { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .highlight-box p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  /* responsive */
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-100%); }
+    #main { margin-left: 0; max-width: 100vw; }
+    .hero-title { font-size: 28px; }
+    .section { padding: 40px 20px; }
+  }
+
+  .section-num {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .ws-diagram {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .ws-diagram .hl { color: var(--accent); }
+  .ws-diagram .hl2 { color: var(--accent3); }
+  .ws-diagram .hl3 { color: var(--accent4); }
+  .ws-diagram .hl4 { color: #a78bfa; }
+
+  footer {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <h1>💬 ChatSys Arch</h1>
+    <p>End-to-End System Design</p>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Overview</div>
+    <a class="nav-item active" href="#hero"><span class="nav-dot" style="background:#00e5ff"></span> Introduction</a>
+    <a class="nav-item" href="#overview"><span class="nav-dot" style="background:#00e5ff"></span> System Overview</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Frontend</div>
+    <a class="nav-item" href="#frontend"><span class="nav-dot" style="background:#a78bfa"></span> Architecture</a>
+    <a class="nav-item" href="#ui-components"><span class="nav-dot" style="background:#a78bfa"></span> UI Components</a>
+    <a class="nav-item" href="#state-mgmt"><span class="nav-dot" style="background:#a78bfa"></span> State Management</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Backend</div>
+    <a class="nav-item" href="#backend"><span class="nav-dot" style="background:#10b981"></span> Services</a>
+    <a class="nav-item" href="#websocket"><span class="nav-dot" style="background:#10b981"></span> WebSocket Layer</a>
+    <a class="nav-item" href="#media"><span class="nav-dot" style="background:#10b981"></span> Media Service</a>
+    <a class="nav-item" href="#notifications"><span class="nav-dot" style="background:#10b981"></span> Notifications</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Data Layer</div>
+    <a class="nav-item" href="#database"><span class="nav-dot" style="background:#f59e0b"></span> Databases</a>
+    <a class="nav-item" href="#schema"><span class="nav-dot" style="background:#f59e0b"></span> DB Schema</a>
+    <a class="nav-item" href="#caching"><span class="nav-dot" style="background:#f59e0b"></span> Caching</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Infrastructure</div>
+    <a class="nav-item" href="#infra"><span class="nav-dot" style="background:#60a5fa"></span> Infra Stack</a>
+    <a class="nav-item" href="#scaling"><span class="nav-dot" style="background:#60a5fa"></span> Scaling Strategy</a>
+    <a class="nav-item" href="#security"><span class="nav-dot" style="background:#ef4444"></span> Security</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Deep Dives</div>
+    <a class="nav-item" href="#msg-flow"><span class="nav-dot" style="background:#00e5ff"></span> Message Flow</a>
+    <a class="nav-item" href="#group-chat"><span class="nav-dot" style="background:#00e5ff"></span> Group Chat</a>
+    <a class="nav-item" href="#encryption"><span class="nav-dot" style="background:#ef4444"></span> E2E Encryption</a>
+    <a class="nav-item" href="#tradeoffs"><span class="nav-dot" style="background:#94a3b8"></span> Trade-offs</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Features</div>
+    <a class="nav-item" href="#user-settings"><span class="nav-dot" style="background:#f59e0b"></span> User Settings</a>
+    <a class="nav-item" href="#stories"><span class="nav-dot" style="background:#a78bfa"></span> Stories / Status</a>
+    <a class="nav-item" href="#broadcast"><span class="nav-dot" style="background:#10b981"></span> Broadcast Lists</a>
+    <a class="nav-item" href="#calls"><span class="nav-dot" style="background:#00e5ff"></span> Voice & Video Calls</a>
+    <a class="nav-item" href="#disappearing"><span class="nav-dot" style="background:#ef4444"></span> Disappearing Msgs</a>
+    <a class="nav-item" href="#reactions"><span class="nav-dot" style="background:#f59e0b"></span> Reactions & Polls</a>
+    <a class="nav-item" href="#backup"><span class="nav-dot" style="background:#60a5fa"></span> Chat Backup</a>
+    <a class="nav-item" href="#multidevice"><span class="nav-dot" style="background:#10b981"></span> Multi-Device</a>
+    <a class="nav-item" href="#privacy-settings"><span class="nav-dot" style="background:#ef4444"></span> Privacy Controls</a>
+    <a class="nav-item" href="#business"><span class="nav-dot" style="background:#f59e0b"></span> Business API</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Mobile App Dev</div>
+    <a class="nav-item" href="#mobile-overview"><span class="nav-dot" style="background:#00e5ff"></span> Mobile Architecture</a>
+    <a class="nav-item" href="#ios-arch"><span class="nav-dot" style="background:#a78bfa"></span> iOS Architecture</a>
+    <a class="nav-item" href="#android-arch"><span class="nav-dot" style="background:#10b981"></span> Android Architecture</a>
+    <a class="nav-item" href="#cross-platform"><span class="nav-dot" style="background:#f59e0b"></span> Cross-Platform (RN/Flutter)</a>
+    <a class="nav-item" href="#local-db"><span class="nav-dot" style="background:#60a5fa"></span> Local DB & Storage</a>
+    <a class="nav-item" href="#mobile-network"><span class="nav-dot" style="background:#10b981"></span> Network Layer</a>
+    <a class="nav-item" href="#mobile-push"><span class="nav-dot" style="background:#ef4444"></span> Push & Background</a>
+    <a class="nav-item" href="#mobile-media"><span class="nav-dot" style="background:#a78bfa"></span> Media Handling</a>
+    <a class="nav-item" href="#mobile-perf"><span class="nav-dot" style="background:#f59e0b"></span> Performance</a>
+    <a class="nav-item" href="#mobile-testing"><span class="nav-dot" style="background:#94a3b8"></span> Testing Strategy</a>
+    <a class="nav-item" href="#mobile-release"><span class="nav-dot" style="background:#00e5ff"></span> Release & CI/CD</a>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<main id="main">
+
+  <div class="top-bar">
+    <div class="top-bar-title">Chat System — <span>End-to-End Architecture</span></div>
+    <div class="badge">WhatsApp Scale</div>
+    <div class="badge">2B+ Users</div>
+  </div>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-eyebrow">System Design Reference</div>
+    <div class="hero-title">WhatsApp-Scale<br>Chat Architecture</div>
+    <div class="hero-desc">
+      A complete end-to-end system design covering frontend, backend microservices, database schema, WebSocket layer, media storage, caching, scaling, and security — ready for interviews and production.
+    </div>
+    <div class="hero-tags">
+      <span class="hero-tag c-cyan">Real-Time Messaging</span>
+      <span class="hero-tag c-purple">Group Chats</span>
+      <span class="hero-tag c-green">Media Upload</span>
+      <span class="hero-tag c-amber">E2E Encryption</span>
+      <span class="hero-tag c-blue">Push Notifications</span>
+      <span class="hero-tag c-red">Horizontal Scaling</span>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 1: SYSTEM OVERVIEW ══ -->
+  <section id="overview" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,229,255,0.1)">🗺️</div>
+      <div>
+        <div class="section-num">01</div>
+        <div class="section-title">System Overview</div>
+        <div class="section-sub">High-level architecture — client to data store</div>
+      </div>
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-flow">
+        <div class="arch-layer">
+          <div class="arch-box">
+            <div class="arch-box-icon">📱</div>
+            <div class="arch-box-title">Clients</div>
+            <div class="arch-box-sub">Web / iOS / Android</div>
+          </div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-layer">
+          <div class="arch-box">
+            <div class="arch-box-icon">🌐</div>
+            <div class="arch-box-title">CDN + Load Balancer</div>
+            <div class="arch-box-sub">CloudFront / Nginx</div>
+          </div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-layer">
+          <div class="arch-box">
+            <div class="arch-box-icon">🔌</div>
+            <div class="arch-box-title">API Gateway</div>
+            <div class="arch-box-sub">REST + WebSocket</div>
+          </div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-layer">
+          <div class="arch-box">
+            <div class="arch-box-icon">⚙️</div>
+            <div class="arch-box-title">Microservices</div>
+            <div class="arch-box-sub">Auth / Chat / Media</div>
+          </div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-layer">
+          <div class="arch-box">
+            <div class="arch-box-icon">🗄️</div>
+            <div class="arch-box-title">Data Layer</div>
+            <div class="arch-box-sub">DB + Cache + Queue</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-cyan">Protocol</div>
+        <h3>Communication Layer</h3>
+        <p>Dual protocol design — HTTP/2 for REST APIs, WebSocket (WS) for real-time messaging. XMPP considered but WebSocket preferred for web clients.</p>
+        <ul>
+          <li>REST — auth, profile, history</li>
+          <li>WebSocket — live messages, typing, presence</li>
+          <li>HTTP/2 Push — notifications fallback</li>
+          <li>QUIC/HTTP3 — mobile networks</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Delivery</div>
+        <h3>Message Guarantees</h3>
+        <p>At-least-once delivery with client-side deduplication using message IDs. Exactly-once semantics enforced via idempotency keys.</p>
+        <ul>
+          <li>Client generates UUID per message</li>
+          <li>Server deduplicates on UUID</li>
+          <li>ACK-based receipt system</li>
+          <li>Retry with exponential backoff</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-purple">Scale Numbers</div>
+        <h3>Target Scale</h3>
+        <p>Designed for WhatsApp-scale — 2B users, 100B messages/day, 65B messages active daily.</p>
+        <ul>
+          <li>100M concurrent connections</li>
+          <li>~1M messages/second peak</li>
+          <li>500ms p99 delivery latency</li>
+          <li>99.99% availability SLA</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 2: FRONTEND ══ -->
+  <section id="frontend" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.15)">🖥️</div>
+      <div>
+        <div class="section-num">02</div>
+        <div class="section-title">Frontend Architecture</div>
+        <div class="section-sub">React + TypeScript, real-time via WebSocket</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-purple">Stack</div>
+        <h3>Tech Choices</h3>
+        <ul>
+          <li>React 18 + TypeScript</li>
+          <li>Redux Toolkit (state)</li>
+          <li>React Query (server state)</li>
+          <li>Socket.io-client (WS)</li>
+          <li>Vite (build tool)</li>
+          <li>TailwindCSS (styling)</li>
+          <li>IndexedDB (offline store)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Architecture</div>
+        <h3>Folder Structure</h3>
+        <ul>
+          <li>features/ (chat, auth, media)</li>
+          <li>components/ (shared UI)</li>
+          <li>services/ (API, socket)</li>
+          <li>store/ (Redux slices)</li>
+          <li>hooks/ (custom hooks)</li>
+          <li>workers/ (service worker)</li>
+          <li>utils/ (crypto, format)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Performance</div>
+        <h3>Optimization</h3>
+        <ul>
+          <li>Virtual list (react-window)</li>
+          <li>Message lazy loading</li>
+          <li>Image lazy + WebP</li>
+          <li>Service Worker cache</li>
+          <li>Code split per route</li>
+          <li>Memoized selectors</li>
+          <li>Debounced typing events</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- UI COMPONENTS -->
+  <section id="ui-components" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.15)">🧩</div>
+      <div>
+        <div class="section-num">02b</div>
+        <div class="section-title">UI Components</div>
+        <div class="section-sub">Key screens and their responsibilities</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Responsibility</th>
+            <th>Key Features</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>ChatList</td><td>Left panel — all conversations sorted by recency</td><td>Unread badge, last message preview, online indicator, search filter</td></tr>
+          <tr><td>ChatWindow</td><td>Message thread for selected conversation</td><td>Virtualized scroll, date separators, scroll-to-bottom, jump to unread</td></tr>
+          <tr><td>MessageBubble</td><td>Individual message with metadata</td><td>Tick indicators (sent/delivered/read), reactions, reply thread</td></tr>
+          <tr><td>InputBar</td><td>Compose area with attachment options</td><td>Text, emoji picker, file attach, voice record, image preview</td></tr>
+          <tr><td>MediaViewer</td><td>Full-screen image/video viewer</td><td>Zoom, download, share, forward</td></tr>
+          <tr><td>GroupInfo</td><td>Group settings panel</td><td>Add/remove members, admin controls, group photo, description</td></tr>
+          <tr><td>ContactInfo</td><td>Profile & chat settings</td><td>Mute, block, clear chat, shared media gallery</td></tr>
+          <tr><td>StatusBar</td><td>WhatsApp Stories/Status</td><td>24h expiry, view count, ring animation</td></tr>
+          <tr><td>CallScreen</td><td>Voice/Video call UI</td><td>WebRTC, mute, camera toggle, speaker, screen share</td></tr>
+          <tr><td>SearchOverlay</td><td>Global search</td><td>Message search across all chats with highlights</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- STATE MANAGEMENT -->
+  <section id="state-mgmt" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.15)">🔄</div>
+      <div>
+        <div class="section-num">02c</div>
+        <div class="section-title">State Management</div>
+        <div class="section-sub">Redux slices + React Query + IndexedDB</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-tag c-purple">Redux Store Slices</div>
+        <h3>Global State</h3>
+        <ul>
+          <li>authSlice — user, token, session</li>
+          <li>chatsSlice — conversation list, metadata</li>
+          <li>messagesSlice — normalized by chatId</li>
+          <li>presenceSlice — online/offline/typing</li>
+          <li>mediaSlice — upload progress, queue</li>
+          <li>notifSlice — unread counts</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-amber">Persistence</div>
+        <h3>Offline Support</h3>
+        <p>IndexedDB (via Dexie.js) stores last 50 messages per chat locally. Service Worker intercepts API calls and returns cached data when offline.</p>
+        <ul>
+          <li>Optimistic UI for sent messages</li>
+          <li>Outbox queue for offline sends</li>
+          <li>Background sync on reconnect</li>
+          <li>Encrypted local storage</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 3: BACKEND ══ -->
+  <section id="backend" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">⚙️</div>
+      <div>
+        <div class="section-num">03</div>
+        <div class="section-title">Backend Microservices</div>
+        <div class="section-sub">Node.js / Go services behind API Gateway</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-green">Auth Service</div>
+        <h3>Authentication & Identity</h3>
+        <p>Phone-number based auth with OTP (Twilio/AWS SNS). JWT access tokens (15min) + Refresh tokens (30 days).</p>
+        <ul>
+          <li>POST /auth/send-otp</li>
+          <li>POST /auth/verify-otp</li>
+          <li>POST /auth/refresh-token</li>
+          <li>POST /auth/logout</li>
+          <li>Rate limit: 5 OTPs/hour/IP</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Chat Service</div>
+        <h3>Message Handling</h3>
+        <p>Core service — creates/retrieves conversations, stores messages, handles status updates.</p>
+        <ul>
+          <li>POST /messages — send message</li>
+          <li>GET /chats/:id/messages — history</li>
+          <li>PATCH /messages/:id/status</li>
+          <li>DELETE /messages/:id</li>
+          <li>POST /messages/:id/react</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-purple">User Service</div>
+        <h3>Profiles & Contacts</h3>
+        <ul>
+          <li>GET/PUT /users/profile</li>
+          <li>GET /users/contacts</li>
+          <li>POST /users/block</li>
+          <li>GET /users/:id/status</li>
+          <li>PUT /users/privacy-settings</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-amber">Group Service</div>
+        <h3>Group Management</h3>
+        <ul>
+          <li>POST /groups — create group</li>
+          <li>POST /groups/:id/members</li>
+          <li>DELETE /groups/:id/members</li>
+          <li>PUT /groups/:id/admins</li>
+          <li>PUT /groups/:id (update info)</li>
+          <li>Max 1024 members/group</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-blue">Media Service</div>
+        <h3>File Upload & Delivery</h3>
+        <ul>
+          <li>POST /media/upload (presigned S3)</li>
+          <li>GET /media/:id (signed URL)</li>
+          <li>Auto-compress images (WebP)</li>
+          <li>Virus scan on upload</li>
+          <li>Max: 100MB video, 16MB doc</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-red">Search Service</div>
+        <h3>Full-text Search</h3>
+        <ul>
+          <li>Elasticsearch backend</li>
+          <li>Message content search</li>
+          <li>Contact/group search</li>
+          <li>Media filename search</li>
+          <li>Encrypted index (tokenized)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEBSOCKET -->
+  <section id="websocket" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">🔌</div>
+      <div>
+        <div class="section-num">03b</div>
+        <div class="section-title">WebSocket Layer</div>
+        <div class="section-sub">Real-time bi-directional communication at scale</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>Connection Strategy</h4>
+      <p>Each WebSocket server manages ~50K concurrent connections. Users connect to the nearest WS server (via geo-DNS). Redis Pub/Sub broadcasts events across WS servers. Sticky sessions via consistent hashing ensure the same user reconnects to the same server.</p>
+    </div>
+
+    <div class="ws-diagram"><span class="hl">Client</span>          <span class="hl2">WS Server (Node.js)</span>       <span class="hl3">Redis Pub/Sub</span>      <span class="hl4">Other WS Servers</span>
+  │                    │                          │                    │
+  │──── connect() ────▶│                          │                    │
+  │◀─── auth_req ──────│                          │                    │
+  │──── send JWT ─────▶│                          │                    │
+  │◀─── connected ─────│                          │                    │
+  │                    │                          │                    │
+  │──── msg_send ─────▶│──── publish(chatId) ────▶│──── broadcast ────▶│
+  │                    │                          │                    │
+  │◀─── msg_ack ───────│                          │                    │
+  │                    │                          │                    │
+  │      Events:       │   WS Event Types:        │                    │
+  │  message:new       │   user:online            │                    │
+  │  message:status    │   typing:start/stop      │                    │
+  │  typing:indicator  │   message:delivered      │                    │
+  │  presence:update   │   message:read           │                    │
+  │  call:incoming     │   group:updated          │                    │</div>
+
+    <div class="two-col" style="margin-top:20px">
+      <div class="card">
+        <div class="card-tag c-green">Event Types</div>
+        <h3>Client → Server</h3>
+        <ul>
+          <li>message:send — new message</li>
+          <li>message:read — mark read</li>
+          <li>typing:start / typing:stop</li>
+          <li>presence:ping — keep alive</li>
+          <li>call:initiate / call:end</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Fanout</div>
+        <h3>Message Fan-out</h3>
+        <p>For 1:1 chats — push to single user's WS session. For groups — Redis Pub/Sub fan-out to all member sessions. Groups &gt;500 use Kafka fan-out pipeline.</p>
+        <ul>
+          <li>Small group (&lt;50): direct WS push</li>
+          <li>Large group (&gt;50): Kafka consumer group</li>
+          <li>Offline users: push to notification queue</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEDIA SERVICE -->
+  <section id="media" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">🖼️</div>
+      <div>
+        <div class="section-num">03c</div>
+        <div class="section-title">Media Service</div>
+        <div class="section-sub">Images, videos, documents — upload, process, deliver</div>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num" style="background:rgba(0,229,255,0.1);border-color:rgba(0,229,255,0.3);color:var(--accent)">1</div>
+        <div class="flow-content">
+          <h4>Client Requests Upload URL</h4>
+          <p>Client POSTs to <code>/media/upload-url</code> with file type + size. Server validates and returns a <code>presigned S3 URL</code> valid for 5 minutes.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:var(--accent3)">2</div>
+        <div class="flow-content">
+          <h4>Client Uploads Directly to S3</h4>
+          <p>Client PUTs file directly to S3 using the presigned URL. This bypasses the backend entirely — zero server load for file transfer.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:var(--accent4)">3</div>
+        <div class="flow-content">
+          <h4>S3 Triggers Lambda (Processing)</h4>
+          <p>S3 event triggers Lambda function: runs virus scan (ClamAV), generates thumbnails (100px, 400px), converts to WebP, extracts metadata.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.3);color:#a78bfa">4</div>
+        <div class="flow-content">
+          <h4>Media Record Saved to DB</h4>
+          <p>Lambda saves <code>media_id</code>, URLs, thumbnails to PostgreSQL. Notifies media service via SQS message.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:rgba(0,229,255,0.1);border-color:rgba(0,229,255,0.3);color:var(--accent)">5</div>
+        <div class="flow-content">
+          <h4>Client Attaches Media to Message</h4>
+          <p>Client sends <code>message:send</code> via WebSocket with <code>media_id</code>. Recipients receive the signed CDN URL for delivery.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTIFICATIONS -->
+  <section id="notifications" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">🔔</div>
+      <div>
+        <div class="section-num">03d</div>
+        <div class="section-title">Push Notifications</div>
+        <div class="section-sub">FCM / APNs for offline users</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-amber">Flow</div>
+        <h3>Notification Pipeline</h3>
+        <p>When a recipient is offline, the message is queued in Kafka. A Notification Worker consumes the queue and sends via FCM (Android) or APNs (iOS). Web uses Web Push (VAPID).</p>
+        <ul>
+          <li>Message → Kafka topic: notifications</li>
+          <li>Worker checks: user online?</li>
+          <li>If offline → push via FCM/APNs</li>
+          <li>Notification includes: sender, preview</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-red">Privacy</div>
+        <h3>E2E Encrypted Notifications</h3>
+        <p>Push payload is minimal for privacy — only shows "You have a new message". Actual content is fetched from server only when app is opened. This respects E2E encryption.</p>
+        <ul>
+          <li>No message content in push payload</li>
+          <li>Badge count only</li>
+          <li>Silent push for background sync</li>
+          <li>Notification preferences: mute/custom</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ DATABASE ══ -->
+  <section id="database" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">🗄️</div>
+      <div>
+        <div class="section-num">04</div>
+        <div class="section-title">Database Choices</div>
+        <div class="section-sub">Polyglot persistence — right tool for right data</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Data Type</th><th>Database</th><th>Why</th><th>Alternatives</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Users / Profiles</td><td>PostgreSQL</td><td>ACID transactions, relations, flexible queries</td><td>MySQL, CockroachDB</td></tr>
+          <tr><td>Messages</td><td>Apache Cassandra</td><td>High write throughput, partitioned by chatId+time</td><td>ScyllaDB, DynamoDB</td></tr>
+          <tr><td>Media Metadata</td><td>PostgreSQL</td><td>Relational joins with messages, transactions</td><td>MongoDB</td></tr>
+          <tr><td>Sessions / Tokens</td><td>Redis</td><td>TTL support, fast O(1) lookups</td><td>Memcached</td></tr>
+          <tr><td>Presence / Online</td><td>Redis</td><td>Pub/Sub, ephemeral data, sorted sets</td><td>Hazelcast</td></tr>
+          <tr><td>Message Queue</td><td>Apache Kafka</td><td>High-throughput, durable, fan-out</td><td>RabbitMQ, SQS</td></tr>
+          <tr><td>Full-text Search</td><td>Elasticsearch</td><td>Inverted index, ranked search, fuzzy match</td><td>Solr, Meilisearch</td></tr>
+          <tr><td>Media Files</td><td>AWS S3 + CloudFront</td><td>Infinite scale, durability, global CDN</td><td>GCS, R2</td></tr>
+          <tr><td>Group metadata</td><td>PostgreSQL</td><td>Complex joins, consistency for membership</td><td>Cassandra (for large groups)</td></tr>
+          <tr><td>Contacts / Graph</td><td>PostgreSQL (initially)</td><td>Adjacency list; Neo4j for advanced social graph</td><td>Neo4j, TigerGraph</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- DB SCHEMA -->
+  <section id="schema" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">📊</div>
+      <div>
+        <div class="section-num">04b</div>
+        <div class="section-title">Database Schema</div>
+        <div class="section-sub">Core tables and their relations</div>
+      </div>
+    </div>
+
+    <div class="schema-grid">
+
+      <div class="schema-table">
+        <div class="schema-table-head"><span>👤</span> users</div>
+        <div class="schema-col"><span class="col-name">id</span><span><span class="col-pk">PK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">phone_number</span><span class="col-type">VARCHAR UNIQUE</span></div>
+        <div class="schema-col"><span class="col-name">display_name</span><span class="col-type">VARCHAR</span></div>
+        <div class="schema-col"><span class="col-name">avatar_url</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">bio</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">last_seen</span><span class="col-type">TIMESTAMP</span></div>
+        <div class="schema-col"><span class="col-name">public_key</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-table-head"><span>💬</span> conversations</div>
+        <div class="schema-col"><span class="col-name">id</span><span><span class="col-pk">PK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">type</span><span class="col-type">ENUM(direct,group)</span></div>
+        <div class="schema-col"><span class="col-name">group_id</span><span><span class="col-fk">FK</span> <span class="col-type">UUID NULL</span></span></div>
+        <div class="schema-col"><span class="col-name">last_message_id</span><span><span class="col-fk">FK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMP</span></div>
+        <div class="schema-col"><span class="col-name">updated_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-table-head"><span>📩</span> messages (Cassandra)</div>
+        <div class="schema-col"><span class="col-name">chat_id</span><span><span class="col-pk">PK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">message_id</span><span><span class="col-pk">PK</span> <span class="col-type">TIMEUUID</span></span></div>
+        <div class="schema-col"><span class="col-name">sender_id</span><span class="col-type">UUID</span></div>
+        <div class="schema-col"><span class="col-name">type</span><span class="col-type">ENUM(text,img,video,doc,audio)</span></div>
+        <div class="schema-col"><span class="col-name">content</span><span class="col-type">BLOB (encrypted)</span></div>
+        <div class="schema-col"><span class="col-name">media_id</span><span class="col-type">UUID NULL</span></div>
+        <div class="schema-col"><span class="col-name">reply_to_id</span><span class="col-type">UUID NULL</span></div>
+        <div class="schema-col"><span class="col-name">status</span><span class="col-type">ENUM(sent,dlvd,read)</span></div>
+        <div class="schema-col"><span class="col-name">reactions</span><span class="col-type">MAP&lt;uuid,text&gt;</span></div>
+        <div class="schema-col"><span class="col-name">deleted_at</span><span class="col-type">TIMESTAMP NULL</span></div>
+        <div class="schema-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-table-head"><span>👥</span> groups</div>
+        <div class="schema-col"><span class="col-name">id</span><span><span class="col-pk">PK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">name</span><span class="col-type">VARCHAR</span></div>
+        <div class="schema-col"><span class="col-name">description</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">avatar_url</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">created_by</span><span><span class="col-fk">FK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">invite_link</span><span class="col-type">VARCHAR UNIQUE</span></div>
+        <div class="schema-col"><span class="col-name">max_members</span><span class="col-type">INT DEFAULT 1024</span></div>
+        <div class="schema-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-table-head"><span>🤝</span> group_members</div>
+        <div class="schema-col"><span class="col-name">group_id</span><span><span class="col-pk">PK</span><span class="col-fk">FK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">user_id</span><span><span class="col-pk">PK</span><span class="col-fk">FK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">role</span><span class="col-type">ENUM(admin,member)</span></div>
+        <div class="schema-col"><span class="col-name">joined_at</span><span class="col-type">TIMESTAMP</span></div>
+        <div class="schema-col"><span class="col-name">last_read_msg_id</span><span class="col-type">UUID</span></div>
+        <div class="schema-col"><span class="col-name">muted_until</span><span class="col-type">TIMESTAMP NULL</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-table-head"><span>🖼️</span> media</div>
+        <div class="schema-col"><span class="col-name">id</span><span><span class="col-pk">PK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">uploader_id</span><span><span class="col-fk">FK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">type</span><span class="col-type">ENUM(image,video,audio,doc)</span></div>
+        <div class="schema-col"><span class="col-name">s3_key</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">thumbnail_key</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">size_bytes</span><span class="col-type">BIGINT</span></div>
+        <div class="schema-col"><span class="col-name">mime_type</span><span class="col-type">VARCHAR</span></div>
+        <div class="schema-col"><span class="col-name">width, height</span><span class="col-type">INT</span></div>
+        <div class="schema-col"><span class="col-name">duration_sec</span><span class="col-type">INT NULL</span></div>
+        <div class="schema-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-table-head"><span>📖</span> message_status (Cassandra)</div>
+        <div class="schema-col"><span class="col-name">message_id</span><span><span class="col-pk">PK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">user_id</span><span><span class="col-pk">PK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">status</span><span class="col-type">ENUM(delivered,read)</span></div>
+        <div class="schema-col"><span class="col-name">timestamp</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-table-head"><span>🚫</span> blocked_users</div>
+        <div class="schema-col"><span class="col-name">blocker_id</span><span><span class="col-pk">PK</span><span class="col-fk">FK</span></span></div>
+        <div class="schema-col"><span class="col-name">blocked_id</span><span><span class="col-pk">PK</span><span class="col-fk">FK</span></span></div>
+        <div class="schema-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CACHING -->
+  <section id="caching" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">⚡</div>
+      <div>
+        <div class="section-num">04c</div>
+        <div class="section-title">Caching Strategy</div>
+        <div class="section-sub">Redis layers for hot data</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cache Key Pattern</th><th>Data</th><th>TTL</th><th>Strategy</th></tr></thead>
+        <tbody>
+          <tr><td>session:{userId}</td><td>JWT refresh token, device info</td><td>30 days</td><td>Write-through on login</td></tr>
+          <tr><td>online:{userId}</td><td>Online status + last seen</td><td>60 sec (heartbeat)</td><td>Write on WS connect/ping</td></tr>
+          <tr><td>typing:{chatId}</td><td>Set of typing user IDs</td><td>5 seconds</td><td>Add/remove on typing events</td></tr>
+          <tr><td>chat:{chatId}:meta</td><td>Chat name, member count, last msg</td><td>5 min</td><td>Cache-aside, invalidate on update</td></tr>
+          <tr><td>user:{userId}:profile</td><td>Name, avatar, bio</td><td>10 min</td><td>Cache-aside</td></tr>
+          <tr><td>group:{groupId}:members</td><td>Member list (for fanout)</td><td>1 min</td><td>Cache-aside, invalidate on join/leave</td></tr>
+          <tr><td>media:{mediaId}:url</td><td>Signed CDN URL</td><td>1 hour</td><td>Cache signed URL validity - 10min</td></tr>
+          <tr><td>unread:{userId}:{chatId}</td><td>Unread message count</td><td>No TTL (persistent)</td><td>Increment on receive, reset on read</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ INFRA ══ -->
+  <section id="infra" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(96,165,250,0.1)">🏗️</div>
+      <div>
+        <div class="section-num">05</div>
+        <div class="section-title">Infrastructure Stack</div>
+        <div class="section-sub">Cloud-native deployment on AWS / Kubernetes</div>
+      </div>
+    </div>
+
+    <div class="infra-stack">
+      <div class="infra-layer">
+        <div class="infra-layer-icon">🌐</div>
+        <div class="infra-layer-name">Edge / CDN</div>
+        <div class="infra-layer-tech">
+          <span class="tech-chip c-cyan">CloudFront CDN</span>
+          <span class="tech-chip c-blue">Route 53 (Geo-DNS)</span>
+          <span class="tech-chip c-amber">WAF (DDoS protect)</span>
+          <span class="tech-chip c-green">TLS 1.3</span>
+        </div>
+      </div>
+      <div class="infra-layer">
+        <div class="infra-layer-icon">⚖️</div>
+        <div class="infra-layer-name">Load Balancing</div>
+        <div class="infra-layer-tech">
+          <span class="tech-chip c-purple">AWS ALB (HTTP)</span>
+          <span class="tech-chip c-purple">NLB (WebSocket)</span>
+          <span class="tech-chip c-cyan">Nginx (reverse proxy)</span>
+          <span class="tech-chip c-green">Sticky sessions</span>
+        </div>
+      </div>
+      <div class="infra-layer">
+        <div class="infra-layer-icon">📦</div>
+        <div class="infra-layer-name">Container Orchestration</div>
+        <div class="infra-layer-tech">
+          <span class="tech-chip c-blue">Kubernetes (EKS)</span>
+          <span class="tech-chip c-cyan">Docker</span>
+          <span class="tech-chip c-green">Helm Charts</span>
+          <span class="tech-chip c-amber">HPA (auto-scale)</span>
+          <span class="tech-chip c-purple">Service Mesh (Istio)</span>
+        </div>
+      </div>
+      <div class="infra-layer">
+        <div class="infra-layer-icon">💾</div>
+        <div class="infra-layer-name">Data Stores</div>
+        <div class="infra-layer-tech">
+          <span class="tech-chip c-amber">RDS PostgreSQL (Multi-AZ)</span>
+          <span class="tech-chip c-red">Cassandra (3x replication)</span>
+          <span class="tech-chip c-cyan">ElastiCache Redis (cluster)</span>
+          <span class="tech-chip c-green">S3 (11 nines durability)</span>
+          <span class="tech-chip c-purple">Elasticsearch (3-node)</span>
+        </div>
+      </div>
+      <div class="infra-layer">
+        <div class="infra-layer-icon">📨</div>
+        <div class="infra-layer-name">Messaging / Queuing</div>
+        <div class="infra-layer-tech">
+          <span class="tech-chip c-red">Apache Kafka (MSK)</span>
+          <span class="tech-chip c-amber">SQS (dead-letter)</span>
+          <span class="tech-chip c-blue">Redis Pub/Sub (WS fanout)</span>
+        </div>
+      </div>
+      <div class="infra-layer">
+        <div class="infra-layer-icon">👁️</div>
+        <div class="infra-layer-name">Observability</div>
+        <div class="infra-layer-tech">
+          <span class="tech-chip c-green">Prometheus + Grafana</span>
+          <span class="tech-chip c-cyan">Jaeger (tracing)</span>
+          <span class="tech-chip c-purple">ELK Stack (logs)</span>
+          <span class="tech-chip c-amber">PagerDuty (alerts)</span>
+          <span class="tech-chip c-blue">Datadog APM</span>
+        </div>
+      </div>
+      <div class="infra-layer">
+        <div class="infra-layer-icon">🔁</div>
+        <div class="infra-layer-name">CI/CD</div>
+        <div class="infra-layer-tech">
+          <span class="tech-chip c-cyan">GitHub Actions</span>
+          <span class="tech-chip c-purple">ArgoCD (GitOps)</span>
+          <span class="tech-chip c-green">Blue-Green Deploy</span>
+          <span class="tech-chip c-amber">Canary Releases</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCALING -->
+  <section id="scaling" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(96,165,250,0.1)">📈</div>
+      <div>
+        <div class="section-num">05b</div>
+        <div class="section-title">Scaling Strategy</div>
+        <div class="section-sub">Horizontal scaling at every layer</div>
+      </div>
+    </div>
+
+    <div class="scale-grid">
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent)">50K</div>
+        <div class="label">WS connections per server</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent3)">2000</div>
+        <div class="label">WS servers at peak</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent4)">100M</div>
+        <div class="label">Concurrent connections</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:#a78bfa">1M/s</div>
+        <div class="label">Messages per second</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent)">500ms</div>
+        <div class="label">p99 delivery latency</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent3)">99.99%</div>
+        <div class="label">Availability SLA</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-blue">DB Sharding</div>
+        <h3>Cassandra Partitioning</h3>
+        <p>Messages partitioned by <code>chat_id</code>. Each partition holds messages for one chat. Wide rows store messages sorted by <code>TIMEUUID</code> — enables efficient range queries for history pagination.</p>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Read Replicas</div>
+        <h3>Read Scaling (PostgreSQL)</h3>
+        <p>Primary handles writes. 3 read replicas for user profile lookups, group metadata, and contact data. PgBouncer connection pooling. Max connections: 10K via pooler.</p>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Rate Limiting</div>
+        <h3>Abuse Prevention</h3>
+        <ul>
+          <li>10 messages/sec per user</li>
+          <li>Sliding window in Redis</li>
+          <li>Burst allowance: 30 messages</li>
+          <li>API: 1000 req/min per token</li>
+          <li>Media: 20 uploads/hour</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY -->
+  <section id="security" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(239,68,68,0.1)">🔒</div>
+      <div>
+        <div class="section-num">05c</div>
+        <div class="section-title">Security</div>
+        <div class="section-sub">Defense-in-depth across all layers</div>
+      </div>
+    </div>
+
+    <div class="sec-list">
+      <div class="sec-item">
+        <div class="sec-item-icon">🔑</div>
+        <div>
+          <div class="sec-item-title">Authentication — JWT + Refresh Tokens</div>
+          <div class="sec-item-desc">Short-lived JWT (15 min) + long-lived refresh token (30 days) in httpOnly cookie. Refresh tokens stored hashed in Redis. Device fingerprinting to detect token theft. Revoke all sessions on password change.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-item-icon">🔐</div>
+        <div>
+          <div class="sec-item-title">End-to-End Encryption (Signal Protocol)</div>
+          <div class="sec-item-desc">X3DH key exchange for initial handshake. Double Ratchet algorithm for forward secrecy. Each message encrypted with a unique symmetric key. Server never has access to plaintext. Public keys stored on server; private keys stay on device.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-item-icon">🛡️</div>
+        <div>
+          <div class="sec-item-title">Transport Security</div>
+          <div class="sec-item-desc">TLS 1.3 enforced for all connections. Certificate pinning in mobile apps. HSTS with preloading. WSS (WebSocket Secure) only. Perfect Forward Secrecy via ECDHE cipher suites.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-item-icon">🚫</div>
+        <div>
+          <div class="sec-item-title">Media Security</div>
+          <div class="sec-item-desc">ClamAV virus scanning on all uploaded files. Time-limited signed S3 URLs (1 hour). Content-type validation. File size limits enforced server-side. EXIF data stripped from images. No public media URLs — all require auth.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-item-icon">🌐</div>
+        <div>
+          <div class="sec-item-title">Network Security</div>
+          <div class="sec-item-desc">AWS WAF rules block known attack patterns. DDoS protection via CloudFront Shield. API rate limiting per user and IP. CORS configured per service. VPC isolation — databases not internet-facing. Secrets in AWS Secrets Manager.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-item-icon">📋</div>
+        <div>
+          <div class="sec-item-title">Compliance & Privacy</div>
+          <div class="sec-item-desc">GDPR-compliant data deletion. Data minimization — only collect what's needed. Audit logs for admin actions. PBKDF2-hashed phone numbers in analytics. Right to export data. Regional data residency options.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MESSAGE FLOW -->
+  <section id="msg-flow" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,229,255,0.1)">📨</div>
+      <div>
+        <div class="section-num">06</div>
+        <div class="section-title">Message Flow (1:1 Chat)</div>
+        <div class="section-sub">Complete lifecycle — send to read receipt</div>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num" style="color:var(--accent);border-color:rgba(0,229,255,0.3)">1</div>
+        <div class="flow-content">
+          <h4>User A types & sends</h4>
+          <p>Client encrypts message with recipient's public key. Generates <code>client_msg_id</code> (UUID). Shows message as "pending" (single grey tick). Sends via WebSocket: <code>message:send</code> event.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:var(--accent);border-color:rgba(0,229,255,0.3)">2</div>
+        <div class="flow-content">
+          <h4>WS Server receives → Chat Service</h4>
+          <p>WS server validates JWT, calls Chat Service via gRPC. Chat Service deduplicates on <code>client_msg_id</code>, writes to Cassandra, publishes <code>message:new</code> event to Kafka topic <code>chat.{chat_id}</code>.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:var(--accent3);border-color:rgba(16,185,129,0.3)">3</div>
+        <div class="flow-content">
+          <h4>Server ACKs to Sender</h4>
+          <p>Chat Service responds with <code>server_msg_id</code> + <code>timestamp</code>. WS server sends <code>message:ack</code> to User A's socket. Client updates local message ID and shows "sent" (double grey tick).</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:var(--accent3);border-color:rgba(16,185,129,0.3)">4</div>
+        <div class="flow-content">
+          <h4>Fan-out to Recipient</h4>
+          <p>Kafka consumer checks if User B is online via Redis <code>online:{userId}</code>. If online → push via WS. If offline → enqueue in notification queue → send FCM/APNs push.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:var(--accent4);border-color:rgba(245,158,11,0.3)">5</div>
+        <div class="flow-content">
+          <h4>Recipient Receives Message</h4>
+          <p>User B's client receives <code>message:new</code> via WebSocket. Client decrypts with private key, displays message, sends <code>message:delivered</code> event back to server. Server updates status in Cassandra.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:var(--accent4);border-color:rgba(245,158,11,0.3)">6</div>
+        <div class="flow-content">
+          <h4>Delivery Receipt to Sender</h4>
+          <p>Server relays <code>delivered</code> status to User A's WS connection. User A's client updates message to "delivered" (double grey tick). Redis updates <code>msg_status</code>.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">7</div>
+        <div class="flow-content">
+          <h4>Read Receipt</h4>
+          <p>When User B opens the chat, client sends <code>message:read</code> with message ID. Server updates status. Relays to User A → client shows "read" (double blue tick). Updates <code>unread:{userId}:{chatId}</code> counter in Redis to 0.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GROUP CHAT -->
+  <section id="group-chat" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,229,255,0.1)">👥</div>
+      <div>
+        <div class="section-num">06b</div>
+        <div class="section-title">Group Chat Architecture</div>
+        <div class="section-sub">Fan-out strategies for small and large groups</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>The Core Challenge: Fan-out at Scale</h4>
+      <p>A group with 500 members means 1 message → 499 deliveries. At 1M messages/second, naive fan-out breaks. WhatsApp uses client-side encryption (each recipient gets separately encrypted copy) + server-side fan-out optimization.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-tag c-green">Small Groups (&lt; 100)</div>
+        <h3>Direct WS Fan-out</h3>
+        <p>For small groups, the WS server fetches the member list from Redis cache and pushes the message directly to each member's WebSocket connection. Simple, low latency.</p>
+        <ul>
+          <li>Cache group members in Redis</li>
+          <li>Fan-out in parallel goroutines</li>
+          <li>Single Kafka event consumed by WS cluster</li>
+          <li>Each member gets individual delivery</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-red">Large Groups (100–1024)</div>
+        <h3>Kafka Fan-out Pipeline</h3>
+        <p>Message published to Kafka. Fan-out Service consumes event, fetches member list from DB, creates individual delivery tasks in Kafka partitioned by userId — one consumer per WS server cluster.</p>
+        <ul>
+          <li>Message → Kafka: chat.events</li>
+          <li>Fan-out Service → Kafka: delivery.{userId}</li>
+          <li>WS Consumers deliver per-user</li>
+          <li>Async — eventually consistent</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:20px">
+      <table>
+        <thead><tr><th>Feature</th><th>How It Works</th></tr></thead>
+        <tbody>
+          <tr><td>Add/Remove Members</td><td>Admin POST /groups/:id/members → updates DB + Redis cache + broadcasts group:updated event to all current members</td></tr>
+          <tr><td>Admin Permissions</td><td>Role column in group_members. Admin-only: delete messages for all, add/remove admins, change group info, restrict message sending</td></tr>
+          <tr><td>@Mentions</td><td>Client parses @username, sends mention_ids[] with message. Server pushes direct notification to mentioned users even if muted</td></tr>
+          <tr><td>Group Invites</td><td>Unique invite_link per group. JOIN via link: check group not full, add to members, send welcome system message</td></tr>
+          <tr><td>Read Receipts in Group</td><td>Tracked per user in message_status table. "x/N read" count shown to sender. Checkbox icon instead of blue ticks</td></tr>
+          <tr><td>Pinned Messages</td><td>Separate pinned_messages table (group_id, message_id, pinned_by, pinned_at). Last 3 pins shown in group header</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- E2E ENCRYPTION -->
+  <section id="encryption" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(239,68,68,0.1)">🔐</div>
+      <div>
+        <div class="section-num">06c</div>
+        <div class="section-title">End-to-End Encryption</div>
+        <div class="section-sub">Signal Protocol — X3DH + Double Ratchet</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num" style="color:var(--accent5);border-color:rgba(239,68,68,0.3)">1</div>
+            <div class="flow-content">
+              <h4>Key Generation (on registration)</h4>
+              <p>Device generates: <code>Identity Key (IK)</code>, <code>Signed PreKey (SPK)</code>, and 100 <code>One-Time PreKeys (OPK)</code>. Public keys uploaded to server. Private keys never leave device.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="color:var(--accent5);border-color:rgba(239,68,68,0.3)">2</div>
+            <div class="flow-content">
+              <h4>Session Initiation (X3DH)</h4>
+              <p>Sender fetches recipient's public key bundle. Runs X3DH (Extended Triple Diffie-Hellman) to derive shared secret. Establishes Double Ratchet session. First message includes sender's ephemeral key.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="color:var(--accent5);border-color:rgba(239,68,68,0.3)">3</div>
+            <div class="flow-content">
+              <h4>Ongoing Encryption (Double Ratchet)</h4>
+              <p>Each message uses a new message key derived from ratchet state. Forward secrecy: past sessions can't be decrypted even if current key is compromised. Break-in recovery built in.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="color:var(--accent5);border-color:rgba(239,68,68,0.3)">4</div>
+            <div class="flow-content">
+              <h4>Group E2EE (Sender Keys)</h4>
+              <p>Each member generates a <code>Sender Key</code>. On joining, sender key is distributed to all group members encrypted individually. Messages encrypted once with sender key — efficient fan-out with E2EE.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="height:fit-content">
+        <div class="card-tag c-red">Key Storage</div>
+        <h3>What Server Stores vs. Client</h3>
+        <p style="margin-bottom:10px"><strong style="color:var(--accent3)">Server stores:</strong></p>
+        <ul>
+          <li>Public identity key</li>
+          <li>Public signed prekeys</li>
+          <li>Public one-time prekeys</li>
+          <li>Encrypted ciphertext blobs</li>
+          <li>Message metadata (timestamp, size)</li>
+        </ul>
+        <p style="margin-top:12px;margin-bottom:8px"><strong style="color:var(--accent5)">Server NEVER stores:</strong></p>
+        <ul>
+          <li>Private keys (any)</li>
+          <li>Plaintext message content</li>
+          <li>Decryption keys</li>
+          <li>Session state</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRADE-OFFS -->
+  <section id="tradeoffs" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(148,163,184,0.1)">⚖️</div>
+      <div>
+        <div class="section-num">07</div>
+        <div class="section-title">Design Trade-offs</div>
+        <div class="section-sub">Key decisions and their consequences</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Decision</th><th>Chosen Approach</th><th>Trade-off / Why</th></tr></thead>
+        <tbody>
+          <tr><td>DB for messages</td><td>Cassandra over MySQL</td><td>Sacrifices complex joins for massive write throughput + horizontal scale. Perfect for append-heavy message data.</td></tr>
+          <tr><td>WebSocket vs HTTP polling</td><td>WebSocket</td><td>Higher complexity (connection state, reconnection) but dramatically lower latency and server load vs long-polling.</td></tr>
+          <tr><td>Fan-out strategy</td><td>Write fan-out (push)</td><td>More writes at send time vs. read fan-out (pull). Better read latency for recipients; higher write amplification for large groups.</td></tr>
+          <tr><td>Message storage</td><td>Store on server</td><td>Enables multi-device sync and history. WhatsApp original design stored on device only — simpler but loses history on device loss.</td></tr>
+          <tr><td>E2EE + server storage</td><td>Encrypted blobs only</td><td>Server can't read messages. Enables backup. Trade-off: can't do server-side spam detection on content.</td></tr>
+          <tr><td>Media upload</td><td>Presigned S3 (direct)</td><td>Server never handles file bytes — massive bandwidth saving. Trade-off: lose upload progress control; must trust client-side virus scanning too.</td></tr>
+          <tr><td>Consistency model</td><td>Eventual consistency</td><td>For message delivery, CAP theorem → Availability + Partition Tolerance. Brief inconsistency acceptable; hard consistency would kill latency.</td></tr>
+          <tr><td>Search on E2EE data</td><td>Client-side search only</td><td>Server can't index encrypted messages. Search is done locally on device cache. No cross-device search by default.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cards" style="margin-top:20px">
+      <div class="card">
+        <div class="card-tag c-amber">Interview Tips</div>
+        <h3>What Interviewers Want</h3>
+        <ul>
+          <li>Clarify scale (DAU, messages/day)</li>
+          <li>Mention WebSocket for real-time</li>
+          <li>Explain Cassandra partition key choice</li>
+          <li>Discuss fan-out approaches for groups</li>
+          <li>Talk about offline delivery via push</li>
+          <li>Address E2EE at high level</li>
+          <li>Mention CDN for media</li>
+          <li>Discuss horizontal scaling of WS servers</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Extension Topics</div>
+        <h3>If Asked to Go Deeper</h3>
+        <ul>
+          <li>Voice/Video — WebRTC + TURN/STUN</li>
+          <li>Status (Stories) — S3 + TTL</li>
+          <li>Payments integration — Stripe</li>
+          <li>Business API — Webhook callbacks</li>
+          <li>Multi-device — key distribution</li>
+          <li>Disappearing messages — TTL in Cassandra</li>
+          <li>Live location — geo stream</li>
+          <li>Anti-spam ML pipeline</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ USER SETTINGS ══ -->
+  <section id="user-settings" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">⚙️</div>
+      <div>
+        <div class="section-num">08</div>
+        <div class="section-title">User Settings</div>
+        <div class="section-sub">Profile, preferences, privacy — stored & synced</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>Settings Architecture</h4>
+      <p>Settings are stored in PostgreSQL (users + user_settings tables). On login, settings payload is fetched once and cached in Redux. Changes are sent via REST PATCH and invalidate the Redis profile cache. Multi-device sync happens via WebSocket <code>settings:updated</code> event.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting Category</th><th>Fields</th><th>Storage</th><th>Sync</th></tr></thead>
+        <tbody>
+          <tr><td>Profile</td><td>display_name, bio, avatar_url, phone visibility</td><td>PostgreSQL users table</td><td>WS event on change</td></tr>
+          <tr><td>Notifications</td><td>message_tone, group_tone, mute_all, preview_text, vibrate</td><td>user_settings (per device)</td><td>Per-device only</td></tr>
+          <tr><td>Privacy</td><td>last_seen, profile_photo, about, read_receipts, groups_add</td><td>user_privacy_settings</td><td>Global, all devices</td></tr>
+          <tr><td>Storage</td><td>auto_download (WiFi/cellular), media_quality, auto_backup</td><td>Device-local + user_settings</td><td>Per-device</td></tr>
+          <tr><td>Chat Settings</td><td>wallpaper, font_size, enter_to_send, theme (dark/light)</td><td>Device-local IndexedDB</td><td>Per-device only</td></tr>
+          <tr><td>Security</td><td>two_step_pin, fingerprint_lock, show_security_notifs</td><td>user_security_settings</td><td>Global sync</td></tr>
+          <tr><td>Blocked Users</td><td>blocked_users list</td><td>blocked_users table</td><td>Global sync</td></tr>
+          <tr><td>Linked Devices</td><td>device_id, name, last_active, platform</td><td>user_devices table</td><td>Global</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="schema-grid">
+      <div class="schema-table">
+        <div class="schema-table-head"><span>⚙️</span> user_settings</div>
+        <div class="schema-col"><span class="col-name">user_id</span><span><span class="col-pk">PK</span><span class="col-fk">FK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">notifications_enabled</span><span class="col-type">BOOL</span></div>
+        <div class="schema-col"><span class="col-name">message_tone</span><span class="col-type">VARCHAR</span></div>
+        <div class="schema-col"><span class="col-name">preview_text</span><span class="col-type">BOOL DEFAULT true</span></div>
+        <div class="schema-col"><span class="col-name">media_auto_dl_wifi</span><span class="col-type">BOOL</span></div>
+        <div class="schema-col"><span class="col-name">media_auto_dl_cell</span><span class="col-type">BOOL</span></div>
+        <div class="schema-col"><span class="col-name">two_step_pin_hash</span><span class="col-type">TEXT NULL</span></div>
+        <div class="schema-col"><span class="col-name">updated_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+      <div class="schema-table">
+        <div class="schema-table-head"><span>🔏</span> user_privacy_settings</div>
+        <div class="schema-col"><span class="col-name">user_id</span><span><span class="col-pk">PK</span><span class="col-fk">FK</span></span></div>
+        <div class="schema-col"><span class="col-name">last_seen_visibility</span><span class="col-type">ENUM(everyone,contacts,nobody)</span></div>
+        <div class="schema-col"><span class="col-name">profile_photo_visibility</span><span class="col-type">ENUM(everyone,contacts,nobody)</span></div>
+        <div class="schema-col"><span class="col-name">about_visibility</span><span class="col-type">ENUM</span></div>
+        <div class="schema-col"><span class="col-name">read_receipts_enabled</span><span class="col-type">BOOL DEFAULT true</span></div>
+        <div class="schema-col"><span class="col-name">groups_add_permission</span><span class="col-type">ENUM(everyone,contacts,nobody)</span></div>
+        <div class="schema-col"><span class="col-name">status_visibility</span><span class="col-type">ENUM</span></div>
+        <div class="schema-col"><span class="col-name">updated_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+      <div class="schema-table">
+        <div class="schema-table-head"><span>📱</span> user_devices</div>
+        <div class="schema-col"><span class="col-name">device_id</span><span><span class="col-pk">PK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">user_id</span><span><span class="col-fk">FK</span> <span class="col-type">UUID</span></span></div>
+        <div class="schema-col"><span class="col-name">platform</span><span class="col-type">ENUM(ios,android,web,desktop)</span></div>
+        <div class="schema-col"><span class="col-name">device_name</span><span class="col-type">VARCHAR</span></div>
+        <div class="schema-col"><span class="col-name">push_token</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">identity_key_pub</span><span class="col-type">TEXT</span></div>
+        <div class="schema-col"><span class="col-name">last_active</span><span class="col-type">TIMESTAMP</span></div>
+        <div class="schema-col"><span class="col-name">registered_at</span><span class="col-type">TIMESTAMP</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ STORIES ══ -->
+  <section id="stories" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.12)">🌀</div>
+      <div>
+        <div class="section-num">09</div>
+        <div class="section-title">Stories / Status</div>
+        <div class="section-sub">24-hour ephemeral content — WhatsApp Status feature</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">1</div>
+            <div class="flow-content">
+              <h4>User Posts a Status</h4>
+              <p>Client uploads media to S3 (same presigned URL flow). Status metadata posted to <code>POST /status</code>. Status Service writes to <code>status</code> table with <code>expires_at = now + 24h</code>.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">2</div>
+            <div class="flow-content">
+              <h4>Distribution to Contacts</h4>
+              <p>Status is NOT pushed proactively. When contacts open the Status tab, client polls <code>GET /status/feed</code> — returns statuses from contacts respecting privacy settings (who can see my status).</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">3</div>
+            <div class="flow-content">
+              <h4>View Tracking</h4>
+              <p>When a contact views the status, client sends <code>POST /status/:id/view</code>. Server writes to <code>status_views</code> table. Owner can see viewer list. View count cached in Redis.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">4</div>
+            <div class="flow-content">
+              <h4>Auto-Expiry (TTL)</h4>
+              <p>A cron job / Kafka Streams job runs every 5 min. Deletes statuses where <code>expires_at &lt; now</code>. Triggers S3 object deletion via lifecycle rule. Removes from feed cache.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card">
+          <div class="card-tag c-purple">Schema</div>
+          <h3>status table</h3>
+          <ul>
+            <li>id — UUID PK</li>
+            <li>user_id — FK</li>
+            <li>type — ENUM(text,image,video)</li>
+            <li>content / media_id</li>
+            <li>background_color — VARCHAR</li>
+            <li>text_overlay — JSON</li>
+            <li>privacy — ENUM(contacts,selected,except)</li>
+            <li>view_count — INT</li>
+            <li>created_at — TIMESTAMP</li>
+            <li>expires_at — TIMESTAMP (created + 24h)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-tag c-cyan">Privacy Modes</div>
+          <h3>Who Sees My Status</h3>
+          <ul>
+            <li>My contacts (default)</li>
+            <li>My contacts except… (exclusion list)</li>
+            <li>Only share with… (allowlist)</li>
+            <li>Status mute (viewer-side hide)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ BROADCAST ══ -->
+  <section id="broadcast" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">📢</div>
+      <div>
+        <div class="section-num">10</div>
+        <div class="section-title">Broadcast Lists</div>
+        <div class="section-sub">One-to-many messaging — recipients get individual messages</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>How Broadcast Differs from Groups</h4>
+      <p>In a broadcast, the sender sends ONE message but each recipient receives it as a SEPARATE 1:1 conversation — replies go only to the sender, not to other recipients. Recipients don't know they're part of a broadcast. Max 256 recipients per broadcast list.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-green">Architecture</div>
+        <h3>Broadcast Fan-out</h3>
+        <p>When a broadcast message is sent, the Broadcast Service creates N individual messages (one per recipient) and enqueues them to Kafka topic <code>broadcast.delivery</code>. Workers process deliveries in parallel — each as a normal 1:1 message.</p>
+        <ul>
+          <li>1 broadcast → N delivery tasks</li>
+          <li>Each task = individual chat message</li>
+          <li>Kafka partitioned by recipient_id</li>
+          <li>No shared conversation thread</li>
+          <li>Replies → private to sender only</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-amber">Constraints</div>
+        <h3>Rules & Limitations</h3>
+        <ul>
+          <li>Max 256 recipients per list</li>
+          <li>Recipient must have sender in contacts (anti-spam)</li>
+          <li>No read receipt aggregate for sender</li>
+          <li>Cannot forward broadcast to group</li>
+          <li>Broadcast list stored client-side (not server)</li>
+          <li>E2EE: each recipient gets separate ciphertext</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Schema</div>
+        <h3>broadcast_lists table</h3>
+        <ul>
+          <li>id — UUID PK</li>
+          <li>owner_id — FK users</li>
+          <li>name — VARCHAR</li>
+          <li>created_at — TIMESTAMP</li>
+          <li>— — —</li>
+          <li>broadcast_members (list_id, recipient_id)</li>
+          <li>broadcast_messages (id, list_id, message_id, sent_at)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CALLS ══ -->
+  <section id="calls" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,229,255,0.1)">📞</div>
+      <div>
+        <div class="section-num">11</div>
+        <div class="section-title">Voice & Video Calls</div>
+        <div class="section-sub">WebRTC peer-to-peer with TURN relay fallback</div>
+      </div>
+    </div>
+
+    <div class="ws-diagram"><span class="hl">Caller A</span>              <span class="hl2">Signal Server (WS)</span>      <span class="hl3">STUN/TURN Server</span>      <span class="hl4">Callee B</span>
+  │                        │                        │                      │
+  │── call:initiate ──────▶│                        │                      │
+  │                        │── call:incoming ───────────────────────────▶  │
+  │                        │                        │                      │
+  │◀─── call:accepted ─────────────────────────────│                      │
+  │                        │                        │                      │
+  │── ICE candidate ──────▶│── ICE candidate ────────────────────────────▶│
+  │◀── ICE candidate ───────────────────────────── │◀─ ICE candidate ─────│
+  │                        │                        │                      │
+  │──────────────── SDP Offer (WebRTC) ────────────────────────────────▶  │
+  │◀─────────────── SDP Answer (WebRTC) ───────────────────────────────── │
+  │                        │                        │                      │
+  │◀══════════ P2P Media Stream (audio/video) ══════════════════════════▶ │
+  │                (TURN relay if P2P blocked)      │                      │
+  │                        │                        │                      │
+  │── call:end ───────────▶│── call:ended ───────────────────────────────▶│</div>
+
+    <div class="cards" style="margin-top:20px">
+      <div class="card">
+        <div class="card-tag c-cyan">WebRTC Stack</div>
+        <h3>Signaling & Media</h3>
+        <ul>
+          <li>Signaling over WebSocket (existing WS server)</li>
+          <li>ICE candidates exchanged via signal server</li>
+          <li>STUN server — discover public IP (Google STUN)</li>
+          <li>TURN server — relay when NAT blocks P2P (coturn)</li>
+          <li>DTLS-SRTP — media encryption</li>
+          <li>OPUS codec (audio), VP8/H.264 (video)</li>
+          <li>Adaptive bitrate based on network</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Group Calls</div>
+        <h3>SFU for Multi-party</h3>
+        <p>1:1 calls use P2P (no server media relay needed). Group calls (3+ participants) use a Selective Forwarding Unit (SFU) — mediasoup or Janus. Each participant sends one stream to SFU; SFU forwards selected streams.</p>
+        <ul>
+          <li>Max 32 participants (video call)</li>
+          <li>SFU hosted on dedicated media servers</li>
+          <li>Speaker detection for active stream</li>
+          <li>Screen sharing as additional track</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-amber">Call Records Schema</div>
+        <h3>call_logs table</h3>
+        <ul>
+          <li>id — UUID PK</li>
+          <li>initiator_id — FK</li>
+          <li>chat_id — FK</li>
+          <li>type — ENUM(audio,video,group)</li>
+          <li>status — ENUM(missed,answered,declined,busy)</li>
+          <li>duration_sec — INT</li>
+          <li>started_at — TIMESTAMP</li>
+          <li>ended_at — TIMESTAMP</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ DISAPPEARING MESSAGES ══ -->
+  <section id="disappearing" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(239,68,68,0.1)">⏳</div>
+      <div>
+        <div class="section-num">12</div>
+        <div class="section-title">Disappearing Messages</div>
+        <div class="section-sub">TTL-based message auto-deletion</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-tag c-red">How It Works</div>
+        <h3>Server-side TTL</h3>
+        <p>When disappearing messages are enabled for a chat, all new messages get a <code>disappears_at</code> timestamp. A Cassandra TTL is set on the message row. The client-side timer is derived from the server timestamp — no client can cheat by system clock manipulation.</p>
+        <ul>
+          <li>Timer options: 24h, 7 days, 90 days</li>
+          <li>Set per-chat by either participant (1:1) or admin (group)</li>
+          <li>Cassandra TTL handles server-side deletion</li>
+          <li>Client deletes on timer expiry</li>
+          <li>Media files: S3 lifecycle rule matches TTL</li>
+          <li>Forwarded messages keep their own timer</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-amber">Edge Cases</div>
+        <h3>Tricky Scenarios</h3>
+        <ul>
+          <li><strong>Offline recipient:</strong> Message expires before they come online → delivered as "deleted message" placeholder</li>
+          <li><strong>Screenshots:</strong> Cannot prevent — show screenshot notification (like Snapchat) optionally</li>
+          <li><strong>Quoted/replied messages:</strong> Parent deletes, but quoted preview in reply remains visible</li>
+          <li><strong>Backup:</strong> Disappearing messages are excluded from chat backup by default</li>
+          <li><strong>Starred messages:</strong> Starred DMs are excluded from auto-delete</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:20px">
+      <table>
+        <thead><tr><th>Field</th><th>Added to messages table</th></tr></thead>
+        <tbody>
+          <tr><td>disappears_at</td><td>TIMESTAMP NULL — null means never disappears. Set on insert if chat has disappearing mode on.</td></tr>
+          <tr><td>disappear_timer_sec</td><td>INT — snapshot of the timer value at send time (86400 / 604800 / 7776000)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ REACTIONS & POLLS ══ -->
+  <section id="reactions" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">😍</div>
+      <div>
+        <div class="section-num">13</div>
+        <div class="section-title">Reactions & Polls</div>
+        <div class="section-sub">Emoji reactions on messages + in-chat polls</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="highlight-box">
+          <h4>Reactions Design</h4>
+          <p>Reactions are stored as a <code>MAP&lt;user_id, emoji&gt;</code> directly on the message row in Cassandra (one reaction per user per message). This avoids a separate reactions table and keeps fan-out simple — just update the message row and broadcast <code>message:reaction_updated</code> event.</p>
+        </div>
+        <div class="card">
+          <div class="card-tag c-amber">Reaction Flow</div>
+          <h3>Add / Change / Remove</h3>
+          <ul>
+            <li>Client sends <code>message:react</code> via WS with emoji + message_id</li>
+            <li>Server: UPDATE messages SET reactions[user_id] = emoji WHERE …</li>
+            <li>Server broadcasts updated reactions map to chat members</li>
+            <li>Remove: send null emoji → DELETE reactions[user_id]</li>
+            <li>One reaction per user per message (overwrite allowed)</li>
+            <li>Emoji set: WhatsApp limits to 6 preset emojis</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-tag c-purple">Polls</div>
+          <h3>Poll Architecture</h3>
+          <p>Polls are a special message type (<code>type = poll</code>). Poll options and votes stored in a separate <code>polls</code> table. Real-time vote updates broadcast to group via WS event <code>poll:updated</code>.</p>
+          <ul>
+            <li>polls table: id, message_id, question, options JSON, is_multi_select, closes_at</li>
+            <li>poll_votes: poll_id, user_id, option_index, voted_at</li>
+            <li>Vote = INSERT or UPDATE poll_votes</li>
+            <li>Aggregate counts cached in Redis</li>
+            <li>Real-time: WS broadcasts poll:vote_update</li>
+            <li>Anonymous polls: votes stored but names hidden</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-tag c-green">Other Message Interactions</div>
+          <h3>Reply, Forward, Star</h3>
+          <ul>
+            <li><strong>Reply:</strong> reply_to_id FK on messages table. Preview text + sender shown in bubble</li>
+            <li><strong>Forward:</strong> New message row, forwarded_from_id meta. "Forwarded" label shown</li>
+            <li><strong>Star:</strong> starred_messages table (user_id, message_id, starred_at). Accessible from profile menu</li>
+            <li><strong>Pin:</strong> pinned_messages table per chat. Max 3 pins. Shown in banner</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ BACKUP ══ -->
+  <section id="backup" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(96,165,250,0.1)">☁️</div>
+      <div>
+        <div class="section-num">14</div>
+        <div class="section-title">Chat Backup</div>
+        <div class="section-sub">Encrypted cloud backup to Google Drive / iCloud</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-blue">Backup Flow</div>
+        <h3>How Backup Works</h3>
+        <p>Backup is CLIENT-SIDE generated. The app exports all local messages to an encrypted archive, then uploads to the user's personal cloud storage (Google Drive / iCloud). WhatsApp servers never store backup data.</p>
+        <ul>
+          <li>Backup key = derived from user's password / pin</li>
+          <li>AES-256 encryption of backup archive</li>
+          <li>Upload via Google Drive API / iCloud API</li>
+          <li>Schedule: daily/weekly/monthly or manual</li>
+          <li>Media optionally included (size warning)</li>
+          <li>End-to-end encrypted backup (since 2021)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Restore Flow</div>
+        <h3>Restoring on New Device</h3>
+        <ul>
+          <li>New device login → prompt for backup restore</li>
+          <li>User authenticates with Google/Apple</li>
+          <li>App downloads encrypted backup file</li>
+          <li>User provides backup key / password to decrypt</li>
+          <li>Messages imported to local IndexedDB / SQLite</li>
+          <li>Media fetched on-demand from backup or S3</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-red">Security Note</div>
+        <h3>E2EE Backup Trade-off</h3>
+        <p>Traditional backup (pre-2021) broke E2EE because the key was held by WhatsApp. End-to-end encrypted backup uses a 64-digit key that only the user holds — not WhatsApp, not Google/Apple. If lost → backup permanently inaccessible.</p>
+        <ul>
+          <li>Key stored in HSM on user's device</li>
+          <li>Optional: password as recovery factor</li>
+          <li>WhatsApp HSM service stores encrypted key (not plain)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MULTI-DEVICE ══ -->
+  <section id="multidevice" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">📲</div>
+      <div>
+        <div class="section-num">15</div>
+        <div class="section-title">Multi-Device Support</div>
+        <div class="section-sub">Up to 4 linked devices — each independently capable</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>Key Challenge: E2EE + Multi-Device</h4>
+      <p>Each device has its own identity key pair. When you send a message, it must be encrypted separately for EACH linked device of the recipient. For a user with 4 devices receiving from a user with 4 devices → 1 message becomes 4 × 4 = 16 ciphertexts. This is the "sender key" efficiency optimization used in groups.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-tag c-green">How Linking Works</div>
+        <h3>Device Registration Flow</h3>
+        <ul>
+          <li>Primary device shows QR code containing a one-time token</li>
+          <li>New device scans QR → sends token to auth server</li>
+          <li>Server validates token, registers device_id + public key</li>
+          <li>Primary device syncs: contacts, chat list, group keys</li>
+          <li>New device downloads last 90 days message history</li>
+          <li>Each device gets its own WS connection + push token</li>
+          <li>Max 4 linked devices (WhatsApp limit)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Message Sync</div>
+        <h3>Keeping Devices in Sync</h3>
+        <ul>
+          <li>All sent/received messages delivered to ALL linked devices</li>
+          <li>Read receipt on one device → synced to all (read:sync event)</li>
+          <li>Deleted message → broadcast delete:sync to all devices</li>
+          <li>Device offline → messages queued, delivered on reconnect</li>
+          <li>Queue stored in Cassandra (offline_messages table) with device_id</li>
+          <li>Primary phone can be offline — web/desktop still works</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PRIVACY CONTROLS ══ -->
+  <section id="privacy-settings" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(239,68,68,0.1)">🕵️</div>
+      <div>
+        <div class="section-num">16</div>
+        <div class="section-title">Privacy Controls</div>
+        <div class="section-sub">Granular visibility settings enforced server-side</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Privacy Feature</th><th>Options</th><th>Enforcement</th><th>Architecture Note</th></tr></thead>
+        <tbody>
+          <tr><td>Last Seen</td><td>Everyone / My Contacts / Nobody</td><td>Server filters GET /users/:id response</td><td>If you hide last_seen, you cannot see others' either (reciprocity rule)</td></tr>
+          <tr><td>Profile Photo</td><td>Everyone / My Contacts / Nobody</td><td>Server returns null avatar_url based on setting + relationship check</td><td>Relationship lookup: is requester in user's contacts?</td></tr>
+          <tr><td>About / Bio</td><td>Everyone / My Contacts / Nobody</td><td>Same as profile photo — filtered at API layer</td><td>Cached per-relationship in Redis</td></tr>
+          <tr><td>Read Receipts</td><td>On / Off</td><td>Server skips sending read:status events if disabled</td><td>Off = you also can't see others' read receipts (reciprocity)</td></tr>
+          <tr><td>Online Status</td><td>Everyone / Same as Last Seen</td><td>Redis presence check + privacy filter before WS broadcast</td><td>Presence events filtered per-requester privacy setting</td></tr>
+          <tr><td>Groups Add Permission</td><td>Everyone / My Contacts / My Contacts Except / Nobody</td><td>Group Service checks permission before executing add</td><td>Nobody → admin sends invite link instead</td></tr>
+          <tr><td>Status Visibility</td><td>My Contacts / Selected / Except</td><td>Status feed query filters by allowlist/denylist</td><td>Stored as allow_list[] / deny_list[] JSON on status row</td></tr>
+          <tr><td>Block User</td><td>Block/Unblock</td><td>All message sends check blocked_users before delivery</td><td>Blocking is bidirectional — neither can see each other</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ BUSINESS API ══ -->
+  <section id="business" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">🏢</div>
+      <div>
+        <div class="section-num">17</div>
+        <div class="section-title">WhatsApp Business API</div>
+        <div class="section-sub">Programmatic messaging for businesses — webhooks, templates</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-amber">Business Profile</div>
+        <h3>Business Account Extras</h3>
+        <ul>
+          <li>Business name + category + description</li>
+          <li>Business hours (schedule in DB)</li>
+          <li>Catalog: products with images + prices</li>
+          <li>Quick replies (saved message templates)</li>
+          <li>Away message (auto-reply when offline)</li>
+          <li>Labels for organizing chats</li>
+          <li>Verified business badge</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Outbound Messaging</div>
+        <h3>Template Messages</h3>
+        <p>Businesses can only initiate conversations using pre-approved message templates (to prevent spam). Templates approved by Meta. Free-form messages only allowed after user initiates or responds within 24h window.</p>
+        <ul>
+          <li>POST /business/messages (send template)</li>
+          <li>Template types: OTP, transactional, marketing</li>
+          <li>24-hour customer service window</li>
+          <li>Rate limit: 1000 msgs/phone/day</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Webhooks</div>
+        <h3>Event Delivery to Business</h3>
+        <p>Business registers a webhook URL. WhatsApp sends HTTP POST for every inbound message, delivery status, or user interaction. Business system must respond with HTTP 200 within 5 seconds.</p>
+        <ul>
+          <li>Events: message, message_status, read, button_reply</li>
+          <li>Retry: exponential backoff up to 24h</li>
+          <li>Signature: HMAC-SHA256 of payload</li>
+          <li>Webhook logs stored 7 days for debugging</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-blue">Business Schema</div>
+        <h3>Additional Tables</h3>
+        <ul>
+          <li>business_profiles (user_id, biz_name, category, hours)</li>
+          <li>message_templates (id, biz_id, name, content, status)</li>
+          <li>catalog_products (id, biz_id, name, price, image_id)</li>
+          <li>chat_labels (id, biz_id, color, name)</li>
+          <li>webhook_configs (biz_id, url, secret, events[])</li>
+          <li>webhook_logs (id, biz_id, event, status, created_at)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MOBILE OVERVIEW ══ -->
+  <section id="mobile-overview" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,229,255,0.1)">📱</div>
+      <div>
+        <div class="section-num">18</div>
+        <div class="section-title">Mobile App Architecture Overview</div>
+        <div class="section-sub">Native iOS + Android + Cross-platform strategy</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>WhatsApp's Real Approach</h4>
+      <p>WhatsApp originally built separate native apps for iOS (Objective-C → Swift) and Android (Java → Kotlin). The core messaging logic (crypto, protocol, sync) lives in a shared C++ library called <strong>Yowsup</strong> — compiled for both platforms. This gives native UI performance while sharing protocol logic.</p>
+    </div>
+
+    <div class="arch-diagram">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;min-width:600px">
+        <div class="arch-box">
+          <div class="arch-box-icon">🍎</div>
+          <div class="arch-box-title">iOS (Swift/SwiftUI)</div>
+          <div class="arch-box-sub">Native UI Layer</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-icon">🤖</div>
+          <div class="arch-box-title">Android (Kotlin/Compose)</div>
+          <div class="arch-box-sub">Native UI Layer</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-icon">⚡</div>
+          <div class="arch-box-title">React Native / Flutter</div>
+          <div class="arch-box-sub">Cross-Platform Option</div>
+        </div>
+        <div class="arch-box" style="grid-column:1/-1;background:rgba(0,229,255,0.05);border-color:rgba(0,229,255,0.2)">
+          <div class="arch-box-icon">🔧</div>
+          <div class="arch-box-title">Shared C++ Core Library</div>
+          <div class="arch-box-sub">Signal Protocol · Sync Engine · Crypto · Network · DB (SQLCipher)</div>
+        </div>
+        <div class="arch-box" style="grid-column:1/-1">
+          <div class="arch-box-icon">☁️</div>
+          <div class="arch-box-title">Backend APIs (REST + WebSocket + gRPC)</div>
+          <div class="arch-box-sub">Same backend serves all platforms</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-cyan">Shared Core (C++)</div>
+        <h3>Platform-Agnostic Logic</h3>
+        <ul>
+          <li>Signal Protocol implementation</li>
+          <li>Message serialization (Protobuf)</li>
+          <li>Network retry / queue logic</li>
+          <li>SQLCipher database layer</li>
+          <li>Media compression pipeline</li>
+          <li>Contact sync engine</li>
+          <li>Key management (prekeys, sessions)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-purple">Platform Native</div>
+        <h3>Per-Platform Responsibilities</h3>
+        <ul>
+          <li>UI rendering (SwiftUI / Jetpack Compose)</li>
+          <li>Camera / microphone APIs</li>
+          <li>Push notifications (APNs / FCM)</li>
+          <li>Background execution (BGTask / WorkManager)</li>
+          <li>Biometrics (Face ID / Fingerprint)</li>
+          <li>Widgets & App Extensions</li>
+          <li>Deep linking & App Clips / Instant Apps</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">App Size Strategy</div>
+        <h3>APK/IPA Optimization</h3>
+        <ul>
+          <li>Android: App Bundle (AAB) — dynamic delivery</li>
+          <li>iOS: App Thinning + Bitcode</li>
+          <li>On-demand resources for non-core features</li>
+          <li>Baseline profiles (Android) for JIT warmup</li>
+          <li>R8 / ProGuard for code shrinking</li>
+          <li>WebP for all bundled images</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ iOS ARCHITECTURE ══ -->
+  <section id="ios-arch" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.12)">🍎</div>
+      <div>
+        <div class="section-num">19</div>
+        <div class="section-title">iOS Architecture</div>
+        <div class="section-sub">Swift + SwiftUI · MVVM + Clean Architecture</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-tag c-purple">Tech Stack</div>
+          <h3>iOS Essentials</h3>
+          <ul>
+            <li><strong>Language:</strong> Swift 5.9+</li>
+            <li><strong>UI:</strong> SwiftUI (new screens) + UIKit (legacy)</li>
+            <li><strong>Architecture:</strong> MVVM + Clean Architecture</li>
+            <li><strong>Concurrency:</strong> Swift Concurrency (async/await, Actors)</li>
+            <li><strong>Reactive:</strong> Combine framework</li>
+            <li><strong>DI:</strong> Resolver / Swinject</li>
+            <li><strong>Networking:</strong> URLSession + custom WebSocket</li>
+            <li><strong>Local DB:</strong> SQLCipher (encrypted SQLite)</li>
+            <li><strong>Keychain:</strong> Private keys, tokens stored securely</li>
+            <li><strong>Testing:</strong> XCTest + XCUITest</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-tag c-cyan">Layer Structure</div>
+          <h3>Clean Architecture Layers</h3>
+          <ul>
+            <li><strong>Presentation:</strong> SwiftUI Views + ViewModels</li>
+            <li><strong>Domain:</strong> Use Cases + Entities (pure Swift, no frameworks)</li>
+            <li><strong>Data:</strong> Repositories (local DB + remote API)</li>
+            <li><strong>Infrastructure:</strong> Network, Push, Crypto, Camera</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Feature</th><th>iOS API Used</th></tr></thead>
+            <tbody>
+              <tr><td>Push Notifications</td><td>APNs + UNUserNotificationCenter</td></tr>
+              <tr><td>Background Sync</td><td>BGProcessingTask, BGAppRefreshTask</td></tr>
+              <tr><td>Camera/Video</td><td>AVFoundation, AVCaptureSession</td></tr>
+              <tr><td>Voice Recording</td><td>AVAudioRecorder + AVAudioSession</td></tr>
+              <tr><td>Biometric Lock</td><td>LocalAuthentication (Face ID / Touch ID)</td></tr>
+              <tr><td>Share Extension</td><td>NSExtension — share from other apps</td></tr>
+              <tr><td>Widgets</td><td>WidgetKit — status/unread on home screen</td></tr>
+              <tr><td>Siri / Shortcuts</td><td>Intents Framework + NSUserActivity</td></tr>
+              <tr><td>CallKit</td><td>Incoming call UI native integration</td></tr>
+              <tr><td>Contacts Access</td><td>CNContactStore — sync phone contacts</td></tr>
+              <tr><td>iCloud Backup</td><td>CloudKit + NSFileManager</td></tr>
+              <tr><td>App Clip</td><td>Lightweight join-group experience</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="ws-diagram" style="margin-top:20px"><span class="hl">SwiftUI View</span>          <span class="hl2">ViewModel (ObservableObject)</span>   <span class="hl3">Use Case</span>         <span class="hl4">Repository</span>
+  │                          │                               │                  │
+  │── user taps Send ───────▶│                               │                  │
+  │                          │── sendMessage(text) ─────────▶│                  │
+  │                          │                               │── save locally ─▶│
+  │                          │                               │── enqueue WS ───▶│──▶ Network
+  │◀── @Published update ────│◀── messageQueued() ───────────│                  │
+  │  (optimistic UI)         │                               │                  │
+  │                          │◀────────── ack received ───────────────────────── │</div>
+  </section>
+
+  <!-- ══ ANDROID ARCHITECTURE ══ -->
+  <section id="android-arch" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">🤖</div>
+      <div>
+        <div class="section-num">20</div>
+        <div class="section-title">Android Architecture</div>
+        <div class="section-sub">Kotlin + Jetpack Compose · MVVM + Clean Architecture</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-tag c-green">Tech Stack</div>
+          <h3>Android Essentials</h3>
+          <ul>
+            <li><strong>Language:</strong> Kotlin + Coroutines + Flow</li>
+            <li><strong>UI:</strong> Jetpack Compose (new) + XML Views (legacy)</li>
+            <li><strong>Architecture:</strong> MVVM + Clean + UDF</li>
+            <li><strong>DI:</strong> Hilt (Dagger wrapper)</li>
+            <li><strong>Navigation:</strong> Navigation Compose</li>
+            <li><strong>Local DB:</strong> Room + SQLCipher</li>
+            <li><strong>Network:</strong> Retrofit + OkHttp + custom WS</li>
+            <li><strong>Image loading:</strong> Coil / Glide</li>
+            <li><strong>Background:</strong> WorkManager</li>
+            <li><strong>Testing:</strong> JUnit5 + Espresso + Robolectric</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-tag c-amber">Jetpack Libraries Used</div>
+          <h3>Android Jetpack Suite</h3>
+          <ul>
+            <li>Room — ORM for local message DB</li>
+            <li>DataStore — settings/preferences</li>
+            <li>WorkManager — background sync, backup</li>
+            <li>Paging 3 — lazy message history loading</li>
+            <li>CameraX — camera feature</li>
+            <li>Biometric — fingerprint lock</li>
+            <li>Security Crypto — EncryptedSharedPrefs</li>
+            <li>Lifecycle — ViewModel, LiveData/StateFlow</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Feature</th><th>Android API Used</th></tr></thead>
+            <tbody>
+              <tr><td>Push Notifications</td><td>FCM + NotificationManager + NotificationChannels</td></tr>
+              <tr><td>Background Sync</td><td>WorkManager (PeriodicWorkRequest)</td></tr>
+              <tr><td>Camera/Video</td><td>CameraX API</td></tr>
+              <tr><td>Voice Recording</td><td>MediaRecorder + AudioManager</td></tr>
+              <tr><td>Biometric Lock</td><td>BiometricPrompt API</td></tr>
+              <tr><td>Share Intents</td><td>Intent.ACTION_SEND — receive from other apps</td></tr>
+              <tr><td>Bubbles (Chat heads)</td><td>Bubbles API (Android 11+)</td></tr>
+              <tr><td>Shortcuts</td><td>ShortcutManager — direct share targets</td></tr>
+              <tr><td>Incoming Calls</td><td>ConnectionService + Telecom API</td></tr>
+              <tr><td>Contacts Sync</td><td>ContentProvider + SyncAdapter</td></tr>
+              <tr><td>Google Drive Backup</td><td>Drive API v3</td></tr>
+              <tr><td>Picture-in-Picture</td><td>PiP mode for video calls</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CROSS-PLATFORM ══ -->
+  <section id="cross-platform" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">⚡</div>
+      <div>
+        <div class="section-num">21</div>
+        <div class="section-title">Cross-Platform: React Native & Flutter</div>
+        <div class="section-sub">When to use, trade-offs, and implementation patterns</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Aspect</th><th>React Native</th><th>Flutter</th><th>Native (iOS+Android)</th></tr></thead>
+        <tbody>
+          <tr><td>Language</td><td>JavaScript / TypeScript</td><td>Dart</td><td>Swift / Kotlin</td></tr>
+          <tr><td>UI Rendering</td><td>Native components via bridge</td><td>Custom Skia canvas (own renderer)</td><td>Platform native widgets</td></tr>
+          <tr><td>Performance</td><td>Good (JSI bridge), not peak</td><td>Excellent — near-native</td><td>Best — direct platform access</td></tr>
+          <tr><td>Code Sharing</td><td>~70% shared</td><td>~80-90% shared</td><td>0% (separate codebases)</td></tr>
+          <tr><td>Real-time / WS</td><td>react-native-websocket / socket.io</td><td>web_socket_channel package</td><td>URLSession / OkHttp native</td></tr>
+          <tr><td>Local DB</td><td>WatermelonDB / MMKV / SQLite</td><td>drift (moor) / sqflite / Hive</td><td>Room / SQLCipher / CoreData</td></tr>
+          <tr><td>Push Notifs</td><td>@react-native-firebase/messaging</td><td>firebase_messaging package</td><td>APNs / FCM native SDKs</td></tr>
+          <tr><td>Camera</td><td>react-native-camera / Vision Camera</td><td>camera package</td><td>CameraX / AVFoundation</td></tr>
+          <tr><td>Best For</td><td>Teams with JS background, fast iteration</td><td>High-quality UI, animations, single codebase</td><td>Max performance, platform features, deep OS integration</td></tr>
+          <tr><td>Used By</td><td>Facebook, Shopify, Discord</td><td>Google Pay, Alibaba, Nubank</td><td>WhatsApp, Instagram, Snapchat</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-tag c-cyan">React Native Chat App Stack</div>
+        <h3>Key Libraries</h3>
+        <ul>
+          <li>socket.io-client — WebSocket</li>
+          <li>@react-native-firebase — push + analytics</li>
+          <li>WatermelonDB — high-perf local DB</li>
+          <li>react-native-mmkv — fast key-value store</li>
+          <li>vision-camera — camera capture</li>
+          <li>react-native-gifted-chat — chat UI base</li>
+          <li>react-native-encrypted-storage — secure store</li>
+          <li>@notifee/react-native — rich notifications</li>
+          <li>react-native-webrtc — voice/video calls</li>
+          <li>react-native-image-picker — media selection</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-amber">Flutter Chat App Stack</div>
+        <h3>Key Packages</h3>
+        <ul>
+          <li>web_socket_channel — WebSocket</li>
+          <li>firebase_messaging — FCM push</li>
+          <li>drift — type-safe local SQLite ORM</li>
+          <li>flutter_secure_storage — keychain/keystore</li>
+          <li>camera — camera capture</li>
+          <li>flutter_chat_ui — chat bubbles UI</li>
+          <li>flutter_webrtc — voice/video</li>
+          <li>image_picker — gallery/camera pick</li>
+          <li>riverpod / bloc — state management</li>
+          <li>dio — HTTP client + interceptors</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ LOCAL DB ══ -->
+  <section id="local-db" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(96,165,250,0.1)">💾</div>
+      <div>
+        <div class="section-num">22</div>
+        <div class="section-title">Local Database & Storage</div>
+        <div class="section-sub">On-device encrypted storage — messages, media, keys</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>Why On-Device DB?</h4>
+      <p>Chat apps need instant message display with zero latency — hitting the server for every scroll event is unacceptable. A local SQLite database (encrypted with SQLCipher) stores recent messages, contacts, and settings. The server is the source of truth; the device is a synchronized cache.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-blue">SQLCipher (Encrypted SQLite)</div>
+        <h3>Local Message Store</h3>
+        <p>All on-device message data encrypted with AES-256. Database key derived from user's PIN + device key stored in Keychain/Keystore. Schema mirrors server but is trimmed (last 1000 msgs per chat by default).</p>
+        <ul>
+          <li>messages — local copy, same schema as server</li>
+          <li>chats — conversation list + last message</li>
+          <li>contacts — phone book + registered users</li>
+          <li>media_cache — local file paths for downloaded media</li>
+          <li>pending_messages — outbox for offline sends</li>
+          <li>signal_sessions — E2EE session states (critical)</li>
+          <li>prekeys — one-time prekeys awaiting use</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-amber">File System Storage</div>
+        <h3>Media File Organization</h3>
+        <ul>
+          <li><code>/WhatsApp/Media/Images/</code> — received images</li>
+          <li><code>/WhatsApp/Media/Video/</code> — received videos</li>
+          <li><code>/WhatsApp/Media/Voice/</code> — voice messages</li>
+          <li><code>/WhatsApp/Media/Documents/</code> — PDFs, docs</li>
+          <li><code>/WhatsApp/Media/.Statuses/</code> — cached statuses</li>
+          <li>Sent media kept in original camera roll</li>
+          <li>Media not downloaded until user taps</li>
+          <li>Auto-download respects WiFi/cellular setting</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-red">Secure Key Storage</div>
+        <h3>iOS Keychain / Android Keystore</h3>
+        <p>Cryptographic keys are NEVER stored in the SQLite database or UserDefaults/SharedPreferences. Platform-provided secure enclaves are used.</p>
+        <ul>
+          <li>Identity key pair → Keychain/Keystore</li>
+          <li>JWT refresh token → Keychain/EncryptedSharedPrefs</li>
+          <li>DB encryption key → Keychain/Keystore</li>
+          <li>Backup key → Secure Enclave (iOS) / StrongBox (Android)</li>
+          <li>Biometric-gated access for sensitive operations</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Storage Limits & Cleanup</div>
+        <h3>Disk Management</h3>
+        <ul>
+          <li>Storage usage screen shows breakdown by media type</li>
+          <li>Per-chat storage view: tap → "Free up space"</li>
+          <li>Auto-delete old media when disk &lt; 500MB free</li>
+          <li>Messages: no auto-delete (only disappearing msgs)</li>
+          <li>Thumbnail cache LRU eviction</li>
+          <li>Temp files cleaned on app foreground</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MOBILE NETWORK ══ -->
+  <section id="mobile-network" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.12)">🌐</div>
+      <div>
+        <div class="section-num">23</div>
+        <div class="section-title">Mobile Network Layer</div>
+        <div class="section-sub">Offline-first design, smart reconnection, bandwidth optimization</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-tag c-green">Offline-First Strategy</div>
+        <h3>How the App Handles No Connectivity</h3>
+        <ul>
+          <li>All reads served from local SQLite — zero network dependency</li>
+          <li>Sends go to <code>pending_messages</code> outbox table</li>
+          <li>Message shown as "pending" (clock icon) in UI</li>
+          <li>Network monitor (NWPathMonitor on iOS / ConnectivityManager on Android) watches for connectivity</li>
+          <li>On reconnect: flush outbox in FIFO order</li>
+          <li>WS reconnect with exponential backoff: 1s → 2s → 4s → 8s → max 60s</li>
+          <li>Missed messages fetched via REST on reconnect</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Network Optimization</div>
+        <h3>Bandwidth Efficiency</h3>
+        <ul>
+          <li>Protobuf binary serialization (vs JSON — 3-10x smaller)</li>
+          <li>HTTP/2 multiplexing — no head-of-line blocking</li>
+          <li>Delta sync — only fetch messages newer than last_message_id</li>
+          <li>Image thumbnails first, full image on tap</li>
+          <li>Adaptive media quality: 4G → high, 3G → medium, 2G → low</li>
+          <li>Compressed WebSocket frames (permessage-deflate)</li>
+          <li>Request coalescing: batch multiple API calls</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:20px">
+      <table>
+        <thead><tr><th>Network State</th><th>App Behavior</th><th>User Experience</th></tr></thead>
+        <tbody>
+          <tr><td>WiFi / 4G / 5G</td><td>Full real-time WS connection, auto-download media, HD voice/video</td><td>All features active, no limitations</td></tr>
+          <tr><td>3G / slow network</td><td>WS active, reduced media quality, thumbnails only, no auto-download video</td><td>"Connecting..." may flash briefly; media tap-to-download</td></tr>
+          <tr><td>2G / EDGE</td><td>REST polling fallback (30s interval), text only, no media auto-download</td><td>Noticeable delay; media tap shows "download" button</td></tr>
+          <tr><td>Offline / Airplane</td><td>Reads from local DB; writes to outbox; WS disconnected</td><td>"Waiting for network..." banner; messages show clock icon</td></tr>
+          <tr><td>Reconnecting</td><td>Flush outbox → fetch missed msgs → re-subscribe WS topics</td><td>Messages deliver automatically; no action needed from user</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ PUSH & BACKGROUND ══ -->
+  <section id="mobile-push" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(239,68,68,0.1)">🔔</div>
+      <div>
+        <div class="section-num">24</div>
+        <div class="section-title">Push Notifications & Background Execution</div>
+        <div class="section-sub">APNs (iOS) · FCM (Android) · Background sync</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-tag c-red">iOS Push (APNs)</div>
+          <h3>iOS Notification Architecture</h3>
+          <ul>
+            <li>Register device token via <code>registerForRemoteNotifications()</code></li>
+            <li>Token sent to backend → stored in user_devices</li>
+            <li>Server sends via APNs HTTP/2 API</li>
+            <li><strong>Silent push:</strong> <code>content-available:1</code> — wakes app in background to decrypt + show local notification (preserving E2EE)</li>
+            <li>Notification Service Extension — intercept push, decrypt, show rich preview</li>
+            <li>UNNotificationCategory — action buttons (Reply, Mark Read)</li>
+            <li>Critical alerts for missed calls (bypass Do Not Disturb)</li>
+            <li>CallKit for incoming call native UI</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-tag c-green">iOS Background Tasks</div>
+          <h3>BGTask Framework</h3>
+          <ul>
+            <li><code>BGAppRefreshTask</code> — refresh chat list every 15 min</li>
+            <li><code>BGProcessingTask</code> — backup, DB vacuum, key refresh</li>
+            <li>VoIP push (PushKit) — keeps WS alive for calls</li>
+            <li>App Extension shares data via App Groups (shared container)</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-tag c-amber">Android Push (FCM)</div>
+          <h3>Android Notification Architecture</h3>
+          <ul>
+            <li>FCM token registered via <code>FirebaseMessaging.getInstance().token</code></li>
+            <li>Token sent to backend → stored in user_devices</li>
+            <li>Server sends via FCM HTTP v1 API</li>
+            <li><strong>Data messages:</strong> wake app via <code>onMessageReceived()</code> — app decrypts and posts local notification</li>
+            <li>Notification channels (Android 8+) — separate channels for messages, calls, groups</li>
+            <li>Notification actions: inline reply (RemoteInput), Mark Read</li>
+            <li>Bubbles API (Android 11+) — chat head overlay</li>
+            <li>High priority FCM for calls (bypass battery optimization)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-tag c-cyan">Android Background</div>
+          <h3>WorkManager Strategy</h3>
+          <ul>
+            <li>PeriodicWorkRequest — contact sync (daily)</li>
+            <li>OneTimeWorkRequest — send queued messages on reconnect</li>
+            <li>Chained workers — compress → upload → notify</li>
+            <li>Foreground service for active media upload/download</li>
+            <li>Battery optimization exemption request for reliable delivery</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MOBILE MEDIA ══ -->
+  <section id="mobile-media" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.12)">🖼️</div>
+      <div>
+        <div class="section-num">25</div>
+        <div class="section-title">Mobile Media Handling</div>
+        <div class="section-sub">Camera, compression, upload, gallery — end to end</div>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">1</div>
+        <div class="flow-content">
+          <h4>Capture / Select</h4>
+          <p>User opens camera (CameraX / AVFoundation) or picks from gallery (MediaPicker / PHPickerViewController). App requests <code>CAMERA</code> + <code>READ_MEDIA_IMAGES</code> permissions at runtime.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">2</div>
+        <div class="flow-content">
+          <h4>Client-Side Compression</h4>
+          <p>Before upload: images resized to max 1600px, converted to WebP (quality 85%). Videos transcoded to H.264/AAC in a background thread. EXIF GPS data stripped for privacy. Runs on background thread (DispatchQueue / Coroutine).</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">3</div>
+        <div class="flow-content">
+          <h4>Chunked Upload to S3</h4>
+          <p>Large files use S3 multipart upload (5MB chunks). Progress tracked in UI. If connection drops, upload resumes from last successful chunk using <code>upload_id</code>. Foreground service (Android) keeps upload alive.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">4</div>
+        <div class="flow-content">
+          <h4>Optimistic UI + Thumbnail</h4>
+          <p>App shows local thumbnail immediately (before upload completes). Message appears in chat with upload progress bar. Only after server ACKs the media_id does status change to "sent".</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="color:#a78bfa;border-color:rgba(124,58,237,0.3)">5</div>
+        <div class="flow-content">
+          <h4>Receiving & Caching</h4>
+          <p>Received image shows thumbnail (100px, pre-generated by server Lambda). Full image downloaded lazily on scroll-into-view or tap. Cached in LRU disk cache (max 200MB). Evicted using LRU when limit exceeded.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards" style="margin-top:20px">
+      <div class="card">
+        <div class="card-tag c-purple">Image Loading Libraries</div>
+        <h3>Platform Choices</h3>
+        <ul>
+          <li><strong>Android:</strong> Coil (Kotlin-first, Coroutines) or Glide</li>
+          <li><strong>iOS:</strong> SDWebImage or Kingfisher</li>
+          <li><strong>RN:</strong> react-native-fast-image (GLide/SDWebImage bridge)</li>
+          <li><strong>Flutter:</strong> cached_network_image + extended_image</li>
+          <li>All: placeholder → thumbnail → full-res progression</li>
+          <li>Blur hash placeholder for instant perceived load</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Voice Messages</div>
+        <h3>Audio Recording & Playback</h3>
+        <ul>
+          <li>Record: hold-to-record button + swipe-to-cancel</li>
+          <li>Format: Opus codec in OGG container (best compression)</li>
+          <li>Waveform visualization: sampled amplitude data stored with message</li>
+          <li>Playback: continues in background when app minimized</li>
+          <li>Speed: 1x / 1.5x / 2x playback</li>
+          <li>Auto-transcription (optional, on-device Whisper)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MOBILE PERF ══ -->
+  <section id="mobile-perf" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">🚀</div>
+      <div>
+        <div class="section-num">26</div>
+        <div class="section-title">Mobile Performance</div>
+        <div class="section-sub">60fps scrolling, fast startup, battery efficiency</div>
+      </div>
+    </div>
+
+    <div class="scale-grid">
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent)">60fps</div>
+        <div class="label">Chat scroll target</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent3)">&lt;1s</div>
+        <div class="label">Cold start to chat list</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent4)">&lt;200ms</div>
+        <div class="label">Message send to optimistic UI</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:#a78bfa">200MB</div>
+        <div class="label">Max media disk cache</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent)">16ms</div>
+        <div class="label">Frame budget (60fps)</div>
+      </div>
+      <div class="scale-card">
+        <div class="num" style="color:var(--accent3)">&lt;50MB</div>
+        <div class="label">Target RAM usage</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-tag c-amber">Chat List Performance</div>
+        <h3>Virtualized Message List</h3>
+        <ul>
+          <li><strong>Android:</strong> RecyclerView with DiffUtil — only re-renders changed items</li>
+          <li><strong>iOS:</strong> UICollectionView with DiffableDataSource</li>
+          <li><strong>RN:</strong> FlashList (by Shopify) — fastest RN list</li>
+          <li><strong>Flutter:</strong> ListView.builder with keys</li>
+          <li>Only ~20 messages rendered at once (viewport + buffer)</li>
+          <li>Scroll to bottom button with unread count</li>
+          <li>Pagination: load 50 older msgs on scroll-to-top</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-cyan">Startup Performance</div>
+        <h3>App Launch Optimization</h3>
+        <ul>
+          <li>Splash screen → immediately show cached chat list from SQLite</li>
+          <li>No network call blocking the initial render</li>
+          <li>Lazy-load avatars and media thumbnails</li>
+          <li>Android: Baseline Profiles for AOT compilation of hot paths</li>
+          <li>iOS: Pre-warm SQLite connection on app init</li>
+          <li>Kotlin Coroutines / Swift Concurrency for non-blocking DB reads</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Battery Optimization</div>
+        <h3>Background Efficiency</h3>
+        <ul>
+          <li>WS heartbeat: every 60s (not 10s) — reduces radio wake-ups</li>
+          <li>Batch network requests — avoid N separate HTTP calls</li>
+          <li>Use push (server-initiated) over polling</li>
+          <li>Coalesce background tasks with OS scheduler (BGTask / WorkManager)</li>
+          <li>Avoid wakelocks; use JobScheduler-compatible APIs</li>
+          <li>Dark mode reduces OLED pixel power draw</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TESTING ══ -->
+  <section id="mobile-testing" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(148,163,184,0.1)">🧪</div>
+      <div>
+        <div class="section-num">27</div>
+        <div class="section-title">Mobile Testing Strategy</div>
+        <div class="section-sub">Unit → Integration → UI → E2E → Device Farm</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Test Type</th><th>iOS Tools</th><th>Android Tools</th><th>What It Tests</th></tr></thead>
+        <tbody>
+          <tr><td>Unit Tests</td><td>XCTest, Quick/Nimble</td><td>JUnit5, MockK, Turbine</td><td>ViewModels, Use Cases, Repositories, Crypto logic</td></tr>
+          <tr><td>Integration Tests</td><td>XCTest (in-process)</td><td>Robolectric + Room in-memory DB</td><td>DB queries, network layer mocking, notification handling</td></tr>
+          <tr><td>UI Tests</td><td>XCUITest</td><td>Espresso / Compose UI Test</td><td>Screen flows, button taps, navigation, accessibility</td></tr>
+          <tr><td>Snapshot Tests</td><td>swift-snapshot-testing</td><td>Paparazzi / Shot</td><td>UI regression — detects visual changes automatically</td></tr>
+          <tr><td>E2E Tests</td><td>Detox (RN) / XCUITest</td><td>Detox / Appium</td><td>Full send-receive flow, media upload, login flow</td></tr>
+          <tr><td>Performance Tests</td><td>XCTest Metrics + Instruments</td><td>Macrobenchmark + Baseline Profiles</td><td>Startup time, scroll FPS, memory, battery</td></tr>
+          <tr><td>Device Farm</td><td>AWS Device Farm / Browserstack</td><td>Firebase Test Lab</td><td>Real device matrix: OS versions, screen sizes, manufacturers</td></tr>
+          <tr><td>Crash Reporting</td><td>Firebase Crashlytics</td><td>Firebase Crashlytics</td><td>Real-world crashes with stack traces + user context</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-tag c-blue">Test Coverage Strategy</div>
+        <h3>What to Prioritize</h3>
+        <ul>
+          <li>100% Unit test coverage on: crypto layer, message send/receive logic, DB operations</li>
+          <li>UI tests for: login flow, send text/image, group create, notification tap</li>
+          <li>E2E smoke tests run on every PR: login → send message → receive → read receipt</li>
+          <li>Performance tests gated on CI: cold start &lt; 1s, scroll &gt; 55fps</li>
+          <li>Accessibility audit: VoiceOver / TalkBack compliance</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-red">What's Hard to Test</div>
+        <h3>Known Challenges</h3>
+        <ul>
+          <li>Push notifications in CI — use mock APNs/FCM server</li>
+          <li>Background execution — hard to simulate; use manual QA</li>
+          <li>WebRTC call quality — network simulation tools</li>
+          <li>Battery usage — Instruments Energy Log / Battery Historian</li>
+          <li>Race conditions in concurrent message sync — actor-model isolation</li>
+          <li>On-device E2EE — test with two simulator instances</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ RELEASE & CI/CD ══ -->
+  <section id="mobile-release" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,229,255,0.1)">🚢</div>
+      <div>
+        <div class="section-num">28</div>
+        <div class="section-title">Mobile Release & CI/CD</div>
+        <div class="section-sub">Automated pipeline from commit to App Store / Play Store</div>
+      </div>
+    </div>
+
+    <div class="ws-diagram"><span class="hl">Developer pushes code</span>
+         │
+         ▼
+<span class="hl2">GitHub Actions / Bitrise / Fastlane</span>
+  ├── Lint (SwiftLint / Detekt / ESLint)
+  ├── Unit Tests (XCTest / JUnit5)
+  ├── Build (xcodebuild / Gradle)
+  ├── UI Tests on Simulator/Emulator
+  ├── Snapshot Tests (diff check)
+  ├── Code Coverage Gate (&gt;80%)
+  └── Security Scan (Snyk / MobSF)
+         │
+         ▼ (on merge to main)
+<span class="hl3">Build Artifacts</span>
+  ├── iOS: .ipa signed with Distribution cert (Fastlane match)
+  └── Android: .aab signed with Keystore (Gradle signing config)
+         │
+         ▼
+<span class="hl4">Distribution Stages</span>
+  ├── Internal (same day) → TestFlight Internal / Firebase App Distribution
+  ├── Beta (weekly)       → TestFlight External / Play Internal Testing
+  ├── Staged Rollout      → 1% → 5% → 25% → 100% users
+  └── Production          → App Store / Play Store public release</div>
+
+    <div class="cards" style="margin-top:20px">
+      <div class="card">
+        <div class="card-tag c-cyan">Fastlane Automation</div>
+        <h3>Key Fastlane Lanes</h3>
+        <ul>
+          <li><code>lane :beta</code> — build + sign + upload to TestFlight</li>
+          <li><code>lane :release</code> — bump version, tag, submit to App Store</li>
+          <li><code>match</code> — sync certificates + provisioning profiles via Git</li>
+          <li><code>scan</code> — run all tests and generate JUnit report</li>
+          <li><code>snapshot</code> — auto-generate App Store screenshots in all locales</li>
+          <li><code>deliver</code> — upload metadata + screenshots to App Store Connect</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-green">Feature Flags</div>
+        <h3>Safe Feature Rollouts</h3>
+        <p>New features wrapped in feature flags (Firebase Remote Config / LaunchDarkly). Ship code dark, enable for 1% → 10% → 100%. Instant kill switch if issues found — no need for emergency app release.</p>
+        <ul>
+          <li>Flag: <code>enable_new_reactions_ui</code></li>
+          <li>Flag: <code>enable_polls_feature</code></li>
+          <li>A/B test new UI before full rollout</li>
+          <li>Server-side flag eval — no app update needed</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-amber">OTA Updates</div>
+        <h3>Hot Patch (React Native Only)</h3>
+        <p>React Native apps can use CodePush (Microsoft App Center) to ship JS bundle updates without going through App Store review. Critical bug fixes can reach users in minutes.</p>
+        <ul>
+          <li>JS/assets updated OTA instantly</li>
+          <li>Native code changes still need store review</li>
+          <li>Rollback if crash rate spikes</li>
+          <li>Not available for native Swift/Kotlin apps</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-tag c-red">Monitoring Post-Release</div>
+        <h3>Crash & Performance Monitoring</h3>
+        <ul>
+          <li>Firebase Crashlytics — real-time crash alerts</li>
+          <li>Sentry — errors + performance traces</li>
+          <li>ANR / App Not Responding alerts (Android vitals)</li>
+          <li>Core Web Vitals equivalent: App startup time</li>
+          <li>Rollback trigger: crash-free sessions &lt; 99.5%</li>
+          <li>Staged rollout pause on crash spike detection</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    chat-system-architecture.html &nbsp;·&nbsp; System Design Reference &nbsp;·&nbsp; WhatsApp Scale &nbsp;·&nbsp; 2026
+  </footer>
+
+</main>
+
+<script>
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(item => {
+          item.classList.remove('active');
+          if (item.getAttribute('href') === '#' + entry.target.id) {
+            item.classList.add('active');
+          }
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

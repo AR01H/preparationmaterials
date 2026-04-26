@@ -1,0 +1,2769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bus Booking Platform — End-to-End System Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #12151c;
+    --bg3: #181c26;
+    --card: #1c2130;
+    --card2: #212638;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --accent: #4f6ef7;
+    --accent2: #7c3aed;
+    --accent3: #06b6d4;
+    --accent4: #f59e0b;
+    --accent5: #10b981;
+    --accent6: #f43f5e;
+    --text: #e8eaf0;
+    --text2: #9ba3b8;
+    --text3: #6b7590;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'Instrument Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --sidebar-w: 280px;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  #sidebar {
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 100;
+    padding-bottom: 40px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(79,110,247,0.3) transparent;
+  }
+
+  #sidebar::-webkit-scrollbar {
+    width: 4px;
+  }
+  #sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  #sidebar::-webkit-scrollbar-thumb {
+    background: rgba(79,110,247,0.3);
+    border-radius: 4px;
+  }
+  #sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(79,110,247,0.6);
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .sidebar-logo h2 {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  .sidebar-logo p {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  .nav-section {
+    padding: 20px 16px 8px;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 8px;
+    margin-bottom: 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text2);
+    font-size: 13.5px;
+    text-decoration: none;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: rgba(79,110,247,0.08);
+    color: var(--text);
+  }
+
+  .nav-item.active {
+    background: rgba(79,110,247,0.14);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 60%;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .nav-dot {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 1px 6px;
+    background: rgba(79,110,247,0.2);
+    color: var(--accent);
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  /* ─── MAIN ─── */
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 0 48px 80px;
+    max-width: calc(100% - var(--sidebar-w));
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 60px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #fff 0%, #9ba3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .hero p {
+    color: var(--text2);
+    font-size: 16px;
+    max-width: 640px;
+    line-height: 1.8;
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .tag {
+    font-size: 11.5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  .tag-blue  { background: rgba(79,110,247,0.15); color: #7b9bff; border: 1px solid rgba(79,110,247,0.25); }
+  .tag-purple{ background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.25); }
+  .tag-cyan  { background: rgba(6,182,212,0.12);  color: #22d3ee; border: 1px solid rgba(6,182,212,0.22); }
+  .tag-amber { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.22); }
+  .tag-green { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.22); }
+  .tag-rose  { background: rgba(244,63,94,0.12);  color: #fb7185; border: 1px solid rgba(244,63,94,0.22); }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    margin-bottom: 64px;
+    scroll-margin-top: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(79,110,247,0.1);
+    border: 1px solid rgba(79,110,247,0.2);
+    padding: 3px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .section h2 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+  }
+
+  .section h2 .dim { color: var(--text3); font-weight: 400; }
+
+  .section h3 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 28px 0 12px;
+  }
+
+  p { color: var(--text2); margin-bottom: 14px; }
+
+  /* ─── CARDS ─── */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: var(--border2); }
+
+  .card-icon {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  .card h4 {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .card p { font-size: 13px; color: var(--text3); margin: 0; line-height: 1.6; }
+
+  /* ─── ARCH DIAGRAM ─── */
+  .arch-diagram {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+
+  .arch-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
+
+  .arch-box {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 110px;
+    border: 1px solid transparent;
+  }
+
+  .arch-box.blue   { background: rgba(79,110,247,0.15); color: #7b9bff; border-color: rgba(79,110,247,0.3); }
+  .arch-box.purple { background: rgba(124,58,237,0.15); color: #a78bfa; border-color: rgba(124,58,237,0.3); }
+  .arch-box.cyan   { background: rgba(6,182,212,0.12);  color: #22d3ee; border-color: rgba(6,182,212,0.3); }
+  .arch-box.amber  { background: rgba(245,158,11,0.12); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+  .arch-box.green  { background: rgba(16,185,129,0.12); color: #34d399; border-color: rgba(16,185,129,0.3); }
+  .arch-box.rose   { background: rgba(244,63,94,0.12);  color: #fb7185; border-color: rgba(244,63,94,0.3); }
+  .arch-box.gray   { background: rgba(255,255,255,0.05); color: var(--text2); border-color: var(--border2); }
+
+  .arch-arrow {
+    text-align: center;
+    color: var(--text3);
+    font-size: 18px;
+    margin: 8px 0;
+  }
+
+  .arch-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .arch-tier {
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  /* ─── TECH STACK ─── */
+  .tech-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .tech-table th {
+    background: var(--bg3);
+    padding: 12px 18px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tech-table td {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    vertical-align: top;
+  }
+
+  .tech-table tr:last-child td { border-bottom: none; }
+  .tech-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tech-table td:first-child { color: var(--text2); font-weight: 500; }
+  .tech-table td:nth-child(2) { color: var(--accent3); font-family: var(--font-mono); font-size: 12.5px; }
+  .tech-table td:nth-child(3) { color: var(--text3); font-size: 13px; }
+
+  /* ─── CODE BLOCKS ─── */
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 12px 0;
+    color: #c5cff5;
+  }
+
+  .code-block .kw   { color: #a78bfa; }
+  .code-block .str  { color: #86efac; }
+  .code-block .cmt  { color: #4b5568; }
+  .code-block .fn   { color: #7dd3fc; }
+  .code-block .num  { color: #fbbf24; }
+  .code-block .type { color: #22d3ee; }
+
+  /* ─── STEP LIST ─── */
+  .step-list { list-style: none; padding: 0; }
+
+  .step-list li {
+    display: flex;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .step-list li:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 30px; height: 30px;
+    background: rgba(79,110,247,0.15);
+    border: 1px solid rgba(79,110,247,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-content h4 {
+    font-family: var(--font-display);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .step-content p { font-size: 13px; color: var(--text3); margin: 0; }
+
+  /* ─── FLOW CHART ─── */
+  .flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 16px 0;
+  }
+
+  .flow-step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+
+  .flow-arrow {
+    color: var(--text3);
+    padding: 0 8px;
+    font-size: 16px;
+  }
+
+  /* ─── NOTICE / CALLOUT ─── */
+  .callout {
+    display: flex;
+    gap: 14px;
+    padding: 18px 20px;
+    border-radius: var(--radius);
+    margin: 16px 0;
+    align-items: flex-start;
+  }
+
+  .callout.info  { background: rgba(79,110,247,0.07); border: 1px solid rgba(79,110,247,0.2); }
+  .callout.warn  { background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.2); }
+  .callout.green { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.2); }
+
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .callout-body h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .callout-body p  { font-size: 13px; color: var(--text3); margin: 0; line-height: 1.65; }
+
+  /* ─── DB SCHEMA ─── */
+  .schema-table {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .schema-table .schema-head {
+    background: var(--bg3);
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent3);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .schema-table .schema-head span { color: var(--text3); font-weight: 400; }
+
+  .schema-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    font-size: 12.5px;
+  }
+
+  .schema-row:last-child { border-bottom: none; }
+
+  .schema-row .col-name { font-family: var(--font-mono); color: var(--text2); min-width: 160px; }
+  .schema-row .col-type { font-family: var(--font-mono); color: var(--accent4); min-width: 100px; font-size: 12px; }
+  .schema-row .col-flag { font-size: 10px; padding: 2px 7px; border-radius: 20px; background: rgba(79,110,247,0.15); color: var(--accent); font-weight: 700; }
+  .schema-row .col-flag.fk { background: rgba(6,182,212,0.1); color: var(--accent3); }
+  .schema-row .col-flag.idx { background: rgba(16,185,129,0.1); color: var(--accent5); }
+  .schema-row .col-desc { color: var(--text3); font-size: 12px; margin-left: auto; }
+
+  /* ─── API ENDPOINT ─── */
+  .endpoint {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+  }
+
+  .method {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    min-width: 52px;
+    text-align: center;
+    margin-top: 2px;
+  }
+
+  .method.get    { background: rgba(16,185,129,0.15); color: #34d399; }
+  .method.post   { background: rgba(79,110,247,0.15); color: #7b9bff; }
+  .method.put    { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .method.delete { background: rgba(244,63,94,0.15);  color: #fb7185; }
+  .method.patch  { background: rgba(6,182,212,0.12);  color: #22d3ee; }
+
+  .endpoint-path {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .endpoint-desc { font-size: 12.5px; color: var(--text3); margin-top: 3px; }
+
+  /* ─── MICROSERVICE ─── */
+  .service-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 12px;
+  }
+
+  .service-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .service-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .service-card h4 {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .service-card .service-sub {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  .service-card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .service-card ul li {
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--text3);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    padding-left: 0;
+    display: flex;
+    gap: 8px;
+  }
+
+  .service-card ul li::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ─── INLINE CODE ─── */
+  code {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    background: rgba(255,255,255,0.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--accent3);
+  }
+
+  /* ─── PHASE TIMELINE ─── */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), transparent);
+    border-radius: 2px;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+    padding-left: 20px;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -21px; top: 6px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--bg);
+  }
+
+  .timeline-item h4 {
+    font-family: var(--font-display);
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .timeline-item p {
+    font-size: 13px;
+    color: var(--text3);
+    margin: 0 0 8px;
+  }
+
+  .timeline-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ─── SCROLL BEHAVIOR ─── */
+  html { scroll-behavior: smooth; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1100px) {
+    .card-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+    .card-grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 800px) {
+    :root { --sidebar-w: 0px; }
+    #sidebar { display: none; }
+    #main { margin-left: 0; padding: 0 20px 60px; }
+    .card-grid.cols-2, .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════ SIDEBAR ════════════════════════════════ -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🚌</div>
+    <h2>BusConnect Platform</h2>
+    <p>System Design Document</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item active" href="#overview">
+      <div class="nav-dot" style="background:rgba(79,110,247,0.2)">🗺</div>
+      System Overview
+    </a>
+    <a class="nav-item" href="#requirements">
+      <div class="nav-dot" style="background:rgba(124,58,237,0.2)">📋</div>
+      Requirements
+    </a>
+    <a class="nav-item" href="#architecture">
+      <div class="nav-dot" style="background:rgba(6,182,212,0.15)">🏗</div>
+      Architecture
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Backend</div>
+    <a class="nav-item" href="#microservices">
+      <div class="nav-dot" style="background:rgba(16,185,129,0.15)">⚙️</div>
+      Microservices
+    </a>
+    <a class="nav-item" href="#database">
+      <div class="nav-dot" style="background:rgba(245,158,11,0.15)">🗄</div>
+      Database Design
+    </a>
+    <a class="nav-item" href="#api">
+      <div class="nav-dot" style="background:rgba(244,63,94,0.15)">🔌</div>
+      API Design
+      <span class="nav-badge">REST</span>
+    </a>
+    <a class="nav-item" href="#auth">
+      <div class="nav-dot" style="background:rgba(124,58,237,0.2)">🔐</div>
+      Auth & Security
+    </a>
+    <a class="nav-item" href="#payments">
+      <div class="nav-dot" style="background:rgba(16,185,129,0.15)">💳</div>
+      Payment Flow
+    </a>
+    <a class="nav-item" href="#queues">
+      <div class="nav-dot" style="background:rgba(6,182,212,0.15)">📨</div>
+      Queues & Events
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Frontend</div>
+    <a class="nav-item" href="#frontend">
+      <div class="nav-dot" style="background:rgba(79,110,247,0.2)">🖥</div>
+      Frontend Architecture
+    </a>
+    <a class="nav-item" href="#userflows">
+      <div class="nav-dot" style="background:rgba(245,158,11,0.15)">👤</div>
+      User Flows
+    </a>
+    <a class="nav-item" href="#operator">
+      <div class="nav-dot" style="background:rgba(244,63,94,0.15)">🚌</div>
+      Operator Dashboard
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Infrastructure</div>
+    <a class="nav-item" href="#infra">
+      <div class="nav-dot" style="background:rgba(6,182,212,0.15)">☁️</div>
+      Cloud & DevOps
+    </a>
+    <a class="nav-item" href="#scaling">
+      <div class="nav-dot" style="background:rgba(16,185,129,0.15)">📈</div>
+      Scaling Strategy
+    </a>
+    <a class="nav-item" href="#notifications">
+      <div class="nav-dot" style="background:rgba(124,58,237,0.2)">🔔</div>
+      Notifications
+    </a>
+    <a class="nav-item" href="#search">
+      <div class="nav-dot" style="background:rgba(245,158,11,0.15)">🔍</div>
+      Search Engine
+    </a>
+    <a class="nav-item" href="#phases">
+      <div class="nav-dot" style="background:rgba(79,110,247,0.2)">🚀</div>
+      Build Phases
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Deep Dives</div>
+    <a class="nav-item" href="#dataflow">
+      <div class="nav-dot" style="background:rgba(79,110,247,0.2)">🔀</div>
+      Data Flow Diagrams
+    </a>
+    <a class="nav-item" href="#caching">
+      <div class="nav-dot" style="background:rgba(6,182,212,0.15)">⚡</div>
+      Caching Strategy
+    </a>
+    <a class="nav-item" href="#errorhandling">
+      <div class="nav-dot" style="background:rgba(244,63,94,0.15)">🛟</div>
+      Error Handling
+    </a>
+    <a class="nav-item" href="#multitenancy">
+      <div class="nav-dot" style="background:rgba(124,58,237,0.2)">🏢</div>
+      Multi-Tenancy
+    </a>
+    <a class="nav-item" href="#ratelimiting">
+      <div class="nav-dot" style="background:rgba(245,158,11,0.15)">🚦</div>
+      Rate Limiting
+    </a>
+    <a class="nav-item" href="#monitoring">
+      <div class="nav-dot" style="background:rgba(16,185,129,0.15)">📊</div>
+      Monitoring & Alerts
+    </a>
+    <a class="nav-item" href="#testing">
+      <div class="nav-dot" style="background:rgba(79,110,247,0.2)">🧪</div>
+      Testing Strategy
+    </a>
+    <a class="nav-item" href="#projectstructure">
+      <div class="nav-dot" style="background:rgba(6,182,212,0.15)">📁</div>
+      Project Structure
+    </a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════ MAIN ════════════════════════════════ -->
+<main id="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">End-to-End System Design</div>
+    <h1>Multi-Operator Bus<br>Booking Platform</h1>
+    <p>A complete blueprint to build a production-grade bus ticketing system from scratch — covering every layer from data models and microservices to payment flows, real-time seat maps, and operator dashboards.</p>
+    <div class="hero-tags">
+      <span class="tag tag-blue">Node.js / TypeScript</span>
+      <span class="tag tag-purple">React + Next.js</span>
+      <span class="tag tag-cyan">PostgreSQL + Redis</span>
+      <span class="tag tag-amber">Kafka / RabbitMQ</span>
+      <span class="tag tag-green">Docker + Kubernetes</span>
+      <span class="tag tag-rose">Stripe / Razorpay</span>
+    </div>
+  </div>
+
+  <!-- ═════════ 1. SYSTEM OVERVIEW ═════════ -->
+  <section class="section" id="overview">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <div>
+        <h2>System Overview <span class="dim">— What we're building</span></h2>
+      </div>
+    </div>
+
+    <p>The platform connects <strong style="color:var(--text)">multiple bus operators</strong> with passengers. Each operator can have different bus fleets, seat configurations, amenities, pricing rules, and cancellation policies. Passengers can search routes, compare buses, book seats, make payments, and get real-time updates — all in one app.</p>
+
+    <h3>Core Stakeholders</h3>
+    <div class="card-grid cols-3">
+      <div class="card">
+        <div class="card-icon">👤</div>
+        <h4>Passenger</h4>
+        <p>Search routes, compare operators, book & cancel tickets, track bus location, view history, receive notifications.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🚌</div>
+        <h4>Bus Operator</h4>
+        <p>Register buses, define routes & schedules, manage seat inventory, view bookings, handle refunds, view revenue reports.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡</div>
+        <h4>Platform Admin</h4>
+        <p>Approve operators, manage commissions, monitor platform health, handle disputes, configure platform-wide policies.</p>
+      </div>
+    </div>
+
+    <h3>Key Differentiators</h3>
+    <div class="card-grid cols-2">
+      <div class="card">
+        <div class="card-icon">🪑</div>
+        <h4>Dynamic Seat Layouts</h4>
+        <p>Each bus has a custom seat map — sleepers, semi-sleepers, seater, AC/Non-AC, upper/lower berths. Stored as JSON config per bus type.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💰</div>
+        <h4>Multi-Operator Pricing</h4>
+        <p>Operators set base prices; platform applies dynamic pricing algorithms based on demand, time-to-departure, and remaining inventory.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <h4>Atomic Seat Locking</h4>
+        <p>Redis-based distributed locks hold seats for 10 minutes during payment. Prevents double-booking across concurrent requests.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📡</div>
+        <h4>Real-Time Updates</h4>
+        <p>WebSocket connections push live seat availability, bus tracking, and boarding notifications to all connected clients.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 2. REQUIREMENTS ═════════ -->
+  <section class="section" id="requirements">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <div><h2>Requirements <span class="dim">— Functional & Non-Functional</span></h2></div>
+    </div>
+
+    <h3>Functional Requirements</h3>
+    <ul class="step-list">
+      <li>
+        <span class="step-num">F1</span>
+        <div class="step-content">
+          <h4>Operator Onboarding & Management</h4>
+          <p>Operators can register, upload documents for KYC, define their bus fleet (make, model, amenities, seat layout), and create routes with multiple stops and schedules.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">F2</span>
+        <div class="step-content">
+          <h4>Route & Schedule Search</h4>
+          <p>Passengers search by origin, destination, and date. Results show all operators, departure times, durations, amenities, price, and available seat count. Filters by price, rating, amenity, bus type.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">F3</span>
+        <div class="step-content">
+          <h4>Interactive Seat Selection</h4>
+          <p>Passengers view a real-time seat map. Booked seats are marked. Selected seats are held with a distributed lock for 10 minutes while the passenger completes payment.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">F4</span>
+        <div class="step-content">
+          <h4>Payment Processing</h4>
+          <p>Support UPI, cards, wallets, net banking. Integrate Razorpay (India) or Stripe (global). Handle payment success, failure, and partial refunds for cancellations.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">F5</span>
+        <div class="step-content">
+          <h4>Booking Management</h4>
+          <p>Passengers can view booking history, download e-tickets as PDF, cancel bookings (within operator's cancellation policy), and request refunds.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">F6</span>
+        <div class="step-content">
+          <h4>Real-Time Bus Tracking</h4>
+          <p>Bus driver app sends GPS coordinates. Passengers can see live bus location on map. Estimated arrival at each stop is computed dynamically.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">F7</span>
+        <div class="step-content">
+          <h4>Notifications</h4>
+          <p>Booking confirmations, departure reminders, delay alerts, and refund status sent via email, SMS, and push notifications.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">F8</span>
+        <div class="step-content">
+          <h4>Operator Revenue & Analytics</h4>
+          <p>Operators see daily/monthly revenue, occupancy rates per trip, cancellation rates, ratings per route, and payout history.</p>
+        </div>
+      </li>
+    </ul>
+
+    <h3>Non-Functional Requirements</h3>
+    <div class="card-grid cols-4">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h4>Performance</h4>
+        <p>Search API &lt; 500ms P99. Seat lock under 100ms. 10,000 concurrent users at launch.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <h4>Availability</h4>
+        <p>99.9% uptime (8.7 hrs downtime/year). Zero downtime deployments. Circuit breakers on all service-to-service calls.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h4>Scalability</h4>
+        <p>Horizontal scaling of stateless services. Read replicas for DB. Sharded Redis for seat locks.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <h4>Security</h4>
+        <p>JWT + refresh tokens. PCI-DSS compliance for payments. HTTPS everywhere. Rate limiting per IP & user.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 3. ARCHITECTURE ═════════ -->
+  <section class="section" id="architecture">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <div><h2>System Architecture <span class="dim">— High-Level Design</span></h2></div>
+    </div>
+
+    <p>The platform follows a <strong style="color:var(--text)">microservices architecture</strong> with an API Gateway as the single entry point. All communication between services is async via a message broker (Kafka) for event-driven flows, and sync via gRPC for real-time service-to-service calls that need immediate responses.</p>
+
+    <div class="arch-diagram">
+
+      <!-- CLIENT TIER -->
+      <div class="arch-tier">
+        <div class="arch-label">Client Layer</div>
+        <div class="arch-row">
+          <div class="arch-box blue">🌐 Web App (Next.js)</div>
+          <div class="arch-box blue">📱 Mobile App (React Native)</div>
+          <div class="arch-box blue">🚌 Driver App</div>
+          <div class="arch-box purple">🛡 Admin Dashboard</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↕  HTTPS / WSS</div>
+
+      <!-- GATEWAY TIER -->
+      <div class="arch-tier">
+        <div class="arch-label">API Gateway (Kong / Nginx)</div>
+        <div class="arch-row">
+          <div class="arch-box cyan">🔑 JWT Validation</div>
+          <div class="arch-box cyan">🚦 Rate Limiting</div>
+          <div class="arch-box cyan">⚖️ Load Balancing</div>
+          <div class="arch-box cyan">📊 Request Logging</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↕  REST / gRPC</div>
+
+      <!-- SERVICE TIER -->
+      <div class="arch-tier">
+        <div class="arch-label">Microservices Layer</div>
+        <div class="arch-row">
+          <div class="arch-box green">👤 User Service</div>
+          <div class="arch-box green">🔍 Search Service</div>
+          <div class="arch-box green">🚌 Operator Service</div>
+          <div class="arch-box green">🪑 Booking Service</div>
+          <div class="arch-box green">💳 Payment Service</div>
+          <div class="arch-box green">🔔 Notify Service</div>
+          <div class="arch-box green">📡 Tracking Service</div>
+          <div class="arch-box green">📊 Analytics Service</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↕  Kafka Events + Redis Pub/Sub</div>
+
+      <!-- DATA TIER -->
+      <div class="arch-tier">
+        <div class="arch-label">Data Layer</div>
+        <div class="arch-row">
+          <div class="arch-box amber">🐘 PostgreSQL (Primary)</div>
+          <div class="arch-box amber">⚡ Redis (Cache + Locks)</div>
+          <div class="arch-box amber">🔍 Elasticsearch</div>
+          <div class="arch-box amber">📦 S3 / Object Store</div>
+          <div class="arch-box amber">📊 ClickHouse (Analytics)</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; padding: 12px 16px; background: rgba(255,255,255,0.02); border-radius: 8px;">
+        <div class="arch-label" style="text-align:left; margin-bottom: 8px;">Supporting Infrastructure</div>
+        <div class="arch-row" style="justify-content: flex-start; gap: 8px;">
+          <div class="arch-box gray">📨 Kafka (Events)</div>
+          <div class="arch-box gray">🔭 Prometheus + Grafana</div>
+          <div class="arch-box gray">📝 ELK Stack (Logs)</div>
+          <div class="arch-box gray">🐳 Kubernetes (Orchestration)</div>
+          <div class="arch-box gray">🔐 Vault (Secrets)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>Design Decision: Shared DB vs Per-Service DB</h4>
+        <p>Each microservice owns its own database schema/tables within PostgreSQL (not separate DB servers initially). As the platform grows, high-traffic services (Booking, Search) get dedicated PostgreSQL instances. This balances operational simplicity at launch with future isolation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 4. MICROSERVICES ═════════ -->
+  <section class="section" id="microservices">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <div><h2>Microservices <span class="dim">— Responsibilities & Contracts</span></h2></div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-head">
+        <div class="service-icon" style="background:rgba(79,110,247,0.15)">👤</div>
+        <div>
+          <h4>User Service</h4>
+          <div class="service-sub">Port 3001 · Database: users schema · Cache: Redis session store</div>
+        </div>
+      </div>
+      <ul>
+        <li>Register, login, OTP-based phone auth, Google OAuth</li>
+        <li>Issue JWT access tokens (15 min TTL) + refresh tokens (30 days)</li>
+        <li>Store user profile, preferences, saved passenger details</li>
+        <li>Role management: passenger, operator_admin, platform_admin</li>
+        <li>Emit <code>user.registered</code>, <code>user.verified</code> events to Kafka</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-head">
+        <div class="service-icon" style="background:rgba(6,182,212,0.12)">🔍</div>
+        <div>
+          <h4>Search Service</h4>
+          <div class="service-sub">Port 3002 · Elasticsearch + Redis cache · Stateless, horizontally scalable</div>
+        </div>
+      </div>
+      <ul>
+        <li>Index all active trips with their metadata into Elasticsearch on every schedule change</li>
+        <li>Handle queries: origin → destination → date with fuzzy matching on city names</li>
+        <li>Apply filters: price range, departure time, operator, amenities, bus type</li>
+        <li>Cache popular route searches in Redis (5 min TTL) for repeated queries</li>
+        <li>Return aggregated results: trip details + operator info + real-time available seat count from Booking Service</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-head">
+        <div class="service-icon" style="background:rgba(16,185,129,0.12)">🚌</div>
+        <div>
+          <h4>Operator Service</h4>
+          <div class="service-sub">Port 3003 · Database: operators schema · Object store for documents</div>
+        </div>
+      </div>
+      <ul>
+        <li>Operator registration, KYC document upload (Aadhar, PAN, RC, permits)</li>
+        <li>Bus fleet management: register buses with make, model, year, capacity</li>
+        <li>Seat layout definition: JSON schema describing each seat (id, type, row, column, deck, price_modifier)</li>
+        <li>Route management: define origin–destination–stops with distances and durations</li>
+        <li>Schedule management: recurring trips with departure times, valid date ranges, seasonal overrides</li>
+        <li>Pricing rules: base fare + dynamic multipliers by seat type, advance booking, load factor</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-head">
+        <div class="service-icon" style="background:rgba(245,158,11,0.15)">🪑</div>
+        <div>
+          <h4>Booking Service <span style="color:var(--accent4);font-size:11px;margin-left:8px">CORE</span></h4>
+          <div class="service-sub">Port 3004 · Database: bookings schema · Redis distributed locks · WebSocket server</div>
+        </div>
+      </div>
+      <ul>
+        <li>Maintain <code>trip_seats</code> table: one row per seat per trip instance (date-specific)</li>
+        <li>Seat lock: <code>SET seat:{tripId}:{seatId} {userId} EX 600 NX</code> in Redis — atomic, expires in 10 min</li>
+        <li>On payment success: mark seats as BOOKED, create booking record, generate PNR</li>
+        <li>On lock expiry: release seats, publish <code>seat.released</code> event to WebSocket clients</li>
+        <li>Cancellation engine: apply operator's cancellation slab policy, calculate refund amount</li>
+        <li>Generate e-ticket PDF with QR code (unique per booking, verified at boarding)</li>
+        <li>Push real-time seat map updates to all connected clients via WebSocket rooms (one room per trip)</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-head">
+        <div class="service-icon" style="background:rgba(244,63,94,0.12)">💳</div>
+        <div>
+          <h4>Payment Service</h4>
+          <div class="service-sub">Port 3005 · Database: payments schema · Idempotency keys · Webhook receiver</div>
+        </div>
+      </div>
+      <ul>
+        <li>Create payment intent / order with Razorpay or Stripe</li>
+        <li>Store idempotency key per booking to prevent duplicate charges</li>
+        <li>Receive payment webhooks; verify signature; update payment status</li>
+        <li>Trigger <code>payment.succeeded</code> or <code>payment.failed</code> events to Kafka</li>
+        <li>Handle refunds: partial (seat cancellation) and full (trip cancelled by operator)</li>
+        <li>Commission split: hold platform commission, transfer remainder to operator payout account</li>
+        <li>Payout scheduler: batch operator payouts via NEFT/IMPS on D+2 settlement cycle</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-head">
+        <div class="service-icon" style="background:rgba(124,58,237,0.15)">📡</div>
+        <div>
+          <h4>Tracking Service</h4>
+          <div class="service-sub">Port 3006 · Redis time-series + PostGIS · WebSocket broadcast</div>
+        </div>
+      </div>
+      <ul>
+        <li>Driver app sends GPS coordinates every 10 seconds via WebSocket</li>
+        <li>Store last known position in Redis with <code>GEO</code> commands; write to PostGIS for history</li>
+        <li>Compute distance to each upcoming stop; publish ETA updates to trip WebSocket room</li>
+        <li>Detect geofence arrival at stops: trigger <code>bus.arrived_at_stop</code> event</li>
+        <li>Passengers subscribed to that trip receive live ETA on their booking detail screen</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═════════ 5. DATABASE DESIGN ═════════ -->
+  <section class="section" id="database">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <div><h2>Database Design <span class="dim">— Schema & Relationships</span></h2></div>
+    </div>
+
+    <p>The primary data store is <strong style="color:var(--text)">PostgreSQL</strong>. Each service owns its schema. Redis handles ephemeral state (locks, sessions, cache). Elasticsearch indexes trip data for fast search.</p>
+
+    <!-- USERS -->
+    <div class="schema-table">
+      <div class="schema-head">users <span>— User Service</span></div>
+      <div class="schema-row"><span class="col-name">id</span><span class="col-type">UUID</span><span class="col-flag">PK</span><span class="col-desc">Primary identifier</span></div>
+      <div class="schema-row"><span class="col-name">phone</span><span class="col-type">VARCHAR(15)</span><span class="col-flag idx">UNIQUE</span><span class="col-desc">Verified phone number</span></div>
+      <div class="schema-row"><span class="col-name">email</span><span class="col-type">VARCHAR(255)</span><span class="col-flag idx">UNIQUE</span><span class="col-desc">Optional email</span></div>
+      <div class="schema-row"><span class="col-name">name</span><span class="col-type">VARCHAR(100)</span><span class="col-flag">NOT NULL</span><span class="col-desc">Display name</span></div>
+      <div class="schema-row"><span class="col-name">role</span><span class="col-type">ENUM</span><span class="col-flag">NOT NULL</span><span class="col-desc">passenger / operator_admin / platform_admin</span></div>
+      <div class="schema-row"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-flag idx">IDX</span><span class="col-desc">Account creation time</span></div>
+    </div>
+
+    <!-- BUSES -->
+    <div class="schema-table">
+      <div class="schema-head">buses <span>— Operator Service</span></div>
+      <div class="schema-row"><span class="col-name">id</span><span class="col-type">UUID</span><span class="col-flag">PK</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">operator_id</span><span class="col-type">UUID</span><span class="col-flag fk">FK → operators</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">registration_no</span><span class="col-type">VARCHAR(20)</span><span class="col-flag idx">UNIQUE</span><span class="col-desc">Vehicle registration number</span></div>
+      <div class="schema-row"><span class="col-name">bus_type</span><span class="col-type">ENUM</span><span class="col-flag">NOT NULL</span><span class="col-desc">seater / sleeper / semi_sleeper / volvo / luxury</span></div>
+      <div class="schema-row"><span class="col-name">amenities</span><span class="col-type">JSONB</span><span class="col-flag"></span><span class="col-desc">{ wifi, ac, charging, blanket, movie, … }</span></div>
+      <div class="schema-row"><span class="col-name">seat_layout</span><span class="col-type">JSONB</span><span class="col-flag">NOT NULL</span><span class="col-desc">Full seat map definition</span></div>
+      <div class="schema-row"><span class="col-name">total_seats</span><span class="col-type">INT</span><span class="col-flag">NOT NULL</span><span class="col-desc">Computed from layout</span></div>
+    </div>
+
+    <!-- TRIPS -->
+    <div class="schema-table">
+      <div class="schema-head">trips <span>— Operator Service</span></div>
+      <div class="schema-row"><span class="col-name">id</span><span class="col-type">UUID</span><span class="col-flag">PK</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">schedule_id</span><span class="col-type">UUID</span><span class="col-flag fk">FK → schedules</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">bus_id</span><span class="col-type">UUID</span><span class="col-flag fk">FK → buses</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">travel_date</span><span class="col-type">DATE</span><span class="col-flag idx">IDX</span><span class="col-desc">Specific travel date instance</span></div>
+      <div class="schema-row"><span class="col-name">departure_time</span><span class="col-type">TIMESTAMPTZ</span><span class="col-flag">NOT NULL</span><span class="col-desc">Absolute departure datetime</span></div>
+      <div class="schema-row"><span class="col-name">status</span><span class="col-type">ENUM</span><span class="col-flag">NOT NULL</span><span class="col-desc">scheduled / in_progress / completed / cancelled</span></div>
+      <div class="schema-row"><span class="col-name">available_seats</span><span class="col-type">INT</span><span class="col-flag">NOT NULL</span><span class="col-desc">Cached count; source of truth in trip_seats</span></div>
+    </div>
+
+    <!-- BOOKINGS -->
+    <div class="schema-table">
+      <div class="schema-head">bookings <span>— Booking Service</span></div>
+      <div class="schema-row"><span class="col-name">id</span><span class="col-type">UUID</span><span class="col-flag">PK</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">pnr</span><span class="col-type">VARCHAR(10)</span><span class="col-flag idx">UNIQUE</span><span class="col-desc">Human-readable booking ref (e.g. BUS1A2B3C)</span></div>
+      <div class="schema-row"><span class="col-name">user_id</span><span class="col-type">UUID</span><span class="col-flag fk idx">FK + IDX</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">trip_id</span><span class="col-type">UUID</span><span class="col-flag fk idx">FK + IDX</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">seats</span><span class="col-type">JSONB</span><span class="col-flag">NOT NULL</span><span class="col-desc">[ { seatId, seatLabel, price, passenger: {...} } ]</span></div>
+      <div class="schema-row"><span class="col-name">total_amount</span><span class="col-type">NUMERIC(10,2)</span><span class="col-flag">NOT NULL</span><span class="col-desc">Total charged amount</span></div>
+      <div class="schema-row"><span class="col-name">status</span><span class="col-type">ENUM</span><span class="col-flag">NOT NULL</span><span class="col-desc">pending / confirmed / cancelled / refunded</span></div>
+      <div class="schema-row"><span class="col-name">boarding_point</span><span class="col-type">UUID</span><span class="col-flag fk">FK → route_stops</span><span class="col-desc"></span></div>
+      <div class="schema-row"><span class="col-name">dropping_point</span><span class="col-type">UUID</span><span class="col-flag fk">FK → route_stops</span><span class="col-desc"></span></div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>Seat Inventory Concurrency</h4>
+        <p>Never do a naive <code>SELECT + UPDATE</code> pattern for seats — it causes race conditions under concurrency. The correct pattern: Redis atomic <code>SET NX EX</code> for temporary lock during checkout, then PostgreSQL <code>UPDATE trip_seats SET status='BOOKED' WHERE seat_id=? AND status='AVAILABLE'</code> with a row-level check. Use PostgreSQL <code>FOR UPDATE SKIP LOCKED</code> for batch operations.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 6. API DESIGN ═════════ -->
+  <section class="section" id="api">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <div><h2>API Design <span class="dim">— REST Endpoints</span></h2></div>
+    </div>
+
+    <p>All APIs follow RESTful conventions. Base URL: <code>https://api.busconnect.in/v1</code>. Authentication via <code>Authorization: Bearer &lt;jwt&gt;</code> header.</p>
+
+    <h3>Auth Endpoints</h3>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/auth/send-otp</div><div class="endpoint-desc">Send OTP to phone number. Rate limited: 3 OTPs per phone per hour.</div></div></div>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/auth/verify-otp</div><div class="endpoint-desc">Verify OTP. Returns access_token + refresh_token on success.</div></div></div>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/auth/refresh</div><div class="endpoint-desc">Exchange refresh token for new access token. Rotates refresh token.</div></div></div>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/auth/logout</div><div class="endpoint-desc">Revoke refresh token. Blacklist in Redis until expiry.</div></div></div>
+
+    <h3>Search & Discovery</h3>
+    <div class="endpoint"><span class="method get">GET</span><div><div class="endpoint-path">/trips/search?from=BLR&amp;to=MYS&amp;date=2025-08-15&amp;passengers=2</div><div class="endpoint-desc">Search available trips. Returns list with operator info, seat count, price. Cached in Redis 5 min.</div></div></div>
+    <div class="endpoint"><span class="method get">GET</span><div><div class="endpoint-path">/trips/:tripId/seat-map</div><div class="endpoint-desc">Get real-time seat map for a trip. Includes locked, booked, and available seats.</div></div></div>
+    <div class="endpoint"><span class="method get">GET</span><div><div class="endpoint-path">/operators/:id/profile</div><div class="endpoint-desc">Get operator public profile — about, ratings, amenities offered, cancellation policy.</div></div></div>
+
+    <h3>Booking Flow</h3>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/bookings/hold-seats</div><div class="endpoint-desc">Acquire Redis lock on selected seats for 10 min. Returns hold_id. Body: { tripId, seatIds[], passengers[] }.</div></div></div>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/bookings/initiate-payment</div><div class="endpoint-desc">Create payment order for held seats. Returns payment gateway order_id / client_secret.</div></div></div>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/bookings/confirm</div><div class="endpoint-desc">Called after successful payment. Confirms booking, releases lock, creates DB record. Idempotent.</div></div></div>
+    <div class="endpoint"><span class="method get">GET</span><div><div class="endpoint-path">/bookings/:id</div><div class="endpoint-desc">Get booking details. Returns PNR, seats, passenger info, QR code data.</div></div></div>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/bookings/:id/cancel</div><div class="endpoint-desc">Cancel booking (or specific seats). Computes refund amount per cancellation policy. Queues refund job.</div></div></div>
+    <div class="endpoint"><span class="method get">GET</span><div><div class="endpoint-path">/bookings/:id/ticket.pdf</div><div class="endpoint-desc">Download e-ticket PDF with QR code, boarding pass, and trip details.</div></div></div>
+
+    <h3>Operator APIs (requires operator_admin role)</h3>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/operator/buses</div><div class="endpoint-desc">Register a new bus. Payload includes seat_layout JSON defining all seat positions, types, and pricing.</div></div></div>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/operator/routes</div><div class="endpoint-desc">Create a route with origin, destination, intermediate stops, distances, and durations.</div></div></div>
+    <div class="endpoint"><span class="method post">POST</span><div><div class="endpoint-path">/operator/schedules</div><div class="endpoint-desc">Create recurring schedule for a route + bus. Defines departure time, days of week, validity period, pricing.</div></div></div>
+    <div class="endpoint"><span class="method get">GET</span><div><div class="endpoint-path">/operator/analytics/revenue</div><div class="endpoint-desc">Revenue summary by day/week/month. Breakdown by route and bus.</div></div></div>
+
+    <h3>WebSocket Events</h3>
+    <div class="code-block">
+<span class="cmt">// Client connects to trip room</span>
+<span class="kw">socket</span>.<span class="fn">emit</span>(<span class="str">'join:trip'</span>, { tripId: <span class="str">'uuid-123'</span> });
+
+<span class="cmt">// Server broadcasts when a seat status changes</span>
+<span class="kw">socket</span>.<span class="fn">on</span>(<span class="str">'seat:update'</span>, ({ seatId, status }) => {
+  <span class="cmt">// update local seat map UI</span>
+});
+
+<span class="cmt">// Server broadcasts bus GPS location every 10s</span>
+<span class="kw">socket</span>.<span class="fn">on</span>(<span class="str">'bus:location'</span>, ({ lat, lng, eta, currentStop }) => {
+  <span class="cmt">// update tracking map</span>
+});
+    </div>
+  </section>
+
+  <!-- ═════════ 7. AUTH & SECURITY ═════════ -->
+  <section class="section" id="auth">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <div><h2>Auth & Security <span class="dim">— JWT, RBAC, PCI</span></h2></div>
+    </div>
+
+    <h3>Authentication Flow</h3>
+    <div class="flow">
+      <div class="flow-step">1. User enters phone</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">2. OTP sent via SMS</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">3. User verifies OTP</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">4. Issue JWT (15m) + Refresh (30d)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">5. Store refresh in Redis</div>
+    </div>
+
+    <h3>JWT Token Structure</h3>
+    <div class="code-block">
+<span class="cmt">// Access Token Payload (expires in 15 minutes)</span>
+{
+  <span class="str">"sub"</span>: <span class="str">"user-uuid"</span>,
+  <span class="str">"role"</span>: <span class="str">"passenger"</span>,          <span class="cmt">// passenger | operator_admin | platform_admin</span>
+  <span class="str">"operator_id"</span>: <span class="str">"operator-uuid"</span>,   <span class="cmt">// present if role = operator_admin</span>
+  <span class="str">"iat"</span>: <span class="num">1712345678</span>,
+  <span class="str">"exp"</span>: <span class="num">1712346578</span>             <span class="cmt">// 15 minutes from iat</span>
+}
+
+<span class="cmt">// Signed with RS256 (private key on Auth Service, public keys exposed at /auth/.well-known/jwks)</span>
+<span class="cmt">// API Gateway validates using public key — no auth DB hit per request</span>
+    </div>
+
+    <h3>Role-Based Access Control (RBAC)</h3>
+    <div class="card-grid cols-3">
+      <div class="card">
+        <div class="card-icon">👤</div>
+        <h4>Passenger</h4>
+        <p>Search, view, book, cancel own bookings, view own profile. Cannot access any operator or admin routes.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🚌</div>
+        <h4>Operator Admin</h4>
+        <p>Manage own buses, routes, schedules. View own bookings and revenue. Scoped to their <code>operator_id</code> — cannot access other operators' data.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡</div>
+        <h4>Platform Admin</h4>
+        <p>Approve/reject operators. Access all data. Manage commissions. Trigger manual refunds. Configure platform settings.</p>
+      </div>
+    </div>
+
+    <h3>Security Checklist</h3>
+    <ul class="step-list">
+      <li><span class="step-num">🔒</span><div class="step-content"><h4>HTTPS Everywhere + HSTS</h4><p>All traffic over TLS 1.2+. HSTS preload enforced. API Gateway terminates TLS.</p></div></li>
+      <li><span class="step-num">🚦</span><div class="step-content"><h4>Rate Limiting</h4><p>Per-IP: 100 req/min on public endpoints. Per-user: 30 req/min on booking endpoints. OTP: 3 per phone per hour. Implemented at API Gateway level with Redis counters.</p></div></li>
+      <li><span class="step-num">🛡</span><div class="step-content"><h4>Payment Security (PCI DSS)</h4><p>Card data never touches our servers — all card collection via Razorpay/Stripe hosted fields (iFrame). We only store gateway order IDs and payment intent IDs, never raw card numbers.</p></div></li>
+      <li><span class="step-num">🔑</span><div class="step-content"><h4>Secrets Management</h4><p>All API keys (payment gateways, SMS provider, Google Maps) stored in HashiCorp Vault. Services fetch secrets at startup. Never in environment variables or source code.</p></div></li>
+      <li><span class="step-num">🧹</span><div class="step-content"><h4>Input Validation</h4><p>All API inputs validated with Zod/Joi schemas before processing. SQL injection prevented by parameterized queries via Prisma/TypeORM. XSS prevention via output encoding.</p></div></li>
+    </ul>
+  </section>
+
+  <!-- ═════════ 8. PAYMENT FLOW ═════════ -->
+  <section class="section" id="payments">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <div><h2>Payment Flow <span class="dim">— Booking & Refund Lifecycle</span></h2></div>
+    </div>
+
+    <h3>Complete Booking + Payment Sequence</h3>
+    <ul class="step-list">
+      <li><span class="step-num">1</span><div class="step-content"><h4>Passenger selects seats</h4><p>Frontend sends <code>POST /bookings/hold-seats</code>. Booking Service acquires Redis locks on each seat: <code>SET seat:{tripId}:{seatId} {userId} NX EX 600</code>. If any lock fails (seat already locked), returns 409 Conflict.</p></div></li>
+      <li><span class="step-num">2</span><div class="step-content"><h4>Payment order created</h4><p><code>POST /bookings/initiate-payment</code> calls Razorpay API to create an order for the total amount. Stores <code>order_id</code> in DB with status <code>PENDING</code>. Returns <code>order_id</code> to frontend.</p></div></li>
+      <li><span class="step-num">3</span><div class="step-content"><h4>Passenger completes payment</h4><p>Frontend opens Razorpay checkout iframe. Passenger enters payment details. Razorpay processes payment client-side. On success, frontend receives <code>payment_id</code> + <code>signature</code>.</p></div></li>
+      <li><span class="step-num">4</span><div class="step-content"><h4>Frontend calls confirm endpoint</h4><p><code>POST /bookings/confirm</code> sends <code>{ holdId, paymentId, signature }</code>. Booking Service verifies Razorpay signature (HMAC-SHA256), updates payment as PAID, marks seats as BOOKED, generates PNR.</p></div></li>
+      <li><span class="step-num">5</span><div class="step-content"><h4>Async confirmation flow</h4><p>Booking Service publishes <code>booking.confirmed</code> to Kafka. Notification Service consumes it → sends confirmation SMS + email. Analytics Service updates occupancy stats. E-ticket PDF generated async.</p></div></li>
+      <li><span class="step-num">6</span><div class="step-content"><h4>Webhook as backup confirmation</h4><p>Razorpay also sends <code>payment.captured</code> webhook to our endpoint. Payment Service verifies and processes idempotently (if booking not yet confirmed, triggers confirm flow). Handles cases where frontend crashes after payment.</p></div></li>
+    </ul>
+
+    <h3>Cancellation & Refund Logic</h3>
+    <div class="code-block">
+<span class="cmt">// Cancellation policy slabs (configured per operator per route)</span>
+<span class="kw">const</span> cancelPolicy = [
+  { hoursBeforeDeparture: <span class="num">48</span>,  refundPercent: <span class="num">100</span> },
+  { hoursBeforeDeparture: <span class="num">24</span>,  refundPercent: <span class="num">75</span>  },
+  { hoursBeforeDeparture: <span class="num">12</span>,  refundPercent: <span class="num">50</span>  },
+  { hoursBeforeDeparture: <span class="num">6</span>,   refundPercent: <span class="num">25</span>  },
+  { hoursBeforeDeparture: <span class="num">0</span>,   refundPercent: <span class="num">0</span>   },
+];
+
+<span class="cmt">// Refund amount computation</span>
+<span class="kw">function</span> <span class="fn">computeRefund</span>(booking, policy) {
+  <span class="kw">const</span> hoursLeft = diffInHours(booking.departureTime, <span class="kw">new</span> <span class="type">Date</span>());
+  <span class="kw">const</span> slab = policy.<span class="fn">findLast</span>(s => hoursLeft >= s.hoursBeforeDeparture);
+  <span class="kw">return</span> (booking.totalAmount * slab.refundPercent) / <span class="num">100</span>;
+}
+    </div>
+
+    <div class="callout green">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <h4>Idempotency is Critical in Payments</h4>
+        <p>Every payment operation (create order, confirm booking, initiate refund) must use an idempotency key. Store it in DB before calling the payment gateway. On retry, return the same stored result rather than re-calling the gateway. This prevents double-charges when clients retry on network timeouts.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 9. QUEUES & EVENTS ═════════ -->
+  <section class="section" id="queues">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <div><h2>Queues & Events <span class="dim">— Kafka Event Bus</span></h2></div>
+    </div>
+
+    <p>Kafka topics decouple services. Each topic has a clear producer and one or more consumers. Events are in JSON format with a consistent envelope.</p>
+
+    <table class="tech-table">
+      <thead>
+        <tr><th>Kafka Topic</th><th>Producer</th><th>Consumers & Action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>booking.confirmed</td><td>Booking Service</td><td>Notify → SMS/email confirmation; Analytics → update occupancy; E-ticket → generate PDF</td></tr>
+        <tr><td>booking.cancelled</td><td>Booking Service</td><td>Payment → initiate refund; Notify → send cancellation SMS; Search → update available seat count</td></tr>
+        <tr><td>payment.succeeded</td><td>Payment Service</td><td>Booking → confirm seats; Operator → credit ledger entry</td></tr>
+        <tr><td>payment.failed</td><td>Payment Service</td><td>Booking → release seat locks; Notify → send failure SMS</td></tr>
+        <tr><td>trip.cancelled</td><td>Operator Service</td><td>Booking → cancel all bookings for trip; Payment → full refund all; Notify → broadcast to all passengers</td></tr>
+        <tr><td>seat.lock.expired</td><td>Booking Service (scheduler)</td><td>WebSocket → push update to clients; Search → increment available count</td></tr>
+        <tr><td>operator.approved</td><td>Admin Service</td><td>Notify → welcome email to operator; Search → enable operator's trips in index</td></tr>
+        <tr><td>bus.arrived_at_stop</td><td>Tracking Service</td><td>Notify → push "bus arriving" notification to passengers boarding at that stop</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-block">
+<span class="cmt">// Standard Kafka message envelope</span>
+{
+  <span class="str">"eventId"</span>: <span class="str">"uuid-v4"</span>,
+  <span class="str">"eventType"</span>: <span class="str">"booking.confirmed"</span>,
+  <span class="str">"version"</span>: <span class="str">"1.0"</span>,
+  <span class="str">"timestamp"</span>: <span class="str">"2025-08-15T10:30:00Z"</span>,
+  <span class="str">"source"</span>: <span class="str">"booking-service"</span>,
+  <span class="str">"payload"</span>: {
+    <span class="str">"bookingId"</span>: <span class="str">"uuid"</span>,
+    <span class="str">"pnr"</span>: <span class="str">"BUS1A2B3C"</span>,
+    <span class="str">"userId"</span>: <span class="str">"uuid"</span>,
+    <span class="str">"tripId"</span>: <span class="str">"uuid"</span>,
+    <span class="str">"seats"</span>: [<span class="str">"A1"</span>, <span class="str">"A2"</span>],
+    <span class="str">"totalAmount"</span>: <span class="num">1200.00</span>
+  }
+}
+    </div>
+  </section>
+
+  <!-- ═════════ 10. FRONTEND ═════════ -->
+  <section class="section" id="frontend">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <div><h2>Frontend Architecture <span class="dim">— Next.js + React</span></h2></div>
+    </div>
+
+    <h3>Tech Stack</h3>
+    <table class="tech-table">
+      <thead><tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>Framework</td><td>Next.js 14 (App Router)</td><td>SSR for search pages (SEO), CSR for booking flow</td></tr>
+        <tr><td>State Management</td><td>Zustand + React Query</td><td>Zustand for booking session state; React Query for server state & caching</td></tr>
+        <tr><td>Styling</td><td>Tailwind CSS + Shadcn/UI</td><td>Utility-first CSS; accessible component primitives</td></tr>
+        <tr><td>Forms</td><td>React Hook Form + Zod</td><td>Typed form validation matching backend schemas</td></tr>
+        <tr><td>Real-time</td><td>Socket.io Client</td><td>Seat map updates + bus tracking</td></tr>
+        <tr><td>Maps</td><td>Google Maps API + Leaflet</td><td>Bus tracking map + stop picker</td></tr>
+        <tr><td>PDF Generation</td><td>React-PDF (client) / Puppeteer (server)</td><td>E-ticket rendering</td></tr>
+        <tr><td>Analytics</td><td>Mixpanel + Sentry</td><td>User behavior tracking + error monitoring</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Page Structure (Next.js App Router)</h3>
+    <div class="code-block">
+app/
+├── (public)/
+│   ├── page.tsx                  <span class="cmt">← Home / Search Landing</span>
+│   ├── search/page.tsx           <span class="cmt">← Search Results (SSR for SEO)</span>
+│   ├── trip/[tripId]/page.tsx    <span class="cmt">← Seat Selection</span>
+│   └── operator/[id]/page.tsx   <span class="cmt">← Operator Profile</span>
+│
+├── (auth)/
+│   └── login/page.tsx            <span class="cmt">← Phone OTP login</span>
+│
+├── (passenger)/
+│   ├── booking/[id]/page.tsx     <span class="cmt">← Booking Detail + E-ticket</span>
+│   ├── bookings/page.tsx         <span class="cmt">← Booking History</span>
+│   └── profile/page.tsx          <span class="cmt">← User Profile</span>
+│
+├── (operator)/
+│   ├── dashboard/page.tsx        <span class="cmt">← Revenue + Bookings Overview</span>
+│   ├── buses/page.tsx            <span class="cmt">← Fleet Management</span>
+│   ├── routes/page.tsx           <span class="cmt">← Route Management</span>
+│   └── schedules/page.tsx        <span class="cmt">← Schedule Management</span>
+│
+└── (admin)/
+    ├── operators/page.tsx        <span class="cmt">← Operator Approvals</span>
+    └── analytics/page.tsx        <span class="cmt">← Platform Analytics</span>
+    </div>
+
+    <h3>Seat Selection Component Architecture</h3>
+    <p>The seat map is the most complex UI component. It renders a JSON-configured bus layout as an interactive SVG/div grid. Seat state is managed locally with Zustand and synchronized via WebSocket.</p>
+
+    <div class="code-block">
+<span class="cmt">// Seat Layout JSON Schema (stored in buses.seat_layout)</span>
+{
+  <span class="str">"decks"</span>: [
+    {
+      <span class="str">"id"</span>: <span class="str">"lower"</span>,
+      <span class="str">"label"</span>: <span class="str">"Lower Deck"</span>,
+      <span class="str">"rows"</span>: <span class="num">9</span>,
+      <span class="str">"seats"</span>: [
+        { <span class="str">"id"</span>: <span class="str">"L1"</span>, <span class="str">"row"</span>: <span class="num">1</span>, <span class="str">"col"</span>: <span class="num">1</span>, <span class="str">"type"</span>: <span class="str">"sleeper"</span>, <span class="str">"priceModifier"</span>: <span class="num">1.0</span> },
+        { <span class="str">"id"</span>: <span class="str">"L2"</span>, <span class="str">"row"</span>: <span class="num">1</span>, <span class="str">"col"</span>: <span class="num">2</span>, <span class="str">"type"</span>: <span class="str">"sleeper"</span>, <span class="str">"priceModifier"</span>: <span class="num">1.0</span> },
+        <span class="cmt">// ... null for aisle gaps</span>
+      ]
+    },
+    {
+      <span class="str">"id"</span>: <span class="str">"upper"</span>,
+      <span class="str">"label"</span>: <span class="str">"Upper Deck"</span>,
+      <span class="str">"seats"</span>: [ <span class="cmt">/* upper berths */</span> ]
+    }
+  ]
+}
+    </div>
+  </section>
+
+  <!-- ═════════ 11. USER FLOWS ═════════ -->
+  <section class="section" id="userflows">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <div><h2>User Flows <span class="dim">— Passenger Journey</span></h2></div>
+    </div>
+
+    <h3>End-to-End Booking Flow</h3>
+    <ul class="step-list">
+      <li><span class="step-num">1</span><div class="step-content"><h4>Search</h4><p>User enters origin city (autocomplete from Elasticsearch), destination, travel date, and passenger count. Hits <code>GET /trips/search</code>. Results load in &lt;500ms from Elasticsearch + Redis cache.</p></div></li>
+      <li><span class="step-num">2</span><div class="step-content"><h4>Compare & Select Bus</h4><p>User sees sorted list of buses: price, departure time, duration, amenity icons, rating, available seats. Can filter and sort. Clicking a bus shows operator profile + cancellation policy before proceeding.</p></div></li>
+      <li><span class="step-num">3</span><div class="step-content"><h4>Seat Selection</h4><p>Real-time seat map loads. WebSocket connection established to trip room. User clicks available seats (turns them to "selecting" state). For multi-passenger, fills passenger details (name, age, gender) per seat.</p></div></li>
+      <li><span class="step-num">4</span><div class="step-content"><h4>Boarding & Dropping Points</h4><p>User selects from the operator's defined stops along the route. Price adjusts based on boarding–dropping pair distance.</p></div></li>
+      <li><span class="step-num">5</span><div class="step-content"><h4>Review & Pay</h4><p>Summary screen: seats, passengers, boarding point, fare breakdown (base fare + taxes + convenience fee). User selects payment method → Razorpay checkout. On success, booking confirmed screen with PNR.</p></div></li>
+      <li><span class="step-num">6</span><div class="step-content"><h4>Post-Booking</h4><p>Confirmation SMS/email within 30s. E-ticket downloadable. On day of travel: push notification 2hrs before departure. Live tracking available after departure. QR code scanned at boarding gate.</p></div></li>
+    </ul>
+  </section>
+
+  <!-- ═════════ 12. OPERATOR DASHBOARD ═════════ -->
+  <section class="section" id="operator">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <div><h2>Operator Dashboard <span class="dim">— Fleet & Revenue Management</span></h2></div>
+    </div>
+
+    <div class="card-grid cols-2">
+      <div class="card">
+        <div class="card-icon">🚌</div>
+        <h4>Fleet Management</h4>
+        <p>Add/edit buses with rich seat layout builder. Visual grid editor for seat positions — drag to set seat type (sleeper/seater/ladies), AC/non-AC, upper/lower, and price multiplier per seat.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗓</div>
+        <h4>Schedule Management</h4>
+        <p>Create weekly recurring schedules. Define holiday overrides. Clone schedules across buses. Set pricing per trip or use dynamic pricing engine. Bulk update departure times.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h4>Revenue Dashboard</h4>
+        <p>Daily/weekly/monthly revenue charts. Occupancy rate per trip. Top routes by revenue. Cancellation trends. Payout history and upcoming settlement dates.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛂</div>
+        <h4>Boarding Management</h4>
+        <p>QR scanner for bus conductors (mobile web app). Scan passenger's e-ticket QR code → verify PNR and seat → mark as boarded. Offline-capable with sync when connected.</p>
+      </div>
+    </div>
+
+    <h3>Seat Layout Builder (Complex Feature)</h3>
+    <p>When an operator adds a new bus, they define the seat layout via a visual editor. This is a crucial piece that affects the entire downstream system.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">📐</div>
+      <div class="callout-body">
+        <h4>Seat Layout Builder Implementation</h4>
+        <p>Build as a React component with a grid canvas. Operators click cells to toggle seats, right-click to set seat properties (type, price modifier, gender lock). The output is the <code>seat_layout</code> JSON that's stored with the bus. This JSON is the source of truth for all seat map rendering across the platform.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 13. INFRA & DEVOPS ═════════ -->
+  <section class="section" id="infra">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <div><h2>Cloud & DevOps <span class="dim">— Infrastructure as Code</span></h2></div>
+    </div>
+
+    <h3>AWS Infrastructure</h3>
+    <table class="tech-table">
+      <thead><tr><th>Component</th><th>AWS Service</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Kubernetes</td><td>EKS</td><td>One cluster, multiple node groups (general, compute-intensive for Search)</td></tr>
+        <tr><td>Database</td><td>RDS PostgreSQL</td><td>Multi-AZ primary + read replicas. Automated backups. Point-in-time recovery.</td></tr>
+        <tr><td>Redis Cache</td><td>ElastiCache Redis</td><td>Cluster mode enabled for seat lock sharding. 3-node cluster.</td></tr>
+        <tr><td>Object Storage</td><td>S3</td><td>KYC documents, e-ticket PDFs, bus images. Versioning enabled.</td></tr>
+        <tr><td>CDN</td><td>CloudFront</td><td>Static assets, e-ticket PDFs, operator images. Cache-Control headers.</td></tr>
+        <tr><td>API Gateway Layer</td><td>Kong (self-hosted on EKS)</td><td>JWT validation, rate limiting, request routing to services.</td></tr>
+        <tr><td>Container Registry</td><td>ECR</td><td>Private Docker image registry. Vulnerability scanning enabled.</td></tr>
+        <tr><td>Secrets</td><td>AWS Secrets Manager + Vault</td><td>Payment gateway keys, SMS provider keys, DB passwords.</td></tr>
+        <tr><td>Message Queue</td><td>MSK (Managed Kafka)</td><td>3-broker cluster across AZs. Retention: 7 days.</td></tr>
+        <tr><td>Monitoring</td><td>CloudWatch + Grafana</td><td>Custom metrics, dashboards, alerting to PagerDuty.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>CI/CD Pipeline</h3>
+    <div class="flow" style="flex-wrap:wrap">
+      <div class="flow-step">Push to GitHub</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">GitHub Actions CI</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Tests + Lint</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Build Docker Image</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Push to ECR</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">ArgoCD Deploy to EKS</div>
+    </div>
+
+    <div class="code-block">
+<span class="cmt"># Kubernetes Deployment for Booking Service (booking-service.yaml)</span>
+<span class="kw">apiVersion</span>: apps/v1
+<span class="kw">kind</span>: Deployment
+<span class="kw">spec</span>:
+  <span class="kw">replicas</span>: <span class="num">3</span>
+  <span class="kw">strategy</span>:
+    <span class="kw">type</span>: RollingUpdate
+    <span class="kw">rollingUpdate</span>: { maxSurge: <span class="num">1</span>, maxUnavailable: <span class="num">0</span> }   <span class="cmt"># Zero downtime deploys</span>
+  <span class="kw">template</span>:
+    <span class="kw">spec</span>:
+      <span class="kw">containers</span>:
+      - <span class="kw">name</span>: booking-service
+        <span class="kw">image</span>: <span class="str">{ECR_URL}/booking-service:{GIT_SHA}</span>
+        <span class="kw">resources</span>:
+          <span class="kw">requests</span>: { cpu: <span class="str">"250m"</span>, memory: <span class="str">"512Mi"</span> }
+          <span class="kw">limits</span>:   { cpu: <span class="str">"1000m"</span>, memory: <span class="str">"1Gi"</span> }
+        <span class="kw">readinessProbe</span>:
+          <span class="kw">httpGet</span>: { path: <span class="str">/health</span>, port: <span class="num">3004</span> }
+    </div>
+  </section>
+
+  <!-- ═════════ 14. SCALING ═════════ -->
+  <section class="section" id="scaling">
+    <div class="section-header">
+      <span class="section-num">14</span>
+      <div><h2>Scaling Strategy <span class="dim">— Bottlenecks & Solutions</span></h2></div>
+    </div>
+
+    <div class="card-grid cols-2">
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <h4>Search Bottleneck</h4>
+        <p>Elasticsearch cluster with 3 shards + 1 replica each. Separate read nodes for search queries. Trip index is small (few million documents) — fast by default. Cache top-100 route searches in Redis.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🪑</div>
+        <h4>Seat Lock Bottleneck</h4>
+        <p>Redis cluster sharded by <code>tripId</code>. Seat locks are short-lived (10 min). At 10k concurrent users, ~1000 active lock operations/sec — well within Redis's 100k ops/sec capacity.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗄</div>
+        <h4>Database Bottleneck</h4>
+        <p>Read replicas for all read-heavy queries (search results, booking history). Booking confirmation writes go to primary. Connection pooling with PgBouncer (max 100 connections per service).</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📡</div>
+        <h4>WebSocket Bottleneck</h4>
+        <p>Socket.io with Redis adapter so WebSocket messages can be broadcast across multiple server instances. Each trip room distributes updates to all subscribers regardless of which server they connected to.</p>
+      </div>
+    </div>
+
+    <h3>Auto-Scaling Configuration</h3>
+    <div class="code-block">
+<span class="cmt"># Horizontal Pod Autoscaler for Search Service</span>
+<span class="kw">apiVersion</span>: autoscaling/v2
+<span class="kw">kind</span>: HorizontalPodAutoscaler
+<span class="kw">spec</span>:
+  <span class="kw">minReplicas</span>: <span class="num">2</span>
+  <span class="kw">maxReplicas</span>: <span class="num">20</span>
+  <span class="kw">metrics</span>:
+  - <span class="kw">type</span>: Resource
+    <span class="kw">resource</span>:
+      <span class="kw">name</span>: cpu
+      <span class="kw">target</span>: { type: Utilization, averageUtilization: <span class="num">70</span> }
+    </div>
+  </section>
+
+  <!-- ═════════ 15. NOTIFICATIONS ═════════ -->
+  <section class="section" id="notifications">
+    <div class="section-header">
+      <span class="section-num">15</span>
+      <div><h2>Notification System <span class="dim">— SMS, Email, Push</span></h2></div>
+    </div>
+
+    <table class="tech-table">
+      <thead><tr><th>Channel</th><th>Provider</th><th>Use Case</th></tr></thead>
+      <tbody>
+        <tr><td>SMS</td><td>Twilio / MSG91</td><td>OTP, booking confirmation, cancellation, departure reminder 2hrs before</td></tr>
+        <tr><td>Email</td><td>SendGrid / AWS SES</td><td>Booking confirmation with e-ticket PDF, cancellation + refund details, operator approvals</td></tr>
+        <tr><td>Push Notification</td><td>Firebase FCM</td><td>Bus arriving at boarding stop, trip delay alerts, payment success/failure</td></tr>
+        <tr><td>WhatsApp</td><td>Twilio / Gupshup</td><td>Booking confirmation (high open rate in India), trip reminders</td></tr>
+        <tr><td>In-App</td><td>WebSocket / Polling</td><td>Real-time seat updates, tracking, booking status changes</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Notification Service Design</h3>
+    <p>The Notification Service is a pure consumer — it listens to Kafka events and dispatches messages via the appropriate channel. It is completely decoupled from all other services. A Notification Template Engine stores templates per event type with variable substitution.</p>
+
+    <div class="callout warn">
+      <div class="callout-icon">📋</div>
+      <div class="callout-body">
+        <h4>Notification Deduplication</h4>
+        <p>Kafka messages can be delivered more than once (at-least-once semantics). Store a <code>notification_log</code> table with <code>eventId + channel</code> as a unique key. Before sending, check if this eventId was already dispatched on that channel. This prevents duplicate SMS/emails on Kafka consumer restarts.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 16. SEARCH ENGINE ═════════ -->
+  <section class="section" id="search">
+    <div class="section-header">
+      <span class="section-num">16</span>
+      <div><h2>Search Engine <span class="dim">— Elasticsearch Indexing</span></h2></div>
+    </div>
+
+    <h3>Trip Document Structure (Elasticsearch Index)</h3>
+    <div class="code-block">
+<span class="cmt">// Elasticsearch document for each trip instance</span>
+{
+  <span class="str">"tripId"</span>: <span class="str">"uuid"</span>,
+  <span class="str">"travelDate"</span>: <span class="str">"2025-08-15"</span>,
+  <span class="str">"origin"</span>: { <span class="str">"city"</span>: <span class="str">"Bengaluru"</span>, <span class="str">"cityId"</span>: <span class="str">"BLR"</span>, <span class="str">"location"</span>: { <span class="str">"lat"</span>: <span class="num">12.97</span>, <span class="str">"lon"</span>: <span class="num">77.59</span> } },
+  <span class="str">"destination"</span>: { <span class="str">"city"</span>: <span class="str">"Mysuru"</span>, <span class="str">"cityId"</span>: <span class="str">"MYS"</span> },
+  <span class="str">"departureTime"</span>: <span class="str">"2025-08-15T22:00:00Z"</span>,
+  <span class="str">"arrivalTime"</span>: <span class="str">"2025-08-16T02:30:00Z"</span>,
+  <span class="str">"durationMinutes"</span>: <span class="num">270</span>,
+  <span class="str">"operatorId"</span>: <span class="str">"uuid"</span>,
+  <span class="str">"operatorName"</span>: <span class="str">"SRS Travels"</span>,
+  <span class="str">"operatorRating"</span>: <span class="num">4.3</span>,
+  <span class="str">"busType"</span>: <span class="str">"sleeper"</span>,
+  <span class="str">"amenities"</span>: [<span class="str">"ac"</span>, <span class="str">"wifi"</span>, <span class="str">"charging"</span>, <span class="str">"blanket"</span>],
+  <span class="str">"minPrice"</span>: <span class="num">650</span>,                   <span class="cmt">// cheapest seat type</span>
+  <span class="str">"availableSeats"</span>: <span class="num">18</span>,              <span class="cmt">// updated by Booking Service events</span>
+  <span class="str">"isActive"</span>: <span class="kw">true</span>
+}
+    </div>
+
+    <p>City name search uses <code>match</code> query with <code>analyzer: "standard"</code> to handle partial names and typos. For city lookup autocomplete, a separate lightweight <code>cities</code> index uses <code>completion</code> suggester for instant autocomplete as the user types.</p>
+  </section>
+
+  <!-- ═════════ 17. BUILD PHASES ═════════ -->
+  <section class="section" id="phases">
+    <div class="section-header">
+      <span class="section-num">17</span>
+      <div><h2>Build Phases <span class="dim">— Roadmap from Zero to Production</span></h2></div>
+    </div>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Phase 1 — Foundation (Weeks 1–4)</h4>
+        <p>Set up monorepo (Turborepo), Dockerize all services, set up PostgreSQL + Redis locally, implement User Service with OTP auth, basic Operator Service (bus + route CRUD), Booking Service with seat locking, Payment integration with Razorpay sandbox.</p>
+        <div class="timeline-tags">
+          <span class="tag tag-blue">Monorepo setup</span>
+          <span class="tag tag-cyan">Auth service</span>
+          <span class="tag tag-green">Seat locking</span>
+          <span class="tag tag-amber">Payment sandbox</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Phase 2 — Core Experience (Weeks 5–8)</h4>
+        <p>Build passenger-facing Next.js app: search page, seat selection with real-time map (WebSocket), booking flow end-to-end. Build operator dashboard: bus management + seat layout builder + schedule creation. E-ticket PDF generation. SMS/email notifications.</p>
+        <div class="timeline-tags">
+          <span class="tag tag-purple">Next.js frontend</span>
+          <span class="tag tag-blue">Seat map UI</span>
+          <span class="tag tag-cyan">Operator dashboard</span>
+          <span class="tag tag-green">Notifications</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Phase 3 — Search & Discovery (Weeks 9–10)</h4>
+        <p>Elasticsearch setup, trip indexing pipeline, search API with filters, city autocomplete, Kafka event bus setup, trip index sync on schedule/price changes.</p>
+        <div class="timeline-tags">
+          <span class="tag tag-amber">Elasticsearch</span>
+          <span class="tag tag-rose">Kafka setup</span>
+          <span class="tag tag-cyan">Search API</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Phase 4 — Real-Time Features (Weeks 11–12)</h4>
+        <p>Bus tracking (driver app + GPS + WebSocket broadcast), ETA computation, geofence stop arrival detection, push notifications via FCM, boarding QR scanner app for conductors.</p>
+        <div class="timeline-tags">
+          <span class="tag tag-blue">GPS tracking</span>
+          <span class="tag tag-purple">Push notifications</span>
+          <span class="tag tag-green">QR scanner</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Phase 5 — Production Readiness (Weeks 13–16)</h4>
+        <p>Deploy to AWS EKS, set up CI/CD with GitHub Actions + ArgoCD, configure Prometheus + Grafana, implement rate limiting and security hardening, load testing with k6, set up staging environment, write runbooks, go live.</p>
+        <div class="timeline-tags">
+          <span class="tag tag-cyan">Kubernetes deploy</span>
+          <span class="tag tag-amber">Monitoring</span>
+          <span class="tag tag-rose">Load testing</span>
+          <span class="tag tag-green">Go live</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout green" style="margin-top:32px">
+      <div class="callout-icon">🚀</div>
+      <div class="callout-body">
+        <h4>Start Simple, Scale Intentionally</h4>
+        <p>Don't over-engineer from Day 1. Start with a monolith or 2–3 services (User, Booking, Operator), share a single PostgreSQL instance, use simple queues. Extract services and add Kafka, Elasticsearch, and Redis cluster only when real bottlenecks appear. Every layer in this document is a future state — build toward it incrementally as traffic grows.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═════════ 18. DATA FLOW DIAGRAMS ═════════ -->
+  <section class="section" id="dataflow">
+    <div class="section-header">
+      <span class="section-num">18</span>
+      <div><h2>Data Flow Diagrams <span class="dim">— How data moves through the system</span></h2></div>
+    </div>
+
+    <p>Understanding exactly how data moves through the platform is critical before writing a single line of code. These flows cover the three most complex scenarios: booking, cancellation, and operator onboarding.</p>
+
+    <h3>Flow 1 — Complete Booking Data Journey</h3>
+    <div class="arch-diagram">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px;font-family:var(--font-mono)">STEP-BY-STEP DATA MOVEMENT: PASSENGER → CONFIRMED BOOKING</div>
+
+      <div style="display:flex;flex-direction:column;gap:0">
+        <!-- Step 1 -->
+        <div style="display:flex;gap:0;align-items:stretch">
+          <div style="width:28px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">1</div>
+            <div style="width:2px;flex:1;background:rgba(79,110,247,0.3);margin:4px 0"></div>
+          </div>
+          <div style="flex:1;padding:0 0 20px 16px">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+              <span class="arch-box blue" style="min-width:auto;padding:4px 10px;font-size:11px">Browser</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box cyan" style="min-width:auto;padding:4px 10px;font-size:11px">API Gateway</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box green" style="min-width:auto;padding:4px 10px;font-size:11px">Search Service</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text3)"><code>GET /trips/search?from=BLR&to=MYS&date=2025-08-15</code> — Gateway validates JWT, forwards to Search. Search queries Elasticsearch index, enriches with live <code>available_seats</code> count from Redis, returns sorted list.</div>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div style="display:flex;gap:0;align-items:stretch">
+          <div style="width:28px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">2</div>
+            <div style="width:2px;flex:1;background:rgba(79,110,247,0.3);margin:4px 0"></div>
+          </div>
+          <div style="flex:1;padding:0 0 20px 16px">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+              <span class="arch-box blue" style="min-width:auto;padding:4px 10px;font-size:11px">Browser</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box green" style="min-width:auto;padding:4px 10px;font-size:11px">Booking Service</span>
+              <span style="color:var(--text3);font-size:13px">+</span>
+              <span class="arch-box amber" style="min-width:auto;padding:4px 10px;font-size:11px">Redis</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text3)"><code>GET /trips/:id/seat-map</code> — Booking Service reads <code>trip_seats</code> from PostgreSQL (status per seat). Merges with Redis keys <code>seat:{tripId}:*</code> to show which seats are currently locked by other users. Returns complete map to browser. WebSocket connection opened.</div>
+          </div>
+        </div>
+        <!-- Step 3 -->
+        <div style="display:flex;gap:0;align-items:stretch">
+          <div style="width:28px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">3</div>
+            <div style="width:2px;flex:1;background:rgba(79,110,247,0.3);margin:4px 0"></div>
+          </div>
+          <div style="flex:1;padding:0 0 20px 16px">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+              <span class="arch-box blue" style="min-width:auto;padding:4px 10px;font-size:11px">Browser</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box green" style="min-width:auto;padding:4px 10px;font-size:11px">Booking Service</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box amber" style="min-width:auto;padding:4px 10px;font-size:11px">Redis SETNX</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text3)"><code>POST /bookings/hold-seats</code> — For each selected seat, Booking Service executes <code>SET seat:{tripId}:{seatId} {userId} NX EX 600</code>. If all succeed → return <code>holdId</code>. If any fail (race condition) → release all acquired locks, return 409. Broadcast <code>seat:locked</code> event to WebSocket room.</div>
+          </div>
+        </div>
+        <!-- Step 4 -->
+        <div style="display:flex;gap:0;align-items:stretch">
+          <div style="width:28px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">4</div>
+            <div style="width:2px;flex:1;background:rgba(79,110,247,0.3);margin:4px 0"></div>
+          </div>
+          <div style="flex:1;padding:0 0 20px 16px">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+              <span class="arch-box green" style="min-width:auto;padding:4px 10px;font-size:11px">Booking Service</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box rose" style="min-width:auto;padding:4px 10px;font-size:11px">Payment Service</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box amber" style="min-width:auto;padding:4px 10px;font-size:11px">Razorpay API</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text3)"><code>POST /bookings/initiate-payment</code> — Booking Service calls Payment Service via gRPC. Payment Service creates a Razorpay order, stores <code>{ orderId, holdId, amount, idempotencyKey }</code> in DB with status <code>PENDING</code>. Returns Razorpay <code>order_id</code> to browser.</div>
+          </div>
+        </div>
+        <!-- Step 5 -->
+        <div style="display:flex;gap:0;align-items:stretch">
+          <div style="width:28px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:20px;height:20px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">5</div>
+            <div style="width:2px;flex:1;background:rgba(16,185,129,0.3);margin:4px 0"></div>
+          </div>
+          <div style="flex:1;padding:0 0 20px 16px">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+              <span class="arch-box rose" style="min-width:auto;padding:4px 10px;font-size:11px">Razorpay Webhook</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box rose" style="min-width:auto;padding:4px 10px;font-size:11px">Payment Service</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box amber" style="min-width:auto;padding:4px 10px;font-size:11px">Kafka</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text3)">Razorpay sends <code>payment.captured</code> webhook. Payment Service verifies HMAC signature, marks payment as <code>PAID</code>, publishes <code>payment.succeeded</code> to Kafka topic.</div>
+          </div>
+        </div>
+        <!-- Step 6 -->
+        <div style="display:flex;gap:0;align-items:stretch">
+          <div style="width:28px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:20px;height:20px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">6</div>
+            <div style="width:2px;flex:1;background:rgba(16,185,129,0.3);margin:4px 0"></div>
+          </div>
+          <div style="flex:1;padding:0 0 20px 16px">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+              <span class="arch-box amber" style="min-width:auto;padding:4px 10px;font-size:11px">Kafka consumer</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box green" style="min-width:auto;padding:4px 10px;font-size:11px">Booking Service</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box gray" style="min-width:auto;padding:4px 10px;font-size:11px">PostgreSQL</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text3)">Booking Service consumes <code>payment.succeeded</code>. In a single DB transaction: UPDATE <code>trip_seats</code> set status=BOOKED, INSERT into <code>bookings</code> with PNR, DELETE Redis seat lock keys. Publishes <code>booking.confirmed</code> to Kafka.</div>
+          </div>
+        </div>
+        <!-- Step 7 -->
+        <div style="display:flex;gap:0;align-items:stretch">
+          <div style="width:28px;display:flex;flex-direction:column;align-items:center">
+            <div style="width:20px;height:20px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">7</div>
+          </div>
+          <div style="flex:1;padding:0 0 0 16px">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+              <span class="arch-box amber" style="min-width:auto;padding:4px 10px;font-size:11px">booking.confirmed</span>
+              <span style="color:var(--text3);font-size:13px">→</span>
+              <span class="arch-box purple" style="min-width:auto;padding:4px 10px;font-size:11px">Notify: SMS + Email</span>
+              <span style="color:var(--text3);font-size:13px">+</span>
+              <span class="arch-box cyan" style="min-width:auto;padding:4px 10px;font-size:11px">E-ticket PDF</span>
+              <span style="color:var(--text3);font-size:13px">+</span>
+              <span class="arch-box amber" style="min-width:auto;padding:4px 10px;font-size:11px">Analytics update</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text3)">Multiple Kafka consumers act in parallel: Notification Service sends confirmation SMS + email with ticket. A PDF worker generates e-ticket and uploads to S3. Analytics Service updates occupancy counters in ClickHouse. Search Service decrements <code>available_seats</code> in Elasticsearch index.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Flow 2 — Cancellation & Refund Journey</h3>
+    <div class="arch-diagram">
+      <ul class="step-list" style="margin:0">
+        <li>
+          <span class="step-num">C1</span>
+          <div class="step-content">
+            <h4>Passenger requests cancellation</h4>
+            <p><code>POST /bookings/:id/cancel</code> with optional <code>seatIds[]</code> (partial cancel). Booking Service verifies the booking belongs to this user. Checks if cancellation is allowed (trip not departed, not already cancelled).</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">C2</span>
+          <div class="step-content">
+            <h4>Refund amount computed</h4>
+            <p>Booking Service fetches operator's cancellation policy slabs. Computes hours remaining until departure. Applies the matching slab percentage to the seat price. If partial cancel, computes per-seat refund only.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">C3</span>
+          <div class="step-content">
+            <h4>DB updated atomically</h4>
+            <p>In a single PostgreSQL transaction: update <code>trip_seats</code> status → AVAILABLE, update <code>bookings.status</code> → CANCELLED (or PARTIALLY_CANCELLED), insert into <code>refund_requests</code> table with computed amount.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">C4</span>
+          <div class="step-content">
+            <h4>Refund initiated asynchronously</h4>
+            <p>Booking Service publishes <code>booking.cancelled</code> to Kafka. Payment Service consumes it, calls Razorpay Refund API with idempotency key = <code>refund_{bookingId}_{timestamp}</code>. Updates refund status in DB as Razorpay responds.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">C5</span>
+          <div class="step-content">
+            <h4>Downstream updates fan out</h4>
+            <p>Notification Service: sends cancellation confirmation + refund ETA SMS. Search Service: increments available seat count in Elasticsearch. Analytics: records cancellation event. WebSocket: broadcasts seat released to anyone viewing that trip's seat map.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <h3>Flow 3 — Operator Onboarding Journey</h3>
+    <div class="arch-diagram">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div class="arch-label" style="text-align:left;margin-bottom:10px">OPERATOR ACTIONS</div>
+          <ul class="step-list" style="margin:0">
+            <li style="padding:10px 0"><span class="step-num" style="width:24px;height:24px;font-size:10px">1</span><div class="step-content"><h4 style="font-size:13px">Register account</h4><p style="font-size:12px">Phone OTP → creates User with role=operator_admin. Creates Operator record in PENDING state.</p></div></li>
+            <li style="padding:10px 0"><span class="step-num" style="width:24px;height:24px;font-size:10px">2</span><div class="step-content"><h4 style="font-size:13px">Upload KYC documents</h4><p style="font-size:12px">Upload to S3 via pre-signed URLs. References stored in <code>operator_documents</code> table.</p></div></li>
+            <li style="padding:10px 0"><span class="step-num" style="width:24px;height:24px;font-size:10px">3</span><div class="step-content"><h4 style="font-size:13px">Add buses & routes</h4><p style="font-size:12px">Can draft buses/routes while approval is pending. Trips stay inactive until approval.</p></div></li>
+            <li style="padding:10px 0"><span class="step-num" style="width:24px;height:24px;font-size:10px">4</span><div class="step-content"><h4 style="font-size:13px">Go live after approval</h4><p style="font-size:12px">Trips indexed in Elasticsearch, visible on search. Payouts enabled.</p></div></li>
+          </ul>
+        </div>
+        <div>
+          <div class="arch-label" style="text-align:left;margin-bottom:10px">PLATFORM ADMIN ACTIONS</div>
+          <ul class="step-list" style="margin:0">
+            <li style="padding:10px 0"><span class="step-num" style="width:24px;height:24px;font-size:10px">A</span><div class="step-content"><h4 style="font-size:13px">Review KYC documents</h4><p style="font-size:12px">Admin dashboard shows pending operators with document viewer. Manual review of permits, registration certificates.</p></div></li>
+            <li style="padding:10px 0"><span class="step-num" style="width:24px;height:24px;font-size:10px">B</span><div class="step-content"><h4 style="font-size:13px">Approve or reject</h4><p style="font-size:12px"><code>PATCH /admin/operators/:id/status</code> with reason. Triggers <code>operator.approved</code> or <code>operator.rejected</code> Kafka event.</p></div></li>
+            <li style="padding:10px 0"><span class="step-num" style="width:24px;height:24px;font-size:10px">C</span><div class="step-content"><h4 style="font-size:13px">Set commission rate</h4><p style="font-size:12px">Configure platform commission % per operator (default 8%). Stored in <code>operator_settings</code>. Applied at payment split time.</p></div></li>
+            <li style="padding:10px 0"><span class="step-num" style="width:24px;height:24px;font-size:10px">D</span><div class="step-content"><h4 style="font-size:13px">Configure payout account</h4><p style="font-size:12px">Link operator's bank account via Razorpay Route. Payouts auto-scheduled D+2 after booking.</p></div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 19. CACHING STRATEGY ═════════ -->
+  <section class="section" id="caching">
+    <div class="section-header">
+      <span class="section-num">19</span>
+      <div><h2>Caching Strategy <span class="dim">— What, Where & How Long</span></h2></div>
+    </div>
+
+    <p>Poor caching kills performance. Over-aggressive caching causes stale data bugs. This section defines exactly what gets cached, at which layer, with what TTL, and when to invalidate.</p>
+
+    <h3>Cache Layers</h3>
+    <div class="card-grid cols-3">
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <h4>CDN Cache (CloudFront)</h4>
+        <p>Static assets: JS bundles, CSS, images — <strong style="color:var(--text)">1 year TTL</strong> with content-hash in filename. Operator logos and bus photos — <strong style="color:var(--text)">7 days</strong>. E-ticket PDFs — <strong style="color:var(--text)">no cache</strong> (private, auth required).</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h4>Redis App Cache</h4>
+        <p>Search results per query hash — <strong style="color:var(--text)">5 min TTL</strong>. Trip seat map — <strong style="color:var(--text)">no TTL</strong> (event-driven invalidation). City list — <strong style="color:var(--text)">24 hrs</strong>. Operator profile — <strong style="color:var(--text)">10 min</strong>.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🖥</div>
+        <h4>Browser Cache</h4>
+        <p>React Query caches API responses in memory. Search results — <strong style="color:var(--text)">2 min stale-while-revalidate</strong>. Booking history — <strong style="color:var(--text)">invalidated on cancel/new booking</strong>. Seat map — <strong style="color:var(--text)">never cached</strong>, always fresh from WebSocket.</p>
+      </div>
+    </div>
+
+    <h3>Redis Key Design</h3>
+    <div class="code-block">
+<span class="cmt">// ─── SEAT LOCKS (Booking Service) ───────────────────────────────────</span>
+<span class="str">seat:{tripId}:{seatId}</span>          → userId          TTL: 600s (10 min)
+<span class="str">seat_hold:{holdId}</span>              → JSON{tripId,seats,userId,expiresAt}   TTL: 600s
+
+<span class="cmt">// ─── SEARCH CACHE (Search Service) ──────────────────────────────────</span>
+<span class="str">search:{hash(from+to+date)}</span>     → JSON[]           TTL: 300s (5 min)
+<span class="str">city:autocomplete:{prefix}</span>      → JSON[]           TTL: 86400s (24 hr)
+
+<span class="cmt">// ─── TRIP AVAILABILITY (Booking Service) ─────────────────────────────</span>
+<span class="str">trip:avail:{tripId}</span>             → INT (seat count) TTL: none (event-invalidated)
+
+<span class="cmt">// ─── AUTH (User Service) ─────────────────────────────────────────────</span>
+<span class="str">refresh:{userId}:{tokenId}</span>      → "1"              TTL: 30 days
+<span class="str">blacklist:token:{jti}</span>           → "1"              TTL: until access token expires
+<span class="str">otp:{phone}</span>                     → hashedOtp        TTL: 300s
+
+<span class="cmt">// ─── BUS TRACKING (Tracking Service) ─────────────────────────────────</span>
+<span class="str">bus:loc:{busId}</span>                 → JSON{lat,lng,ts}  TTL: 60s
+<span class="str">bus:eta:{tripId}:{stopId}</span>       → INT (minutes)    TTL: 120s
+
+<span class="cmt">// ─── RATE LIMITING (API Gateway) ─────────────────────────────────────</span>
+<span class="str">ratelimit:ip:{ip}:{window}</span>      → INT count        TTL: window duration
+<span class="str">ratelimit:user:{userId}:{window}</span>→ INT count        TTL: window duration
+    </div>
+
+    <h3>Cache Invalidation Rules</h3>
+    <table class="tech-table">
+      <thead><tr><th>Cache Key</th><th>Invalidated When</th><th>Method</th></tr></thead>
+      <tbody>
+        <tr><td><code>search:{hash}</code></td><td>Operator changes price, adds/removes trip, trip cancelled</td><td>Delete key on Kafka event <code>trip.updated</code></td></tr>
+        <tr><td><code>trip:avail:{tripId}</code></td><td>Seat booked, seat lock acquired/released, trip cancelled</td><td>DECR/INCR atomically or DEL + recompute</td></tr>
+        <tr><td><code>seat:{tripId}:{seatId}</code></td><td>Payment confirmed (seat booked), hold timer expires</td><td>DEL on confirm; Redis TTL auto-expires lock</td></tr>
+        <tr><td>Operator profile in Redis</td><td>Operator updates their profile, admin changes status</td><td>DEL on <code>PATCH /operator/profile</code></td></tr>
+        <tr><td>City autocomplete</td><td>New city added by admin</td><td>DEL matching keys, rebuild on next request</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>Cache Stampede Prevention</h4>
+        <p>When a popular search cache key expires, hundreds of concurrent requests hit Elasticsearch simultaneously — a "thundering herd." Prevent this with <strong style="color:var(--text)">probabilistic early expiration</strong>: recompute cache when TTL drops below a random threshold, not when it hits zero. Alternatively, use a Redis lock on the key so only one request recomputes while others wait for the result.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 20. ERROR HANDLING ═════════ -->
+  <section class="section" id="errorhandling">
+    <div class="section-header">
+      <span class="section-num">20</span>
+      <div><h2>Error Handling <span class="dim">— Resilience & Graceful Degradation</span></h2></div>
+    </div>
+
+    <p>Production systems fail. The goal isn't to prevent all failures — it's to fail predictably, recover automatically, and give users the best possible experience even when things go wrong.</p>
+
+    <h3>Standard API Error Response Format</h3>
+    <div class="code-block">
+<span class="cmt">// Every error response across ALL services follows this envelope</span>
+{
+  <span class="str">"success"</span>: <span class="kw">false</span>,
+  <span class="str">"error"</span>: {
+    <span class="str">"code"</span>:    <span class="str">"SEAT_ALREADY_LOCKED"</span>,       <span class="cmt">// machine-readable, stable across versions</span>
+    <span class="str">"message"</span>: <span class="str">"Seat A3 is currently held by another user"</span>,
+    <span class="str">"details"</span>: { <span class="str">"seatId"</span>: <span class="str">"A3"</span>, <span class="str">"retryAfter"</span>: <span class="num">45</span> },  <span class="cmt">// optional contextual data</span>
+    <span class="str">"traceId"</span>: <span class="str">"req_3kj9fxm2p"</span>          <span class="cmt">// correlate with logs in Grafana</span>
+  }
+}
+
+<span class="cmt">// HTTP status codes used consistently:</span>
+<span class="cmt">// 400 Bad Request      — validation errors, malformed input</span>
+<span class="cmt">// 401 Unauthorized     — missing or invalid JWT</span>
+<span class="cmt">// 403 Forbidden        — valid JWT but insufficient role/scope</span>
+<span class="cmt">// 404 Not Found        — resource doesn't exist</span>
+<span class="cmt">// 409 Conflict         — seat already locked, duplicate booking</span>
+<span class="cmt">// 422 Unprocessable    — valid input but business rule violation</span>
+<span class="cmt">// 429 Too Many Requests— rate limit exceeded</span>
+<span class="cmt">// 503 Service Unavailable — downstream dependency down</span>
+    </div>
+
+    <h3>Circuit Breaker Pattern</h3>
+    <p>Every service-to-service call is wrapped in a circuit breaker (using <code>opossum</code> library in Node.js). This prevents cascade failures when a downstream service slows down or crashes.</p>
+    <div class="code-block">
+<span class="kw">import</span> CircuitBreaker <span class="kw">from</span> <span class="str">'opossum'</span>;
+
+<span class="kw">const</span> paymentServiceBreaker = <span class="kw">new</span> <span class="type">CircuitBreaker</span>(callPaymentService, {
+  timeout:          <span class="num">3000</span>,   <span class="cmt">// if function takes > 3s, trip the breaker</span>
+  errorThresholdPercentage: <span class="num">50</span>, <span class="cmt">// trip when 50% of last 10 calls fail</span>
+  resetTimeout:     <span class="num">30000</span>,  <span class="cmt">// try again after 30s in OPEN state</span>
+  volumeThreshold:  <span class="num">10</span>,     <span class="cmt">// need at least 10 calls before tripping</span>
+});
+
+paymentServiceBreaker.<span class="fn">fallback</span>(() => ({
+  error: <span class="str">'PAYMENT_SERVICE_UNAVAILABLE'</span>,
+  message: <span class="str">'Payment service is temporarily unavailable. Please retry.'</span>
+}));
+
+<span class="cmt">// States: CLOSED (healthy) → OPEN (tripped) → HALF_OPEN (testing recovery)</span>
+    </div>
+
+    <h3>Retry & Timeout Strategy</h3>
+    <table class="tech-table">
+      <thead><tr><th>Call Type</th><th>Timeout</th><th>Retries</th><th>Backoff</th></tr></thead>
+      <tbody>
+        <tr><td>Elasticsearch search query</td><td>2s</td><td>2</td><td>100ms fixed</td></tr>
+        <tr><td>PostgreSQL read query</td><td>5s</td><td>3</td><td>50ms exponential</td></tr>
+        <tr><td>PostgreSQL write (booking)</td><td>10s</td><td>1 (idempotent)</td><td>No retry on lock fail</td></tr>
+        <tr><td>Razorpay API create order</td><td>5s</td><td>2</td><td>200ms with jitter</td></tr>
+        <tr><td>SMS send (Twilio)</td><td>3s</td><td>3</td><td>500ms exponential</td></tr>
+        <tr><td>Redis seat lock</td><td>100ms</td><td>0</td><td>Fail fast — no retry</td></tr>
+        <tr><td>gRPC service call</td><td>2s</td><td>2</td><td>100ms exponential</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Dead Letter Queue (DLQ) for Kafka</h3>
+    <div class="code-block">
+<span class="cmt">// Every Kafka consumer has a DLQ for failed messages</span>
+<span class="kw">async function</span> <span class="fn">consumeWithDLQ</span>(message) {
+  <span class="kw">for</span> (<span class="kw">let</span> attempt = <span class="num">1</span>; attempt <= <span class="num">3</span>; attempt++) {
+    <span class="kw">try</span> {
+      <span class="kw">await</span> <span class="fn">processMessage</span>(message);
+      <span class="kw">return</span>; <span class="cmt">// success</span>
+    } <span class="kw">catch</span> (err) {
+      <span class="kw">if</span> (attempt === <span class="num">3</span>) {
+        <span class="cmt">// All retries exhausted → send to Dead Letter Queue</span>
+        <span class="kw">await</span> kafka.<span class="fn">publish</span>(<span class="str">`dlq.${originalTopic}`</span>, {
+          originalMessage: message,
+          error: err.message,
+          failedAt: <span class="kw">new</span> <span class="type">Date</span>().<span class="fn">toISOString</span>(),
+          attempts: <span class="num">3</span>
+        });
+        <span class="cmt">// Alert on-call engineer via PagerDuty if DLQ depth > 10</span>
+      }
+      <span class="kw">await</span> <span class="fn">sleep</span>(<span class="num">1000</span> * attempt); <span class="cmt">// exponential backoff</span>
+    }
+  }
+}
+<span class="cmt">// DLQ messages are replayed manually after investigation</span>
+    </div>
+
+    <h3>Payment Failure Handling</h3>
+    <div class="card-grid cols-2">
+      <div class="card">
+        <div class="card-icon">❌</div>
+        <h4>Payment Declined</h4>
+        <p>Seat locks remain active for the full 10-min window. User can retry with a different payment method. If they abandon, locks expire automatically via Redis TTL. No DB booking record created.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔌</div>
+        <h4>Network Timeout During Payment</h4>
+        <p>User may not know if payment went through. We poll Razorpay order status every 2s for 60s. If captured but our webhook missed it, we confirm the booking. The Razorpay webhook is the final backup for all edge cases.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 21. MULTI-TENANCY ═════════ -->
+  <section class="section" id="multitenancy">
+    <div class="section-header">
+      <span class="section-num">21</span>
+      <div><h2>Multi-Tenancy Design <span class="dim">— Isolating Operator Data</span></h2></div>
+    </div>
+
+    <p>This platform is a <strong style="color:var(--text)">shared infrastructure, logically isolated</strong> multi-tenant system. All operators run on the same database, same services, and same Kubernetes cluster — but their data is strictly isolated by design.</p>
+
+    <h3>Tenant Isolation Strategy</h3>
+    <div class="card-grid cols-2">
+      <div class="card">
+        <div class="card-icon">🗄</div>
+        <h4>Row-Level Isolation (Database)</h4>
+        <p>Every table that belongs to an operator has an <code>operator_id</code> column. All queries from the Operator Service automatically filter by the operator_id from the JWT token. A middleware layer injects this filter — operators literally cannot query data belonging to other operators even if they craft a custom API request.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔑</div>
+        <h4>Token-Scoped Access</h4>
+        <p>Operator admin JWTs contain <code>operator_id</code> claim. Every protected endpoint checks that the resource being accessed belongs to the <code>operator_id</code> in the token. This check happens in the service layer, not just the gateway.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h4>S3 Prefix Isolation</h4>
+        <p>All operator files (KYC docs, bus images) are stored under <code>s3://bucket/operators/{operatorId}/</code>. Pre-signed URLs are generated per-operator and expire in 15 minutes. Operators cannot access files from other operator prefixes.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💰</div>
+        <h4>Financial Isolation</h4>
+        <p>Each operator has a separate virtual ledger account in the payments schema. Commission is deducted at booking time. Payouts only go to that operator's verified bank account via Razorpay Route — never cross-contaminated.</p>
+      </div>
+    </div>
+
+    <h3>Operator Data Isolation in Code</h3>
+    <div class="code-block">
+<span class="cmt">// Middleware that auto-injects operator_id filter on all Operator Service queries</span>
+<span class="kw">export function</span> <span class="fn">operatorScopeMiddleware</span>(req, res, next) {
+  <span class="kw">const</span> { operatorId, role } = req.user; <span class="cmt">// from JWT</span>
+
+  <span class="kw">if</span> (role === <span class="str">'operator_admin'</span>) {
+    req.queryScope = { operator_id: operatorId };
+    <span class="cmt">// All DB queries in route handlers MUST spread this scope:</span>
+    <span class="cmt">// await db.bus.findMany({ where: { ...req.queryScope, ...otherFilters } })</span>
+  }
+
+  <span class="kw">if</span> (role === <span class="str">'platform_admin'</span>) {
+    req.queryScope = {}; <span class="cmt">// admin sees all operators</span>
+  }
+
+  <span class="fn">next</span>();
+}
+
+<span class="cmt">// PostgreSQL Row Level Security (RLS) as backup defense-in-depth</span>
+<span class="cmt">-- CREATE POLICY operator_isolation ON buses</span>
+<span class="cmt">--   USING (operator_id = current_setting('app.current_operator_id')::uuid);</span>
+    </div>
+
+    <h3>Per-Operator Configuration</h3>
+    <table class="tech-table">
+      <thead><tr><th>Setting</th><th>Scope</th><th>Where Stored</th></tr></thead>
+      <tbody>
+        <tr><td>Commission rate (%)</td><td>Per operator</td><td><code>operator_settings.commission_rate</code></td></tr>
+        <tr><td>Cancellation policy slabs</td><td>Per operator (can override per route)</td><td><code>cancellation_policies</code> table, FK to operator</td></tr>
+        <tr><td>Dynamic pricing on/off</td><td>Per operator</td><td><code>operator_settings.dynamic_pricing_enabled</code></td></tr>
+        <tr><td>Max passengers per booking</td><td>Per operator</td><td><code>operator_settings.max_seats_per_booking</code> (default: 6)</td></tr>
+        <tr><td>Ladies-only seat enforcement</td><td>Per bus layout</td><td><code>seat_layout.seats[].gender_lock</code> JSONB field</td></tr>
+        <tr><td>Boarding point cutoff (mins before departure)</td><td>Per operator</td><td><code>operator_settings.boarding_cutoff_mins</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═════════ 22. RATE LIMITING ═════════ -->
+  <section class="section" id="ratelimiting">
+    <div class="section-header">
+      <span class="section-num">22</span>
+      <div><h2>Rate Limiting <span class="dim">— Protecting the Platform</span></h2></div>
+    </div>
+
+    <p>Rate limiting happens at two levels: at the <strong style="color:var(--text)">API Gateway</strong> for broad IP-level protection, and at the <strong style="color:var(--text)">service level</strong> for business-logic-aware throttling.</p>
+
+    <h3>Rate Limit Tiers</h3>
+    <table class="tech-table">
+      <thead><tr><th>Endpoint Group</th><th>Limit</th><th>Window</th><th>Key</th></tr></thead>
+      <tbody>
+        <tr><td>Public search (<code>GET /trips/search</code>)</td><td>60 requests</td><td>1 minute</td><td>IP address</td></tr>
+        <tr><td>Auth OTP send</td><td>3 requests</td><td>1 hour</td><td>Phone number</td></tr>
+        <tr><td>Auth OTP verify</td><td>5 attempts</td><td>15 minutes</td><td>Phone + IP</td></tr>
+        <tr><td>Seat hold (<code>POST /bookings/hold-seats</code>)</td><td>10 requests</td><td>5 minutes</td><td>User ID</td></tr>
+        <tr><td>Payment initiate</td><td>5 requests</td><td>5 minutes</td><td>User ID</td></tr>
+        <tr><td>Booking cancel</td><td>10 requests</td><td>1 hour</td><td>User ID</td></tr>
+        <tr><td>Operator API (all)</td><td>300 requests</td><td>1 minute</td><td>Operator ID</td></tr>
+        <tr><td>Admin API (all)</td><td>1000 requests</td><td>1 minute</td><td>Admin User ID</td></tr>
+        <tr><td>Webhook receiver</td><td>Unlimited (IP-allowlisted)</td><td>—</td><td>Source IP in Razorpay allowlist</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Redis Sliding Window Algorithm</h3>
+    <div class="code-block">
+<span class="cmt">// Sliding window rate limiter using Redis sorted sets</span>
+<span class="kw">async function</span> <span class="fn">isRateLimited</span>(key, limit, windowMs) {
+  <span class="kw">const</span> now = <span class="type">Date</span>.<span class="fn">now</span>();
+  <span class="kw">const</span> windowStart = now - windowMs;
+
+  <span class="kw">const</span> pipeline = redis.<span class="fn">pipeline</span>();
+
+  <span class="cmt">// Remove entries older than the window</span>
+  pipeline.<span class="fn">zremrangebyscore</span>(key, <span class="str">'-inf'</span>, windowStart);
+
+  <span class="cmt">// Count entries in current window</span>
+  pipeline.<span class="fn">zcard</span>(key);
+
+  <span class="cmt">// Add current request timestamp</span>
+  pipeline.<span class="fn">zadd</span>(key, now, <span class="str">`</span>${now}<span class="str">-</span>${<span class="type">Math</span>.<span class="fn">random</span>()}<span class="str">`</span>);
+
+  <span class="cmt">// Set key expiry to window duration</span>
+  pipeline.<span class="fn">expire</span>(key, <span class="type">Math</span>.<span class="fn">ceil</span>(windowMs / <span class="num">1000</span>));
+
+  <span class="kw">const</span> results = <span class="kw">await</span> pipeline.<span class="fn">exec</span>();
+  <span class="kw">const</span> currentCount = results[<span class="num">1</span>][<span class="num">1</span>];
+
+  <span class="kw">return</span> {
+    limited: currentCount >= limit,
+    remaining: <span class="type">Math</span>.<span class="fn">max</span>(<span class="num">0</span>, limit - currentCount - <span class="num">1</span>),
+    resetAt: now + windowMs
+  };
+}
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>Rate Limit Response Headers</h4>
+        <p>Always return <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, and <code>X-RateLimit-Reset</code> headers on every response, not just when throttled. This lets frontend apps show real-time quota feedback and implement smart retry logic with the exact reset time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 23. MONITORING & ALERTS ═════════ -->
+  <section class="section" id="monitoring">
+    <div class="section-header">
+      <span class="section-num">23</span>
+      <div><h2>Monitoring & Alerts <span class="dim">— Observability Stack</span></h2></div>
+    </div>
+
+    <p>You can't improve what you can't measure. Every service exposes metrics, logs, and traces. The three pillars of observability are wired end-to-end from Day 1.</p>
+
+    <h3>Observability Stack</h3>
+    <div class="card-grid cols-3">
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h4>Metrics — Prometheus + Grafana</h4>
+        <p>Every service exposes <code>/metrics</code> endpoint. Prometheus scrapes every 15s. Grafana dashboards show: request rate, error rate, P50/P95/P99 latency, active seat locks, payment success rate, Kafka consumer lag.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📝</div>
+        <h4>Logs — ELK Stack</h4>
+        <p>Structured JSON logs from every service. Filebeat ships to Elasticsearch. Kibana for log search and dashboards. Every log line includes: <code>traceId</code>, <code>service</code>, <code>level</code>, <code>userId</code> (if auth'd), <code>duration</code>.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <h4>Traces — Jaeger / OpenTelemetry</h4>
+        <p>Distributed tracing across all service calls. A single booking request generates a trace spanning: API Gateway → Booking Service → Redis → Payment Service → Razorpay → Kafka. Identify exact bottlenecks.</p>
+      </div>
+    </div>
+
+    <h3>Key Metrics to Track</h3>
+    <table class="tech-table">
+      <thead><tr><th>Metric</th><th>Target</th><th>Alert Threshold</th></tr></thead>
+      <tbody>
+        <tr><td>Search API P99 latency</td><td>&lt; 500ms</td><td>Alert if P99 &gt; 1s for 2 min</td></tr>
+        <tr><td>Booking confirmation P99</td><td>&lt; 2s</td><td>Alert if P99 &gt; 5s for 1 min</td></tr>
+        <tr><td>Payment success rate</td><td>&gt; 95%</td><td>Alert if rate drops below 90% for 5 min</td></tr>
+        <tr><td>Seat lock contention rate</td><td>&lt; 5%</td><td>Alert if &gt; 15% of hold-seat requests fail with 409</td></tr>
+        <tr><td>Kafka consumer lag</td><td>&lt; 1000 messages</td><td>Alert if lag &gt; 5000 for any consumer group</td></tr>
+        <tr><td>Redis memory usage</td><td>&lt; 70%</td><td>Alert if &gt; 80% — risk of eviction</td></tr>
+        <tr><td>PostgreSQL connection pool</td><td>&lt; 60% utilization</td><td>Alert if &gt; 80% for 3 min</td></tr>
+        <tr><td>DLQ message count</td><td>0</td><td>Alert immediately on any DLQ message</td></tr>
+        <tr><td>5xx error rate</td><td>&lt; 0.1%</td><td>Alert if &gt; 1% for 1 min (PagerDuty)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Structured Log Format</h3>
+    <div class="code-block">
+<span class="cmt">// Every log line is JSON — never plain text strings</span>
+{
+  <span class="str">"timestamp"</span>:  <span class="str">"2025-08-15T22:10:05.123Z"</span>,
+  <span class="str">"level"</span>:      <span class="str">"info"</span>,
+  <span class="str">"service"</span>:    <span class="str">"booking-service"</span>,
+  <span class="str">"traceId"</span>:    <span class="str">"req_3kj9fxm2p"</span>,
+  <span class="str">"spanId"</span>:     <span class="str">"span_9abc"</span>,
+  <span class="str">"userId"</span>:     <span class="str">"user-uuid"</span>,
+  <span class="str">"action"</span>:     <span class="str">"seat.locked"</span>,
+  <span class="str">"tripId"</span>:     <span class="str">"trip-uuid"</span>,
+  <span class="str">"seatIds"</span>:    [<span class="str">"A1"</span>, <span class="str">"A2"</span>],
+  <span class="str">"duration_ms"</span>: <span class="num">42</span>,
+  <span class="str">"result"</span>:     <span class="str">"success"</span>
+}
+    </div>
+
+    <h3>Business Metrics Dashboard (Grafana)</h3>
+    <div class="card-grid cols-4">
+      <div class="card">
+        <div class="card-icon">💰</div>
+        <h4>GMV (Today)</h4>
+        <p>Gross merchandise value of all confirmed bookings in the last 24 hours. Real-time counter from ClickHouse.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎟</div>
+        <h4>Tickets Sold</h4>
+        <p>Count of seat bookings. Separate counters for new bookings vs cancellations. Net tickets outstanding.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🚌</div>
+        <h4>Active Trips</h4>
+        <p>Trips currently in-progress with live GPS tracking. Active driver WebSocket connections count.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <h4>Active Seat Locks</h4>
+        <p>Count of currently held seats across all trips. If unusually high, could indicate checkout funnel drop-off.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 24. TESTING STRATEGY ═════════ -->
+  <section class="section" id="testing">
+    <div class="section-header">
+      <span class="section-num">24</span>
+      <div><h2>Testing Strategy <span class="dim">— Unit, Integration, Load</span></h2></div>
+    </div>
+
+    <p>Testing for a booking platform requires special attention to concurrency (seat locking races), idempotency (payment retries), and money (refund calculations). Tests are the only way to confidently deploy 10 times a day.</p>
+
+    <h3>Test Pyramid</h3>
+    <div class="card-grid cols-3">
+      <div class="card">
+        <div class="card-icon">🧱</div>
+        <h4>Unit Tests (70%)</h4>
+        <p>Pure business logic: refund amount calculation, cancellation policy slabs, seat availability count, JWT validation, price computation with dynamic modifiers. Use Jest. Run in &lt;30s. No DB, no Redis.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔗</div>
+        <h4>Integration Tests (20%)</h4>
+        <p>API endpoints with real PostgreSQL (Docker) and Redis (Docker). Test the full booking flow end-to-end through HTTP. Test seat lock contention with concurrent requests. Use Supertest + testcontainers.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎭</div>
+        <h4>E2E Tests (10%)</h4>
+        <p>Playwright tests against staging environment. Cover: search → select → book → download ticket. Run on every PR merge to main. Also test payment failure and cancellation flows.</p>
+      </div>
+    </div>
+
+    <h3>Critical Test Cases</h3>
+    <ul class="step-list">
+      <li>
+        <span class="step-num">T1</span>
+        <div class="step-content">
+          <h4>Concurrent Seat Lock — Race Condition Test</h4>
+          <p>Send 50 simultaneous <code>POST /bookings/hold-seats</code> requests for the same seat from 50 different users. Assert: exactly 1 succeeds (200), 49 return 409. Assert: Redis has exactly 1 lock key for that seat. This is the most important test in the entire codebase.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">T2</span>
+        <div class="step-content">
+          <h4>Payment Idempotency Test</h4>
+          <p>Call <code>POST /bookings/confirm</code> with the same <code>paymentId</code> twice (simulating client retry). Assert: only 1 booking record created, second call returns the existing booking without creating a duplicate.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">T3</span>
+        <div class="step-content">
+          <h4>Seat Lock Expiry Test</h4>
+          <p>Set Redis TTL to 2s for testing, hold seats, wait 3s without completing payment. Assert: Redis keys deleted, <code>trip:avail:{tripId}</code> counter incremented, WebSocket broadcasts seat release to connected clients.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">T4</span>
+        <div class="step-content">
+          <h4>Refund Calculation Accuracy</h4>
+          <p>Parameterized tests: booking with departure 50 hrs away → expect 100% refund. 20 hrs → 75%. 8 hrs → 50%. 4 hrs → 25%. 1 hr → 0%. Test each cancellation slab boundary exactly. Test partial cancellation (cancel 1 of 3 seats).</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">T5</span>
+        <div class="step-content">
+          <h4>Operator Data Isolation Test</h4>
+          <p>Create two operators, create buses for each. Log in as Operator A, attempt to access Operator B's bus via <code>GET /operator/buses/:busId</code>. Assert: 403 Forbidden. Attempt to book a trip from Operator B's bus via Operator A's token. Assert: correct behavior (passengers can book any operator's trips, but operator APIs are scoped).</p>
+        </div>
+      </li>
+    </ul>
+
+    <h3>Load Testing with k6</h3>
+    <div class="code-block">
+<span class="cmt">// k6 load test: search API under 500 concurrent users</span>
+<span class="kw">import</span> http <span class="kw">from</span> <span class="str">'k6/http'</span>;
+<span class="kw">import</span> { check, sleep } <span class="kw">from</span> <span class="str">'k6'</span>;
+
+<span class="kw">export const</span> options = {
+  stages: [
+    { duration: <span class="str">'2m'</span>, target: <span class="num">100</span> },   <span class="cmt">// ramp up to 100 users</span>
+    { duration: <span class="str">'5m'</span>, target: <span class="num">500</span> },   <span class="cmt">// hold at 500 users</span>
+    { duration: <span class="str">'2m'</span>, target: <span class="num">0</span> },     <span class="cmt">// ramp down</span>
+  ],
+  thresholds: {
+    <span class="str">'http_req_duration'</span>: [<span class="str">'p(99)<500'</span>],  <span class="cmt">// P99 < 500ms</span>
+    <span class="str">'http_req_failed'</span>:   [<span class="str">'rate<0.01'</span>],  <span class="cmt">// < 1% errors</span>
+  },
+};
+
+<span class="kw">export default function</span> () {
+  <span class="kw">const</span> res = http.<span class="fn">get</span>(
+    <span class="str">'https://api.busconnect.in/v1/trips/search?from=BLR&to=MYS&date=2025-09-01'</span>
+  );
+  <span class="fn">check</span>(res, { <span class="str">'status 200'</span>: r => r.status === <span class="num">200</span> });
+  <span class="fn">sleep</span>(<span class="num">1</span>);
+}
+    </div>
+  </section>
+
+  <!-- ═════════ 25. PROJECT STRUCTURE ═════════ -->
+  <section class="section" id="projectstructure">
+    <div class="section-header">
+      <span class="section-num">25</span>
+      <div><h2>Project Structure <span class="dim">— Monorepo Layout & Service Scaffolding</span></h2></div>
+    </div>
+
+    <p>The entire platform lives in a single Turborepo monorepo. Shared types, utilities, and database clients are extracted into <code>packages/</code> to avoid duplication and keep schemas in sync across services.</p>
+
+    <h3>Monorepo Root Structure</h3>
+    <div class="code-block">
+busconnect/                           <span class="cmt">← root</span>
+├── apps/
+│   ├── web/                          <span class="cmt">← Next.js passenger app</span>
+│   ├── operator-dashboard/           <span class="cmt">← Next.js operator portal</span>
+│   ├── admin-dashboard/              <span class="cmt">← Next.js admin portal</span>
+│   ├── driver-app/                   <span class="cmt">← React Native (Expo) driver app</span>
+│   └── services/
+│       ├── user-service/
+│       ├── search-service/
+│       ├── operator-service/
+│       ├── booking-service/
+│       ├── payment-service/
+│       ├── notification-service/
+│       ├── tracking-service/
+│       └── analytics-service/
+│
+├── packages/
+│   ├── db/                           <span class="cmt">← Prisma schema + generated client (shared)</span>
+│   ├── types/                        <span class="cmt">← Shared TypeScript types & Zod schemas</span>
+│   ├── kafka/                        <span class="cmt">← Kafka client wrapper + topic definitions</span>
+│   ├── redis/                        <span class="cmt">← Redis client + key helpers</span>
+│   ├── auth/                         <span class="cmt">← JWT sign/verify utilities</span>
+│   ├── logger/                       <span class="cmt">← Structured logger (Pino)</span>
+│   └── ui/                           <span class="cmt">← Shared React component library</span>
+│
+├── infra/
+│   ├── kubernetes/                   <span class="cmt">← K8s manifests per service</span>
+│   ├── terraform/                    <span class="cmt">← AWS infrastructure as code</span>
+│   └── docker-compose.yml           <span class="cmt">← Full local dev environment</span>
+│
+├── turbo.json                        <span class="cmt">← Turborepo pipeline config</span>
+└── package.json                      <span class="cmt">← Workspace root</span>
+    </div>
+
+    <h3>Individual Service Structure (e.g. booking-service)</h3>
+    <div class="code-block">
+apps/services/booking-service/
+├── src/
+│   ├── index.ts                     <span class="cmt">← App entry: Express + WebSocket server setup</span>
+│   ├── config.ts                    <span class="cmt">← Environment variable validation (Zod)</span>
+│   ├── routes/
+│   │   ├── booking.routes.ts        <span class="cmt">← Route registration</span>
+│   │   └── health.routes.ts
+│   ├── controllers/
+│   │   ├── booking.controller.ts    <span class="cmt">← HTTP handlers (thin — parse, validate, call service)</span>
+│   │   └── seatmap.controller.ts
+│   ├── services/
+│   │   ├── booking.service.ts       <span class="cmt">← Business logic: hold seats, confirm, cancel</span>
+│   │   ├── seat-lock.service.ts     <span class="cmt">← Redis lock acquisition/release</span>
+│   │   └── refund.service.ts        <span class="cmt">← Cancellation policy + refund calc</span>
+│   ├── repositories/
+│   │   ├── booking.repository.ts    <span class="cmt">← DB queries for bookings table</span>
+│   │   └── trip-seat.repository.ts  <span class="cmt">← DB queries for trip_seats table</span>
+│   ├── events/
+│   │   ├── producers/
+│   │   │   └── booking.producer.ts  <span class="cmt">← Publish to Kafka</span>
+│   │   └── consumers/
+│   │       └── payment.consumer.ts  <span class="cmt">← Consume payment.succeeded events</span>
+│   ├── websocket/
+│   │   └── seatmap.gateway.ts       <span class="cmt">← Socket.io room management</span>
+│   ├── middleware/
+│   │   ├── auth.middleware.ts        <span class="cmt">← JWT validation</span>
+│   │   ├── validate.middleware.ts    <span class="cmt">← Zod schema validation</span>
+│   │   └── ratelimit.middleware.ts   <span class="cmt">← Redis-based rate limiter</span>
+│   └── utils/
+│       ├── pnr.ts                   <span class="cmt">← PNR generation (alphanumeric, collision-checked)</span>
+│       └── errors.ts                <span class="cmt">← AppError class + error code constants</span>
+│
+├── tests/
+│   ├── unit/
+│   │   ├── refund.service.test.ts
+│   │   └── seat-lock.service.test.ts
+│   └── integration/
+│       └── booking.routes.test.ts   <span class="cmt">← Full HTTP tests with testcontainers</span>
+│
+├── Dockerfile
+├── package.json
+└── tsconfig.json
+    </div>
+
+    <h3>Shared Prisma Schema Highlights</h3>
+    <div class="code-block">
+<span class="cmt">// packages/db/schema.prisma (shared across all services)</span>
+<span class="kw">model</span> <span class="type">TripSeat</span> {
+  id         <span class="type">String</span>    @id @default(uuid())
+  tripId     <span class="type">String</span>    <span class="cmt">// FK → Trip</span>
+  seatId     <span class="type">String</span>    <span class="cmt">// seat identifier from bus layout JSON</span>
+  status     <span class="type">SeatStatus</span> @default(AVAILABLE)
+  bookingId  <span class="type">String</span>?   <span class="cmt">// FK → Booking (null if not booked)</span>
+  createdAt  <span class="type">DateTime</span>  @default(now())
+  updatedAt  <span class="type">DateTime</span>  @updatedAt
+
+  @@unique([tripId, seatId])   <span class="cmt">// prevent duplicate seat rows per trip</span>
+  @@index([tripId, status])    <span class="cmt">// fast available seat count query</span>
+}
+
+<span class="kw">enum</span> <span class="type">SeatStatus</span> {
+  AVAILABLE
+  BOOKED
+  <span class="cmt">// LOCKED is NOT stored in DB — only exists as a Redis key</span>
+  <span class="cmt">// This is intentional: DB only has durable state</span>
+}
+    </div>
+
+    <h3>Local Development Setup</h3>
+    <div class="code-block">
+<span class="cmt"># One command to start the entire platform locally</span>
+<span class="fn">docker-compose up</span>
+
+<span class="cmt"># Starts:</span>
+<span class="cmt">#  - PostgreSQL on :5432 with all schemas migrated</span>
+<span class="cmt">#  - Redis cluster on :6379</span>
+<span class="cmt">#  - Kafka + Zookeeper on :9092</span>
+<span class="cmt">#  - Elasticsearch on :9200</span>
+<span class="cmt">#  - All 8 microservices (with hot reload via tsx watch)</span>
+<span class="cmt">#  - Next.js web app on :3000</span>
+<span class="cmt">#  - Grafana on :3100 with pre-built dashboards</span>
+
+<span class="cmt"># Seed data (operators, buses, routes, trips)</span>
+<span class="fn">pnpm</span> db:seed
+
+<span class="cmt"># Run all tests</span>
+<span class="fn">pnpm</span> test
+
+<span class="cmt"># Build all services</span>
+<span class="fn">pnpm</span> build
+    </div>
+
+    <div class="callout green" style="margin-top:24px">
+      <div class="callout-icon">📦</div>
+      <div class="callout-body">
+        <h4>Turborepo Build Caching</h4>
+        <p>Turborepo caches build outputs by input hash. If you change only the <code>payment-service</code>, only that service rebuilds — all others use cached outputs. This cuts CI time from 15 minutes to under 2 minutes for typical PR changes. Remote caching can be enabled with Vercel Remote Cache or self-hosted.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Active nav highlighting based on scroll
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-20px 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

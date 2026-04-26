@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeliverX — End-to-End Architecture & Design System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --surface3: #22222f;
+    --border: #2a2a3a;
+    --border2: #3a3a50;
+    --accent: #ff5722;
+    --accent2: #ff8a00;
+    --accent3: #ffcc02;
+    --green: #00e676;
+    --blue: #448aff;
+    --purple: #e040fb;
+    --cyan: #18ffff;
+    --text: #f0f0f8;
+    --text2: #9999b8;
+    --text3: #5555778;
+    --sidebar-w: 280px;
+    --header-h: 60px;
+    --radius: 12px;
+    --radius-sm: 6px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────── */
+  #sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+  }
+
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; }
+  .logo-sub { font-size: 10px; color: var(--text2); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .sidebar-section {
+    padding: 14px 12px 4px;
+  }
+  .sidebar-section-label {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text2);
+    padding: 0 8px;
+    margin-bottom: 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 13.5px;
+    font-weight: 400;
+    transition: all 0.18s;
+    text-decoration: none;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: rgba(255,87,34,0.12);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 60%;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+  .nav-icon { font-size: 15px; flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: white;
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 1px 6px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .version-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+  .version-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── MAIN CONTENT ─────────────────────────── */
+  #main {
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+  }
+
+  /* ── TOPBAR ──────────────────────────────── */
+  .topbar {
+    position: sticky; top: 0;
+    background: rgba(10,10,15,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    height: var(--header-h);
+    display: flex; align-items: center;
+    padding: 0 32px;
+    gap: 20px;
+    z-index: 50;
+  }
+  .topbar-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; color: var(--text2); }
+  .topbar-crumb { color: var(--text); font-weight: 600; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    border: 1px solid;
+  }
+  .chip-orange { border-color: var(--accent); color: var(--accent); background: rgba(255,87,34,0.08); }
+  .chip-green { border-color: var(--green); color: var(--green); background: rgba(0,230,118,0.08); }
+  .chip-blue { border-color: var(--blue); color: var(--blue); background: rgba(68,138,255,0.08); }
+
+  /* ── SECTIONS ─────────────────────────────── */
+  .section {
+    padding: 48px 40px;
+    border-bottom: 1px solid var(--border);
+    display: none;
+  }
+  .section.active { display: block; }
+
+  .section-header {
+    margin-bottom: 36px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .section-icon-wrap {
+    width: 52px; height: 52px;
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .section-subtitle { color: var(--text2); font-size: 14.5px; max-width: 600px; }
+
+  /* ── GRID / CARDS ────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-body { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+  /* ── CODE BLOCKS ─────────────────────────── */
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 18px 0;
+  }
+  .code-header {
+    background: var(--surface3);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .code-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .code-lang {
+    margin-left: auto;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text2);
+    background: var(--surface);
+    padding: 2px 8px; border-radius: 20px;
+  }
+  pre {
+    padding: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-track { background: transparent; }
+  pre::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .kw { color: #ff9d8a; }
+  .str { color: #a8ff78; }
+  .cmt { color: #5c6270; font-style: italic; }
+  .fn { color: #79c0ff; }
+  .nm { color: #ffdca0; }
+  .ty { color: #c792ea; }
+  .op { color: var(--text2); }
+  .num { color: #f78c6c; }
+  .prop { color: #80cbc4; }
+
+  /* ── FLOW / DIAGRAM BOXES ─────────────────── */
+  .flow-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  .flow-row {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: nowrap; margin-bottom: 14px;
+    min-width: max-content;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .flow-box:hover { border-color: var(--border2); background: var(--surface3); }
+  .flow-box.orange { border-color: var(--accent); color: var(--accent); background: rgba(255,87,34,0.07); }
+  .flow-box.green { border-color: var(--green); color: var(--green); background: rgba(0,230,118,0.07); }
+  .flow-box.blue { border-color: var(--blue); color: var(--blue); background: rgba(68,138,255,0.07); }
+  .flow-box.purple { border-color: var(--purple); color: var(--purple); background: rgba(224,64,251,0.07); }
+  .flow-box.cyan { border-color: var(--cyan); color: var(--cyan); background: rgba(24,255,255,0.07); }
+  .flow-box.yellow { border-color: var(--accent3); color: var(--accent3); background: rgba(255,204,2,0.07); }
+  .arrow { color: var(--text2); font-size: 18px; flex-shrink: 0; }
+
+  /* ── TECH STACK PILLS ─────────────────────── */
+  .tech-stack {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin: 14px 0;
+  }
+  .tech-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    transition: all 0.18s;
+  }
+  .tech-pill:hover { border-color: var(--border2); color: var(--text); }
+  .tech-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── TABLES ───────────────────────────────── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 18px 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 11px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); color: var(--text); }
+
+  /* ── TIMELINE ─────────────────────────────── */
+  .timeline { position: relative; padding-left: 28px; margin: 20px 0; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 9px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--blue));
+    border-radius: 2px;
+  }
+  .timeline-item { position: relative; margin-bottom: 24px; }
+  .timeline-item::before {
+    content: '';
+    position: absolute; left: -24px; top: 6px;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+  }
+  .timeline-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .timeline-body { font-size: 13px; color: var(--text2); }
+
+  /* ── CALLOUTS ─────────────────────────────── */
+  .callout {
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-left: 3px solid;
+    font-size: 13.5px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout.info { background: rgba(68,138,255,0.07); border-color: var(--blue); color: #a0bcf5; }
+  .callout.warn { background: rgba(255,204,2,0.07); border-color: var(--accent3); color: #f5d87a; }
+  .callout.success { background: rgba(0,230,118,0.07); border-color: var(--green); color: #88f0b8; }
+  .callout.danger { background: rgba(255,87,34,0.07); border-color: var(--accent); color: #f5a090; }
+
+  /* ── ENV TABLE / INLINE ───────────────────── */
+  .env-row {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .env-row:last-child { border-bottom: none; }
+  .env-key {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent2);
+    min-width: 240px;
+    flex-shrink: 0;
+  }
+  .env-val { color: var(--text2); }
+
+  /* ── DIVIDER ──────────────────────────────── */
+  .divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+  /* ── H-TAGS ───────────────────────────────── */
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 19px; font-weight: 800;
+    margin: 28px 0 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14.5px; font-weight: 700;
+    color: var(--text2);
+    margin: 20px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  p { color: var(--text2); font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
+  ul { color: var(--text2); font-size: 13.5px; line-height: 1.75; padding-left: 18px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+
+  /* ── STAT CARDS ───────────────────────────── */
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px; font-weight: 800;
+    line-height: 1;
+  }
+  .stat-label { font-size: 12px; color: var(--text2); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── ROLE BADGE ───────────────────────────── */
+  .role-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── MOBILE TOGGLE ────────────────────────── */
+  #menu-btn {
+    display: none;
+    position: fixed; bottom: 24px; right: 24px;
+    width: 48px; height: 48px;
+    background: var(--accent);
+    border: none; border-radius: 50%;
+    color: white; font-size: 20px;
+    cursor: pointer; z-index: 200;
+    align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(255,87,34,0.4);
+  }
+  #overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 90;
+  }
+
+  @media (max-width: 900px) {
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    #main { margin-left: 0; }
+    #menu-btn { display: flex; }
+    #overlay.show { display: block; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .section { padding: 28px 20px; }
+    .topbar { padding: 0 20px; }
+    .flow-diagram { padding: 18px; }
+    .env-key { min-width: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🚀</div>
+    <div>
+      <div class="logo-text">DeliverX</div>
+      <div class="logo-sub">Architecture Docs</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div>
+    <a class="nav-item active" onclick="show('overview')">
+      <span class="nav-icon">🗺️</span> System Overview
+    </a>
+    <a class="nav-item" onclick="show('tech-stack')">
+      <span class="nav-icon">⚙️</span> Tech Stack
+    </a>
+    <a class="nav-item" onclick="show('roles')">
+      <span class="nav-icon">👥</span> User Roles & Auth
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Architecture</div>
+    <a class="nav-item" onclick="show('folder-structure')">
+      <span class="nav-icon">📁</span> Folder Structure
+    </a>
+    <a class="nav-item" onclick="show('database')">
+      <span class="nav-icon">🗄️</span> Database Schema
+    </a>
+    <a class="nav-item" onclick="show('api-design')">
+      <span class="nav-icon">🔌</span> API Design
+    </a>
+    <a class="nav-item" onclick="show('realtime')">
+      <span class="nav-icon">⚡</span> Real-Time Events
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Frontend</div>
+    <a class="nav-item" onclick="show('frontend')">
+      <span class="nav-icon">🖥️</span> Frontend Design
+    </a>
+    <a class="nav-item" onclick="show('state-management')">
+      <span class="nav-icon">🔄</span> State Management
+    </a>
+    <a class="nav-item" onclick="show('maps')">
+      <span class="nav-icon">🗺️</span> Maps & Tracking
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Backend</div>
+    <a class="nav-item" onclick="show('backend')">
+      <span class="nav-icon">🧠</span> Backend Services
+    </a>
+    <a class="nav-item" onclick="show('payments')">
+      <span class="nav-icon">💳</span> Payment Flow
+    </a>
+    <a class="nav-item" onclick="show('notifications')">
+      <span class="nav-icon">🔔</span> Notifications
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">DevOps</div>
+    <a class="nav-item" onclick="show('env-config')">
+      <span class="nav-icon">🔧</span> Env & Config
+    </a>
+    <a class="nav-item" onclick="show('ci-cd')">
+      <span class="nav-icon">🔁</span> CI/CD Pipeline
+    </a>
+    <a class="nav-item" onclick="show('deployment')">
+      <span class="nav-icon">☁️</span> Deployment
+    </a>
+    <a class="nav-item" onclick="show('monitoring')">
+      <span class="nav-icon">📊</span> Monitoring & Logs
+    </a>
+    <a class="nav-item" onclick="show('security')">
+      <span class="nav-icon">🛡️</span> Security
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Features</div>
+    <a class="nav-item" onclick="show('features')">
+      <span class="nav-icon">✨</span> Full Feature List
+      <span class="nav-badge">36</span>
+    </a>
+    <a class="nav-item" onclick="show('testing')">
+      <span class="nav-icon">🧪</span> Testing Strategy
+    </a>
+    <a class="nav-item" onclick="show('scaling')">
+      <span class="nav-icon">📈</span> Scaling Plan
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="version-tag">
+      <div class="version-dot"></div>
+      v1.0.0 — Production Ready
+    </div>
+  </div>
+</aside>
+<div id="overlay" onclick="closeSidebar()"></div>
+<button id="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<!-- MAIN -->
+<main id="main">
+  <div class="topbar">
+    <span class="topbar-title">DeliverX /</span>
+    <span class="topbar-crumb" id="topbar-label">System Overview</span>
+    <div class="topbar-right">
+      <span class="chip chip-green">✓ Production Ready</span>
+      <span class="chip chip-orange">v1.0.0</span>
+      <span class="chip chip-blue">Full Stack</span>
+    </div>
+  </div>
+
+  <!-- ───────────────────── OVERVIEW ───────────────────── -->
+  <div class="section active" id="sec-overview">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(255,87,34,0.1); border-color:var(--accent);">🗺️</div>
+      <div>
+        <div class="section-title">System Overview</div>
+        <div class="section-subtitle">End-to-end architecture of DeliverX — a scalable, real-time food & package delivery platform built for millions of users.</div>
+      </div>
+    </div>
+
+    <div class="grid-4" style="margin-bottom:28px;">
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent)">3</div><div class="stat-label">User Roles</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">36</div><div class="stat-label">Features</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--blue)">12</div><div class="stat-label">Microservices</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--purple)">99.9%</div><div class="stat-label">Uptime Target</div></div>
+    </div>
+
+    <h2>High-Level Architecture</h2>
+    <p>DeliverX is structured as a multi-tier, event-driven application. The frontend (React Native + Next.js web) communicates via a GraphQL/REST API Gateway. Core services are decoupled microservices backed by PostgreSQL, Redis, and MongoDB. Real-time delivery tracking uses WebSockets and Socket.io.</p>
+
+    <div class="flow-diagram">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.1em;">Request Flow — Client to Data</div>
+      <div class="flow-row">
+        <div class="flow-box orange">📱 Mobile App</div>
+        <div class="arrow">→</div>
+        <div class="flow-box orange">🌐 Web App</div>
+        <div class="arrow">→</div>
+        <div class="flow-box blue">🔒 Auth Middleware</div>
+        <div class="arrow">→</div>
+        <div class="flow-box blue">⚙️ API Gateway</div>
+        <div class="arrow">→</div>
+        <div class="flow-box green">🧠 Microservices</div>
+      </div>
+      <div class="flow-row" style="margin-top:8px;">
+        <div class="flow-box green">🧠 Microservices</div>
+        <div class="arrow">→</div>
+        <div class="flow-box purple">🗄️ PostgreSQL</div>
+        <div class="arrow">+</div>
+        <div class="flow-box purple">⚡ Redis</div>
+        <div class="arrow">+</div>
+        <div class="flow-box purple">🍃 MongoDB</div>
+        <div class="arrow">→</div>
+        <div class="flow-box cyan">📡 Event Bus</div>
+        <div class="arrow">→</div>
+        <div class="flow-box yellow">🔔 Notifications</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <h2>Platform Clients</h2>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">📱 Customer App</div>
+        <div class="card-body">React Native (Expo) iOS/Android app for customers to browse restaurants, place orders, track delivery live.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏪 Merchant Dashboard</div>
+        <div class="card-body">Next.js web portal for restaurant/shop owners to manage menu, orders, pricing, and analytics.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🛵 Driver App</div>
+        <div class="card-body">React Native app for delivery drivers with navigation, earnings, live dispatch, and shift management.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── TECH STACK ───────────────────── -->
+  <div class="section" id="sec-tech-stack">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(68,138,255,0.1); border-color:var(--blue);">⚙️</div>
+      <div>
+        <div class="section-title">Technology Stack</div>
+        <div class="section-subtitle">Every tool, framework, and service that powers DeliverX — frontend to infrastructure.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h2>Frontend</h2>
+        <div class="tech-stack">
+          <span class="tech-pill"><span class="tech-dot" style="background:#61dafb"></span>React Native (Expo)</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ffffff"></span>Next.js 14 (App Router)</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#38bdf8"></span>Tailwind CSS</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ff6b6b"></span>Zustand</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#e040fb"></span>React Query (TanStack)</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ffd700"></span>Socket.io Client</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#4285F4"></span>Google Maps SDK</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#00e676"></span>Mapbox</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ff9d00"></span>Stripe.js</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#8b5cf6"></span>Framer Motion</span>
+        </div>
+
+        <h2>Backend</h2>
+        <div class="tech-stack">
+          <span class="tech-pill"><span class="tech-dot" style="background:#68a063"></span>Node.js + Express</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#007acc"></span>TypeScript</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#e10098"></span>GraphQL (Apollo)</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#00e5ff"></span>REST APIs</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ffd700"></span>Socket.io</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#cc0000"></span>Redis (BullMQ)</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#00e676"></span>JWT + OAuth2</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ff5722"></span>Firebase Auth</span>
+        </div>
+      </div>
+
+      <div>
+        <h2>Database & Storage</h2>
+        <div class="tech-stack">
+          <span class="tech-pill"><span class="tech-dot" style="background:#336791"></span>PostgreSQL 15</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#47a248"></span>MongoDB</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#dc382d"></span>Redis 7</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ff9900"></span>AWS S3</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#00b4d8"></span>Prisma ORM</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#f0932b"></span>Elasticsearch</span>
+        </div>
+
+        <h2>Infrastructure & DevOps</h2>
+        <div class="tech-stack">
+          <span class="tech-pill"><span class="tech-dot" style="background:#ff9900"></span>AWS (EC2, ECS, RDS)</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#2496ed"></span>Docker</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#326ce5"></span>Kubernetes</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#e24329"></span>GitLab CI/CD</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#f05033"></span>GitHub Actions</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#00bcd4"></span>Terraform</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ff4081"></span>NGINX</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#fb8c00"></span>Prometheus + Grafana</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#005571"></span>ELK Stack</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#007acc"></span>Datadog</span>
+        </div>
+
+        <h2>Third-Party Services</h2>
+        <div class="tech-stack">
+          <span class="tech-pill"><span class="tech-dot" style="background:#6772e5"></span>Stripe Payments</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#4285f4"></span>Google Maps API</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ff4500"></span>Twilio SMS</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ffa500"></span>SendGrid Email</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ff5722"></span>Firebase Cloud Msg</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#00b4d8"></span>Algolia Search</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#795548"></span>Razorpay (India)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── ROLES ───────────────────── -->
+  <div class="section" id="sec-roles">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(224,64,251,0.1); border-color:var(--purple);">👥</div>
+      <div>
+        <div class="section-title">User Roles & Authentication</div>
+        <div class="section-subtitle">Role-based access control with JWT + OAuth2. Four roles, each with scoped permissions.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="role-badge" style="background:rgba(255,87,34,0.15);color:var(--accent);">CUSTOMER</span></div>
+        <div class="card-body">
+          Browse restaurants · Place orders · Track live · Manage addresses · Wallet · Reviews · Reorder · Schedule delivery · Multiple payment methods · Refer & Earn
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="role-badge" style="background:rgba(68,138,255,0.15);color:var(--blue);">MERCHANT</span></div>
+        <div class="card-body">
+          Manage menu & pricing · Accept/reject orders · Analytics dashboard · Payout management · Promotions · Hours & holiday mode · Multi-branch support
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="role-badge" style="background:rgba(0,230,118,0.15);color:var(--green);">DRIVER</span></div>
+        <div class="card-body">
+          Go online/offline · Accept dispatches · Navigation · Earnings dashboard · Shift management · Proof of delivery · SOS / safety features
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="role-badge" style="background:rgba(255,204,2,0.15);color:var(--accent3);">ADMIN</span></div>
+        <div class="card-body">
+          Full platform control · User management · Dispute resolution · Promotions · Financial reports · Service zones · Commission settings · Audit logs
+        </div>
+      </div>
+    </div>
+
+    <h2>Auth Flow</h2>
+    <div class="flow-diagram">
+      <div class="flow-row">
+        <div class="flow-box orange">User logs in</div>
+        <div class="arrow">→</div>
+        <div class="flow-box blue">Phone OTP / Email / Google / Apple OAuth</div>
+        <div class="arrow">→</div>
+        <div class="flow-box green">Firebase Auth / JWT issued</div>
+        <div class="arrow">→</div>
+        <div class="flow-box cyan">Access Token (15m) + Refresh Token (30d) stored</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-box cyan">API Request</div>
+        <div class="arrow">→</div>
+        <div class="flow-box blue">Bearer token in header</div>
+        <div class="arrow">→</div>
+        <div class="flow-box green">Middleware verifies + attaches user + role</div>
+        <div class="arrow">→</div>
+        <div class="flow-box orange">Role guard checks permission</div>
+        <div class="arrow">→</div>
+        <div class="flow-box purple">Handler executes</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#ffbd2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+        <span style="margin-left:8px;">authMiddleware.ts</span>
+        <span class="code-lang">TypeScript</span>
+      </div>
+      <pre><span class="kw">export const</span> <span class="fn">requireRole</span> = (...<span class="nm">roles</span>: <span class="ty">Role</span>[]) => {
+  <span class="kw">return</span> (<span class="nm">req</span>: <span class="ty">Request</span>, <span class="nm">res</span>: <span class="ty">Response</span>, <span class="nm">next</span>: <span class="ty">NextFunction</span>) => {
+    <span class="kw">const</span> <span class="nm">token</span> = <span class="nm">req</span>.<span class="prop">headers</span>.<span class="prop">authorization</span>?.<span class="fn">split</span>(<span class="str">' '</span>)[<span class="num">1</span>];
+    <span class="kw">if</span> (!<span class="nm">token</span>) <span class="kw">return</span> <span class="nm">res</span>.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ <span class="prop">error</span>: <span class="str">'Unauthorized'</span> });
+
+    <span class="kw">try</span> {
+      <span class="kw">const</span> <span class="nm">payload</span> = <span class="fn">verifyJWT</span>(<span class="nm">token</span>) <span class="kw">as</span> <span class="ty">JWTPayload</span>;
+      <span class="kw">if</span> (!<span class="nm">roles</span>.<span class="fn">includes</span>(<span class="nm">payload</span>.<span class="prop">role</span>)) {
+        <span class="kw">return</span> <span class="nm">res</span>.<span class="fn">status</span>(<span class="num">403</span>).<span class="fn">json</span>({ <span class="prop">error</span>: <span class="str">'Forbidden'</span> });
+      }
+      <span class="nm">req</span>.<span class="prop">user</span> = <span class="nm">payload</span>;
+      <span class="fn">next</span>();
+    } <span class="kw">catch</span> {
+      <span class="nm">res</span>.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ <span class="prop">error</span>: <span class="str">'Token invalid or expired'</span> });
+    }
+  };
+};</pre>
+    </div>
+  </div>
+
+  <!-- ───────────────────── FOLDER STRUCTURE ───────────────────── -->
+  <div class="section" id="sec-folder-structure">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(255,204,2,0.1); border-color:var(--accent3);">📁</div>
+      <div>
+        <div class="section-title">Folder Structure</div>
+        <div class="section-subtitle">Monorepo layout using Turborepo. All apps and packages in one repository with shared configs.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#ffbd2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+          <span style="margin-left:8px;">Root Monorepo</span>
+          <span class="code-lang">tree</span>
+        </div>
+        <pre><span class="nm">deliverx/</span>
+├── <span class="prop">apps/</span>
+│   ├── <span class="fn">customer-app/</span>       <span class="cmt"># React Native (Expo)</span>
+│   ├── <span class="fn">driver-app/</span>         <span class="cmt"># React Native (Expo)</span>
+│   ├── <span class="fn">merchant-web/</span>       <span class="cmt"># Next.js 14</span>
+│   ├── <span class="fn">admin-web/</span>          <span class="cmt"># Next.js 14</span>
+│   └── <span class="fn">landing/</span>            <span class="cmt"># Marketing site</span>
+│
+├── <span class="prop">services/</span>
+│   ├── <span class="fn">api-gateway/</span>        <span class="cmt"># NGINX + Express proxy</span>
+│   ├── <span class="fn">auth-service/</span>
+│   ├── <span class="fn">user-service/</span>
+│   ├── <span class="fn">order-service/</span>
+│   ├── <span class="fn">restaurant-service/</span>
+│   ├── <span class="fn">driver-service/</span>
+│   ├── <span class="fn">payment-service/</span>
+│   ├── <span class="fn">notification-service/</span>
+│   ├── <span class="fn">tracking-service/</span>  <span class="cmt"># WebSocket</span>
+│   ├── <span class="fn">review-service/</span>
+│   ├── <span class="fn">search-service/</span>    <span class="cmt"># Elasticsearch</span>
+│   └── <span class="fn">analytics-service/</span>
+│
+├── <span class="prop">packages/</span>
+│   ├── <span class="fn">shared-types/</span>       <span class="cmt"># TypeScript types</span>
+│   ├── <span class="fn">ui-components/</span>     <span class="cmt"># Design system</span>
+│   ├── <span class="fn">utils/</span>
+│   ├── <span class="fn">config/</span>            <span class="cmt"># ESLint, TSConfig etc</span>
+│   └── <span class="fn">prisma/</span>            <span class="cmt"># Shared DB schema</span>
+│
+├── <span class="prop">infra/</span>
+│   ├── <span class="fn">docker/</span>
+│   ├── <span class="fn">k8s/</span>               <span class="cmt"># Kubernetes manifests</span>
+│   └── <span class="fn">terraform/</span>
+│
+├── <span class="nm">turbo.json</span>
+├── <span class="nm">docker-compose.yml</span>
+└── <span class="nm">package.json</span></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#ffbd2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+          <span style="margin-left:8px;">order-service/ layout</span>
+          <span class="code-lang">tree</span>
+        </div>
+        <pre><span class="nm">order-service/</span>
+├── <span class="prop">src/</span>
+│   ├── <span class="fn">controllers/</span>
+│   │   ├── <span class="nm">order.controller.ts</span>
+│   │   └── <span class="nm">cart.controller.ts</span>
+│   ├── <span class="fn">services/</span>
+│   │   ├── <span class="nm">order.service.ts</span>
+│   │   ├── <span class="nm">dispatch.service.ts</span>
+│   │   └── <span class="nm">pricing.service.ts</span>
+│   ├── <span class="fn">repositories/</span>
+│   │   └── <span class="nm">order.repository.ts</span>
+│   ├── <span class="fn">routes/</span>
+│   │   └── <span class="nm">order.routes.ts</span>
+│   ├── <span class="fn">events/</span>
+│   │   ├── <span class="nm">order.producer.ts</span>
+│   │   └── <span class="nm">order.consumer.ts</span>
+│   ├── <span class="fn">middleware/</span>
+│   │   ├── <span class="nm">auth.ts</span>
+│   │   └── <span class="nm">validate.ts</span>
+│   ├── <span class="fn">models/</span>
+│   │   └── <span class="nm">order.model.ts</span>  <span class="cmt"># Prisma</span>
+│   ├── <span class="fn">types/</span>
+│   ├── <span class="fn">utils/</span>
+│   └── <span class="nm">index.ts</span>
+├── <span class="nm">Dockerfile</span>
+├── <span class="nm">.env.example</span>
+├── <span class="nm">package.json</span>
+└── <span class="nm">tsconfig.json</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── DATABASE ───────────────────── -->
+  <div class="section" id="sec-database">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(51,103,145,0.2); border-color:#336791;">🗄️</div>
+      <div>
+        <div class="section-title">Database Schema</div>
+        <div class="section-subtitle">PostgreSQL primary relational store + MongoDB for unstructured data + Redis for caching and queues.</div>
+      </div>
+    </div>
+
+    <div class="callout info"><span class="callout-icon">ℹ️</span> PostgreSQL is the source of truth for all transactional data. MongoDB stores menu catalogs (flexible schema). Redis handles caching, rate limiting, sessions, and job queues (BullMQ).</div>
+
+    <div class="grid-2">
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#ffbd2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+          <span style="margin-left:8px;">schema.prisma — Core Tables</span>
+          <span class="code-lang">Prisma</span>
+        </div>
+        <pre><span class="kw">model</span> <span class="ty">User</span> {
+  <span class="prop">id</span>          <span class="ty">String</span>    <span class="nm">@id @default(cuid())</span>
+  <span class="prop">email</span>       <span class="ty">String?</span>   <span class="nm">@unique</span>
+  <span class="prop">phone</span>       <span class="ty">String</span>    <span class="nm">@unique</span>
+  <span class="prop">name</span>        <span class="ty">String</span>
+  <span class="prop">role</span>        <span class="ty">Role</span>      <span class="cmt">// CUSTOMER|DRIVER|MERCHANT|ADMIN</span>
+  <span class="prop">avatar</span>      <span class="ty">String?</span>
+  <span class="prop">isVerified</span>  <span class="ty">Boolean</span>   <span class="nm">@default(false)</span>
+  <span class="prop">createdAt</span>   <span class="ty">DateTime</span>  <span class="nm">@default(now())</span>
+  <span class="prop">orders</span>      <span class="ty">Order[]</span>
+  <span class="prop">addresses</span>   <span class="ty">Address[]</span>
+  <span class="prop">wallet</span>      <span class="ty">Wallet?</span>
+}
+
+<span class="kw">model</span> <span class="ty">Order</span> {
+  <span class="prop">id</span>           <span class="ty">String</span>      <span class="nm">@id @default(cuid())</span>
+  <span class="prop">customerId</span>   <span class="ty">String</span>
+  <span class="prop">restaurantId</span> <span class="ty">String</span>
+  <span class="prop">driverId</span>     <span class="ty">String?</span>
+  <span class="prop">status</span>       <span class="ty">OrderStatus</span>
+  <span class="prop">items</span>        <span class="ty">OrderItem[]</span>
+  <span class="prop">subtotal</span>     <span class="ty">Decimal</span>
+  <span class="prop">deliveryFee</span>  <span class="ty">Decimal</span>
+  <span class="prop">tax</span>          <span class="ty">Decimal</span>
+  <span class="prop">total</span>        <span class="ty">Decimal</span>
+  <span class="prop">paymentId</span>    <span class="ty">String?</span>
+  <span class="prop">addressId</span>    <span class="ty">String</span>
+  <span class="prop">scheduledFor</span> <span class="ty">DateTime?</span>
+  <span class="prop">notes</span>        <span class="ty">String?</span>
+  <span class="prop">createdAt</span>    <span class="ty">DateTime</span>   <span class="nm">@default(now())</span>
+  <span class="prop">updatedAt</span>    <span class="ty">DateTime</span>   <span class="nm">@updatedAt</span>
+}
+
+<span class="kw">enum</span> <span class="ty">OrderStatus</span> {
+  <span class="nm">PENDING CONFIRMED PREPARING</span>
+  <span class="nm">READY PICKED_UP IN_TRANSIT</span>
+  <span class="nm">DELIVERED CANCELLED REFUNDED</span>
+}</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#ffbd2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+          <span style="margin-left:8px;">More Core Tables</span>
+          <span class="code-lang">Prisma</span>
+        </div>
+        <pre><span class="kw">model</span> <span class="ty">Restaurant</span> {
+  <span class="prop">id</span>           <span class="ty">String</span>   <span class="nm">@id @default(cuid())</span>
+  <span class="prop">ownerId</span>      <span class="ty">String</span>
+  <span class="prop">name</span>         <span class="ty">String</span>
+  <span class="prop">slug</span>         <span class="ty">String</span>   <span class="nm">@unique</span>
+  <span class="prop">cuisines</span>     <span class="ty">String[]</span>
+  <span class="prop">rating</span>       <span class="ty">Float</span>    <span class="nm">@default(0)</span>
+  <span class="prop">lat</span>          <span class="ty">Float</span>
+  <span class="prop">lng</span>          <span class="ty">Float</span>
+  <span class="prop">isOpen</span>       <span class="ty">Boolean</span>  <span class="nm">@default(true)</span>
+  <span class="prop">deliveryRadius</span> <span class="ty">Float</span> <span class="nm">@default(5)</span>  <span class="cmt">// km</span>
+  <span class="prop">minOrder</span>     <span class="ty">Decimal</span>
+  <span class="prop">avgPrepTime</span>  <span class="ty">Int</span>     <span class="cmt">// minutes</span>
+}
+
+<span class="kw">model</span> <span class="ty">Driver</span> {
+  <span class="prop">id</span>         <span class="ty">String</span>      <span class="nm">@id</span>
+  <span class="prop">userId</span>     <span class="ty">String</span>      <span class="nm">@unique</span>
+  <span class="prop">vehicleType</span> <span class="ty">VehicleType</span>
+  <span class="prop">status</span>     <span class="ty">DriverStatus</span>
+  <span class="prop">lat</span>        <span class="ty">Float?</span>
+  <span class="prop">lng</span>        <span class="ty">Float?</span>
+  <span class="prop">totalRating</span> <span class="ty">Float</span>    <span class="nm">@default(5.0)</span>
+  <span class="prop">earnings</span>   <span class="ty">Decimal</span>   <span class="nm">@default(0)</span>
+  <span class="prop">bankDetails</span> <span class="ty">Json?</span>
+}
+
+<span class="kw">model</span> <span class="ty">Payment</span> {
+  <span class="prop">id</span>          <span class="ty">String</span>        <span class="nm">@id</span>
+  <span class="prop">orderId</span>     <span class="ty">String</span>        <span class="nm">@unique</span>
+  <span class="prop">method</span>      <span class="ty">PaymentMethod</span>
+  <span class="prop">status</span>      <span class="ty">PaymentStatus</span>
+  <span class="prop">amount</span>      <span class="ty">Decimal</span>
+  <span class="prop">gateway</span>     <span class="ty">String</span>       <span class="cmt">// stripe|razorpay</span>
+  <span class="prop">gatewayId</span>   <span class="ty">String?</span>
+  <span class="prop">createdAt</span>   <span class="ty">DateTime</span>     <span class="nm">@default(now())</span>
+}</pre>
+      </div>
+    </div>
+
+    <h2>Database Strategy</h2>
+    <table class="data-table">
+      <thead><tr><th>Store</th><th>Used For</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>PostgreSQL</td><td>Users, Orders, Payments, Drivers, Reviews</td><td>ACID transactions, strong consistency, relational integrity</td></tr>
+        <tr><td>MongoDB</td><td>Menu catalogs, restaurant content, logs</td><td>Flexible schema, nested documents (categories → items → modifiers)</td></tr>
+        <tr><td>Redis</td><td>Sessions, caching, rate limiting, BullMQ job queues</td><td>In-memory speed; pub/sub for real-time</td></tr>
+        <tr><td>Elasticsearch</td><td>Restaurant / menu search</td><td>Full-text, geo-distance, fuzzy, faceted filtering</td></tr>
+        <tr><td>AWS S3</td><td>Images, documents, receipts</td><td>Durable blob storage at scale</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ───────────────────── API DESIGN ───────────────────── -->
+  <div class="section" id="sec-api-design">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(24,255,255,0.1); border-color:var(--cyan);">🔌</div>
+      <div>
+        <div class="section-title">API Design</div>
+        <div class="section-subtitle">RESTful endpoints for CRUD + GraphQL for flexible data queries. All behind the API Gateway.</div>
+      </div>
+    </div>
+
+    <h2>REST Endpoint Map</h2>
+    <table class="data-table">
+      <thead><tr><th>Method</th><th>Endpoint</th><th>Role</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-green" style="font-size:10px;padding:2px 8px;">POST</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/auth/login</code></td><td>All</td><td>Phone OTP / email login</td></tr>
+        <tr><td><span class="chip chip-blue" style="font-size:10px;padding:2px 8px;">GET</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/restaurants?lat&lng&cuisine</code></td><td>Customer</td><td>Nearby restaurants with filters</td></tr>
+        <tr><td><span class="chip chip-blue" style="font-size:10px;padding:2px 8px;">GET</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/restaurants/:id/menu</code></td><td>Customer</td><td>Full menu with categories & modifiers</td></tr>
+        <tr><td><span class="chip chip-green" style="font-size:10px;padding:2px 8px;">POST</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/orders</code></td><td>Customer</td><td>Place a new order</td></tr>
+        <tr><td><span class="chip chip-blue" style="font-size:10px;padding:2px 8px;">GET</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/orders/:id/track</code></td><td>Customer</td><td>Real-time order status + driver location</td></tr>
+        <tr><td><span class="chip chip-orange" style="font-size:10px;padding:2px 8px;">PATCH</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/orders/:id/status</code></td><td>Merchant/Driver</td><td>Update order status</td></tr>
+        <tr><td><span class="chip chip-green" style="font-size:10px;padding:2px 8px;">POST</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/payments/initiate</code></td><td>Customer</td><td>Create payment intent</td></tr>
+        <tr><td><span class="chip chip-green" style="font-size:10px;padding:2px 8px;">POST</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/drivers/location</code></td><td>Driver</td><td>Push GPS update</td></tr>
+        <tr><td><span class="chip chip-blue" style="font-size:10px;padding:2px 8px;">GET</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/drivers/earnings</code></td><td>Driver</td><td>Daily/weekly earnings summary</td></tr>
+        <tr><td><span class="chip chip-blue" style="font-size:10px;padding:2px 8px;">GET</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/merchant/analytics</code></td><td>Merchant</td><td>Revenue, orders, top items</td></tr>
+        <tr><td><span class="chip chip-green" style="font-size:10px;padding:2px 8px;">POST</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/reviews</code></td><td>Customer</td><td>Submit order review + rating</td></tr>
+        <tr><td><span class="chip chip-blue" style="font-size:10px;padding:2px 8px;">GET</span></td><td><code style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;">/search?q=&lat&lng</code></td><td>Customer</td><td>Elasticsearch full-text + geo search</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#ffbd2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+        <span style="margin-left:8px;">Place Order — order.controller.ts</span>
+        <span class="code-lang">TypeScript</span>
+      </div>
+      <pre><span class="kw">export const</span> <span class="fn">placeOrder</span> = <span class="kw">async</span> (<span class="nm">req</span>: <span class="ty">AuthRequest</span>, <span class="nm">res</span>: <span class="ty">Response</span>) => {
+  <span class="kw">const</span> { <span class="nm">restaurantId</span>, <span class="nm">items</span>, <span class="nm">addressId</span>, <span class="nm">paymentMethod</span>, <span class="nm">notes</span> } = <span class="nm">req</span>.<span class="prop">body</span>;
+
+  <span class="cmt">// 1. Validate restaurant is open & items exist</span>
+  <span class="kw">const</span> <span class="nm">restaurant</span> = <span class="kw">await</span> <span class="fn">getRestaurantOrThrow</span>(<span class="nm">restaurantId</span>);
+  <span class="kw">const</span> <span class="nm">validatedItems</span> = <span class="kw">await</span> <span class="fn">validateMenuItems</span>(<span class="nm">restaurantId</span>, <span class="nm">items</span>);
+
+  <span class="cmt">// 2. Calculate pricing (subtotal + fees + tax)</span>
+  <span class="kw">const</span> <span class="nm">pricing</span> = <span class="kw">await</span> <span class="nm">pricingService</span>.<span class="fn">calculate</span>({
+    <span class="nm">items</span>: <span class="nm">validatedItems</span>, <span class="nm">addressId</span>, <span class="nm">restaurant</span>
+  });
+
+  <span class="cmt">// 3. Create order in DB (PENDING)</span>
+  <span class="kw">const</span> <span class="nm">order</span> = <span class="kw">await</span> <span class="nm">orderRepository</span>.<span class="fn">create</span>({
+    <span class="nm">customerId</span>: <span class="nm">req</span>.<span class="prop">user</span>.<span class="prop">id</span>, <span class="nm">restaurantId</span>, <span class="nm">items</span>: <span class="nm">validatedItems</span>,
+    <span class="nm">addressId</span>, <span class="nm">notes</span>, ...<span class="nm">pricing</span>, <span class="nm">status</span>: <span class="str">'PENDING'</span>
+  });
+
+  <span class="cmt">// 4. Initiate payment</span>
+  <span class="kw">const</span> <span class="nm">paymentIntent</span> = <span class="kw">await</span> <span class="nm">paymentService</span>.<span class="fn">createIntent</span>({
+    <span class="nm">orderId</span>: <span class="nm">order</span>.<span class="prop">id</span>, <span class="nm">amount</span>: <span class="nm">pricing</span>.<span class="prop">total</span>, <span class="nm">method</span>: <span class="nm">paymentMethod</span>
+  });
+
+  <span class="cmt">// 5. Publish event → notification service</span>
+  <span class="kw">await</span> <span class="nm">eventBus</span>.<span class="fn">publish</span>(<span class="str">'order.created'</span>, { <span class="nm">order</span>, <span class="nm">restaurant</span> });
+
+  <span class="nm">res</span>.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>({ <span class="nm">order</span>, <span class="nm">paymentIntent</span> });
+};</pre>
+    </div>
+  </div>
+
+  <!-- ───────────────────── REALTIME ───────────────────── -->
+  <div class="section" id="sec-realtime">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(255,204,2,0.1); border-color:var(--accent3);">⚡</div>
+      <div>
+        <div class="section-title">Real-Time Events</div>
+        <div class="section-subtitle">WebSocket rooms per order for live driver tracking. Redis pub/sub for cross-service events.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h2>Socket.io Events</h2>
+        <table class="data-table">
+          <thead><tr><th>Event</th><th>Direction</th><th>Payload</th></tr></thead>
+          <tbody>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);">order:status</code></td><td>Server→Customer</td><td>status, timestamp</td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);">driver:location</code></td><td>Driver→Server→Customer</td><td>lat, lng, heading</td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);">dispatch:new</code></td><td>Server→Driver</td><td>order, pickup, dropoff</td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);">dispatch:accept</code></td><td>Driver→Server</td><td>driverId, orderId</td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);">order:new</code></td><td>Server→Merchant</td><td>order details</td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);">chat:message</code></td><td>Bidirectional</td><td>from, message, orderId</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#ffbd2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+            <span style="margin-left:8px;">tracking.gateway.ts</span>
+            <span class="code-lang">TypeScript</span>
+          </div>
+          <pre><span class="nm">io</span>.<span class="fn">on</span>(<span class="str">'connection'</span>, (<span class="nm">socket</span>) => {
+  <span class="cmt">// Customer joins order room</span>
+  <span class="nm">socket</span>.<span class="fn">on</span>(<span class="str">'order:join'</span>, ({ <span class="nm">orderId</span> }) => {
+    <span class="nm">socket</span>.<span class="fn">join</span>(<span class="str">`order:</span><span class="nm">${orderId}</span><span class="str">`</span>);
+  });
+
+  <span class="cmt">// Driver pushes GPS every 3s</span>
+  <span class="nm">socket</span>.<span class="fn">on</span>(<span class="str">'driver:location'</span>, <span class="kw">async</span> (<span class="nm">data</span>) => {
+    <span class="kw">await</span> <span class="nm">redis</span>.<span class="fn">geoAdd</span>(<span class="str">'drivers'</span>, {
+      <span class="prop">longitude</span>: <span class="nm">data</span>.<span class="prop">lng</span>,
+      <span class="prop">latitude</span>: <span class="nm">data</span>.<span class="prop">lat</span>,
+      <span class="prop">member</span>: <span class="nm">data</span>.<span class="prop">driverId</span>
+    });
+    <span class="cmt">// Broadcast to customer watching order</span>
+    <span class="nm">io</span>.<span class="fn">to</span>(<span class="str">`order:</span><span class="nm">${data.orderId}</span><span class="str">`</span>)
+      .<span class="fn">emit</span>(<span class="str">'driver:location'</span>, <span class="nm">data</span>);
+  });
+});</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── FRONTEND ───────────────────── -->
+  <div class="section" id="sec-frontend">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(61,218,251,0.1); border-color:#61dafb;">🖥️</div>
+      <div>
+        <div class="section-title">Frontend Design</div>
+        <div class="section-subtitle">Customer & Driver apps in React Native. Merchant & Admin as Next.js 14 web. Shared design system.</div>
+      </div>
+    </div>
+
+    <h2>Screen Map — Customer App</h2>
+    <div class="flow-diagram">
+      <div class="flow-row">
+        <div class="flow-box orange">Onboarding</div><div class="arrow">→</div>
+        <div class="flow-box blue">Home Feed</div><div class="arrow">→</div>
+        <div class="flow-box blue">Restaurant Page</div><div class="arrow">→</div>
+        <div class="flow-box blue">Menu / Cart</div><div class="arrow">→</div>
+        <div class="flow-box green">Checkout</div><div class="arrow">→</div>
+        <div class="flow-box green">Payment</div><div class="arrow">→</div>
+        <div class="flow-box cyan">Live Tracking</div><div class="arrow">→</div>
+        <div class="flow-box purple">Review</div>
+      </div>
+    </div>
+
+    <h2>Key Components</h2>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">🏠 Home Screen</div>
+        <div class="card-body">Location picker · Search bar (Algolia) · Banner carousel · Cuisine filter chips · Nearby restaurants grid · Featured sections</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🛒 Cart & Checkout</div>
+        <div class="card-body">Persistent cart (Zustand + AsyncStorage) · Item modifiers · Address selector with maps · Promo code · Tip selector · Time scheduling</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📍 Live Tracking</div>
+        <div class="card-body">Google Maps with animated driver marker · Route polyline · ETA countdown · Order status timeline · In-app chat with driver</div>
+      </div>
+      <div class="card">
+        <div class="card-title">👤 Profile</div>
+        <div class="card-body">Saved addresses · Order history · Wallet balance · Refer & earn · Notification preferences · Help / FAQs</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏪 Merchant Dashboard</div>
+        <div class="card-body">Live order queue · Menu editor (drag/drop) · Prep time control · Holiday mode · Daily revenue chart · Payout request</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🛵 Driver App</div>
+        <div class="card-body">Go online toggle · Dispatch popup · Navigation (turn-by-turn) · Proof of delivery photo · Earnings & tips · SOS button</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── STATE ───────────────────── -->
+  <div class="section" id="sec-state-management">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(255,107,107,0.1); border-color:#ff6b6b;">🔄</div>
+      <div>
+        <div class="section-title">State Management</div>
+        <div class="section-subtitle">Zustand for global client state. React Query for server state + caching. No Redux needed.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#ffbd2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+        <span style="margin-left:8px;">useCartStore.ts — Zustand</span>
+        <span class="code-lang">TypeScript</span>
+      </div>
+      <pre><span class="kw">interface</span> <span class="ty">CartStore</span> {
+  <span class="prop">restaurantId</span>: <span class="ty">string</span> | <span class="ty">null</span>;
+  <span class="prop">items</span>: <span class="ty">CartItem[]</span>;
+  <span class="fn">addItem</span>: (<span class="nm">item</span>: <span class="ty">CartItem</span>) => <span class="ty">void</span>;
+  <span class="fn">removeItem</span>: (<span class="nm">id</span>: <span class="ty">string</span>) => <span class="ty">void</span>;
+  <span class="fn">clearCart</span>: () => <span class="ty">void</span>;
+  <span class="fn">getTotal</span>: () => <span class="ty">number</span>;
+}
+
+<span class="kw">export const</span> <span class="nm">useCartStore</span> = <span class="fn">create</span><<span class="ty">CartStore</span>>()(
+  <span class="fn">persist</span>(
+    (<span class="nm">set</span>, <span class="nm">get</span>) => ({
+      <span class="prop">restaurantId</span>: <span class="kw">null</span>,
+      <span class="prop">items</span>: [],
+      <span class="fn">addItem</span>: (<span class="nm">item</span>) => <span class="fn">set</span>((<span class="nm">s</span>) => ({
+        <span class="prop">items</span>: [...<span class="nm">s</span>.<span class="prop">items</span>, <span class="nm">item</span>],
+        <span class="prop">restaurantId</span>: <span class="nm">item</span>.<span class="prop">restaurantId</span>
+      })),
+      <span class="fn">removeItem</span>: (<span class="nm">id</span>) => <span class="fn">set</span>((<span class="nm">s</span>) => ({
+        <span class="prop">items</span>: <span class="nm">s</span>.<span class="prop">items</span>.<span class="fn">filter</span>((<span class="nm">i</span>) => <span class="nm">i</span>.<span class="prop">id</span> !== <span class="nm">id</span>)
+      })),
+      <span class="fn">clearCart</span>: () => <span class="fn">set</span>({ <span class="prop">items</span>: [], <span class="prop">restaurantId</span>: <span class="kw">null</span> }),
+      <span class="fn">getTotal</span>: () => <span class="nm">get</span>().<span class="prop">items</span>.<span class="fn">reduce</span>((<span class="nm">sum</span>, <span class="nm">i</span>) => <span class="nm">sum</span> + <span class="nm">i</span>.<span class="prop">price</span> * <span class="nm">i</span>.<span class="prop">qty</span>, <span class="num">0</span>),
+    }),
+    { <span class="prop">name</span>: <span class="str">'cart-storage'</span> }
+  )
+);</pre>
+    </div>
+  </div>
+
+  <!-- ───────────────────── MAPS ───────────────────── -->
+  <div class="section" id="sec-maps">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(0,230,118,0.1); border-color:var(--green);">🗺️</div>
+      <div>
+        <div class="section-title">Maps & Live Tracking</div>
+        <div class="section-subtitle">Google Maps SDK for routing. Mapbox for custom styled maps. Redis GEO for driver proximity.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h2>Driver Location Pipeline</h2>
+        <div class="timeline">
+          <div class="timeline-item"><div class="timeline-label">Driver App (GPS)</div><div class="timeline-body">Expo Location API polls GPS every 3s while shift is active</div></div>
+          <div class="timeline-item"><div class="timeline-label">Socket.io Emit</div><div class="timeline-body">Sends driver:location event with lat/lng/heading/speed</div></div>
+          <div class="timeline-item"><div class="timeline-label">Redis GEO Store</div><div class="timeline-body">GEOADD stores driver position for proximity queries</div></div>
+          <div class="timeline-item"><div class="timeline-label">Broadcast to Order Room</div><div class="timeline-body">io.to(`order:${id}`) emits to customer watching that order</div></div>
+          <div class="timeline-item"><div class="timeline-label">Customer Map Update</div><div class="timeline-body">Animated marker moves smoothly with interpolation (60fps)</div></div>
+        </div>
+      </div>
+      <div>
+        <h2>Dispatch Algorithm</h2>
+        <div class="timeline">
+          <div class="timeline-item"><div class="timeline-label">Order Confirmed</div><div class="timeline-body">Merchant accepts order, dispatch service activates</div></div>
+          <div class="timeline-item"><div class="timeline-label">Find Nearby Drivers</div><div class="timeline-body">GEORADIUS query: online drivers within 3km of restaurant</div></div>
+          <div class="timeline-item"><div class="timeline-label">Score & Rank</div><div class="timeline-body">Score = distance × 0.6 + rating × 0.3 + acceptance rate × 0.1</div></div>
+          <div class="timeline-item"><div class="timeline-label">Dispatch Offer</div><div class="timeline-body">Send offer to top driver; 30s timeout to accept</div></div>
+          <div class="timeline-item"><div class="timeline-label">Fallback</div><div class="timeline-body">If rejected/timeout → try next driver; widen radius by 1km</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── BACKEND ───────────────────── -->
+  <div class="section" id="sec-backend">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(104,160,99,0.15); border-color:#68a063;">🧠</div>
+      <div>
+        <div class="section-title">Backend Services</div>
+        <div class="section-subtitle">12 independent Node.js microservices. Each owns its data. Communicate via REST + event bus (Redis Streams).</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card"><div class="card-title">🔒 Auth Service</div><div class="card-body">Phone OTP, email/pass, Google/Apple OAuth. Issues JWT access + refresh tokens. Revocation via Redis blacklist.</div></div>
+      <div class="card"><div class="card-title">👤 User Service</div><div class="card-body">Profile CRUD, address management, wallet operations, preferences, referral system.</div></div>
+      <div class="card"><div class="card-title">📦 Order Service</div><div class="card-body">Order lifecycle state machine. Cart validation, pricing calculation, order creation, cancellation & refund logic.</div></div>
+      <div class="card"><div class="card-title">🏪 Restaurant Service</div><div class="card-body">Restaurant CRUD, menu management (MongoDB), opening hours, delivery zones, rating aggregation.</div></div>
+      <div class="card"><div class="card-title">🛵 Driver Service</div><div class="card-body">Driver profile, document verification, shift management, dispatch engine, earnings calculation, payouts.</div></div>
+      <div class="card"><div class="card-title">💳 Payment Service</div><div class="card-body">Stripe & Razorpay integration, webhook handling, refunds, wallet top-up/deduct, commission splits.</div></div>
+      <div class="card"><div class="card-title">📡 Tracking Service</div><div class="card-body">Socket.io server, GPS ingestion, Redis GEO storage, ETA calculation using Google Maps Distance Matrix.</div></div>
+      <div class="card"><div class="card-title">🔔 Notification Service</div><div class="card-body">FCM push, Twilio SMS, SendGrid email. Template engine. Preference-aware routing. Queued via BullMQ.</div></div>
+      <div class="card"><div class="card-title">⭐ Review Service</div><div class="card-body">Post-delivery review flow. Rating validation (1 review/order). Aggregate restaurant + driver ratings.</div></div>
+      <div class="card"><div class="card-title">🔍 Search Service</div><div class="card-body">Elasticsearch wrapper. Restaurant/menu indexing, geo-distance filtering, autocomplete, cuisine facets.</div></div>
+      <div class="card"><div class="card-title">📊 Analytics Service</div><div class="card-body">Event ingestion. Merchant dashboards, admin reports, cohort analysis, revenue tracking. ClickHouse backend.</div></div>
+      <div class="card"><div class="card-title">⚙️ API Gateway</div><div class="card-body">NGINX + Express proxy. Rate limiting, auth token forwarding, request logging, circuit breaking.</div></div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── PAYMENTS ───────────────────── -->
+  <div class="section" id="sec-payments">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(103,114,229,0.15); border-color:#6772e5;">💳</div>
+      <div>
+        <div class="section-title">Payment Flow</div>
+        <div class="section-subtitle">Stripe for global payments. Razorpay for India. Wallet system for balance + cashback. Auto commission splits.</div>
+      </div>
+    </div>
+
+    <div class="flow-diagram">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.1em;">Payment Flow</div>
+      <div class="flow-row">
+        <div class="flow-box orange">Customer pays</div><div class="arrow">→</div>
+        <div class="flow-box blue">Stripe/Razorpay</div><div class="arrow">→</div>
+        <div class="flow-box green">Webhook confirms</div><div class="arrow">→</div>
+        <div class="flow-box green">Order → CONFIRMED</div><div class="arrow">→</div>
+        <div class="flow-box cyan">Escrow holds funds</div>
+      </div>
+      <div class="flow-row" style="margin-top:8px;">
+        <div class="flow-box cyan">Order DELIVERED</div><div class="arrow">→</div>
+        <div class="flow-box green">Split commission</div><div class="arrow">→</div>
+        <div class="flow-box purple">Restaurant: 80%</div>
+        <div class="arrow">+</div>
+        <div class="flow-box blue">Driver earnings pool</div>
+        <div class="arrow">+</div>
+        <div class="flow-box orange">Platform: 20%</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h2>Payment Methods</h2>
+        <ul>
+          <li>Credit/Debit cards (Stripe)</li>
+          <li>UPI / Net Banking (Razorpay — India)</li>
+          <li>In-app wallet (top-up, cashback)</li>
+          <li>Cash on delivery</li>
+          <li>Apple Pay / Google Pay</li>
+          <li>Promo code / voucher deduction</li>
+          <li>Referral credits</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Refund Logic</h2>
+        <ul>
+          <li>Auto-refund if merchant rejects within 5 min</li>
+          <li>Partial refund for missing items (admin decision)</li>
+          <li>Full refund if driver never picked up</li>
+          <li>Stripe refund API → original payment method</li>
+          <li>Or credited to wallet (instant, user choice)</li>
+          <li>Dispute resolution via admin panel</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── NOTIFICATIONS ───────────────────── -->
+  <div class="section" id="sec-notifications">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(255,87,34,0.1); border-color:var(--accent);">🔔</div>
+      <div>
+        <div class="section-title">Notification System</div>
+        <div class="section-subtitle">Multi-channel notifications: FCM push, SMS (Twilio), and Email (SendGrid). Queued with BullMQ.</div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead><tr><th>Trigger</th><th>Customer</th><th>Driver</th><th>Merchant</th></tr></thead>
+      <tbody>
+        <tr><td>Order placed</td><td>✅ Push + SMS</td><td>—</td><td>✅ Push + Sound</td></tr>
+        <tr><td>Order confirmed</td><td>✅ Push</td><td>✅ Dispatch</td><td>—</td></tr>
+        <tr><td>Driver assigned</td><td>✅ Push (driver ETA)</td><td>✅ Navigation start</td><td>—</td></tr>
+        <tr><td>Order picked up</td><td>✅ Push</td><td>—</td><td>—</td></tr>
+        <tr><td>Order delivered</td><td>✅ Push + Email receipt</td><td>✅ Earnings credited</td><td>✅ Settlement notification</td></tr>
+        <tr><td>Order cancelled</td><td>✅ Push + Refund notice</td><td>✅ Cancellation notice</td><td>✅ Push</td></tr>
+        <tr><td>Promo / offer</td><td>✅ Push + Email</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ───────────────────── ENV CONFIG ───────────────────── -->
+  <div class="section" id="sec-env-config">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(255,138,0,0.1); border-color:var(--accent2);">🔧</div>
+      <div>
+        <div class="section-title">Environment & Configuration</div>
+        <div class="section-subtitle">All secrets via environment variables. AWS Secrets Manager in production. Never committed to Git.</div>
+      </div>
+    </div>
+
+    <div class="callout warn"><span class="callout-icon">⚠️</span> Never commit .env files. Use .env.example as template. Production secrets must live in AWS Secrets Manager or HashiCorp Vault.</div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#ffbd2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+        <span style="margin-left:8px;">.env.example — order-service</span>
+        <span class="code-lang">ENV</span>
+      </div>
+      <pre><span class="cmt"># App</span>
+<span class="prop">NODE_ENV</span>=<span class="str">development</span>
+<span class="prop">PORT</span>=<span class="num">3002</span>
+<span class="prop">SERVICE_NAME</span>=<span class="str">order-service</span>
+
+<span class="cmt"># Database</span>
+<span class="prop">DATABASE_URL</span>=<span class="str">postgresql://user:pass@localhost:5432/deliverx</span>
+<span class="prop">REDIS_URL</span>=<span class="str">redis://localhost:6379</span>
+<span class="prop">MONGODB_URI</span>=<span class="str">mongodb://localhost:27017/deliverx</span>
+
+<span class="cmt"># Auth</span>
+<span class="prop">JWT_SECRET</span>=<span class="str">your-super-secret-jwt-key-256bit</span>
+<span class="prop">JWT_REFRESH_SECRET</span>=<span class="str">refresh-secret-key</span>
+<span class="prop">JWT_EXPIRES_IN</span>=<span class="str">15m</span>
+
+<span class="cmt"># Payments</span>
+<span class="prop">STRIPE_SECRET_KEY</span>=<span class="str">sk_test_...</span>
+<span class="prop">STRIPE_WEBHOOK_SECRET</span>=<span class="str">whsec_...</span>
+<span class="prop">RAZORPAY_KEY_ID</span>=<span class="str">rzp_test_...</span>
+<span class="prop">RAZORPAY_SECRET</span>=<span class="str">...</span>
+
+<span class="cmt"># Maps & External</span>
+<span class="prop">GOOGLE_MAPS_KEY</span>=<span class="str">AIza...</span>
+<span class="prop">TWILIO_ACCOUNT_SID</span>=<span class="str">AC...</span>
+<span class="prop">TWILIO_AUTH_TOKEN</span>=<span class="str">...</span>
+<span class="prop">SENDGRID_API_KEY</span>=<span class="str">SG....</span>
+<span class="prop">FIREBASE_SERVICE_ACCOUNT</span>=<span class="str">/run/secrets/firebase.json</span>
+
+<span class="cmt"># AWS</span>
+<span class="prop">AWS_ACCESS_KEY_ID</span>=<span class="str">AKIA...</span>
+<span class="prop">AWS_SECRET_ACCESS_KEY</span>=<span class="str">...</span>
+<span class="prop">AWS_REGION</span>=<span class="str">ap-south-1</span>
+<span class="prop">S3_BUCKET_NAME</span>=<span class="str">deliverx-media</span>
+
+<span class="cmt"># Services</span>
+<span class="prop">RESTAURANT_SERVICE_URL</span>=<span class="str">http://restaurant-service:3003</span>
+<span class="prop">PAYMENT_SERVICE_URL</span>=<span class="str">http://payment-service:3005</span>
+<span class="prop">NOTIFICATION_SERVICE_URL</span>=<span class="str">http://notification-service:3007</span></pre>
+    </div>
+  </div>
+
+  <!-- ───────────────────── CI/CD ───────────────────── -->
+  <div class="section" id="sec-ci-cd">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(232,67,41,0.1); border-color:#e84329;">🔁</div>
+      <div>
+        <div class="section-title">CI/CD Pipeline</div>
+        <div class="section-subtitle">GitHub Actions for every push. Lint → Test → Build → Docker → Deploy to ECS. Zero-downtime rolling deploys.</div>
+      </div>
+    </div>
+
+    <div class="flow-diagram">
+      <div class="flow-row">
+        <div class="flow-box orange">git push / PR</div><div class="arrow">→</div>
+        <div class="flow-box blue">ESLint + TypeCheck</div><div class="arrow">→</div>
+        <div class="flow-box blue">Unit Tests (Jest)</div><div class="arrow">→</div>
+        <div class="flow-box blue">Integration Tests</div><div class="arrow">→</div>
+        <div class="flow-box green">Docker Build</div><div class="arrow">→</div>
+        <div class="flow-box green">Push to ECR</div><div class="arrow">→</div>
+        <div class="flow-box cyan">Deploy ECS</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#ffbd2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+        <span style="margin-left:8px;">.github/workflows/deploy.yml</span>
+        <span class="code-lang">YAML</span>
+      </div>
+      <pre><span class="kw">name</span>: <span class="str">CI/CD Pipeline</span>
+<span class="kw">on</span>:
+  <span class="prop">push</span>:
+    <span class="prop">branches</span>: [<span class="str">main</span>, <span class="str">staging</span>]
+
+<span class="kw">jobs</span>:
+  <span class="prop">test</span>:
+    <span class="prop">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="prop">steps</span>:
+      - <span class="prop">uses</span>: <span class="str">actions/checkout@v4</span>
+      - <span class="prop">name</span>: <span class="str">Setup Node 20</span>
+        <span class="prop">uses</span>: <span class="str">actions/setup-node@v4</span>
+        <span class="prop">with</span>: { <span class="prop">node-version</span>: <span class="str">'20'</span> }
+      - <span class="fn">run</span>: <span class="str">npm ci</span>
+      - <span class="fn">run</span>: <span class="str">npm run lint && npm run typecheck</span>
+      - <span class="fn">run</span>: <span class="str">npm run test:ci</span>
+
+  <span class="prop">build-deploy</span>:
+    <span class="prop">needs</span>: test
+    <span class="prop">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="prop">steps</span>:
+      - <span class="prop">name</span>: <span class="str">Configure AWS</span>
+        <span class="prop">uses</span>: <span class="str">aws-actions/configure-aws-credentials@v4</span>
+        <span class="prop">with</span>:
+          <span class="prop">aws-access-key-id</span>: <span class="str">${{ secrets.AWS_ACCESS_KEY_ID }}</span>
+          <span class="prop">aws-secret-access-key</span>: <span class="str">${{ secrets.AWS_SECRET_ACCESS_KEY }}</span>
+
+      - <span class="prop">name</span>: <span class="str">Build & Push Docker image</span>
+        <span class="fn">run</span>: |
+          <span class="str">docker build -t $ECR_REGISTRY/order-service:$GITHUB_SHA .</span>
+          <span class="str">docker push $ECR_REGISTRY/order-service:$GITHUB_SHA</span>
+
+      - <span class="prop">name</span>: <span class="str">Deploy to ECS</span>
+        <span class="fn">run</span>: |
+          <span class="str">aws ecs update-service \</span>
+            <span class="str">--cluster deliverx-prod \</span>
+            <span class="str">--service order-service \</span>
+            <span class="str">--force-new-deployment</span></pre>
+    </div>
+
+    <div class="grid-3">
+      <div class="card"><div class="card-title">🌿 Branch Strategy</div><div class="card-body"><strong>main</strong> → production · <strong>staging</strong> → staging env · <strong>feature/*</strong> → PR → staging · <strong>hotfix/*</strong> → directly to main with fast-track review</div></div>
+      <div class="card"><div class="card-title">🔄 Deployment Strategy</div><div class="card-body">Rolling deployment on ECS. Max 50% surge, 25% drain. Blue/green for major releases. Automatic rollback on health check failure.</div></div>
+      <div class="card"><div class="card-title">🧪 Gate Requirements</div><div class="card-body">100% TypeScript passing · ≥80% test coverage · No HIGH/CRITICAL vulnerabilities (Snyk) · Lighthouse ≥90 (web apps)</div></div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── DEPLOYMENT ───────────────────── -->
+  <div class="section" id="sec-deployment">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(255,153,0,0.1); border-color:#ff9900;">☁️</div>
+      <div>
+        <div class="section-title">Deployment Architecture</div>
+        <div class="section-subtitle">AWS-first infrastructure. Kubernetes (EKS) for service orchestration. Terraform for infra-as-code.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h2>AWS Services Used</h2>
+        <table class="data-table">
+          <thead><tr><th>Service</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>ECS (Fargate)</td><td>Run Docker containers (microservices)</td></tr>
+            <tr><td>ECR</td><td>Docker image registry</td></tr>
+            <tr><td>RDS (PostgreSQL)</td><td>Primary DB with Multi-AZ failover</td></tr>
+            <tr><td>ElastiCache (Redis)</td><td>Managed Redis cluster</td></tr>
+            <tr><td>S3 + CloudFront</td><td>Media storage + CDN</td></tr>
+            <tr><td>ALB</td><td>Load balancer, SSL termination</td></tr>
+            <tr><td>Route 53</td><td>DNS management</td></tr>
+            <tr><td>ACM</td><td>SSL/TLS certificates (free)</td></tr>
+            <tr><td>Secrets Manager</td><td>Secure env vars</td></tr>
+            <tr><td>CloudWatch</td><td>Logs, metrics, alarms</td></tr>
+            <tr><td>SES</td><td>Email sending (backup to SendGrid)</td></tr>
+            <tr><td>SNS</td><td>Event fan-out for cross-service</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h2>Network Topology</h2>
+        <div class="flow-diagram">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:12px;">VPC Architecture</div>
+          <div class="flow-row">
+            <div class="flow-box orange">Internet</div><div class="arrow">→</div>
+            <div class="flow-box blue">CloudFront CDN</div><div class="arrow">→</div>
+            <div class="flow-box blue">ALB (public subnet)</div>
+          </div>
+          <div class="flow-row" style="margin-top:8px;">
+            <div class="flow-box blue">ALB</div><div class="arrow">→</div>
+            <div class="flow-box green">ECS Tasks (private subnet)</div>
+          </div>
+          <div class="flow-row" style="margin-top:8px;">
+            <div class="flow-box green">ECS Tasks</div><div class="arrow">→</div>
+            <div class="flow-box purple">RDS + ElastiCache (DB subnet)</div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#ffbd2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+            <span style="margin-left:8px;">Dockerfile (service)</span>
+            <span class="code-lang">Docker</span>
+          </div>
+          <pre><span class="kw">FROM</span> <span class="nm">node:20-alpine AS builder</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="nm">package*.json ./</span>
+<span class="kw">RUN</span> <span class="str">npm ci --only=production</span>
+<span class="kw">COPY</span> <span class="nm">. .</span>
+<span class="kw">RUN</span> <span class="str">npm run build</span>
+
+<span class="kw">FROM</span> <span class="nm">node:20-alpine AS runner</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="kw">--from</span>=builder /app/dist ./dist
+<span class="kw">COPY</span> <span class="kw">--from</span>=builder /app/node_modules ./node_modules
+<span class="kw">EXPOSE</span> <span class="num">3000</span>
+<span class="kw">CMD</span> [<span class="str">"node"</span>, <span class="str">"dist/index.js"</span>]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── MONITORING ───────────────────── -->
+  <div class="section" id="sec-monitoring">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(251,140,0,0.1); border-color:#fb8c00;">📊</div>
+      <div>
+        <div class="section-title">Monitoring & Observability</div>
+        <div class="section-subtitle">Full observability: metrics (Prometheus/Grafana), logs (ELK), traces (Jaeger), and alerts (PagerDuty).</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">📈 Metrics — Grafana</div>
+        <div class="card-body">
+          Prometheus scrapes all services. Grafana dashboards for: API latency P99, order success rate, payment failure rate, driver GPS ping frequency, DB connection pool, Redis memory.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 Logs — ELK Stack</div>
+        <div class="card-body">
+          Winston → Filebeat → Elasticsearch → Kibana. Structured JSON logs with trace IDs. Log levels: error, warn, info, debug. 30-day retention.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔍 Traces — Jaeger</div>
+        <div class="card-body">
+          OpenTelemetry across all services. Distributed tracing for cross-service request flows. Identify slow DB queries, external API bottlenecks.
+        </div>
+      </div>
+    </div>
+
+    <h2>Key Alerts</h2>
+    <table class="data-table">
+      <thead><tr><th>Alert</th><th>Threshold</th><th>Channel</th></tr></thead>
+      <tbody>
+        <tr><td>API error rate</td><td>&gt; 1% over 5 min</td><td>PagerDuty (P2)</td></tr>
+        <tr><td>Order placement failures</td><td>&gt; 0.5%</td><td>PagerDuty (P1) + Slack</td></tr>
+        <tr><td>Payment failure rate</td><td>&gt; 2%</td><td>PagerDuty (P1)</td></tr>
+        <tr><td>Service down (ECS task)</td><td>0 healthy tasks</td><td>PagerDuty (P0) + SMS</td></tr>
+        <tr><td>DB CPU</td><td>&gt; 80% for 10 min</td><td>Slack #ops-alerts</td></tr>
+        <tr><td>Redis memory</td><td>&gt; 85%</td><td>Slack #ops-alerts</td></tr>
+        <tr><td>Active drivers = 0</td><td>During peak hours</td><td>Ops on-call SMS</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ───────────────────── SECURITY ───────────────────── -->
+  <div class="section" id="sec-security">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(0,230,118,0.1); border-color:var(--green);">🛡️</div>
+      <div>
+        <div class="section-title">Security</div>
+        <div class="section-subtitle">Defense in depth: TLS everywhere, RBAC, input validation, rate limiting, WAF, and regular audits.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h2>Security Checklist</h2>
+        <ul>
+          <li>✅ All traffic HTTPS only (TLS 1.3)</li>
+          <li>✅ JWT with short expiry (15 min access tokens)</li>
+          <li>✅ Refresh token rotation + revocation</li>
+          <li>✅ bcrypt for any stored passwords (rounds=12)</li>
+          <li>✅ Input validation on every endpoint (Zod)</li>
+          <li>✅ SQL injection prevention (Prisma parameterized)</li>
+          <li>✅ XSS prevention (Helmet.js, CSP headers)</li>
+          <li>✅ CORS whitelist (only known origins)</li>
+          <li>✅ Rate limiting per IP + per user (Redis)</li>
+          <li>✅ AWS WAF (OWASP rule set)</li>
+          <li>✅ Secrets in AWS Secrets Manager (never in code)</li>
+          <li>✅ GDPR: data export, deletion, consent tracking</li>
+          <li>✅ PCI DSS: no raw card data stored (Stripe tokenizes)</li>
+          <li>✅ Audit logs for admin actions</li>
+          <li>✅ Snyk dependency vulnerability scanning in CI</li>
+          <li>✅ SAST (SonarQube) in pipeline</li>
+          <li>✅ Penetration testing quarterly</li>
+        </ul>
+      </div>
+      <div>
+        <div class="callout danger"><span class="callout-icon">🔴</span> Never store raw payment card numbers. Use Stripe/Razorpay tokens only. All card operations happen on their PCI-compliant servers.</div>
+        <div class="callout success"><span class="callout-icon">✅</span> All database connections are restricted to the VPC. No public RDS/Redis endpoints.</div>
+        <div class="callout warn"><span class="callout-icon">⚠️</span> Driver GPS data is considered sensitive. Only the matched customer can query a driver's location during their active order.</div>
+        <div class="callout info"><span class="callout-icon">ℹ️</span> Phone numbers are hashed before indexing in Elasticsearch to prevent leakage in search service logs.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── FEATURES ───────────────────── -->
+  <div class="section" id="sec-features">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(255,87,34,0.1); border-color:var(--accent);">✨</div>
+      <div>
+        <div class="section-title">Full Feature List</div>
+        <div class="section-subtitle">All 36 features across Customer, Driver, Merchant, and Admin interfaces.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h2>Customer (14 features)</h2>
+        <ul>
+          <li>📍 Location-based restaurant discovery</li>
+          <li>🔍 Search with autocomplete & filters</li>
+          <li>🛒 Cart with modifiers & special instructions</li>
+          <li>📅 Schedule delivery for later</li>
+          <li>💳 Multiple payment methods (card/UPI/wallet/cash)</li>
+          <li>📍 Live GPS order tracking with ETA</li>
+          <li>💬 In-app chat with driver / support</li>
+          <li>⭐ Rate order, food, and delivery</li>
+          <li>🔄 Reorder with one tap</li>
+          <li>🎁 Promo codes & referral system</li>
+          <li>💰 In-app wallet with cashback</li>
+          <li>🏠 Multiple saved addresses</li>
+          <li>📜 Full order history</li>
+          <li>🌙 Dark mode + accessibility support</li>
+        </ul>
+
+        <h2>Driver (8 features)</h2>
+        <ul>
+          <li>🟢 Go online/offline with one tap</li>
+          <li>📲 Dispatch offers with accept/decline</li>
+          <li>🗺️ Turn-by-turn navigation (Google Maps)</li>
+          <li>📸 Proof of delivery photo upload</li>
+          <li>💵 Real-time earnings dashboard</li>
+          <li>🏦 Payout request to bank</li>
+          <li>📊 Performance metrics & rating</li>
+          <li>🆘 SOS emergency button</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Merchant (8 features)</h2>
+        <ul>
+          <li>📦 Live order queue (accept/reject/prep)</li>
+          <li>🍽️ Menu builder with categories & modifiers</li>
+          <li>⏱️ Adjust prep time dynamically</li>
+          <li>🏖️ Holiday / pause mode</li>
+          <li>📊 Analytics: revenue, orders, top dishes</li>
+          <li>💰 Payout management & commission view</li>
+          <li>🎟️ Create promotions & discount codes</li>
+          <li>🏢 Multi-branch support</li>
+        </ul>
+
+        <h2>Admin (6 features)</h2>
+        <ul>
+          <li>👥 User & merchant management</li>
+          <li>⚖️ Dispute resolution center</li>
+          <li>🗺️ Service zone management</li>
+          <li>💹 Platform financial reports</li>
+          <li>📢 Push notification campaigns</li>
+          <li>📋 Full audit trail</li>
+        </ul>
+
+        <h2>System / Platform</h2>
+        <ul>
+          <li>🌐 Multi-language support (i18n)</li>
+          <li>🌍 Multi-currency support</li>
+          <li>📱 iOS + Android + Web (PWA)</li>
+          <li>⚡ &lt;200ms API response (P95)</li>
+          <li>🔄 Automated refund processing</li>
+          <li>🔔 Multi-channel notifications (push/SMS/email)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── TESTING ───────────────────── -->
+  <div class="section" id="sec-testing">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(68,138,255,0.1); border-color:var(--blue);">🧪</div>
+      <div>
+        <div class="section-title">Testing Strategy</div>
+        <div class="section-subtitle">Pyramid-based: unit → integration → E2E. 80% coverage minimum. Automated in CI on every commit.</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">🔬 Unit Tests — Jest</div>
+        <div class="card-body">Pure functions, service logic, utility helpers. Mock all external dependencies. Run in &lt;30s. Target: &gt;80% coverage per service.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔗 Integration Tests</div>
+        <div class="card-body">API endpoints with real DB (Docker test containers). Supertest for HTTP. Validates full request/response cycle including DB writes.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎭 E2E Tests — Playwright</div>
+        <div class="card-body">Full user flows on web apps. Critical paths: login → order → track → review. Runs on staging before production deploy.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#ffbd2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+        <span style="margin-left:8px;">order.service.test.ts</span>
+        <span class="code-lang">Jest</span>
+      </div>
+      <pre><span class="fn">describe</span>(<span class="str">'OrderService.placeOrder'</span>, () => {
+  <span class="fn">beforeEach</span>(() => <span class="nm">jest</span>.<span class="fn">clearAllMocks</span>());
+
+  <span class="fn">it</span>(<span class="str">'creates order with correct pricing'</span>, <span class="kw">async</span> () => {
+    <span class="nm">mockRestaurantRepo</span>.<span class="prop">findById</span>.<span class="fn">mockResolvedValue</span>(<span class="nm">fakeRestaurant</span>);
+    <span class="nm">mockMenuRepo</span>.<span class="prop">validateItems</span>.<span class="fn">mockResolvedValue</span>(<span class="nm">fakeItems</span>);
+    <span class="nm">mockPricingService</span>.<span class="prop">calculate</span>.<span class="fn">mockResolvedValue</span>({
+      <span class="prop">subtotal</span>: <span class="num">250</span>, <span class="prop">deliveryFee</span>: <span class="num">30</span>, <span class="prop">tax</span>: <span class="num">22</span>, <span class="prop">total</span>: <span class="num">302</span>
+    });
+
+    <span class="kw">const</span> <span class="nm">order</span> = <span class="kw">await</span> <span class="nm">orderService</span>.<span class="fn">placeOrder</span>(<span class="nm">fakePayload</span>);
+
+    <span class="fn">expect</span>(<span class="nm">order</span>.<span class="prop">total</span>).<span class="fn">toBe</span>(<span class="num">302</span>);
+    <span class="fn">expect</span>(<span class="nm">order</span>.<span class="prop">status</span>).<span class="fn">toBe</span>(<span class="str">'PENDING'</span>);
+    <span class="fn">expect</span>(<span class="nm">mockEventBus</span>.<span class="prop">publish</span>).<span class="fn">toHaveBeenCalledWith</span>(
+      <span class="str">'order.created'</span>, <span class="fn">expect</span>.<span class="fn">objectContaining</span>({ <span class="prop">order</span> })
+    );
+  });
+
+  <span class="fn">it</span>(<span class="str">'throws if restaurant is closed'</span>, <span class="kw">async</span> () => {
+    <span class="nm">mockRestaurantRepo</span>.<span class="prop">findById</span>.<span class="fn">mockResolvedValue</span>({
+      ...<span class="nm">fakeRestaurant</span>, <span class="prop">isOpen</span>: <span class="kw">false</span>
+    });
+    <span class="kw">await</span> <span class="fn">expect</span>(<span class="nm">orderService</span>.<span class="fn">placeOrder</span>(<span class="nm">fakePayload</span>))
+      .<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">'Restaurant is currently closed'</span>);
+  });
+});</pre>
+    </div>
+  </div>
+
+  <!-- ───────────────────── SCALING ───────────────────── -->
+  <div class="section" id="sec-scaling">
+    <div class="section-header">
+      <div class="section-icon-wrap" style="background:rgba(224,64,251,0.1); border-color:var(--purple);">📈</div>
+      <div>
+        <div class="section-title">Scaling Plan</div>
+        <div class="section-subtitle">Horizontal scaling via ECS auto-scaling. DB read replicas. Redis clustering. CDN for static assets.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h2>Current Capacity Targets</h2>
+        <div class="grid-2">
+          <div class="stat-card"><div class="stat-num" style="color:var(--accent)">50K</div><div class="stat-label">concurrent users</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:var(--blue)">5K</div><div class="stat-label">orders/hour</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:var(--green)">200ms</div><div class="stat-label">API P95 latency</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:var(--purple)">99.9%</div><div class="stat-label">uptime SLA</div></div>
+        </div>
+
+        <h2>Scaling Triggers</h2>
+        <table class="data-table">
+          <thead><tr><th>Service</th><th>Trigger</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>API Services</td><td>CPU &gt; 70%</td><td>+2 ECS tasks (max 20)</td></tr>
+            <tr><td>Tracking Service</td><td>Connections &gt; 5K/task</td><td>Scale WebSocket cluster</td></tr>
+            <tr><td>DB (RDS)</td><td>CPU &gt; 60%</td><td>Add read replica</td></tr>
+            <tr><td>Redis</td><td>Memory &gt; 80%</td><td>Cluster scale out</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h2>Performance Optimizations</h2>
+        <ul>
+          <li>🗄️ Redis caching for restaurant listings (TTL 5 min)</li>
+          <li>📝 Database indexes on all foreign keys + geo columns</li>
+          <li>📖 Read replicas for analytics & reporting queries</li>
+          <li>🌐 CloudFront CDN for all images and static assets</li>
+          <li>📦 BullMQ for async work (notifications, emails)</li>
+          <li>🔢 Pagination on all list endpoints (cursor-based)</li>
+          <li>🗜️ Gzip compression on all API responses</li>
+          <li>⚡ Connection pooling (PgBouncer for PostgreSQL)</li>
+          <li>📊 Elasticsearch for all search queries (not DB)</li>
+          <li>🔄 Event sourcing for order history (immutable)</li>
+        </ul>
+
+        <div class="callout success" style="margin-top:20px;">
+          <span class="callout-icon">🚀</span>
+          Phase 2 scaling plan includes: Apache Kafka to replace Redis Streams, ClickHouse for analytics at scale, global multi-region deployment (Singapore + Mumbai + London).
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const labels = {
+    'overview': 'System Overview',
+    'tech-stack': 'Tech Stack',
+    'roles': 'User Roles & Auth',
+    'folder-structure': 'Folder Structure',
+    'database': 'Database Schema',
+    'api-design': 'API Design',
+    'realtime': 'Real-Time Events',
+    'frontend': 'Frontend Design',
+    'state-management': 'State Management',
+    'maps': 'Maps & Tracking',
+    'backend': 'Backend Services',
+    'payments': 'Payment Flow',
+    'notifications': 'Notifications',
+    'env-config': 'Env & Config',
+    'ci-cd': 'CI/CD Pipeline',
+    'deployment': 'Deployment',
+    'monitoring': 'Monitoring & Logs',
+    'security': 'Security',
+    'features': 'Full Feature List',
+    'testing': 'Testing Strategy',
+    'scaling': 'Scaling Plan'
+  };
+
+  function show(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const sec = document.getElementById('sec-' + id);
+    if (sec) sec.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') === `show('${id}')`) n.classList.add('active');
+    });
+    document.getElementById('topbar-label').textContent = labels[id] || id;
+    window.scrollTo(0, 0);
+    closeSidebar();
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+</script>
+</body>
+</html>

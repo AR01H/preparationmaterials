@@ -1,0 +1,3198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce App — Full Stack Architecture Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --surface3: #1e1e28;
+    --border: #2a2a38;
+    --border2: #353548;
+    --accent: #ff6b35;
+    --accent2: #ffd166;
+    --accent3: #06d6a0;
+    --accent4: #118ab2;
+    --accent5: #ef476f;
+    --text: #e8e8f0;
+    --text2: #9898b0;
+    --text3: #5a5a70;
+    --sidebar-w: 280px;
+    --header-h: 60px;
+    --code-bg: #0d0d15;
+    --radius: 8px;
+    --radius2: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lora', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── SIDEBAR ─── */
+  #sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+  }
+
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .sidebar-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .sidebar-search {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-search input {
+    width: 100%;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .sidebar-search input::placeholder { color: var(--text3); }
+  .sidebar-search input:focus { border-color: var(--accent); }
+
+  .sidebar-nav { padding: 12px 0; flex: 1; }
+
+  .nav-group { margin-bottom: 4px; }
+
+  .nav-group-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text3);
+    padding: 8px 20px 4px;
+    display: block;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-decoration: none;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(255,107,53,0.06);
+  }
+
+  .nav-item .icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    flex-shrink: 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: var(--surface3);
+    color: var(--text3);
+  }
+
+  .nav-item.active .nav-badge { background: rgba(255,107,53,0.15); color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  #main {
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    position: sticky;
+    top: 0;
+    height: var(--header-h);
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 50;
+  }
+
+  .top-bar-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 1px;
+  }
+
+  .top-bar-pills {
+    display: flex;
+    gap: 8px;
+  }
+
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+  }
+
+  .pill.green { border-color: var(--accent3); color: var(--accent3); background: rgba(6,214,160,0.08); }
+  .pill.orange { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.08); }
+
+  /* ─── CONTENT ─── */
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 40px 120px;
+  }
+
+  /* ─── SECTIONS ─── */
+  section {
+    margin-bottom: 80px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  section.visible { opacity: 1; transform: none; }
+
+  .section-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  h2 .h2-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 28px 0 12px;
+  }
+
+  h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent2);
+    margin: 20px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  p { color: var(--text2); margin-bottom: 14px; font-size: 15px; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ─── HERO SECTION ─── */
+  .hero {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0 !important;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hero-meta-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text3);
+  }
+
+  .hero-meta-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent3);
+  }
+
+  /* ─── CODE BLOCKS ─── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius2);
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-track { background: transparent; }
+  pre::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--radius2) var(--radius2) 0 0;
+    padding: 8px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .code-header .dots { display: flex; gap: 5px; }
+  .code-header .dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .code-header .dots span:nth-child(1) { background: #ff5f57; }
+  .code-header .dots span:nth-child(2) { background: #febc2e; }
+  .code-header .dots span:nth-child(3) { background: #28c840; }
+
+  .code-wrap pre { border-radius: 0 0 var(--radius2) var(--radius2); margin: 0; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.8;
+  }
+
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cmt { color: var(--text3); font-style: italic; }
+  .num { color: #f78c6c; }
+  .tag { color: var(--accent5); }
+  .attr { color: var(--accent2); }
+  .op { color: #89ddff; }
+
+  /* ─── CARDS ─── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius2);
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+  .card-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* ─── TECH STACK PILLS ─── */
+  .tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .tech-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+    cursor: default;
+  }
+
+  .tech-pill.fe { border-color: #82aaff; color: #82aaff; background: rgba(130,170,255,0.07); }
+  .tech-pill.be { border-color: var(--accent3); color: var(--accent3); background: rgba(6,214,160,0.07); }
+  .tech-pill.db { border-color: var(--accent2); color: var(--accent2); background: rgba(255,209,102,0.07); }
+  .tech-pill.infra { border-color: var(--accent5); color: var(--accent5); background: rgba(239,71,111,0.07); }
+  .tech-pill.tool { border-color: #c792ea; color: #c792ea; background: rgba(199,146,234,0.07); }
+
+  /* ─── TREE / FILE STRUCTURE ─── */
+  .file-tree {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius2);
+    padding: 20px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 2;
+    overflow-x: auto;
+  }
+
+  .tree-dir { color: #82aaff; }
+  .tree-file { color: var(--text2); }
+  .tree-comment { color: var(--text3); }
+  .tree-special { color: var(--accent2); }
+  .tree-config { color: var(--accent5); }
+
+  /* ─── STEPS / TIMELINE ─── */
+  .steps {
+    position: relative;
+    padding-left: 32px;
+    margin: 20px 0;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 10px; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .step {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(255,107,53,0.5);
+  }
+
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .step-body { font-size: 14px; color: var(--text2); }
+
+  /* ─── TABLES ─── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text3);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  td code {
+    background: var(--surface3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--accent3);
+  }
+
+  /* ─── CALLOUTS ─── */
+  .callout {
+    border-radius: var(--radius2);
+    padding: 16px 20px;
+    margin: 16px 0;
+    border-left: 3px solid;
+    font-size: 14px;
+  }
+
+  .callout.info { border-color: var(--accent4); background: rgba(17,138,178,0.08); color: var(--text2); }
+  .callout.warn { border-color: var(--accent2); background: rgba(255,209,102,0.08); color: var(--text2); }
+  .callout.tip  { border-color: var(--accent3); background: rgba(6,214,160,0.08); color: var(--text2); }
+  .callout.danger { border-color: var(--accent5); background: rgba(239,71,111,0.08); color: var(--text2); }
+
+  .callout strong {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .callout.info strong { color: var(--accent4); }
+  .callout.warn strong { color: var(--accent2); }
+  .callout.tip  strong { color: var(--accent3); }
+  .callout.danger strong { color: var(--accent5); }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* ─── ARCHITECTURE DIAGRAM ─── */
+  .arch-diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius2);
+    padding: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 2;
+    overflow-x: auto;
+    color: var(--text2);
+  }
+
+  .arch-diagram .layer-label {
+    color: var(--accent2);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .arch-diagram .box {
+    display: inline-block;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+
+  .arch-diagram .box.fe { border-color: #82aaff; color: #82aaff; }
+  .arch-diagram .box.be { border-color: var(--accent3); color: var(--accent3); }
+  .arch-diagram .box.db { border-color: var(--accent2); color: var(--accent2); }
+  .arch-diagram .box.infra { border-color: var(--accent5); color: var(--accent5); }
+
+  /* ─── ENV SECTION ─── */
+  .env-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .env-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .env-card-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  /* ─── MOBILE TOGGLE ─── */
+  #sidebar-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    background: var(--accent);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 200;
+    box-shadow: 0 4px 20px rgba(255,107,53,0.4);
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (max-width: 900px) {
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    #main { margin-left: 0; }
+    #sidebar-toggle { display: flex; }
+    .content { padding: 40px 20px 80px; }
+    h1 { font-size: 32px; }
+    .env-grid { grid-template-columns: 1fr; }
+    .top-bar { padding: 0 20px; }
+  }
+
+  /* ─── SCROLL PROGRESS ─── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--accent), var(--accent2));
+    z-index: 9999;
+    transition: width 0.1s;
+  }
+
+  /* ─── COPY BUTTON ─── */
+  .copy-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--text3); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    margin-left: var(--sidebar-w);
+    border-top: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  @media (max-width: 900px) {
+    footer { margin-left: 0; padding: 20px; flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<button id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-logo">EcomStack</span>
+    <span class="sidebar-subtitle">Full Architecture Guide v2.0</span>
+  </div>
+  <div class="sidebar-search">
+    <input type="text" placeholder="Search sections..." id="searchInput" oninput="filterNav(this.value)">
+  </div>
+  <div class="sidebar-nav" id="navList">
+
+    <div class="nav-group" data-label="Introduction">
+      <span class="nav-group-label">Introduction</span>
+      <a class="nav-item" href="#overview">
+        <span class="icon">🗺</span> Overview
+      </a>
+      <a class="nav-item" href="#tech-stack">
+        <span class="icon">⚙️</span> Tech Stack
+      </a>
+      <a class="nav-item" href="#architecture">
+        <span class="icon">🏗</span> Architecture
+      </a>
+    </div>
+
+    <div class="nav-group" data-label="Frontend">
+      <span class="nav-group-label">Frontend</span>
+      <a class="nav-item" href="#project-structure">
+        <span class="icon">📁</span> Project Structure
+      </a>
+      <a class="nav-item" href="#pages">
+        <span class="icon">📄</span> Pages & Routes
+      </a>
+      <a class="nav-item" href="#components">
+        <span class="icon">🧩</span> Components
+      </a>
+      <a class="nav-item" href="#state">
+        <span class="icon">🔄</span> State Management
+      </a>
+    </div>
+
+    <div class="nav-group" data-label="Backend">
+      <span class="nav-group-label">Backend</span>
+      <a class="nav-item" href="#api-design">
+        <span class="icon">🔌</span> API Design
+        <span class="nav-badge">REST</span>
+      </a>
+      <a class="nav-item" href="#auth">
+        <span class="icon">🔐</span> Authentication
+      </a>
+      <a class="nav-item" href="#models">
+        <span class="icon">🗄</span> Data Models
+      </a>
+      <a class="nav-item" href="#db-design">
+        <span class="icon">🧬</span> DB Design (ERD)
+      </a>
+      <a class="nav-item" href="#payment">
+        <span class="icon">💳</span> Payments
+      </a>
+      <a class="nav-item" href="#search">
+        <span class="icon">🔍</span> Search & Filter
+      </a>
+    </div>
+
+    <div class="nav-group" data-label="Services">
+      <span class="nav-group-label">Services & Infra</span>
+      <a class="nav-item" href="#caching">
+        <span class="icon">⚡</span> Caching / Redis
+      </a>
+      <a class="nav-item" href="#storage">
+        <span class="icon">🪣</span> Storage / CDN
+      </a>
+      <a class="nav-item" href="#email">
+        <span class="icon">📧</span> Email / Notifications
+      </a>
+      <a class="nav-item" href="#jobs">
+        <span class="icon">⏱</span> Background Jobs
+      </a>
+    </div>
+
+    <div class="nav-group" data-label="DevOps">
+      <span class="nav-group-label">DevOps / CI-CD</span>
+      <a class="nav-item" href="#env-setup">
+        <span class="icon">🛠</span> Environment Setup
+      </a>
+      <a class="nav-item" href="#docker">
+        <span class="icon">🐳</span> Docker
+      </a>
+      <a class="nav-item" href="#cicd">
+        <span class="icon">🚀</span> CI/CD Pipeline
+      </a>
+      <a class="nav-item" href="#deployment">
+        <span class="icon">☁️</span> Deployment
+      </a>
+      <a class="nav-item" href="#monitoring">
+        <span class="icon">📊</span> Monitoring
+      </a>
+    </div>
+
+    <div class="nav-group" data-label="Quality">
+      <span class="nav-group-label">Quality & Security</span>
+      <a class="nav-item" href="#testing">
+        <span class="icon">🧪</span> Testing Strategy
+      </a>
+      <a class="nav-item" href="#security">
+        <span class="icon">🛡</span> Security
+      </a>
+      <a class="nav-item" href="#performance">
+        <span class="icon">⚡</span> Performance
+      </a>
+      <a class="nav-item" href="#seo">
+        <span class="icon">🔎</span> SEO
+      </a>
+    </div>
+
+    <div class="nav-group" data-label="Operations">
+      <span class="nav-group-label">Operations</span>
+      <a class="nav-item" href="#analytics">
+        <span class="icon">📈</span> Analytics
+      </a>
+      <a class="nav-item" href="#inventory">
+        <span class="icon">📦</span> Inventory
+      </a>
+      <a class="nav-item" href="#admin">
+        <span class="icon">🖥</span> Admin Panel
+      </a>
+      <a class="nav-item" href="#checklist">
+        <span class="icon">✅</span> Launch Checklist
+      </a>
+    </div>
+
+  </div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main id="main">
+  <div class="top-bar">
+    <span class="top-bar-title">📖 E-Commerce Full Stack Architecture — Complete Reference</span>
+    <div class="top-bar-pills">
+      <span class="pill green">● Live Doc</span>
+      <span class="pill orange">v2.0</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── HERO ── -->
+    <section id="overview" class="hero">
+      <div class="section-eyebrow">Full Stack Architecture</div>
+      <h1>E-Commerce<br>App <span>Blueprint</span></h1>
+      <p>A complete end-to-end reference for building, scaling, and deploying a production-grade e-commerce application — from first <code>npm init</code> to live deployment with monitoring.</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Stack</span>
+          <span class="hero-meta-value">Next.js + Node.js + PostgreSQL</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Deploy Target</span>
+          <span class="hero-meta-value">AWS / Vercel / Docker</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Payments</span>
+          <span class="hero-meta-value">Stripe</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Auth</span>
+          <span class="hero-meta-value">JWT + OAuth 2.0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TECH STACK ── -->
+    <section id="tech-stack">
+      <h2><span class="h2-num">01</span> Technology Stack</h2>
+      <p>Carefully selected technologies that balance developer experience, performance, and ecosystem maturity.</p>
+
+      <h4>Frontend</h4>
+      <div class="tech-stack">
+        <span class="tech-pill fe">Next.js 14 (App Router)</span>
+        <span class="tech-pill fe">TypeScript</span>
+        <span class="tech-pill fe">Tailwind CSS</span>
+        <span class="tech-pill fe">Zustand</span>
+        <span class="tech-pill fe">React Query (TanStack)</span>
+        <span class="tech-pill fe">Framer Motion</span>
+        <span class="tech-pill fe">Radix UI</span>
+        <span class="tech-pill fe">React Hook Form + Zod</span>
+      </div>
+
+      <h4>Backend</h4>
+      <div class="tech-stack">
+        <span class="tech-pill be">Node.js 20 LTS</span>
+        <span class="tech-pill be">Express.js</span>
+        <span class="tech-pill be">Prisma ORM</span>
+        <span class="tech-pill be">JWT + Passport.js</span>
+        <span class="tech-pill be">Bull (queue)</span>
+        <span class="tech-pill be">Socket.io</span>
+        <span class="tech-pill be">Multer (uploads)</span>
+      </div>
+
+      <h4>Database & Storage</h4>
+      <div class="tech-stack">
+        <span class="tech-pill db">PostgreSQL 16</span>
+        <span class="tech-pill db">Redis 7</span>
+        <span class="tech-pill db">AWS S3 (media)</span>
+        <span class="tech-pill db">CloudFront CDN</span>
+        <span class="tech-pill db">Elasticsearch</span>
+      </div>
+
+      <h4>Infrastructure & DevOps</h4>
+      <div class="tech-stack">
+        <span class="tech-pill infra">Docker + Compose</span>
+        <span class="tech-pill infra">GitHub Actions</span>
+        <span class="tech-pill infra">AWS ECS / EC2</span>
+        <span class="tech-pill infra">Nginx</span>
+        <span class="tech-pill infra">Terraform</span>
+        <span class="tech-pill infra">Vercel (frontend)</span>
+      </div>
+
+      <h4>Tools & Services</h4>
+      <div class="tech-stack">
+        <span class="tech-pill tool">Stripe</span>
+        <span class="tech-pill tool">Resend (email)</span>
+        <span class="tech-pill tool">Twilio (SMS)</span>
+        <span class="tech-pill tool">Sentry</span>
+        <span class="tech-pill tool">Datadog</span>
+        <span class="tech-pill tool">Algolia</span>
+      </div>
+    </section>
+
+    <!-- ── ARCHITECTURE ── -->
+    <section id="architecture">
+      <h2><span class="h2-num">02</span> System Architecture</h2>
+      <p>Microservices-friendly monolith (a "modular monolith") that can be split later. Clean separation between frontend, API, workers, and data stores.</p>
+
+      <div class="arch-diagram">
+<pre style="background:transparent;border:none;padding:0;margin:0;">
+<span class="layer-label">CLIENTS</span>
+  <span class="box fe">Browser (Next.js SSR/CSR)</span>   <span class="box fe">Mobile App (React Native)</span>
+
+        │ HTTPS / WebSocket
+        ▼
+
+<span class="layer-label">EDGE / INGRESS</span>
+  <span class="box infra">Cloudflare (DDoS + WAF)</span>  →  <span class="box infra">Vercel Edge Network</span>
+                                    │
+                                    ▼
+<span class="layer-label">API GATEWAY (Nginx)</span>
+  Rate-limiting · SSL termination · Load balancing · Request routing
+
+        │
+        ├─────────────────────┬──────────────────────┐
+        ▼                     ▼                      ▼
+
+<span class="layer-label">SERVICES</span>
+  <span class="box be">Auth Service</span>       <span class="box be">Product Service</span>      <span class="box be">Order Service</span>
+  <span class="box be">Cart Service</span>       <span class="box be">Payment Service</span>      <span class="box be">Notification Svc</span>
+  <span class="box be">Search Service</span>     <span class="box be">Review Service</span>       <span class="box be">Admin Service</span>
+
+        │
+        ├──────────────────┬───────────────────┐
+        ▼                  ▼                   ▼
+
+<span class="layer-label">DATA LAYER</span>
+  <span class="box db">PostgreSQL</span>      <span class="box db">Redis Cache</span>     <span class="box db">Elasticsearch</span>
+  (primary DB)    (sessions+cart)  (product search)
+
+        │
+        ▼
+
+<span class="layer-label">BACKGROUND WORKERS (Bull Queue)</span>
+  Email dispatch · Order processing · Image resizing · Reports
+
+        │
+        ▼
+
+<span class="layer-label">EXTERNAL SERVICES</span>
+  <span class="box infra">Stripe</span>  <span class="box infra">Resend</span>  <span class="box infra">Twilio</span>  <span class="box infra">AWS S3</span>  <span class="box infra">Sentry</span>
+</pre>
+      </div>
+    </section>
+
+    <!-- ── PROJECT STRUCTURE ── -->
+    <section id="project-structure">
+      <h2><span class="h2-num">03</span> Full Project Structure</h2>
+      <p>Monorepo layout using <code>pnpm workspaces</code>. Each app/package is independently deployable.</p>
+
+      <div class="file-tree">
+        <pre>
+          <code>
+<span class="tree-dir">ecommerce-app/</span>
+├── <span class="tree-dir">apps/</span>
+│   ├── <span class="tree-dir">web/</span>                      <span class="tree-comment"># Next.js 14 frontend</span>
+│   │   ├── <span class="tree-dir">app/</span>                   <span class="tree-comment"># App Router pages</span>
+│   │   │   ├── <span class="tree-dir">(auth)/</span>            <span class="tree-comment"># Auth group (no layout)</span>
+│   │   │   │   ├── login/page.tsx
+│   │   │   │   ├── register/page.tsx
+│   │   │   │   └── forgot-password/page.tsx
+│   │   │   ├── <span class="tree-dir">(shop)/</span>            <span class="tree-comment"># Shop group</span>
+│   │   │   │   ├── layout.tsx            <span class="tree-comment"># Header + footer</span>
+│   │   │   │   ├── page.tsx              <span class="tree-comment"># Homepage</span>
+│   │   │   │   ├── products/page.tsx
+│   │   │   │   ├── products/[slug]/page.tsx
+│   │   │   │   ├── categories/[slug]/page.tsx
+│   │   │   │   ├── cart/page.tsx
+│   │   │   │   ├── checkout/page.tsx
+│   │   │   │   └── search/page.tsx
+│   │   │   ├── <span class="tree-dir">(account)/</span>
+│   │   │   │   ├── layout.tsx
+│   │   │   │   ├── dashboard/page.tsx
+│   │   │   │   ├── orders/page.tsx
+│   │   │   │   ├── orders/[id]/page.tsx
+│   │   │   │   ├── wishlist/page.tsx
+│   │   │   │   ├── addresses/page.tsx
+│   │   │   │   └── settings/page.tsx
+│   │   │   ├── <span class="tree-dir">api/</span>               <span class="tree-comment"># Next.js API routes (thin proxy)</span>
+│   │   │   └── globals.css
+│   │   ├── <span class="tree-dir">components/</span>
+│   │   │   ├── <span class="tree-dir">ui/</span>                <span class="tree-comment"># Base UI (Button, Input, Modal…)</span>
+│   │   │   ├── <span class="tree-dir">product/</span>           <span class="tree-comment"># ProductCard, Gallery, Reviews…</span>
+│   │   │   ├── <span class="tree-dir">cart/</span>              <span class="tree-comment"># CartDrawer, CartItem, Summary</span>
+│   │   │   ├── <span class="tree-dir">checkout/</span>          <span class="tree-comment"># AddressForm, PaymentForm…</span>
+│   │   │   ├── <span class="tree-dir">layout/</span>            <span class="tree-comment"># Header, Footer, Sidebar…</span>
+│   │   │   └── <span class="tree-dir">common/</span>            <span class="tree-comment"># Breadcrumbs, Pagination…</span>
+│   │   ├── <span class="tree-dir">hooks/</span>             <span class="tree-comment"># Custom React hooks</span>
+│   │   ├── <span class="tree-dir">stores/</span>            <span class="tree-comment"># Zustand stores</span>
+│   │   ├── <span class="tree-dir">lib/</span>               <span class="tree-comment"># API client, utils, constants</span>
+│   │   ├── <span class="tree-dir">types/</span>             <span class="tree-comment"># Shared TypeScript types</span>
+│   │   └── <span class="tree-config">next.config.ts</span>
+│   │
+│   └── <span class="tree-dir">api/</span>                       <span class="tree-comment"># Express.js REST API</span>
+│       ├── <span class="tree-dir">src/</span>
+│       │   ├── <span class="tree-dir">modules/</span>           <span class="tree-comment"># Feature modules</span>
+│       │   │   ├── <span class="tree-dir">auth/</span>
+│       │   │   │   ├── auth.controller.ts
+│       │   │   │   ├── auth.service.ts
+│       │   │   │   ├── auth.routes.ts
+│       │   │   │   └── auth.middleware.ts
+│       │   │   ├── <span class="tree-dir">products/</span>
+│       │   │   ├── <span class="tree-dir">categories/</span>
+│       │   │   ├── <span class="tree-dir">orders/</span>
+│       │   │   ├── <span class="tree-dir">cart/</span>
+│       │   │   ├── <span class="tree-dir">payments/</span>
+│       │   │   ├── <span class="tree-dir">users/</span>
+│       │   │   ├── <span class="tree-dir">reviews/</span>
+│       │   │   ├── <span class="tree-dir">inventory/</span>
+│       │   │   ├── <span class="tree-dir">shipping/</span>
+│       │   │   ├── <span class="tree-dir">coupons/</span>
+│       │   │   ├── <span class="tree-dir">search/</span>
+│       │   │   ├── <span class="tree-dir">notifications/</span>
+│       │   │   └── <span class="tree-dir">admin/</span>
+│       │   ├── <span class="tree-dir">shared/</span>
+│       │   │   ├── <span class="tree-dir">middleware/</span>    <span class="tree-comment"># rate-limit, logger, validate…</span>
+│       │   │   ├── <span class="tree-dir">guards/</span>        <span class="tree-comment"># auth, role, ownership</span>
+│       │   │   ├── <span class="tree-dir">pipes/</span>         <span class="tree-comment"># validation, transform</span>
+│       │   │   ├── <span class="tree-dir">exceptions/</span>    <span class="tree-comment"># custom error classes</span>
+│       │   │   └── <span class="tree-dir">utils/</span>         <span class="tree-comment"># helpers, formatters</span>
+│       │   ├── <span class="tree-dir">jobs/</span>              <span class="tree-comment"># Bull queue workers</span>
+│       │   ├── <span class="tree-dir">events/</span>            <span class="tree-comment"># Event emitters</span>
+│       │   ├── <span class="tree-dir">config/</span>            <span class="tree-comment"># Env config loader</span>
+│       │   └── app.ts
+│       └── <span class="tree-config">tsconfig.json</span>
+│
+├── <span class="tree-dir">packages/</span>
+│   ├── <span class="tree-dir">database/</span>              <span class="tree-comment"># Prisma schema + migrations</span>
+│   │   ├── <span class="tree-dir">prisma/</span>
+│   │   │   ├── schema.prisma
+│   │   │   └── <span class="tree-dir">migrations/</span>
+│   │   └── <span class="tree-dir">seeds/</span>
+│   ├── <span class="tree-dir">types/</span>                 <span class="tree-comment"># Shared types across apps</span>
+│   └── <span class="tree-dir">config/</span>                <span class="tree-comment"># ESLint, Prettier, TypeScript configs</span>
+│
+├── <span class="tree-dir">infra/</span>                     <span class="tree-comment"># Infrastructure as code</span>
+│   ├── <span class="tree-dir">terraform/</span>             <span class="tree-comment"># AWS resources</span>
+│   ├── <span class="tree-dir">k8s/</span>                   <span class="tree-comment"># Kubernetes manifests (optional)</span>
+│   └── <span class="tree-dir">nginx/</span>                 <span class="tree-comment"># Nginx config</span>
+│
+├── <span class="tree-dir">.github/</span>
+│   └── <span class="tree-dir">workflows/</span>             <span class="tree-comment"># CI/CD pipelines</span>
+│
+├── <span class="tree-config">docker-compose.yml</span>
+├── <span class="tree-config">docker-compose.prod.yml</span>
+├── <span class="tree-config">pnpm-workspace.yaml</span>
+└── <span class="tree-config">turbo.json</span>
+          </code>
+        </pre>
+
+      </div>
+    </section>
+
+    <!-- ── PAGES & ROUTES ── -->
+    <section id="pages">
+      <h2><span class="h2-num">04</span> Pages & Routes</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Route</th><th>Page</th><th>Rendering</th><th>Auth</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/</code></td><td>Homepage (hero, featured, categories)</td><td>SSG + ISR</td><td>No</td></tr>
+            <tr><td><code>/products</code></td><td>Product listing with filters</td><td>SSR</td><td>No</td></tr>
+            <tr><td><code>/products/[slug]</code></td><td>Product detail + reviews</td><td>SSG + ISR</td><td>No</td></tr>
+            <tr><td><code>/categories/[slug]</code></td><td>Category page</td><td>SSG + ISR</td><td>No</td></tr>
+            <tr><td><code>/search</code></td><td>Search results</td><td>CSR</td><td>No</td></tr>
+            <tr><td><code>/cart</code></td><td>Shopping cart</td><td>CSR</td><td>No</td></tr>
+            <tr><td><code>/checkout</code></td><td>Checkout flow (address → payment)</td><td>CSR</td><td>Required</td></tr>
+            <tr><td><code>/checkout/success</code></td><td>Order confirmation</td><td>SSR</td><td>Required</td></tr>
+            <tr><td><code>/login</code></td><td>Login / OAuth</td><td>CSR</td><td>Guest only</td></tr>
+            <tr><td><code>/register</code></td><td>Registration</td><td>CSR</td><td>Guest only</td></tr>
+            <tr><td><code>/dashboard</code></td><td>User dashboard</td><td>SSR</td><td>Required</td></tr>
+            <tr><td><code>/orders</code></td><td>Order history</td><td>SSR</td><td>Required</td></tr>
+            <tr><td><code>/orders/[id]</code></td><td>Order detail + tracking</td><td>SSR</td><td>Required</td></tr>
+            <tr><td><code>/wishlist</code></td><td>Saved items</td><td>CSR</td><td>Required</td></tr>
+            <tr><td><code>/admin/*</code></td><td>Admin dashboard</td><td>CSR</td><td>Admin role</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── COMPONENTS ── -->
+    <section id="components">
+      <h2><span class="h2-num">05</span> Component Architecture</h2>
+      <p>Components follow an atomic design system. Base UI → Domain components → Page-level compositions.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">🃏</span>
+          <div class="card-title">ProductCard</div>
+          <div class="card-desc">Image, title, price, rating, wishlist toggle, add-to-cart. Lazy-loaded image with blur placeholder.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🛒</span>
+          <div class="card-title">CartDrawer</div>
+          <div class="card-desc">Slide-in panel with real-time sync. Handles quantity changes, removal, coupon codes, and subtotal.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🔍</span>
+          <div class="card-title">SearchBar</div>
+          <div class="card-desc">Debounced autocomplete using Algolia InstantSearch. Shows suggestions, products, categories.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🖼</span>
+          <div class="card-title">ImageGallery</div>
+          <div class="card-desc">Zoomable product gallery with thumbnail strip. WebP format with AVIF fallback.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">⭐</span>
+          <div class="card-title">ReviewSystem</div>
+          <div class="card-desc">Star rating, verified buyer badge, pagination, sort, and ability to submit reviews.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">📍</span>
+          <div class="card-title">AddressForm</div>
+          <div class="card-desc">Google Places autocomplete, saved addresses, default address selection.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">💳</span>
+          <div class="card-title">CheckoutForm</div>
+          <div class="card-desc">Stripe Elements integration — card input, Apple/Google Pay, UPI (India-specific).</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🔔</span>
+          <div class="card-title">NotificationToast</div>
+          <div class="card-desc">Animated toast system for cart updates, order confirmations, errors.</div>
+        </div>
+      </div>
+
+      <h3>Sample: ProductCard Component</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>components/product/ProductCard.tsx</span>
+        </div>
+        <pre><code><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">"react"</span>;
+<span class="kw">import</span> Image <span class="kw">from</span> <span class="str">"next/image"</span>;
+<span class="kw">import</span> { <span class="fn">useCartStore</span> } <span class="kw">from</span> <span class="str">"@/stores/cart"</span>;
+<span class="kw">import</span> { <span class="fn">useWishlist</span> } <span class="kw">from</span> <span class="str">"@/hooks/useWishlist"</span>;
+<span class="kw">import</span> { <span class="fn">formatCurrency</span> } <span class="kw">from</span> <span class="str">"@/lib/utils"</span>;
+<span class="kw">import</span> <span class="kw">type</span> { Product } <span class="kw">from</span> <span class="str">"@ecom/types"</span>;
+
+<span class="kw">interface</span> ProductCardProps {
+  product: Product;
+  priority?: <span class="kw">boolean</span>;
+}
+
+<span class="kw">export function</span> <span class="fn">ProductCard</span>({ product, priority = <span class="kw">false</span> }: ProductCardProps) {
+  <span class="kw">const</span> [isAdding, setIsAdding] = <span class="fn">useState</span>(<span class="kw">false</span>);
+  <span class="kw">const</span> addItem = <span class="fn">useCartStore</span>(s => s.addItem);
+  <span class="kw">const</span> { isWishlisted, toggle } = <span class="fn">useWishlist</span>(product.id);
+
+  <span class="kw">async function</span> <span class="fn">handleAddToCart</span>() {
+    setIsAdding(<span class="kw">true</span>);
+    <span class="kw">await</span> <span class="fn">addItem</span>(product);
+    setIsAdding(<span class="kw">false</span>);
+  }
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;article</span> <span class="attr">className</span>=<span class="str">"group relative bg-white rounded-2xl overflow-hidden"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"relative aspect-square"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;Image</span>
+          <span class="attr">src</span>={product.images[<span class="num">0</span>].url}
+          <span class="attr">alt</span>={product.name}
+          <span class="attr">fill</span> <span class="attr">className</span>=<span class="str">"object-cover group-hover:scale-105 transition-transform"</span>
+          <span class="attr">placeholder</span>=<span class="str">"blur"</span> <span class="attr">blurDataURL</span>={product.images[<span class="num">0</span>].blurData}
+          <span class="attr">priority</span>={priority}
+        <span class="tag">/&gt;</span>
+        <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() =&gt; <span class="fn">toggle</span>()} <span class="attr">className</span>=<span class="str">"absolute top-3 right-3 p-2"</span><span class="tag">&gt;</span>
+          {isWishlisted ? <span class="str">"♥"</span> : <span class="str">"♡"</span>}
+        <span class="tag">&lt;/button&gt;</span>
+        {product.discountPercent &gt; <span class="num">0</span> <span class="op">&amp;&amp;</span> (
+          <span class="tag">&lt;span</span> <span class="attr">className</span>=<span class="str">"absolute top-3 left-3 badge-sale"</span><span class="tag">&gt;</span>
+            -{product.discountPercent}%
+          <span class="tag">&lt;/span&gt;</span>
+        )}
+      <span class="tag">&lt;/div&gt;</span>
+
+      <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"p-4"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;p</span> <span class="attr">className</span>=<span class="str">"text-sm text-gray-500"</span><span class="tag">&gt;</span>{product.brand}<span class="tag">&lt;/p&gt;</span>
+        <span class="tag">&lt;h3</span> <span class="attr">className</span>=<span class="str">"font-semibold mt-1"</span><span class="tag">&gt;</span>{product.name}<span class="tag">&lt;/h3&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"flex items-center justify-between mt-2"</span><span class="tag">&gt;</span>
+          <span class="tag">&lt;div&gt;</span>
+            <span class="tag">&lt;span</span> <span class="attr">className</span>=<span class="str">"font-bold text-lg"</span><span class="tag">&gt;</span>
+              {<span class="fn">formatCurrency</span>(product.salePrice)}
+            <span class="tag">&lt;/span&gt;</span>
+            {product.salePrice &lt; product.price <span class="op">&amp;&amp;</span> (
+              <span class="tag">&lt;span</span> <span class="attr">className</span>=<span class="str">"line-through text-gray-400 ml-2 text-sm"</span><span class="tag">&gt;</span>
+                {<span class="fn">formatCurrency</span>(product.price)}
+              <span class="tag">&lt;/span&gt;</span>
+            )}
+          <span class="tag">&lt;/div&gt;</span>
+          <span class="tag">&lt;button</span>
+            <span class="attr">onClick</span>={handleAddToCart} <span class="attr">disabled</span>={isAdding}
+            <span class="attr">className</span>=<span class="str">"btn-primary text-sm"</span>
+          <span class="tag">&gt;</span>
+            {isAdding ? <span class="str">"Adding..."</span> : <span class="str">"Add to Cart"</span>}
+          <span class="tag">&lt;/button&gt;</span>
+        <span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/article&gt;</span>
+  );
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── STATE MANAGEMENT ── -->
+    <section id="state">
+      <h2><span class="h2-num">06</span> State Management</h2>
+      <p>Zustand for global UI state (cart, auth, UI); React Query for server state (products, orders).</p>
+
+      <h3>Cart Store (Zustand + Persist)</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>stores/cart.ts</span>
+        </div>
+        <pre><code><span class="kw">import</span> { create } <span class="kw">from</span> <span class="str">"zustand"</span>;
+<span class="kw">import</span> { persist } <span class="kw">from</span> <span class="str">"zustand/middleware"</span>;
+<span class="kw">import</span> <span class="kw">type</span> { CartItem, Product } <span class="kw">from</span> <span class="str">"@ecom/types"</span>;
+
+<span class="kw">interface</span> CartState {
+  items: CartItem[];
+  coupon: <span class="kw">string</span> | <span class="kw">null</span>;
+  addItem: (product: Product, qty?: <span class="kw">number</span>) =&gt; <span class="kw">void</span>;
+  removeItem: (productId: <span class="kw">string</span>) =&gt; <span class="kw">void</span>;
+  updateQty: (productId: <span class="kw">string</span>, qty: <span class="kw">number</span>) =&gt; <span class="kw">void</span>;
+  applyCoupon: (code: <span class="kw">string</span>) =&gt; <span class="kw">void</span>;
+  clear: () =&gt; <span class="kw">void</span>;
+  total: () =&gt; <span class="kw">number</span>;
+}
+
+<span class="kw">export const</span> useCartStore = <span class="fn">create</span>&lt;CartState&gt;()(
+  <span class="fn">persist</span>(
+    (set, get) =&gt; ({
+      items: [],
+      coupon: <span class="kw">null</span>,
+
+      addItem: (product, qty = <span class="num">1</span>) =&gt; <span class="fn">set</span>(state =&gt; {
+        <span class="kw">const</span> existing = state.items.<span class="fn">find</span>(i =&gt; i.productId === product.id);
+        <span class="kw">if</span> (existing) {
+          <span class="kw">return</span> {
+            items: state.items.<span class="fn">map</span>(i =&gt;
+              i.productId === product.id ? { ...i, qty: i.qty + qty } : i
+            )
+          };
+        }
+        <span class="kw">return</span> {
+          items: [...state.items, {
+            productId: product.id,
+            name: product.name,
+            price: product.salePrice,
+            image: product.images[<span class="num">0</span>].url,
+            qty,
+          }]
+        };
+      }),
+
+      removeItem: (productId) =&gt; <span class="fn">set</span>(s =&gt; ({
+        items: s.items.<span class="fn">filter</span>(i =&gt; i.productId !== productId)
+      })),
+
+      updateQty: (productId, qty) =&gt; <span class="fn">set</span>(s =&gt; ({
+        items: qty &lt;= <span class="num">0</span>
+          ? s.items.<span class="fn">filter</span>(i =&gt; i.productId !== productId)
+          : s.items.<span class="fn">map</span>(i =&gt; i.productId === productId ? {...i, qty} : i)
+      })),
+
+      applyCoupon: (code) =&gt; <span class="fn">set</span>({ coupon: code }),
+      clear: () =&gt; <span class="fn">set</span>({ items: [], coupon: <span class="kw">null</span> }),
+
+      total: () =&gt; <span class="fn">get</span>().items.<span class="fn">reduce</span>(
+        (sum, i) =&gt; sum + i.price * i.qty, <span class="num">0</span>
+      ),
+    }),
+    { name: <span class="str">"ecom-cart"</span>, version: <span class="num">1</span> }
+  )
+);</code></pre>
+      </div>
+    </section>
+
+    <!-- ── API DESIGN ── -->
+    <section id="api-design">
+      <h2><span class="h2-num">07</span> API Design (REST)</h2>
+      <p>RESTful API with versioning. All endpoints return a standard envelope: <code>&#123; success, data, error, meta &#125;</code>.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>POST</code></td><td><code>/api/v1/auth/register</code></td><td>Register new user</td><td>—</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/v1/auth/login</code></td><td>Login → JWT</td><td>—</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/v1/auth/refresh</code></td><td>Refresh access token</td><td>Refresh token</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/v1/products</code></td><td>List products (filter, sort, paginate)</td><td>—</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/v1/products/:slug</code></td><td>Single product</td><td>—</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/v1/categories</code></td><td>Category tree</td><td>—</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/v1/search?q=&amp;filters=</code></td><td>Full-text search</td><td>—</td></tr>
+            <tr><td><code>GET/POST</code></td><td><code>/api/v1/cart</code></td><td>Sync cart server-side</td><td>User</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/v1/orders</code></td><td>Create order</td><td>User</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/v1/orders/:id</code></td><td>Order detail</td><td>Owner</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/v1/payments/intent</code></td><td>Create Stripe PaymentIntent</td><td>User</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/v1/payments/webhook</code></td><td>Stripe webhook handler</td><td>Stripe sig</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/v1/reviews/:productId</code></td><td>Submit review</td><td>Verified buyer</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/v1/users/me</code></td><td>Current user profile</td><td>User</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/v1/admin/dashboard</code></td><td>Admin stats</td><td>Admin</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Standard API Response Envelope</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>shared/response.ts</span>
+        </div>
+        <pre><code><span class="cmt">// Success</span>
+{
+  <span class="str">"success"</span>: <span class="kw">true</span>,
+  <span class="str">"data"</span>: { ... },
+  <span class="str">"meta"</span>: {
+    <span class="str">"page"</span>: <span class="num">1</span>,
+    <span class="str">"total"</span>: <span class="num">234</span>,
+    <span class="str">"totalPages"</span>: <span class="num">12</span>
+  }
+}
+
+<span class="cmt">// Error</span>
+{
+  <span class="str">"success"</span>: <span class="kw">false</span>,
+  <span class="str">"error"</span>: {
+    <span class="str">"code"</span>: <span class="str">"PRODUCT_NOT_FOUND"</span>,
+    <span class="str">"message"</span>: <span class="str">"Product with slug 'xyz' was not found"</span>,
+    <span class="str">"statusCode"</span>: <span class="num">404</span>
+  }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── AUTH ── -->
+    <section id="auth">
+      <h2><span class="h2-num">08</span> Authentication & Authorization</h2>
+      <p>JWT-based auth with short-lived access tokens (15m) and long-lived refresh tokens (7d) stored in <code>httpOnly</code> cookies.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">🔑</span>
+          <div class="card-title">JWT Access Token</div>
+          <div class="card-desc">15-minute expiry. Stored in memory. Signed with RS256. Contains userId, email, role.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🔄</span>
+          <div class="card-title">Refresh Token</div>
+          <div class="card-desc">7-day expiry. httpOnly + Secure cookie. Rotated on each use. Stored hashed in DB.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🌐</span>
+          <div class="card-title">OAuth 2.0</div>
+          <div class="card-desc">Google, Facebook login via Passport.js. Auto-links accounts with same email.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🛡</span>
+          <div class="card-title">RBAC</div>
+          <div class="card-desc">Roles: customer, vendor, admin, super-admin. Permissions checked at middleware level.</div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <strong>Security note</strong>
+        Never store JWTs in localStorage. Access tokens live in React state; refresh tokens in httpOnly cookies only accessible server-side.
+      </div>
+
+      <h3>Auth Middleware</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>shared/middleware/authenticate.ts</span>
+        </div>
+        <pre><code><span class="kw">import</span> jwt <span class="kw">from</span> <span class="str">"jsonwebtoken"</span>;
+<span class="kw">import</span> { UnauthorizedException } <span class="kw">from</span> <span class="str">"../exceptions"</span>;
+
+<span class="kw">export function</span> <span class="fn">authenticate</span>(req, res, next) {
+  <span class="kw">const</span> authHeader = req.headers[<span class="str">"authorization"</span>];
+  <span class="kw">if</span> (!authHeader?.startsWith(<span class="str">"Bearer "</span>))
+    <span class="kw">throw new</span> <span class="fn">UnauthorizedException</span>(<span class="str">"Missing token"</span>);
+
+  <span class="kw">const</span> token = authHeader.<span class="fn">slice</span>(<span class="num">7</span>);
+  <span class="kw">try</span> {
+    req.user = jwt.<span class="fn">verify</span>(token, process.env.JWT_PUBLIC_KEY, {
+      algorithms: [<span class="str">"RS256"</span>],
+    });
+    <span class="fn">next</span>();
+  } <span class="kw">catch</span> {
+    <span class="kw">throw new</span> <span class="fn">UnauthorizedException</span>(<span class="str">"Invalid or expired token"</span>);
+  }
+}
+
+<span class="kw">export function</span> <span class="fn">authorize</span>(...roles: <span class="kw">string</span>[]) {
+  <span class="kw">return</span> (req, res, next) =&gt; {
+    <span class="kw">if</span> (!roles.<span class="fn">includes</span>(req.user.role))
+      <span class="kw">throw new</span> <span class="fn">ForbiddenException</span>(<span class="str">"Insufficient permissions"</span>);
+    <span class="fn">next</span>();
+  };
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── DATA MODELS ── -->
+    <section id="models">
+      <h2><span class="h2-num">09</span> Data Models (Prisma Schema)</h2>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>packages/database/prisma/schema.prisma (core models)</span>
+        </div>
+        <pre><code><span class="kw">model</span> <span class="fn">User</span> {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  name          String
+  role          Role      @default(CUSTOMER)
+  emailVerified Boolean   @default(false)
+  avatar        String?
+  phone         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  addresses     Address[]
+  orders        Order[]
+  cart          Cart?
+  reviews       Review[]
+  wishlist      WishlistItem[]
+  refreshTokens RefreshToken[]
+  @@index([email])
+}
+
+<span class="kw">model</span> <span class="fn">Product</span> {
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  name           String
+  description    String
+  sku            String    @unique
+  price          Decimal   @db.Decimal(10,2)
+  salePrice      Decimal   @db.Decimal(10,2)
+  stock          Int       @default(0)
+  images         Image[]
+  category       Category  @relation(fields:[categoryId], references:[id])
+  categoryId     String
+  brand          Brand?    @relation(fields:[brandId], references:[id])
+  brandId        String?
+  attributes     Json      <span class="cmt">// {color, size, weight, etc.}</span>
+  tags           String[]
+  isActive       Boolean   @default(true)
+  isFeatured     Boolean   @default(false)
+  avgRating      Float     @default(0)
+  reviewCount    Int       @default(0)
+  orderItems     OrderItem[]
+  reviews        Review[]
+  createdAt      DateTime  @default(now())
+  @@fulltext([name, description])
+  @@index([categoryId, isActive, salePrice])
+}
+
+<span class="kw">model</span> <span class="fn">Order</span> {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique
+  user          User        @relation(fields:[userId], references:[id])
+  userId        String
+  status        OrderStatus @default(PENDING)
+  items         OrderItem[]
+  address       Address     @relation(fields:[addressId], references:[id])
+  addressId     String
+  subtotal      Decimal     @db.Decimal(10,2)
+  discount      Decimal     @db.Decimal(10,2) @default(0)
+  shippingCost  Decimal     @db.Decimal(10,2)
+  tax           Decimal     @db.Decimal(10,2)
+  total         Decimal     @db.Decimal(10,2)
+  couponCode    String?
+  paymentId     String?
+  paymentMethod PaymentMethod?
+  trackingNumber String?
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  @@index([userId, status, createdAt])
+}
+
+<span class="kw">enum</span> OrderStatus {
+  PENDING PAYMENT_PENDING PAID CONFIRMED
+  PROCESSING SHIPPED DELIVERED CANCELLED REFUNDED
+}
+<span class="kw">enum</span> Role { CUSTOMER VENDOR ADMIN SUPER_ADMIN }</code></pre>
+      </div>
+    </section>
+
+    <!-- ── DB DESIGN ── -->
+    <section id="db-design" class="visible">
+      <h2><span class="h2-num">09b</span> Database Design (ERD + Full Schema)</h2>
+      <p>PostgreSQL 16. All tables use <code>cuid()</code> primary keys for distribution safety. Decimal fields for money — never Float. Every foreign key has an explicit index.</p>
+
+      <!-- ERD Diagram -->
+      <h3>Entity-Relationship Diagram</h3>
+      <div class="arch-diagram" style="overflow-x:auto;">
+<pre style="background:transparent;border:none;padding:0;margin:0;line-height:1.9;font-size:11.5px;">
+┌──────────────────┐         ┌──────────────────────┐        ┌─────────────────────┐
+│      <span class="box fe">USER</span>        │         │       <span class="box fe">ADDRESS</span>        │        │    <span class="box fe">REFRESH_TOKEN</span>     │
+├──────────────────┤         ├──────────────────────┤        ├─────────────────────┤
+│ id (PK)          │◄──1:N───│ userId (FK)          │        │ id (PK)             │
+│ email (UNIQUE)   │         │ id (PK)              │        │ userId (FK) ────────►│
+│ passwordHash     │         │ fullName             │        │ tokenHash           │
+│ name             │         │ line1                │        │ expiresAt           │
+│ role             │         │ line2                │        │ revokedAt           │
+│ emailVerified    │         │ city                 │        │ createdAt           │
+│ avatar           │         │ state                │        └─────────────────────┘
+│ phone            │         │ pincode              │
+│ createdAt        │         │ country              │
+│ updatedAt        │         │ isDefault            │
+└──────┬───────────┘         └──────────────────────┘
+       │
+       │ 1:N                        ┌──────────────────────┐
+       ▼                            │      <span class="box db">CATEGORY</span>         │
+┌──────────────────┐                ├──────────────────────┤
+│      <span class="box db">ORDER</span>       │                │ id (PK)              │
+├──────────────────┤                │ name                 │
+│ id (PK)          │                │ slug (UNIQUE)        │
+│ orderNumber(UNIQ)│                │ description          │
+│ userId (FK)      │                │ image                │
+│ addressId (FK)   │                │ parentId (FK→self)   │◄─ self-referential
+│ status (ENUM)    │                │ level                │   for subcategories
+│ subtotal         │                │ isActive             │
+│ discount         │                │ sortOrder            │
+│ shippingCost     │                └──────────┬───────────┘
+│ tax              │                           │ 1:N
+│ total            │                           ▼
+│ couponCode       │           ┌───────────────────────────┐
+│ paymentId        │           │         <span class="box db">PRODUCT</span>           │
+│ paymentMethod    │           ├───────────────────────────┤
+│ trackingNumber   │           │ id (PK)                   │
+│ notes            │           │ slug (UNIQUE)             │
+│ createdAt        │           │ name                      │
+│ updatedAt        │           │ description               │
+└──────┬───────────┘           │ sku (UNIQUE)              │
+       │ 1:N                   │ price (DECIMAL 10,2)      │
+       ▼                       │ salePrice (DECIMAL 10,2)  │
+┌──────────────────┐           │ stock                     │
+│   <span class="box db">ORDER_ITEM</span>    │           │ categoryId (FK)           │
+├──────────────────┤           │ brandId (FK)              │
+│ id (PK)          │           │ attributes (JSONB)        │
+│ orderId (FK)     │           │ tags (TEXT[])             │
+│ productId (FK) ──┼───────────► isActive, isFeatured     │
+│ variantId (FK)   │           │ avgRating, reviewCount    │
+│ productName      │◄──────────┤ weight, dimensions(JSONB)│
+│ productSku       │  snapshot │ metaTitle, metaDesc       │
+│ price (snapshot) │           │ createdAt, updatedAt      │
+│ qty              │           └──────────┬────────────────┘
+│ total            │                      │
+└──────────────────┘         ┌────────────┼──────────────────┐
+                             ▼            ▼                  ▼
+                    ┌──────────────┐ ┌──────────────┐ ┌────────────────┐
+                    │  <span class="box be">PRODUCT</span>    │ │   <span class="box be">PRODUCT</span>   │ │    <span class="box be">REVIEW</span>     │
+                    │  <span class="box be">_IMAGE</span>     │ │  <span class="box be">_VARIANT</span>  │ ├────────────────┤
+                    ├──────────────┤ ├──────────────┤ │ id (PK)        │
+                    │ id (PK)      │ │ id (PK)      │ │ productId (FK) │
+                    │ productId FK │ │ productId FK │ │ userId (FK)    │
+                    │ url          │ │ sku (UNIQUE) │ │ orderId (FK)   │
+                    │ blurData     │ │ attributes   │ │ rating 1-5     │
+                    │ altText      │ │ price        │ │ title          │
+                    │ sortOrder    │ │ stock        │ │ body           │
+                    │ isPrimary    │ │ images       │ │ isVerified     │
+                    └──────────────┘ └──────────────┘ │ isApproved     │
+                                                       │ helpfulCount   │
+                                                       │ createdAt      │
+                                                       └────────────────┘
+
+┌──────────────┐   ┌──────────────┐   ┌────────────────┐   ┌──────────────────┐
+│    <span class="box infra">CART</span>      │   │  <span class="box infra">CART_ITEM</span>  │   │    <span class="box infra">COUPON</span>      │   │   <span class="box infra">COUPON_USE</span>    │
+├──────────────┤   ├──────────────┤   ├────────────────┤   ├──────────────────┤
+│ id (PK)      │   │ id (PK)      │   │ id (PK)        │   │ id (PK)          │
+│ userId (FK)  │──►│ cartId (FK)  │   │ code (UNIQUE)  │   │ couponId (FK)    │
+│ sessionId    │   │ productId FK │   │ type ENUM      │   │ userId (FK)      │
+│ updatedAt    │   │ variantId FK │   │ value          │   │ orderId (FK)     │
+└──────────────┘   │ qty          │   │ minOrderValue  │   │ createdAt        │
+                   │ price        │   │ maxUses        │   └──────────────────┘
+                   └──────────────┘   │ usedCount      │
+                                      │ startsAt       │
+                                      │ expiresAt      │
+                                      │ isActive       │
+                                      └────────────────┘
+
+┌─────────────────┐   ┌───────────────────┐   ┌──────────────────────┐
+│   <span class="box fe">WISHLIST_ITEM</span> │   │   <span class="box fe">NOTIFICATION</span>   │   │   <span class="box fe">AUDIT_LOG</span>        │
+├─────────────────┤   ├───────────────────┤   ├──────────────────────┤
+│ id (PK)         │   │ id (PK)           │   │ id (PK)              │
+│ userId (FK)     │   │ userId (FK)       │   │ userId (FK)          │
+│ productId (FK)  │   │ type ENUM         │   │ action               │
+│ createdAt       │   │ title, body       │   │ entity, entityId     │
+└─────────────────┘   │ isRead            │   │ oldValue (JSONB)     │
+                      │ data (JSONB)      │   │ newValue (JSONB)     │
+                      │ createdAt         │   │ ip, userAgent        │
+                      └───────────────────┘   │ createdAt            │
+                                              └──────────────────────┘
+</pre>
+      </div>
+
+      <!-- Complete Schema -->
+      <h3>Complete Prisma Schema — All Tables</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>packages/database/prisma/schema.prisma — full schema</span>
+        </div>
+        <pre><code><span class="cmt">// ─── DATASOURCE & GENERATOR ───────────────────────────────────────────</span>
+<span class="kw">datasource</span> db {
+  provider   = <span class="str">"postgresql"</span>
+  url        = env(<span class="str">"DATABASE_URL"</span>)
+  extensions = [pgcrypto, pg_trgm, unaccent]  <span class="cmt">// for full-text + fuzzy</span>
+}
+
+<span class="kw">generator</span> client {
+  provider        = <span class="str">"prisma-client-js"</span>
+  previewFeatures = [<span class="str">"fullTextSearch"</span>, <span class="str">"postgresqlExtensions"</span>]
+}
+
+<span class="cmt">// ─── ENUMS ────────────────────────────────────────────────────────────</span>
+<span class="kw">enum</span> Role            { CUSTOMER VENDOR ADMIN SUPER_ADMIN }
+<span class="kw">enum</span> OrderStatus     { PENDING PAYMENT_PENDING PAID CONFIRMED PROCESSING
+                       SHIPPED DELIVERED CANCELLED REFUNDED PARTIALLY_REFUNDED }
+<span class="kw">enum</span> PaymentMethod   { CARD UPI NETBANKING WALLET COD }
+<span class="kw">enum</span> PaymentStatus   { PENDING AUTHORIZED CAPTURED FAILED REFUNDED }
+<span class="kw">enum</span> CouponType      { PERCENTAGE FIXED_AMOUNT FREE_SHIPPING BUY_X_GET_Y }
+<span class="kw">enum</span> NotifType       { ORDER_UPDATE PROMO SYSTEM REVIEW_REPLY LOW_STOCK }
+<span class="kw">enum</span> ShipStatus      { LABEL_CREATED PICKED_UP IN_TRANSIT OUT_FOR_DELIVERY
+                       DELIVERED ATTEMPTED RETURNED }
+
+<span class="cmt">// ─── USER ─────────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">User</span> {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  name          String
+  role          Role      @default(CUSTOMER)
+  emailVerified Boolean   @default(false)
+  avatar        String?
+  phone         String?
+  phoneVerified Boolean   @default(false)
+  dateOfBirth   DateTime?
+  gender        String?
+  locale        String    @default(<span class="str">"en-IN"</span>)
+  currency      String    @default(<span class="str">"INR"</span>)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  deletedAt     DateTime? <span class="cmt">// soft delete</span>
+
+  addresses      Address[]
+  orders         Order[]
+  cart           Cart?
+  reviews        Review[]
+  wishlist       WishlistItem[]
+  notifications  Notification[]
+  refreshTokens  RefreshToken[]
+  oauthAccounts  OAuthAccount[]
+  reviewVotes    ReviewVote[]
+  couponsUsed    CouponUse[]
+
+  @@index([email])
+  @@index([createdAt])
+  @@index([role])
+}
+
+<span class="kw">model</span> <span class="fn">OAuthAccount</span> {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String   <span class="cmt">// "google" | "facebook"</span>
+  providerUid  String
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  user         User     @relation(fields:[userId], references:[id], onDelete: Cascade)
+  @@unique([provider, providerUid])
+  @@index([userId])
+}
+
+<span class="kw">model</span> <span class="fn">RefreshToken</span> {
+  id          String   @id @default(cuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields:[userId], references:[id], onDelete: Cascade)
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+<span class="kw">model</span> <span class="fn">Address</span> {
+  id         String   @id @default(cuid())
+  userId     String
+  fullName   String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  pincode    String
+  country    String   @default(<span class="str">"IN"</span>)
+  type       String   @default(<span class="str">"HOME"</span>) <span class="cmt">// HOME | WORK | OTHER</span>
+  isDefault  Boolean  @default(false)
+  lat        Float?
+  lng        Float?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields:[userId], references:[id], onDelete: Cascade)
+  orders     Order[]
+  @@index([userId])
+}
+
+<span class="cmt">// ─── CATALOGUE ────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">Category</span> {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  image       String?
+  parentId    String?
+  parent      Category?  @relation(<span class="str">"CategoryTree"</span>, fields:[parentId], references:[id])
+  children    Category[] @relation(<span class="str">"CategoryTree"</span>)
+  level       Int        @default(0) <span class="cmt">// 0=root, 1=sub, 2=sub-sub</span>
+  isActive    Boolean    @default(true)
+  sortOrder   Int        @default(0)
+  metaTitle   String?
+  metaDesc    String?
+  products    Product[]
+  @@index([parentId])
+  @@index([slug])
+}
+
+<span class="kw">model</span> <span class="fn">Brand</span> {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  logo     String?
+  website  String?
+  isActive Boolean   @default(true)
+  products Product[]
+  @@index([slug])
+}
+
+<span class="kw">model</span> <span class="fn">Product</span> {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  name          String
+  description   String
+  shortDesc     String?
+  sku           String    @unique
+  price         Decimal   @db.Decimal(10,2)
+  salePrice     Decimal   @db.Decimal(10,2)
+  costPrice     Decimal?  @db.Decimal(10,2) <span class="cmt">// for margin tracking</span>
+  stock         Int       @default(0)
+  lowStockAt    Int       @default(10)      <span class="cmt">// alert threshold</span>
+  soldCount     Int       @default(0)
+  categoryId    String
+  brandId       String?
+  attributes    Json      @default(<span class="str">"{}"</span>)     <span class="cmt">// {color, size, material…}</span>
+  dimensions    Json?                        <span class="cmt">// {length, width, height, unit}</span>
+  weight        Float?                       <span class="cmt">// kg</span>
+  tags          String[]
+  isActive      Boolean   @default(true)
+  isFeatured    Boolean   @default(false)
+  isDigital     Boolean   @default(false)
+  avgRating     Float     @default(0)
+  reviewCount   Int       @default(0)
+  viewCount     Int       @default(0)
+  metaTitle     String?
+  metaDesc      String?
+  metaKeywords  String?
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?                    <span class="cmt">// soft delete</span>
+
+  category    Category      @relation(fields:[categoryId], references:[id])
+  brand       Brand?        @relation(fields:[brandId], references:[id])
+  images      ProductImage[]
+  variants    ProductVariant[]
+  orderItems  OrderItem[]
+  reviews     Review[]
+  cartItems   CartItem[]
+  wishlist    WishlistItem[]
+
+  @@fulltext([name, description])
+  @@index([categoryId, isActive])
+  @@index([salePrice])
+  @@index([isActive, isFeatured])
+  @@index([slug])
+  @@index([sku])
+  @@index([createdAt])
+}
+
+<span class="kw">model</span> <span class="fn">ProductImage</span> {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  blurData  String?  <span class="cmt">// base64 blur placeholder</span>
+  altText   String?
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  product   Product  @relation(fields:[productId], references:[id], onDelete: Cascade)
+  @@index([productId])
+}
+
+<span class="kw">model</span> <span class="fn">ProductVariant</span> {
+  id          String   @id @default(cuid())
+  productId   String
+  sku         String   @unique
+  name        String   <span class="cmt">// "Red / XL"</span>
+  attributes  Json     <span class="cmt">// {color:"Red", size:"XL"}</span>
+  price       Decimal  @db.Decimal(10,2)
+  salePrice   Decimal  @db.Decimal(10,2)
+  stock       Int      @default(0)
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  product     Product  @relation(fields:[productId], references:[id], onDelete: Cascade)
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+  @@index([productId])
+  @@index([sku])
+}
+
+<span class="cmt">// ─── CART ─────────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">Cart</span> {
+  id        String     @id @default(cuid())
+  userId    String?    @unique
+  sessionId String?    @unique <span class="cmt">// for guest carts</span>
+  updatedAt DateTime   @updatedAt
+  user      User?      @relation(fields:[userId], references:[id], onDelete: Cascade)
+  items     CartItem[]
+  @@index([sessionId])
+}
+
+<span class="kw">model</span> <span class="fn">CartItem</span> {
+  id        String          @id @default(cuid())
+  cartId    String
+  productId String
+  variantId String?
+  qty       Int             @default(1)
+  price     Decimal         @db.Decimal(10,2)
+  addedAt   DateTime        @default(now())
+  cart      Cart            @relation(fields:[cartId], references:[id], onDelete: Cascade)
+  product   Product         @relation(fields:[productId], references:[id])
+  variant   ProductVariant? @relation(fields:[variantId], references:[id])
+  @@unique([cartId, productId, variantId])
+  @@index([cartId])
+}
+
+<span class="cmt">// ─── ORDERS ───────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">Order</span> {
+  id             String        @id @default(cuid())
+  orderNumber    String        @unique @default(cuid())
+  userId         String
+  addressId      String
+  status         OrderStatus   @default(PENDING)
+  subtotal       Decimal       @db.Decimal(10,2)
+  discount       Decimal       @db.Decimal(10,2) @default(0)
+  shippingCost   Decimal       @db.Decimal(10,2) @default(0)
+  tax            Decimal       @db.Decimal(10,2) @default(0)
+  total          Decimal       @db.Decimal(10,2)
+  couponCode     String?
+  notes          String?
+  trackingNumber String?
+  carrier        String?
+  estimatedAt    DateTime?
+  deliveredAt    DateTime?
+  cancelledAt    DateTime?
+  cancelReason   String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user       User        @relation(fields:[userId], references:[id])
+  address    Address     @relation(fields:[addressId], references:[id])
+  items      OrderItem[]
+  payment    Payment?
+  shipments  Shipment[]
+  couponUses CouponUse[]
+
+  @@index([userId, status])
+  @@index([createdAt])
+  @@index([orderNumber])
+  @@index([status])
+}
+
+<span class="kw">model</span> <span class="fn">OrderItem</span> {
+  id           String          @id @default(cuid())
+  orderId      String
+  productId    String
+  variantId    String?
+  productName  String          <span class="cmt">// snapshot at time of order</span>
+  productSku   String
+  productImage String
+  attributes   Json?           <span class="cmt">// variant snapshot</span>
+  price        Decimal         @db.Decimal(10,2)
+  qty          Int
+  total        Decimal         @db.Decimal(10,2)
+  order        Order           @relation(fields:[orderId], references:[id], onDelete: Cascade)
+  product      Product         @relation(fields:[productId], references:[id])
+  variant      ProductVariant? @relation(fields:[variantId], references:[id])
+  @@index([orderId])
+  @@index([productId])
+}
+
+<span class="cmt">// ─── PAYMENTS ─────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">Payment</span> {
+  id              String        @id @default(cuid())
+  orderId         String        @unique
+  stripePaymentId String?       @unique
+  stripeIntentId  String?       @unique
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  amount          Decimal       @db.Decimal(10,2)
+  currency        String        @default(<span class="str">"INR"</span>)
+  gatewayResponse Json?         <span class="cmt">// raw Stripe event stored</span>
+  refundId        String?
+  refundAmount    Decimal?      @db.Decimal(10,2)
+  refundedAt      DateTime?
+  capturedAt      DateTime?
+  failureReason   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  order           Order         @relation(fields:[orderId], references:[id])
+  @@index([stripePaymentId])
+  @@index([status])
+}
+
+<span class="cmt">// ─── SHIPPING ─────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">Shipment</span> {
+  id             String      @id @default(cuid())
+  orderId        String
+  trackingNumber String?
+  carrier        String?     <span class="cmt">// "Delhivery" | "BlueDart" | "Shiprocket"</span>
+  status         ShipStatus  @default(LABEL_CREATED)
+  labelUrl       String?
+  estimatedAt    DateTime?
+  deliveredAt    DateTime?
+  events         ShipmentEvent[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  order          Order       @relation(fields:[orderId], references:[id])
+  @@index([orderId])
+  @@index([trackingNumber])
+}
+
+<span class="kw">model</span> <span class="fn">ShipmentEvent</span> {
+  id          String    @id @default(cuid())
+  shipmentId  String
+  status      String
+  location    String?
+  description String
+  occurredAt  DateTime
+  shipment    Shipment  @relation(fields:[shipmentId], references:[id], onDelete: Cascade)
+  @@index([shipmentId])
+}
+
+<span class="cmt">// ─── REVIEWS ──────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">Review</span> {
+  id           String   @id @default(cuid())
+  productId    String
+  userId       String
+  orderId      String?  <span class="cmt">// links to verified purchase</span>
+  rating       Int      <span class="cmt">// 1-5</span>
+  title        String?
+  body         String
+  images       String[] <span class="cmt">// uploaded review photos</span>
+  isVerified   Boolean  @default(false)
+  isApproved   Boolean  @default(true)
+  helpfulCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  product  Product      @relation(fields:[productId], references:[id], onDelete: Cascade)
+  user     User         @relation(fields:[userId], references:[id])
+  votes    ReviewVote[]
+
+  @@unique([productId, userId])  <span class="cmt">// one review per product per user</span>
+  @@index([productId, isApproved])
+  @@index([userId])
+}
+
+<span class="kw">model</span> <span class="fn">ReviewVote</span> {
+  id       String  @id @default(cuid())
+  reviewId String
+  userId   String
+  helpful  Boolean <span class="cmt">// true=helpful, false=not helpful</span>
+  review   Review  @relation(fields:[reviewId], references:[id], onDelete: Cascade)
+  user     User    @relation(fields:[userId], references:[id])
+  @@unique([reviewId, userId])
+}
+
+<span class="cmt">// ─── COUPONS ──────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">Coupon</span> {
+  id              String      @id @default(cuid())
+  code            String      @unique
+  type            CouponType
+  value           Decimal     @db.Decimal(10,2)
+  minOrderValue   Decimal?    @db.Decimal(10,2)
+  maxDiscount     Decimal?    @db.Decimal(10,2)  <span class="cmt">// cap for % coupons</span>
+  maxUses         Int?
+  maxUsesPerUser  Int         @default(1)
+  usedCount       Int         @default(0)
+  categoryId      String?     <span class="cmt">// restrict to category</span>
+  productId       String?     <span class="cmt">// restrict to product</span>
+  startsAt        DateTime?
+  expiresAt       DateTime?
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  uses            CouponUse[]
+  @@index([code])
+  @@index([isActive, expiresAt])
+}
+
+<span class="kw">model</span> <span class="fn">CouponUse</span> {
+  id        String   @id @default(cuid())
+  couponId  String
+  userId    String
+  orderId   String
+  discount  Decimal  @db.Decimal(10,2)
+  createdAt DateTime @default(now())
+  coupon    Coupon   @relation(fields:[couponId], references:[id])
+  user      User     @relation(fields:[userId], references:[id])
+  order     Order    @relation(fields:[orderId], references:[id])
+  @@index([couponId])
+  @@index([userId])
+}
+
+<span class="cmt">// ─── WISHLIST ─────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">WishlistItem</span> {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields:[userId], references:[id], onDelete: Cascade)
+  product   Product  @relation(fields:[productId], references:[id], onDelete: Cascade)
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+<span class="cmt">// ─── NOTIFICATIONS ────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">Notification</span> {
+  id        String    @id @default(cuid())
+  userId    String
+  type      NotifType
+  title     String
+  body      String
+  data      Json?     <span class="cmt">// {orderId, productId, etc.}</span>
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields:[userId], references:[id], onDelete: Cascade)
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+<span class="cmt">// ─── AUDIT LOG ────────────────────────────────────────────────────────</span>
+<span class="kw">model</span> <span class="fn">AuditLog</span> {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String   <span class="cmt">// "ORDER_STATUS_CHANGED" | "PRODUCT_UPDATED" …</span>
+  entity     String   <span class="cmt">// "Order" | "Product" | "User"</span>
+  entityId   String
+  oldValue   Json?
+  newValue   Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}</code></pre>
+      </div>
+
+      <!-- Indexes & Design Decisions -->
+      <h3>Key Index Strategy</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Table</th><th>Index / Constraint</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>products</td><td><code>(categoryId, isActive)</code></td><td>Category listing page — most common query</td></tr>
+            <tr><td>products</td><td><code>(isActive, isFeatured)</code></td><td>Homepage featured products</td></tr>
+            <tr><td>products</td><td><code>FULLTEXT(name, description)</code></td><td>PostgreSQL full-text search fallback</td></tr>
+            <tr><td>orders</td><td><code>(userId, status)</code></td><td>User's order list filtered by status</td></tr>
+            <tr><td>orders</td><td><code>(status)</code></td><td>Admin order management by status</td></tr>
+            <tr><td>order_items</td><td><code>(productId)</code></td><td>Bestseller analytics queries</td></tr>
+            <tr><td>reviews</td><td><code>(productId, isApproved)</code></td><td>Fetch approved reviews for a product</td></tr>
+            <tr><td>cart_items</td><td><code>UNIQUE(cartId, productId, variantId)</code></td><td>Prevent duplicate cart entries</td></tr>
+            <tr><td>wishlist_items</td><td><code>UNIQUE(userId, productId)</code></td><td>Prevent duplicate wishlist entries</td></tr>
+            <tr><td>refresh_tokens</td><td><code>(expiresAt)</code></td><td>Cleanup job for expired tokens</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Design Decisions -->
+      <h3>Design Decisions & Patterns</h3>
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">📸</span>
+          <div class="card-title">Snapshot Pattern on OrderItem</div>
+          <div class="card-desc">Product name, SKU, image, and price are copied into <code>OrderItem</code> at creation time. This means historical orders remain accurate even if the product is later edited or deleted.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🗑</span>
+          <div class="card-title">Soft Deletes on User & Product</div>
+          <div class="card-desc"><code>deletedAt</code> timestamp instead of hard delete. Protects referential integrity for orders. All queries filter <code>WHERE deletedAt IS NULL</code>. Prisma middleware adds this automatically.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🌲</span>
+          <div class="card-title">Self-Referential Category Tree</div>
+          <div class="card-desc"><code>parentId</code> FK back to the same table allows unlimited nesting depth. The <code>level</code> field is denormalised for fast top-level queries without recursive CTEs.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🪙</span>
+          <div class="card-title">Decimal for All Money Fields</div>
+          <div class="card-desc"><code>DECIMAL(10,2)</code> instead of Float — floats can't represent ₹0.10 accurately. The app converts to paise (integer) only when calling Stripe.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">👤</span>
+          <div class="card-title">Guest Cart via sessionId</div>
+          <div class="card-desc">The <code>Cart</code> table supports both <code>userId</code> (logged-in) and <code>sessionId</code> (guest). On login, guest cart is merged into the user's cart, then the session cart is deleted.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🔒</span>
+          <div class="card-title">Payment Data Isolation</div>
+          <div class="card-desc">Stripe card details never touch your DB — only the <code>paymentIntentId</code> and raw Stripe event JSON are stored. The <code>Payment</code> table is kept separate from <code>Order</code> for clean separation.</div>
+        </div>
+      </div>
+
+      <!-- Migrations -->
+      <h3>Migration Workflow</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>Terminal — Prisma migration commands</span>
+        </div>
+        <pre><code><span class="cmt"># Create a new migration (dev)</span>
+pnpm --filter database exec prisma migrate dev \
+  --name add_shipment_events
+
+<span class="cmt"># Preview what SQL will be generated</span>
+pnpm --filter database exec prisma migrate diff \
+  --from-schema-datasource ./prisma/schema.prisma \
+  --to-schema-datamodel ./prisma/schema.prisma
+
+<span class="cmt"># Apply migrations in production (CI/CD step)</span>
+pnpm --filter database exec prisma migrate deploy
+
+<span class="cmt"># Reset dev DB completely and re-seed</span>
+pnpm --filter database exec prisma migrate reset
+
+<span class="cmt"># Open Prisma Studio (visual DB browser)</span>
+pnpm --filter database exec prisma studio
+
+<span class="cmt"># Generate Prisma client after schema change</span>
+pnpm --filter database exec prisma generate</code></pre>
+      </div>
+
+      <div class="callout warn">
+        <strong>Production Migration Safety</strong>
+        Never run <code>migrate dev</code> in production — it can reset the database. Always use <code>migrate deploy</code> in CI/CD after reviewing the generated SQL. For large tables, use <code>CREATE INDEX CONCURRENTLY</code> in a raw SQL migration to avoid table locks.
+      </div>
+    </section>
+
+    <!-- ── PAYMENT ── -->
+    <section id="payment">
+      <h2><span class="h2-num">10</span> Payment Integration (Stripe)</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-title">1. Create PaymentIntent on server</div>
+          <div class="step-body">When user clicks "Pay", call <code>POST /api/v1/payments/intent</code> which creates a Stripe PaymentIntent and returns the <code>client_secret</code>.</div>
+        </div>
+        <div class="step">
+          <div class="step-title">2. Confirm on client with Stripe Elements</div>
+          <div class="step-body">Use <code>stripe.confirmPayment()</code> with the <code>client_secret</code>. Handles card, Apple Pay, Google Pay, UPI automatically.</div>
+        </div>
+        <div class="step">
+          <div class="step-title">3. Webhook confirms payment</div>
+          <div class="step-body">Stripe sends <code>payment_intent.succeeded</code> to your webhook. Verify signature, then mark order as PAID and trigger fulfilment.</div>
+        </div>
+        <div class="step">
+          <div class="step-title">4. Fulfilment pipeline</div>
+          <div class="step-body">Webhook triggers Bull job: reduce inventory → send confirmation email → notify vendor → update order status.</div>
+        </div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>modules/payments/payments.service.ts</span>
+        </div>
+        <pre><code><span class="kw">import</span> Stripe <span class="kw">from</span> <span class="str">"stripe"</span>;
+
+<span class="kw">const</span> stripe = <span class="kw">new</span> <span class="fn">Stripe</span>(process.env.STRIPE_SECRET_KEY!);
+
+<span class="kw">export async function</span> <span class="fn">createPaymentIntent</span>(orderId: <span class="kw">string</span>) {
+  <span class="kw">const</span> order = <span class="kw">await</span> db.order.<span class="fn">findUniqueOrThrow</span>({ where: { id: orderId } });
+
+  <span class="kw">const</span> intent = <span class="kw">await</span> stripe.paymentIntents.<span class="fn">create</span>({
+    amount: <span class="fn">toStripeAmount</span>(order.total),  <span class="cmt">// paise/cents</span>
+    currency: <span class="str">"inr"</span>,
+    metadata: { orderId, userId: order.userId },
+    payment_method_types: [<span class="str">"card"</span>, <span class="str">"upi"</span>],
+    receipt_email: order.user.email,
+  });
+
+  <span class="kw">await</span> db.order.<span class="fn">update</span>({
+    where: { id: orderId },
+    data: { paymentId: intent.id, status: <span class="str">"PAYMENT_PENDING"</span> }
+  });
+
+  <span class="kw">return</span> { clientSecret: intent.client_secret };
+}
+
+<span class="kw">export async function</span> <span class="fn">handleWebhook</span>(rawBody: Buffer, sig: <span class="kw">string</span>) {
+  <span class="kw">const</span> event = stripe.webhooks.<span class="fn">constructEvent</span>(
+    rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!
+  );
+
+  <span class="kw">switch</span> (event.type) {
+    <span class="kw">case</span> <span class="str">"payment_intent.succeeded"</span>:
+      <span class="kw">await</span> <span class="fn">fulfillOrder</span>(event.data.object.metadata.orderId);
+      <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">"payment_intent.payment_failed"</span>:
+      <span class="kw">await</span> <span class="fn">handlePaymentFailed</span>(event.data.object.metadata.orderId);
+      <span class="kw">break</span>;
+  }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── SEARCH ── -->
+    <section id="search">
+      <h2><span class="h2-num">11</span> Search & Filtering</h2>
+      <p>Elasticsearch for full-text search with faceted filtering. Products are indexed on create/update via a Bull queue job.</p>
+
+      <div class="callout tip">
+        <strong>Tip — India deployment</strong>
+        For simpler setups, Algolia's free tier works well. For self-hosted, use Elasticsearch or MeiliSearch (much easier to run on a single VPS).
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>modules/search/search.service.ts</span>
+        </div>
+        <pre><code><span class="kw">export async function</span> <span class="fn">searchProducts</span>(params: SearchParams) {
+  <span class="kw">const</span> { q, category, minPrice, maxPrice, brand, rating, sort, page } = params;
+
+  <span class="kw">const</span> query = {
+    index: <span class="str">"products"</span>,
+    body: {
+      query: {
+        bool: {
+          must: q ? [{ multi_match: { query: q,
+            fields: [<span class="str">"name^3"</span>, <span class="str">"description"</span>, <span class="str">"tags^2"</span>, <span class="str">"brand.name"</span>],
+            fuzziness: <span class="str">"AUTO"</span>
+          }}] : [{ match_all: {} }],
+          filter: [
+            category &amp;&amp; { term: { <span class="str">"category.slug"</span>: category } },
+            minPrice &amp;&amp; { range: { salePrice: { gte: minPrice, lte: maxPrice } } },
+            brand &amp;&amp; { term: { <span class="str">"brand.slug"</span>: brand } },
+            rating &amp;&amp; { range: { avgRating: { gte: rating } } },
+          ].<span class="fn">filter</span>(Boolean),
+        }
+      },
+      aggs: {
+        categories: { terms: { field: <span class="str">"category.slug"</span> } },
+        brands:     { terms: { field: <span class="str">"brand.slug"</span> } },
+        price_range:{ stats: { field: <span class="str">"salePrice"</span> } },
+        avg_rating: { avg: { field: <span class="str">"avgRating"</span> } },
+      },
+      sort: <span class="fn">buildSort</span>(sort),
+      from: (page - <span class="num">1</span>) * <span class="num">20</span>, size: <span class="num">20</span>,
+    }
+  };
+
+  <span class="kw">return</span> esClient.<span class="fn">search</span>(query);
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── CACHING ── -->
+    <section id="caching">
+      <h2><span class="h2-num">12</span> Caching Strategy (Redis)</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Data</th><th>Cache Key</th><th>TTL</th><th>Strategy</th></tr></thead>
+          <tbody>
+            <tr><td>Product detail</td><td><code>product:{slug}</code></td><td>1 hour</td><td>Cache-aside</td></tr>
+            <tr><td>Category tree</td><td><code>categories:tree</code></td><td>6 hours</td><td>Cache-aside</td></tr>
+            <tr><td>Homepage featured</td><td><code>home:featured</code></td><td>30 min</td><td>Cache-aside</td></tr>
+            <tr><td>Search results</td><td><code>search:{hash}</code></td><td>5 min</td><td>Cache-aside</td></tr>
+            <tr><td>User cart</td><td><code>cart:{userId}</code></td><td>7 days</td><td>Write-through</td></tr>
+            <tr><td>Sessions</td><td><code>session:{id}</code></td><td>15 min</td><td>Write-through</td></tr>
+            <tr><td>Rate limit</td><td><code>rl:{ip}:{route}</code></td><td>1 min</td><td>Sliding window</td></tr>
+            <tr><td>OTP codes</td><td><code>otp:{email}</code></td><td>5 min</td><td>Write-through</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── STORAGE ── -->
+    <section id="storage">
+      <h2><span class="h2-num">13</span> File Storage & CDN</h2>
+      <p>AWS S3 for origin storage. CloudFront as CDN for images and static assets. Images processed on upload with Sharp.</p>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>shared/utils/storage.ts</span>
+        </div>
+        <pre><code><span class="kw">import</span> sharp <span class="kw">from</span> <span class="str">"sharp"</span>;
+<span class="kw">import</span> { S3Client, PutObjectCommand } <span class="kw">from</span> <span class="str">"@aws-sdk/client-s3"</span>;
+
+<span class="kw">const</span> s3 = <span class="kw">new</span> <span class="fn">S3Client</span>({ region: process.env.AWS_REGION });
+
+<span class="kw">const</span> SIZES = [
+  { suffix: <span class="str">"thumb"</span>, width: <span class="num">200</span>, height: <span class="num">200</span> },
+  { suffix: <span class="str">"medium"</span>, width: <span class="num">600</span>, height: <span class="num">600</span> },
+  { suffix: <span class="str">"large"</span>, width: <span class="num">1200</span>, height: <span class="num">1200</span> },
+];
+
+<span class="kw">export async function</span> <span class="fn">uploadProductImage</span>(
+  file: Buffer,
+  productId: <span class="kw">string</span>
+): Promise&lt;ImageUrls&gt; {
+  <span class="kw">const</span> urls: Record&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt; = {};
+
+  <span class="kw">for</span> (<span class="kw">const</span> { suffix, width, height } <span class="kw">of</span> SIZES) {
+    <span class="kw">const</span> webp = <span class="kw">await</span> <span class="fn">sharp</span>(file)
+      .<span class="fn">resize</span>(width, height, { fit: <span class="str">"cover"</span> })
+      .<span class="fn">webp</span>({ quality: <span class="num">85</span> })
+      .<span class="fn">toBuffer</span>();
+
+    <span class="kw">const</span> key = <span class="str">`products/${productId}/${suffix}.webp`</span>;
+
+    <span class="kw">await</span> s3.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">PutObjectCommand</span>({
+      Bucket: process.env.S3_BUCKET!,
+      Key: key,
+      Body: webp,
+      ContentType: <span class="str">"image/webp"</span>,
+      CacheControl: <span class="str">"public, max-age=31536000, immutable"</span>,
+    }));
+
+    urls[suffix] = <span class="str">`${process.env.CDN_URL}/${key}`</span>;
+  }
+
+  <span class="kw">return</span> { ...urls, blurData: <span class="kw">await</span> <span class="fn">generateBlurPlaceholder</span>(file) };
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── EMAIL ── -->
+    <section id="email">
+      <h2><span class="h2-num">14</span> Email & Notifications</h2>
+      <p>Transactional emails via Resend. SMS via Twilio. Real-time browser notifications via Socket.io.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">📧</span>
+          <div class="card-title">Welcome Email</div>
+          <div class="card-desc">Triggered on registration. Includes email verification link. React Email template.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">📦</span>
+          <div class="card-title">Order Confirmation</div>
+          <div class="card-desc">Itemized receipt with order number, estimated delivery, and tracking link.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🚚</span>
+          <div class="card-title">Shipping Updates</div>
+          <div class="card-desc">Status changes trigger email + SMS. Real-time tracking page via WebSocket.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🔐</span>
+          <div class="card-title">Auth Emails</div>
+          <div class="card-desc">OTP verification, password reset (24h expiry), login from new device alert.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── JOBS ── -->
+    <section id="jobs">
+      <h2><span class="h2-num">15</span> Background Jobs (Bull + Redis)</h2>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>jobs/index.ts — Queue definitions</span>
+        </div>
+        <pre><code><span class="kw">import</span> Queue <span class="kw">from</span> <span class="str">"bull"</span>;
+
+<span class="kw">export const</span> emailQueue    = <span class="kw">new</span> <span class="fn">Queue</span>(<span class="str">"email"</span>,    { redis: redisConfig });
+<span class="kw">export const</span> imageQueue    = <span class="kw">new</span> <span class="fn">Queue</span>(<span class="str">"image"</span>,    { redis: redisConfig });
+<span class="kw">export const</span> orderQueue    = <span class="kw">new</span> <span class="fn">Queue</span>(<span class="str">"order"</span>,    { redis: redisConfig });
+<span class="kw">export const</span> searchQueue   = <span class="kw">new</span> <span class="fn">Queue</span>(<span class="str">"search"</span>,   { redis: redisConfig });
+<span class="kw">export const</span> reportQueue   = <span class="kw">new</span> <span class="fn">Queue</span>(<span class="str">"report"</span>,   { redis: redisConfig });
+<span class="kw">export const</span> cleanupQueue  = <span class="kw">new</span> <span class="fn">Queue</span>(<span class="str">"cleanup"</span>,  { redis: redisConfig });
+
+<span class="cmt">// Recurring jobs (cron-style)</span>
+cleanupQueue.<span class="fn">add</span>({}, { repeat: { cron: <span class="str">"0 2 * * *"</span> } });  <span class="cmt">// daily 2 AM</span>
+reportQueue.<span class="fn">add</span>({}, { repeat: { cron: <span class="str">"0 8 * * 1"</span> } });   <span class="cmt">// monday 8 AM</span></code></pre>
+      </div>
+    </section>
+
+    <!-- ── ENV SETUP ── -->
+    <section id="env-setup">
+      <h2><span class="h2-num">16</span> Environment Setup</h2>
+
+      <div class="callout warn">
+        <strong>First-time Setup</strong>
+        Node.js 20+, pnpm 9+, Docker Desktop, and PostgreSQL 16 are required before starting.
+      </div>
+
+      <h3>Initial Setup Commands</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>Terminal</span>
+        </div>
+        <pre><code><span class="cmt"># Clone and install</span>
+git clone https://github.com/your-org/ecommerce-app.git
+cd ecommerce-app
+pnpm install
+
+<span class="cmt"># Copy environment files</span>
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+
+<span class="cmt"># Start infrastructure (Postgres + Redis + Elasticsearch)</span>
+docker-compose up -d postgres redis elasticsearch
+
+<span class="cmt"># Run database migrations and seed</span>
+pnpm db:migrate
+pnpm db:seed
+
+<span class="cmt"># Start development servers</span>
+pnpm dev   <span class="cmt"># starts all apps via turbo</span></code></pre>
+      </div>
+
+      <h3>Environment Variables</h3>
+      <div class="env-grid">
+        <div class="env-card">
+          <div class="env-card-title">apps/api/.env</div>
+          <pre style="background:transparent;border:none;padding:0;margin:0;font-size:11px;"><code>DATABASE_URL=postgresql://...
+REDIS_URL=redis://localhost:6379
+JWT_PRIVATE_KEY=...
+JWT_PUBLIC_KEY=...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+S3_BUCKET=ecom-media
+CDN_URL=https://cdn.yoursite.com
+RESEND_API_KEY=re_...
+TWILIO_SID=...
+ELASTICSEARCH_URL=http://localhost:9200
+SENTRY_DSN=...
+PORT=4000</code></pre>
+        </div>
+        <div class="env-card">
+          <div class="env-card-title">apps/web/.env</div>
+          <pre style="background:transparent;border:none;padding:0;margin:0;font-size:11px;"><code>NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+NEXT_PUBLIC_STRIPE_KEY=pk_test_...
+NEXT_PUBLIC_ALGOLIA_APP_ID=...
+NEXT_PUBLIC_ALGOLIA_SEARCH_KEY=...
+NEXT_PUBLIC_GA_ID=G-XXXXXX
+NEXT_PUBLIC_CDN_URL=https://cdn.yoursite.com
+NEXTAUTH_SECRET=...
+NEXTAUTH_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── DOCKER ── -->
+    <section id="docker">
+      <h2><span class="h2-num">17</span> Docker Configuration</h2>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>docker-compose.yml (development)</span>
+        </div>
+        <pre><code><span class="attr">version</span>: <span class="str">"3.9"</span>
+<span class="attr">services</span>:
+  <span class="attr">postgres</span>:
+    <span class="attr">image</span>: <span class="str">postgres:16-alpine</span>
+    <span class="attr">environment</span>:
+      POSTGRES_USER: ecom
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ecomdb
+    <span class="attr">ports</span>: [<span class="str">"5432:5432"</span>]
+    <span class="attr">volumes</span>: [<span class="str">pgdata:/var/lib/postgresql/data</span>]
+
+  <span class="attr">redis</span>:
+    <span class="attr">image</span>: <span class="str">redis:7-alpine</span>
+    <span class="attr">ports</span>: [<span class="str">"6379:6379"</span>]
+    <span class="attr">command</span>: <span class="str">redis-server --save 60 1 --appendonly yes</span>
+
+  <span class="attr">elasticsearch</span>:
+    <span class="attr">image</span>: <span class="str">elasticsearch:8.11.0</span>
+    <span class="attr">environment</span>:
+      - <span class="str">discovery.type=single-node</span>
+      - <span class="str">xpack.security.enabled=false</span>
+      - <span class="str">ES_JAVA_OPTS=-Xms512m -Xmx512m</span>
+    <span class="attr">ports</span>: [<span class="str">"9200:9200"</span>]
+
+  <span class="attr">mailhog</span>:           <span class="cmt"># local email testing</span>
+    <span class="attr">image</span>: <span class="str">mailhog/mailhog</span>
+    <span class="attr">ports</span>: [<span class="str">"1025:1025"</span>, <span class="str">"8025:8025"</span>]
+
+<span class="attr">volumes</span>:
+  pgdata:</code></pre>
+      </div>
+
+      <h3>Production Dockerfile (API)</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>apps/api/Dockerfile</span>
+        </div>
+        <pre><code><span class="kw">FROM</span> node:20-alpine <span class="kw">AS</span> base
+<span class="kw">RUN</span> npm install -g pnpm
+
+<span class="kw">FROM</span> base <span class="kw">AS</span> deps
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+<span class="kw">COPY</span> packages/database/package.json ./packages/database/
+<span class="kw">COPY</span> apps/api/package.json ./apps/api/
+<span class="kw">RUN</span> pnpm install --frozen-lockfile --filter api...
+
+<span class="kw">FROM</span> base <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> --from=deps /app/node_modules ./node_modules
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> pnpm --filter api build
+<span class="kw">RUN</span> pnpm --filter database generate
+
+<span class="kw">FROM</span> base <span class="kw">AS</span> runner
+<span class="kw">WORKDIR</span> /app
+<span class="kw">ENV</span> NODE_ENV=production
+
+<span class="kw">COPY</span> --from=builder /app/apps/api/dist ./dist
+<span class="kw">COPY</span> --from=builder /app/node_modules ./node_modules
+<span class="kw">COPY</span> --from=builder /app/packages/database ./packages/database
+
+<span class="kw">RUN</span> addgroup -S appgroup && adduser -S appuser -G appgroup
+<span class="kw">USER</span> appuser
+
+<span class="kw">EXPOSE</span> 4000
+<span class="kw">HEALTHCHECK</span> --interval=30s CMD wget -qO- http://localhost:4000/health
+<span class="kw">CMD</span> ["node", "dist/app.js"]</code></pre>
+      </div>
+    </section>
+
+    <!-- ── CI/CD ── -->
+    <section id="cicd">
+      <h2><span class="h2-num">18</span> CI/CD Pipeline (GitHub Actions)</h2>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>.github/workflows/ci.yml</span>
+        </div>
+        <pre><code><span class="attr">name</span>: CI/CD Pipeline
+
+<span class="attr">on</span>:
+  <span class="attr">push</span>:
+    <span class="attr">branches</span>: [main, develop]
+  <span class="attr">pull_request</span>:
+    <span class="attr">branches</span>: [main]
+
+<span class="attr">jobs</span>:
+  <span class="attr">test</span>:
+    <span class="attr">runs-on</span>: ubuntu-latest
+    <span class="attr">services</span>:
+      <span class="attr">postgres</span>:
+        <span class="attr">image</span>: postgres:16
+        <span class="attr">env</span>: { POSTGRES_PASSWORD: test }
+        <span class="attr">options</span>: >-
+          --health-cmd pg_isready --health-interval 10s
+    <span class="attr">steps</span>:
+      - <span class="attr">uses</span>: actions/checkout@v4
+      - <span class="attr">uses</span>: pnpm/action-setup@v3
+      - <span class="attr">uses</span>: actions/setup-node@v4
+        <span class="attr">with</span>: { node-version: 20, cache: pnpm }
+      - <span class="attr">run</span>: pnpm install
+      - <span class="attr">run</span>: pnpm lint
+      - <span class="attr">run</span>: pnpm typecheck
+      - <span class="attr">run</span>: pnpm test --coverage
+      - <span class="attr">uses</span>: codecov/codecov-action@v4
+
+  <span class="attr">build-and-push</span>:
+    <span class="attr">needs</span>: test
+    <span class="attr">if</span>: github.ref == 'refs/heads/main'
+    <span class="attr">runs-on</span>: ubuntu-latest
+    <span class="attr">steps</span>:
+      - <span class="attr">uses</span>: actions/checkout@v4
+      - <span class="attr">uses</span>: docker/login-action@v3
+        <span class="attr">with</span>:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - <span class="attr">name</span>: Build and push API image
+        <span class="attr">uses</span>: docker/build-push-action@v5
+        <span class="attr">with</span>:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  <span class="attr">deploy</span>:
+    <span class="attr">needs</span>: build-and-push
+    <span class="attr">runs-on</span>: ubuntu-latest
+    <span class="attr">environment</span>: production
+    <span class="attr">steps</span>:
+      - <span class="attr">name</span>: Deploy to ECS
+        <span class="attr">run</span>: |
+          aws ecs update-service \
+            --cluster ecom-prod \
+            --service ecom-api \
+            --force-new-deployment</code></pre>
+      </div>
+    </section>
+
+    <!-- ── DEPLOYMENT ── -->
+    <section id="deployment">
+      <h2><span class="h2-num">19</span> Deployment Architecture</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">🌐</span>
+          <div class="card-title">Frontend → Vercel</div>
+          <div class="card-desc">Next.js deploys to Vercel Edge Network. Automatic preview deployments per PR. ISR for product pages.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">☁️</span>
+          <div class="card-title">API → AWS ECS (Fargate)</div>
+          <div class="card-desc">Containerized API behind Application Load Balancer. Auto-scales 2–20 tasks. Blue/green deployments.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🗄</span>
+          <div class="card-title">DB → AWS RDS</div>
+          <div class="card-desc">PostgreSQL on RDS Multi-AZ. Automated backups (7 days). Read replica for analytics queries.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">⚡</span>
+          <div class="card-title">Cache → ElastiCache</div>
+          <div class="card-desc">Redis on ElastiCache in cluster mode. Automatic failover. TLS + auth enabled.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🔍</span>
+          <div class="card-title">Search → OpenSearch</div>
+          <div class="card-desc">AWS OpenSearch Service (managed Elasticsearch). 2-node cluster with automated snapshots.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🛡</span>
+          <div class="card-title">DDoS → Cloudflare</div>
+          <div class="card-desc">Cloudflare WAF + DDoS protection in front of everything. Bot management and rate limiting.</div>
+        </div>
+      </div>
+
+      <h3>Nginx Configuration</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>infra/nginx/api.conf</span>
+        </div>
+        <pre><code><span class="kw">upstream</span> api_backend {
+  <span class="fn">least_conn</span>;
+  <span class="fn">server</span> api_1:4000;
+  <span class="fn">server</span> api_2:4000;
+  <span class="fn">keepalive</span> 32;
+}
+
+<span class="kw">server</span> {
+  <span class="fn">listen</span> 443 ssl http2;
+  <span class="fn">server_name</span> api.yoursite.com;
+
+  <span class="fn">ssl_certificate</span>     /etc/letsencrypt/.../fullchain.pem;
+  <span class="fn">ssl_certificate_key</span> /etc/letsencrypt/.../privkey.pem;
+  <span class="fn">ssl_protocols</span> TLSv1.2 TLSv1.3;
+
+  <span class="cmt"># Rate limiting</span>
+  <span class="fn">limit_req_zone</span> $binary_remote_addr zone=api:10m rate=30r/s;
+  <span class="fn">limit_req</span> zone=api burst=50 nodelay;
+
+  <span class="kw">location</span> /api/ {
+    <span class="fn">proxy_pass</span>         http://api_backend;
+    <span class="fn">proxy_http_version</span> 1.1;
+    <span class="fn">proxy_set_header</span>   Upgrade $http_upgrade;
+    <span class="fn">proxy_set_header</span>   Connection "upgrade";
+    <span class="fn">proxy_set_header</span>   Host $host;
+    <span class="fn">proxy_set_header</span>   X-Real-IP $remote_addr;
+    <span class="fn">proxy_cache_bypass</span> $http_upgrade;
+    <span class="fn">proxy_read_timeout</span> 60s;
+
+    <span class="cmt"># CORS</span>
+    <span class="fn">add_header</span> Access-Control-Allow-Origin  "https://yoursite.com";
+    <span class="fn">add_header</span> Access-Control-Allow-Methods "GET,POST,PUT,DELETE,PATCH";
+  }
+
+  <span class="kw">location</span> /api/v1/payments/webhook {
+    <span class="fn">proxy_pass</span>    http://api_backend;
+    <span class="fn">proxy_read_timeout</span> 30s;
+    <span class="cmt"># Don't buffer webhook body</span>
+    <span class="fn">proxy_request_buffering</span> off;
+  }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── MONITORING ── -->
+    <section id="monitoring">
+      <h2><span class="h2-num">20</span> Monitoring & Observability</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">🔴</span>
+          <div class="card-title">Sentry (Errors)</div>
+          <div class="card-desc">Full stack error tracking. Source maps uploaded on deploy. Slack alerts for new issues. P1 issues auto-create Jira tickets.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">📊</span>
+          <div class="card-title">Datadog (APM)</div>
+          <div class="card-desc">Distributed tracing, custom metrics, dashboards. Alert on P95 latency &gt; 500ms or error rate &gt; 1%.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">💓</span>
+          <div class="card-title">Uptime Monitoring</div>
+          <div class="card-desc">Better Uptime (or Pingdom) checks every 1min from 3 regions. PagerDuty on-call for SEV-1.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">📝</span>
+          <div class="card-title">Structured Logging</div>
+          <div class="card-desc">Winston + JSON logs → CloudWatch → Datadog Log Management. Correlation IDs on every request.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TESTING ── -->
+    <section id="testing">
+      <h2><span class="h2-num">21</span> Testing Strategy</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>Tool</th><th>Target Coverage</th><th>Focus</th></tr></thead>
+          <tbody>
+            <tr><td>Unit</td><td>Vitest</td><td>80%+</td><td>Services, utils, calculations</td></tr>
+            <tr><td>Integration</td><td>Supertest + Testcontainers</td><td>70%+</td><td>API endpoints, DB queries</td></tr>
+            <tr><td>Component</td><td>React Testing Library</td><td>60%+</td><td>Critical UI components</td></tr>
+            <tr><td>E2E</td><td>Playwright</td><td>Key flows</td><td>Checkout, auth, cart</td></tr>
+            <tr><td>Load</td><td>k6</td><td>—</td><td>100 concurrent users, checkout flow</td></tr>
+            <tr><td>Visual</td><td>Chromatic (Storybook)</td><td>—</td><td>Component regression</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout tip">
+        <strong>Testing tip</strong>
+        Use Testcontainers to spin up a real PostgreSQL for integration tests — it's much more reliable than mocking Prisma and catches real DB query bugs.
+      </div>
+    </section>
+
+    <!-- ── SECURITY ── -->
+    <section id="security">
+      <h2><span class="h2-num">22</span> Security Checklist</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-title">Input Validation — Zod on every endpoint</div>
+          <div class="step-body">All request bodies, query params, and path params validated with Zod schemas. Unknown fields stripped. SQL injected strings rejected.</div>
+        </div>
+        <div class="step">
+          <div class="step-title">OWASP Headers — Helmet.js</div>
+          <div class="step-body">Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, HSTS, Referrer-Policy all set via Helmet middleware.</div>
+        </div>
+        <div class="step">
+          <div class="step-title">Rate Limiting — per IP + per user</div>
+          <div class="step-body">Auth endpoints: 5 attempts/min. API: 100 req/min per IP. Stripe webhooks: IP whitelist only.</div>
+        </div>
+        <div class="step">
+          <div class="step-title">CSRF Protection — SameSite cookies</div>
+          <div class="step-body">Refresh tokens use SameSite=Strict cookies. Double-submit CSRF tokens on state-changing forms.</div>
+        </div>
+        <div class="step">
+          <div class="step-title">Secrets Management — AWS Secrets Manager</div>
+          <div class="step-body">All secrets in AWS Secrets Manager in production. Never hardcode. Rotate Stripe keys quarterly.</div>
+        </div>
+        <div class="step">
+          <div class="step-title">Dependency Scanning — Dependabot + Snyk</div>
+          <div class="step-body">Auto PRs for vulnerable packages. Block merging if HIGH severity vulnerability detected in CI.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PERFORMANCE ── -->
+    <section id="performance">
+      <h2><span class="h2-num">23</span> Performance Optimizations</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">🖼</span>
+          <div class="card-title">Image Optimization</div>
+          <div class="card-desc">Next.js Image component: WebP/AVIF, lazy loading, LQIP blur placeholders, responsive srcsets via CDN.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">📦</span>
+          <div class="card-title">Bundle Optimization</div>
+          <div class="card-desc">Dynamic imports for heavy components (checkout, charts). Tree-shaking. Bundle analyzer in CI to catch regressions.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🗃</span>
+          <div class="card-title">DB Query Optimization</div>
+          <div class="card-desc">Composite indexes on hot queries. Cursor-based pagination. N+1 prevention via Prisma <code>include</code>. Query EXPLAIN in staging.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">⚡</span>
+          <div class="card-title">Edge Rendering</div>
+          <div class="card-desc">Homepage and static product pages use ISR (revalidate: 3600). Dynamic pages use streaming SSR.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SEO ── -->
+    <section id="seo">
+      <h2><span class="h2-num">24</span> SEO Implementation</h2>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>app/(shop)/products/[slug]/page.tsx — Metadata</span>
+        </div>
+        <pre><code><span class="kw">import</span> { Metadata } <span class="kw">from</span> <span class="str">"next"</span>;
+
+<span class="kw">export async function</span> <span class="fn">generateMetadata</span>({ params }): Promise&lt;Metadata&gt; {
+  <span class="kw">const</span> product = <span class="kw">await</span> <span class="fn">getProduct</span>(params.slug);
+
+  <span class="kw">return</span> {
+    title: <span class="str">`${product.name} | EcomStore`</span>,
+    description: product.description.<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">160</span>),
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      images: [{ url: product.images[<span class="num">0</span>].url, width: <span class="num">1200</span>, height: <span class="num">630</span> }],
+      type: <span class="str">"website"</span>,
+    },
+    other: {
+      <span class="str">"product:price:amount"</span>: product.salePrice.toString(),
+      <span class="str">"product:price:currency"</span>: <span class="str">"INR"</span>,
+    },
+  };
+}
+
+<span class="cmt">// Structured data (JSON-LD)</span>
+<span class="kw">function</span> <span class="fn">ProductJsonLd</span>({ product }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;script</span>
+      <span class="attr">type</span>=<span class="str">"application/ld+json"</span>
+      <span class="attr">dangerouslySetInnerHTML</span>={{ __html: JSON.<span class="fn">stringify</span>({
+        <span class="str">"@context"</span>: <span class="str">"https://schema.org"</span>,
+        <span class="str">"@type"</span>: <span class="str">"Product"</span>,
+        name: product.name,
+        image: product.images.<span class="fn">map</span>(i =&gt; i.url),
+        description: product.description,
+        brand: { <span class="str">"@type"</span>: <span class="str">"Brand"</span>, name: product.brand },
+        offers: {
+          <span class="str">"@type"</span>: <span class="str">"Offer"</span>,
+          price: product.salePrice,
+          priceCurrency: <span class="str">"INR"</span>,
+          availability: product.stock > <span class="num">0</span>
+            ? <span class="str">"https://schema.org/InStock"</span>
+            : <span class="str">"https://schema.org/OutOfStock"</span>
+        },
+        aggregateRating: {
+          <span class="str">"@type"</span>: <span class="str">"AggregateRating"</span>,
+          ratingValue: product.avgRating,
+          reviewCount: product.reviewCount,
+        }
+      })}}
+    <span class="tag">/&gt;</span>
+  );
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── ANALYTICS ── -->
+    <section id="analytics">
+      <h2><span class="h2-num">25</span> Analytics & Business Metrics</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">📈</span>
+          <div class="card-title">Google Analytics 4</div>
+          <div class="card-desc">E-commerce events: view_item, add_to_cart, begin_checkout, purchase. Custom dimensions for user segments.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">🔥</span>
+          <div class="card-title">Mixpanel / Posthog</div>
+          <div class="card-desc">Product analytics. Funnel analysis for checkout drop-off. Cohort retention. Feature flags via PostHog.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">📊</span>
+          <div class="card-title">Admin Dashboard</div>
+          <div class="card-desc">Real-time revenue, orders, inventory levels. Built with Recharts. Data from dedicated analytics DB.</div>
+        </div>
+        <div class="card">
+          <span class="card-icon">💰</span>
+          <div class="card-title">Key Metrics Tracked</div>
+          <div class="card-desc">GMV, AOV, CAC, LTV, cart abandonment rate, conversion rate by traffic source, refund rate.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── INVENTORY ── -->
+    <section id="inventory">
+      <h2><span class="h2-num">26</span> Inventory Management</h2>
+
+      <div class="callout danger">
+        <strong>Race Condition Warning</strong>
+        Always use database transactions with SELECT FOR UPDATE when decrementing stock to prevent overselling. Never check stock and update in separate queries.
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>modules/inventory/inventory.service.ts</span>
+        </div>
+        <pre><code><span class="kw">export async function</span> <span class="fn">reserveStock</span>(
+  items: OrderItem[],
+  tx: PrismaTransaction
+) {
+  <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> items) {
+    <span class="cmt">// Pessimistic lock — prevents race conditions</span>
+    <span class="kw">const</span> product = <span class="kw">await</span> tx.$<span class="fn">queryRaw</span><span class="tag">`
+      SELECT id, stock FROM products
+      WHERE id = ${item.productId}
+      FOR UPDATE
+    `</span>;
+
+    <span class="kw">if</span> (product.stock &lt; item.qty) {
+      <span class="kw">throw new</span> <span class="fn">BadRequestException</span>(
+        <span class="str">`Insufficient stock for ${product.name}`</span>
+      );
+    }
+
+    <span class="kw">await</span> tx.product.<span class="fn">update</span>({
+      where: { id: item.productId },
+      data: {
+        stock: { decrement: item.qty },
+        soldCount: { increment: item.qty },
+      }
+    });
+  }
+}
+
+<span class="cmt">// Automatic restock alerts via Bull job</span>
+<span class="kw">export async function</span> <span class="fn">checkLowStock</span>() {
+  <span class="kw">const</span> lowStock = <span class="kw">await</span> db.product.<span class="fn">findMany</span>({
+    where: { stock: { lte: <span class="num">10</span> }, isActive: <span class="kw">true</span> }
+  });
+  <span class="kw">if</span> (lowStock.length) {
+    <span class="kw">await</span> emailQueue.<span class="fn">add</span>({ type: <span class="str">"LOW_STOCK_ALERT"</span>, products: lowStock });
+  }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ── ADMIN ── -->
+    <section id="admin">
+      <h2><span class="h2-num">27</span> Admin Panel</h2>
+      <p>Role-protected admin panel at <code>/admin/*</code>. Built with the same Next.js app using a separate layout and role guard.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Section</th><th>Features</th></tr></thead>
+          <tbody>
+            <tr><td>Dashboard</td><td>Revenue today/month, orders, new users, low stock alerts, recent activity feed</td></tr>
+            <tr><td>Products</td><td>CRUD, bulk import (CSV), image management, variant management, publish/unpublish</td></tr>
+            <tr><td>Orders</td><td>Filter by status, update status, add tracking numbers, issue refunds via Stripe</td></tr>
+            <tr><td>Customers</td><td>User list, order history per user, ban, export</td></tr>
+            <tr><td>Inventory</td><td>Stock levels, adjust stock, set reorder points, export report</td></tr>
+            <tr><td>Coupons</td><td>Create % or fixed discount codes, usage limits, expiry dates</td></tr>
+            <tr><td>Analytics</td><td>Revenue charts, top products, traffic sources, conversion funnel</td></tr>
+            <tr><td>Settings</td><td>Store info, shipping zones, tax rates, payment methods, email templates</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── LAUNCH CHECKLIST ── -->
+    <section id="checklist">
+      <h2><span class="h2-num">28</span> Production Launch Checklist</h2>
+
+      <div class="callout tip">
+        <strong>Before you go live</strong>
+        Run through every item below before flipping the DNS. Most post-launch incidents are preventable with this checklist.
+      </div>
+
+      <h4>Infrastructure</h4>
+      <div class="steps">
+        <div class="step"><div class="step-title">✅ SSL certificates valid and auto-renewing (Let's Encrypt / ACM)</div></div>
+        <div class="step"><div class="step-title">✅ DNS configured: A records, CNAME, MX for email</div></div>
+        <div class="step"><div class="step-title">✅ Cloudflare WAF enabled with appropriate rules</div></div>
+        <div class="step"><div class="step-title">✅ RDS automated backups enabled, restore tested</div></div>
+        <div class="step"><div class="step-title">✅ Load balancer health checks passing</div></div>
+        <div class="step"><div class="step-title">✅ Auto-scaling policies configured and tested</div></div>
+      </div>
+
+      <h4>Application</h4>
+      <div class="steps">
+        <div class="step"><div class="step-title">✅ All env vars set in production (no .env file on server)</div></div>
+        <div class="step"><div class="step-title">✅ Stripe webhooks registered with production endpoint</div></div>
+        <div class="step"><div class="step-title">✅ Email sending tested (order confirmation, password reset)</div></div>
+        <div class="step"><div class="step-title">✅ Google/Facebook OAuth redirect URIs updated to production domain</div></div>
+        <div class="step"><div class="step-title">✅ CORS whitelist updated to production domain only</div></div>
+        <div class="step"><div class="step-title">✅ Rate limiting tuned (not too aggressive to block real users)</div></div>
+        <div class="step"><div class="step-title">✅ robots.txt and sitemap.xml accessible</div></div>
+        <div class="step"><div class="step-title">✅ Google Search Console and Analytics connected</div></div>
+      </div>
+
+      <h4>Security</h4>
+      <div class="steps">
+        <div class="step"><div class="step-title">✅ No debug logs leaking in production</div></div>
+        <div class="step"><div class="step-title">✅ Sentry DSN configured and test error received</div></div>
+        <div class="step"><div class="step-title">✅ Secrets rotated from development values</div></div>
+        <div class="step"><div class="step-title">✅ OWASP headers checked via securityheaders.com</div></div>
+        <div class="step"><div class="step-title">✅ Payment flow tested end-to-end with Stripe test cards</div></div>
+        <div class="step"><div class="step-title">✅ Admin routes inaccessible to non-admin users</div></div>
+      </div>
+
+      <h4>Performance</h4>
+      <div class="steps">
+        <div class="step"><div class="step-title">✅ Lighthouse score ≥ 90 on homepage and product page</div></div>
+        <div class="step"><div class="step-title">✅ Core Web Vitals: LCP &lt; 2.5s, CLS &lt; 0.1, FID &lt; 100ms</div></div>
+        <div class="step"><div class="step-title">✅ Load test: 100 concurrent users checkout flow passes without errors</div></div>
+        <div class="step"><div class="step-title">✅ Image CDN serving WebP with proper cache headers</div></div>
+      </div>
+    </section>
+
+  </div><!-- /.content -->
+</main>
+
+<footer>
+  <span>EcomStack Architecture Guide — Full Stack Reference v2.0</span>
+  <span>Next.js · Node.js · PostgreSQL · Redis · Stripe · AWS</span>
+</footer>
+
+<script>
+  // ── Progress bar ──
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    const pct = (scrollTop / (scrollHeight - clientHeight)) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  // ── Sidebar active link on scroll ──
+  const sections = document.querySelectorAll('section[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.25, rootMargin: '-60px 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // ── Animate sections ──
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  sections.forEach(s => sectionObserver.observe(s));
+  document.querySelector('.hero').classList.add('visible');
+
+  // ── Sidebar filter ──
+  function filterNav(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(group => {
+      const items = group.querySelectorAll('.nav-item');
+      let vis = 0;
+      items.forEach(item => {
+        const match = item.textContent.toLowerCase().includes(q);
+        item.style.display = match ? '' : 'none';
+        if (match) vis++;
+      });
+      group.style.display = vis === 0 ? 'none' : '';
+    });
+  }
+
+  // ── Mobile sidebar ──
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // ── Smooth scroll for all nav items ──
+  document.querySelectorAll('.nav-item[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        const offset = 80;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+        // Close mobile sidebar
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    });
+  });
+
+  // ── Copy to clipboard for code blocks ──
+  document.querySelectorAll('pre').forEach(pre => {
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'copy';
+    pre.style.position = 'relative';
+    pre.appendChild(btn);
+    btn.addEventListener('click', () => {
+      const code = pre.querySelector('code')?.innerText || pre.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'copied!';
+        btn.style.color = '#06d6a0';
+        setTimeout(() => { btn.textContent = 'copy'; btn.style.color = ''; }, 1500);
+      });
+    });
+  });
+</script>
+</body>
+</html>

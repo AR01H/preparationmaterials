@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Shortcuts Mastery Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3e;
+    --accent: #f5c842;
+    --accent2: #e8454a;
+    --accent3: #4ade80;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --highlight: #f5c84220;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 0%, #2a1f00 0%, #0a0a0f 60%);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 60px,
+      rgba(245,200,66,0.03) 60px, rgba(245,200,66,0.03) 61px
+    ),
+    repeating-linear-gradient(
+      90deg, transparent, transparent 60px,
+      rgba(245,200,66,0.03) 60px, rgba(245,200,66,0.03) 61px
+    );
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.4rem 1.2rem;
+    border-radius: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: #fff;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+    display: block;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    position: relative;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* TOC */
+  .toc-section {
+    padding: 5rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .toc-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .toc-item:hover {
+    border-color: var(--accent);
+    background: var(--highlight);
+    transform: translateY(-2px);
+  }
+
+  .toc-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    min-width: 2rem;
+  }
+
+  .toc-title { font-size: 0.95rem; font-weight: 500; }
+
+  /* CHAPTERS */
+  .chapter {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .chapter-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .chapter-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--border);
+    line-height: 1;
+    min-width: 80px;
+  }
+
+  .chapter-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .chapter-subtitle {
+    color: var(--muted);
+    margin-top: 0.5rem;
+    font-size: 1rem;
+  }
+
+  /* TRICK CARDS */
+  .trick {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .trick::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--accent);
+  }
+
+  .trick-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+  }
+
+  .trick-rule {
+    background: var(--highlight);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .trick-rule .label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 400;
+  }
+
+  .examples {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1.2rem;
+  }
+
+  .example {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .example-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    min-width: 60px;
+  }
+
+  .example-math {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .example-ans {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent3);
+    background: rgba(74,222,128,0.1);
+    padding: 0.2rem 0.8rem;
+    border-radius: 6px;
+  }
+
+  .steps {
+    margin-top: 1rem;
+    padding-left: 0;
+    list-style: none;
+    counter-reset: steps;
+  }
+
+  .steps li {
+    counter-increment: steps;
+    display: flex;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .steps li::before {
+    content: counter(steps);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: var(--highlight);
+    min-width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .steps li span { color: var(--text); }
+
+  /* FORMULA BOX */
+  .formula-box {
+    background: linear-gradient(135deg, #1a1a26, #0f0f1a);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    color: #fff;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  /* PRACTICE */
+  .practice {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .practice-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent2);
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .practice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .practice-q {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    text-align: center;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .practice-q:hover { border-color: var(--accent); }
+
+  .practice-q .ans {
+    display: none;
+    color: var(--accent3);
+    font-weight: 700;
+    margin-top: 0.3rem;
+    font-size: 0.85rem;
+  }
+
+  .practice-q.revealed .ans { display: block; }
+  .practice-q.revealed { border-color: var(--accent3); background: rgba(74,222,128,0.05); }
+
+  /* DIVIDER */
+  .divider {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .divider hr {
+    border: none;
+    border-top: 1px solid var(--border);
+  }
+
+  /* HIGHLIGHT BOX */
+  .tip-box {
+    background: rgba(232,69,74,0.08);
+    border: 1px solid rgba(232,69,74,0.3);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .tip-box .tip-label {
+    color: var(--accent2);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    margin: 2rem 0 1rem;
+    color: #fff;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 1.5rem 0 0.8rem;
+  }
+
+  p { color: var(--muted); margin-bottom: 1rem; }
+  p strong { color: var(--text); }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+
+  th {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  td {
+    border: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+  }
+
+  tr:nth-child(even) td { background: var(--surface); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 4rem;
+  }
+
+  footer strong { color: var(--accent); }
+
+  /* SCROLL NAV */
+  .scroll-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(245,200,66,0.3);
+  }
+
+  .scroll-top.visible { display: flex; }
+
+  @media (max-width: 600px) {
+    .hero-stats { gap: 1.5rem; }
+    .chapter-header { flex-direction: column; gap: 0.5rem; }
+    .chapter-num { font-size: 2.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Complete Course · Basic to Advanced</div>
+  <h1>Math<span>Shortcuts</span>Mastery</h1>
+  <p>Calculate faster than a calculator. Master the mental math tricks used by toppers, traders, and teachers.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">12</span><span class="stat-label">Chapters</span></div>
+    <div class="stat"><span class="stat-num">60+</span><span class="stat-label">Shortcuts</span></div>
+    <div class="stat"><span class="stat-num">200+</span><span class="stat-label">Examples</span></div>
+  </div>
+</section>
+
+<!-- TABLE OF CONTENTS -->
+<section class="toc-section">
+  <div class="section-label">Table of Contents</div>
+  <h2 style="margin-top:0">What You'll Master</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#ch1"><span class="toc-num">01</span><span class="toc-title">Addition Shortcuts</span></a>
+    <a class="toc-item" href="#ch2"><span class="toc-num">02</span><span class="toc-title">Subtraction Shortcuts</span></a>
+    <a class="toc-item" href="#ch3"><span class="toc-num">03</span><span class="toc-title">Multiplication Tricks</span></a>
+    <a class="toc-item" href="#ch4"><span class="toc-num">04</span><span class="toc-title">Division Shortcuts</span></a>
+    <a class="toc-item" href="#ch5"><span class="toc-num">05</span><span class="toc-title">Squares & Square Roots</span></a>
+    <a class="toc-item" href="#ch6"><span class="toc-num">06</span><span class="toc-title">Cubes & Cube Roots</span></a>
+    <a class="toc-item" href="#ch7"><span class="toc-num">07</span><span class="toc-title">Percentages Fast</span></a>
+    <a class="toc-item" href="#ch8"><span class="toc-num">08</span><span class="toc-title">Fractions & Decimals</span></a>
+    <a class="toc-item" href="#ch9"><span class="toc-num">09</span><span class="toc-title">Vedic Math Sutras</span></a>
+    <a class="toc-item" href="#ch10"><span class="toc-num">10</span><span class="toc-title">Number Series & Patterns</span></a>
+    <a class="toc-item" href="#ch11"><span class="toc-num">11</span><span class="toc-title">Algebra Shortcuts</span></a>
+    <a class="toc-item" href="#ch12"><span class="toc-num">12</span><span class="toc-title">Calendar & Clock Math</span></a>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 1: ADDITION ===== -->
+<section class="chapter" id="ch1">
+  <div class="chapter-header">
+    <div class="chapter-num">01</div>
+    <div>
+      <div class="chapter-title">Addition Shortcuts</div>
+      <div class="chapter-subtitle">Add large numbers in seconds without paper</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Left-to-Right Addition</div>
+    <p>Instead of adding right to left (as taught in school), add from left to right mentally. Your brain holds bigger numbers more naturally this way.</p>
+    <div class="trick-rule"><span class="label">Method</span>Add hundreds first → then tens → then units</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">456 + 378 → 400+300=700 → 700+50+70=820 → 820+6+8=834</span>
+        <span class="example-ans">834</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Try</span>
+        <span class="example-math">623 + 489 → 600+400=1000 → 1000+20+80=1100 → 1100+3+9=1112</span>
+        <span class="example-ans">1112</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Make-10 / Make-100 Grouping</div>
+    <p>Group numbers that add up to 10 or 100 first. Then add what remains.</p>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">7 + 3 + 8 + 2 + 5 → (7+3) + (8+2) + 5 = 10+10+5</span>
+        <span class="example-ans">25</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">65 + 35 + 48 + 52 → (65+35) + (48+52) = 100+100</span>
+        <span class="example-ans">200</span>
+      </div>
+    </div>
+    <div class="practice">
+      <div class="practice-title">🧠 Quick Practice — Click to reveal answers</div>
+      <div class="practice-grid">
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">34+66+27<div class="ans">127</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">15+85+43<div class="ans">143</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">72+28+55<div class="ans">155</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">6+4+9+1+8<div class="ans">28</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Round & Adjust</div>
+    <p>Round numbers to the nearest 10 or 100, add, then adjust by what you added or removed.</p>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">397 + 284 → 400 + 284 = 684 → 684 − 3</span>
+        <span class="example-ans">681</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">598 + 463 → 600 + 463 = 1063 → 1063 − 2</span>
+        <span class="example-ans">1061</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Adding Consecutive Numbers</div>
+    <div class="formula-box">Sum = (First + Last) × Count ÷ 2</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">1+2+3+...+100 → (1+100) × 100 ÷ 2 = 101 × 50</span>
+        <span class="example-ans">5050</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">5+6+7+8+9+10 → (5+10) × 6 ÷ 2 = 15 × 3</span>
+        <span class="example-ans">45</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 2: SUBTRACTION ===== -->
+<section class="chapter" id="ch2">
+  <div class="chapter-header">
+    <div class="chapter-num">02</div>
+    <div>
+      <div class="chapter-title">Subtraction Shortcuts</div>
+      <div class="chapter-subtitle">Subtract without borrowing or confusion</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Add Instead of Subtract</div>
+    <p>Ask: "what do I add to the smaller number to get the bigger one?" This is faster for your brain.</p>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">73 − 48 → What adds to 48 to get 73? → 48+2=50, 50+23=73 → 2+23</span>
+        <span class="example-ans">25</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Subtracting from 1000 (or 10, 100)</div>
+    <div class="trick-rule"><span class="label">Rule</span>All digits subtract from 9, EXCEPT the last digit subtracts from 10</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">1000 − 364 → (9−3)(9−6)(10−4) = 6, 3, 6</span>
+        <span class="example-ans">636</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">1000 − 527 → (9−5)(9−2)(10−7) = 4, 7, 3</span>
+        <span class="example-ans">473</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">100 − 67 → (9−6)(10−7) = 3, 3</span>
+        <span class="example-ans">33</span>
+      </div>
+    </div>
+    <div class="practice">
+      <div class="practice-title">🧠 Quick Practice — Click to reveal</div>
+      <div class="practice-grid">
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">1000−738<div class="ans">262</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">1000−451<div class="ans">549</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">100−83<div class="ans">17</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">1000−999<div class="ans">1</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Round & Adjust for Subtraction</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">542 − 198 → 542 − 200 = 342 → 342 + 2</span>
+        <span class="example-ans">344</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">835 − 297 → 835 − 300 = 535 → 535 + 3</span>
+        <span class="example-ans">538</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 3: MULTIPLICATION ===== -->
+<section class="chapter" id="ch3">
+  <div class="chapter-header">
+    <div class="chapter-num">03</div>
+    <div>
+      <div class="chapter-title">Multiplication Tricks</div>
+      <div class="chapter-subtitle">The most powerful shortcuts in mental math</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Multiply by 11</div>
+    <div class="trick-rule"><span class="label">Rule for 2-digit numbers</span>Put the sum of the two digits in the middle</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">36 × 11 → 3 _ 6 → 3+6=9 → 3 9 6</span>
+        <span class="example-ans">396</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">54 × 11 → 5 _ 4 → 5+4=9 → 594</span>
+        <span class="example-ans">594</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example (carry)</span>
+        <span class="example-math">78 × 11 → 7+8=15 → carry 1 → (7+1) 5 8 = 858</span>
+        <span class="example-ans">858</span>
+      </div>
+    </div>
+    <div class="practice">
+      <div class="practice-title">🧠 Quick Practice</div>
+      <div class="practice-grid">
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">43 × 11<div class="ans">473</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">62 × 11<div class="ans">682</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">85 × 11<div class="ans">935</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">99 × 11<div class="ans">1089</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Multiply by 9</div>
+    <div class="trick-rule"><span class="label">Rule</span>Multiply by 10, then subtract the number itself</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">47 × 9 → 47 × 10 = 470 → 470 − 47</span>
+        <span class="example-ans">423</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">124 × 9 → 1240 − 124</span>
+        <span class="example-ans">1116</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Multiply by 5</div>
+    <div class="trick-rule"><span class="label">Rule</span>Divide by 2, then multiply by 10 (i.e. divide by 2 and add a zero)</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">84 × 5 → 84 ÷ 2 = 42 → 42 × 10</span>
+        <span class="example-ans">420</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example (odd)</span>
+        <span class="example-math">73 × 5 → 73 ÷ 2 = 36.5 → 36.5 × 10</span>
+        <span class="example-ans">365</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Multiply Numbers Near 100</div>
+    <div class="trick-rule"><span class="label">Rule</span>Find difference from 100 for each number. Cross-subtract for first part, multiply differences for second part.</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">97 × 96 → (97−4) | (3×4) → 93 | 12</span>
+        <span class="example-ans">9312</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">98 × 95 → deficits: 2 and 5 → (98−5) | (2×5) = 93 | 10</span>
+        <span class="example-ans">9310</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">104 × 106 → surplus: 4 and 6 → (104+6) | (4×6) = 110 | 24</span>
+        <span class="example-ans">11024</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Multiply Two Numbers with Same Tens Digit & Units Adding to 10</div>
+    <div class="trick-rule"><span class="label">Rule</span>Multiply tens digit by (tens+1), then multiply units digits</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">43 × 47 → 4×5=20 | 3×7=21 → 20|21</span>
+        <span class="example-ans">2021</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">62 × 68 → 6×7=42 | 2×8=16 → 42|16</span>
+        <span class="example-ans">4216</span>
+      </div>
+    </div>
+    <div class="tip-box">
+      <span class="tip-label">⚠️ Remember</span>
+      The units must sum to 10 (like 3+7, 2+8, 1+9) and both numbers must have the same tens digit. The second part is always 2 digits — pad with zero if needed (e.g. 2×3=06, not 6).
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Doubling & Halving</div>
+    <p>If one number is even, halve it and double the other. Repeat until easy.</p>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">32 × 125 → 16×250 → 8×500 → 4×1000</span>
+        <span class="example-ans">4000</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">24 × 35 → 12×70 → 6×140 → 3×280</span>
+        <span class="example-ans">840</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Multiply by 25</div>
+    <div class="trick-rule"><span class="label">Rule</span>Divide by 4, then multiply by 100</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">44 × 25 → 44 ÷ 4 = 11 → 11 × 100</span>
+        <span class="example-ans">1100</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">68 × 25 → 68 ÷ 4 = 17 → 17 × 100</span>
+        <span class="example-ans">1700</span>
+      </div>
+    </div>
+    <div class="practice">
+      <div class="practice-title">🧠 Quick Practice</div>
+      <div class="practice-grid">
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">36 × 25<div class="ans">900</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">52 × 25<div class="ans">1300</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">88 × 25<div class="ans">2200</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">124 × 25<div class="ans">3100</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 4: DIVISION ===== -->
+<section class="chapter" id="ch4">
+  <div class="chapter-header">
+    <div class="chapter-num">04</div>
+    <div>
+      <div class="chapter-title">Division Shortcuts</div>
+      <div class="chapter-subtitle">Divisibility rules & fast division methods</div>
+    </div>
+  </div>
+
+  <h2>Divisibility Rules</h2>
+
+  <table>
+    <tr><th>Divisor</th><th>Rule</th><th>Example</th></tr>
+    <tr><td>2</td><td>Last digit is even (0,2,4,6,8)</td><td>348 ✓</td></tr>
+    <tr><td>3</td><td>Sum of digits divisible by 3</td><td>123 → 1+2+3=6 ✓</td></tr>
+    <tr><td>4</td><td>Last two digits divisible by 4</td><td>1324 → 24÷4=6 ✓</td></tr>
+    <tr><td>5</td><td>Last digit is 0 or 5</td><td>745 ✓</td></tr>
+    <tr><td>6</td><td>Divisible by both 2 and 3</td><td>132 → even & 1+3+2=6 ✓</td></tr>
+    <tr><td>7</td><td>Double last digit, subtract from rest. Repeat till clear.</td><td>203 → 20−(3×2)=14 ✓</td></tr>
+    <tr><td>8</td><td>Last three digits divisible by 8</td><td>1128 → 128÷8=16 ✓</td></tr>
+    <tr><td>9</td><td>Sum of digits divisible by 9</td><td>729 → 7+2+9=18 ✓</td></tr>
+    <tr><td>10</td><td>Last digit is 0</td><td>450 ✓</td></tr>
+    <tr><td>11</td><td>Alternating sum = 0 or divisible by 11</td><td>2728 → 2−7+2−8=−11 ✓</td></tr>
+    <tr><td>12</td><td>Divisible by both 3 and 4</td><td>144 ✓</td></tr>
+    <tr><td>25</td><td>Last two digits are 00, 25, 50, or 75</td><td>1175 ✓</td></tr>
+  </table>
+
+  <div class="trick">
+    <div class="trick-name">Divide by 5</div>
+    <div class="trick-rule"><span class="label">Rule</span>Multiply by 2, then divide by 10</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">235 ÷ 5 → 235 × 2 = 470 → 470 ÷ 10</span>
+        <span class="example-ans">47</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Divide by 25</div>
+    <div class="trick-rule"><span class="label">Rule</span>Multiply by 4, then divide by 100</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">1275 ÷ 25 → 1275 × 4 = 5100 → 5100 ÷ 100</span>
+        <span class="example-ans">51</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 5: SQUARES ===== -->
+<section class="chapter" id="ch5">
+  <div class="chapter-header">
+    <div class="chapter-num">05</div>
+    <div>
+      <div class="chapter-title">Squares & Square Roots</div>
+      <div class="chapter-subtitle">Find squares instantly in your head</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Square of Numbers Ending in 5</div>
+    <div class="trick-rule"><span class="label">Rule</span>Multiply the tens digit by (tens+1), then append 25</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">35² → 3×4=12 → append 25</span>
+        <span class="example-ans">1225</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">75² → 7×8=56 → append 25</span>
+        <span class="example-ans">5625</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">105² → 10×11=110 → append 25</span>
+        <span class="example-ans">11025</span>
+      </div>
+    </div>
+    <div class="practice">
+      <div class="practice-title">🧠 Quick Practice</div>
+      <div class="practice-grid">
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">25²<div class="ans">625</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">45²<div class="ans">2025</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">55²<div class="ans">3025</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">95²<div class="ans">9025</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Square Using (a+b)² Formula</div>
+    <div class="formula-box">(a+b)² = a² + 2ab + b²</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">47² = (40+7)² = 1600 + 560 + 49</span>
+        <span class="example-ans">2209</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">63² = (60+3)² = 3600 + 360 + 9</span>
+        <span class="example-ans">3969</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Square Near 50</div>
+    <div class="trick-rule"><span class="label">Rule</span>If n = 50±d → n² = (25±d) | d²</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">54² → d=4 → (25+4) | 4² = 29 | 16</span>
+        <span class="example-ans">2916</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">47² → d=3 → (25−3) | 3² = 22 | 09</span>
+        <span class="example-ans">2209</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Square Root of Perfect Squares (Units Trick)</div>
+    <p>Memorize which last digits correspond to which square root endings:</p>
+    <table>
+      <tr><th>Square ends in</th><th>Root ends in</th></tr>
+      <tr><td>1</td><td>1 or 9</td></tr>
+      <tr><td>4</td><td>2 or 8</td></tr>
+      <tr><td>9</td><td>3 or 7</td></tr>
+      <tr><td>6</td><td>4 or 6</td></tr>
+      <tr><td>5</td><td>5</td></tr>
+      <tr><td>0</td><td>0</td></tr>
+    </table>
+    <div class="tip-box">
+      <span class="tip-label">💡 How to use this</span>
+      For √1764: Last digit 4 → root ends in 2 or 8. First two digits 17 → between 4²=16 and 5²=25, so tens digit is 4. Options: 42 or 48. 42²=1764 ✓ → Answer: 42
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 6: CUBES ===== -->
+<section class="chapter" id="ch6">
+  <div class="chapter-header">
+    <div class="chapter-num">06</div>
+    <div>
+      <div class="chapter-title">Cubes & Cube Roots</div>
+      <div class="chapter-subtitle">Instant cube roots of perfect cubes</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Memorize Cubes 1–10</div>
+    <table>
+      <tr><th>n</th><th>n³</th><th>n</th><th>n³</th></tr>
+      <tr><td>1</td><td>1</td><td>6</td><td>216</td></tr>
+      <tr><td>2</td><td>8</td><td>7</td><td>343</td></tr>
+      <tr><td>3</td><td>27</td><td>8</td><td>512</td></tr>
+      <tr><td>4</td><td>64</td><td>9</td><td>729</td></tr>
+      <tr><td>5</td><td>125</td><td>10</td><td>1000</td></tr>
+    </table>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Cube Root of Perfect Cubes (up to 6-digit)</div>
+    <div class="trick-rule"><span class="label">Key insight</span>Units digit of cube = units digit of cube root (except 2↔8 and 3↔7)</div>
+    <table>
+      <tr><th>Cube ends in</th><th>Root ends in</th></tr>
+      <tr><td>1</td><td>1</td></tr>
+      <tr><td>2</td><td>8</td></tr>
+      <tr><td>3</td><td>7</td></tr>
+      <tr><td>4</td><td>4</td></tr>
+      <tr><td>5</td><td>5</td></tr>
+      <tr><td>6</td><td>6</td></tr>
+      <tr><td>7</td><td>3</td></tr>
+      <tr><td>8</td><td>2</td></tr>
+      <tr><td>9</td><td>9</td></tr>
+      <tr><td>0</td><td>0</td></tr>
+    </table>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">∛17576 → ends in 6 → root ends in 6. Remove last 3 digits → 17. 2³=8 &lt; 17 &lt; 27=3³ → tens=2. Answer: 26</span>
+        <span class="example-ans">26</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">∛54872 → ends in 2 → root ends in 8. Remove last 3 digits → 54. 3³=27 &lt; 54 &lt; 64=4³ → tens=3. Answer: 38</span>
+        <span class="example-ans">38</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 7: PERCENTAGES ===== -->
+<section class="chapter" id="ch7">
+  <div class="chapter-header">
+    <div class="chapter-num">07</div>
+    <div>
+      <div class="chapter-title">Percentages Fast</div>
+      <div class="chapter-subtitle">Calculate discounts, tips, and interest instantly</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">The 1% Base Method</div>
+    <div class="trick-rule"><span class="label">Rule</span>Find 1%, then multiply. 1% of any number = move decimal 2 places left.</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">7% of 350 → 1% = 3.5 → 7% = 3.5 × 7</span>
+        <span class="example-ans">24.5</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">35% of 80 → 1% = 0.8 → 35% = 0.8 × 35</span>
+        <span class="example-ans">28</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Flip the Percentage</div>
+    <div class="trick-rule"><span class="label">Key insight</span>X% of Y = Y% of X. Pick whichever is easier!</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">4% of 75 = 75% of 4 = 3</span>
+        <span class="example-ans">3</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">8% of 25 = 25% of 8 = 2</span>
+        <span class="example-ans">2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Common % Shortcuts</div>
+    <table>
+      <tr><th>%</th><th>Shortcut</th><th>Example (of 240)</th></tr>
+      <tr><td>10%</td><td>÷ 10</td><td>24</td></tr>
+      <tr><td>5%</td><td>÷ 20 (or half of 10%)</td><td>12</td></tr>
+      <tr><td>20%</td><td>÷ 5</td><td>48</td></tr>
+      <tr><td>25%</td><td>÷ 4</td><td>60</td></tr>
+      <tr><td>50%</td><td>÷ 2</td><td>120</td></tr>
+      <tr><td>75%</td><td>÷ 4 × 3</td><td>180</td></tr>
+      <tr><td>33.3%</td><td>÷ 3</td><td>80</td></tr>
+      <tr><td>66.7%</td><td>÷ 3 × 2</td><td>160</td></tr>
+      <tr><td>12.5%</td><td>÷ 8</td><td>30</td></tr>
+    </table>
+    <div class="practice">
+      <div class="practice-title">🧠 Quick Practice</div>
+      <div class="practice-grid">
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">15% of 200<div class="ans">30</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">25% of 360<div class="ans">90</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">30% of 150<div class="ans">45</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">40% of 75<div class="ans">30</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Percentage Increase/Decrease</div>
+    <div class="formula-box">% Change = (Change ÷ Original) × 100</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">Price went from 200 to 250 → Change=50 → (50÷200)×100</span>
+        <span class="example-ans">25% increase</span>
+      </div>
+    </div>
+    <div class="tip-box">
+      <span class="tip-label">💡 Successive Discounts</span>
+      Two discounts of 20% and 10% ≠ 30% discount. Actual = 100 × 0.80 × 0.90 = 72, so effective discount = 28%
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 8: FRACTIONS ===== -->
+<section class="chapter" id="ch8">
+  <div class="chapter-header">
+    <div class="chapter-num">08</div>
+    <div>
+      <div class="chapter-title">Fractions & Decimals</div>
+      <div class="chapter-subtitle">Convert and compare fractions fast</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Key Fraction-Decimal Equivalents</div>
+    <table>
+      <tr><th>Fraction</th><th>Decimal</th><th>Fraction</th><th>Decimal</th></tr>
+      <tr><td>1/2</td><td>0.5</td><td>1/7</td><td>0.142857...</td></tr>
+      <tr><td>1/3</td><td>0.333...</td><td>1/8</td><td>0.125</td></tr>
+      <tr><td>1/4</td><td>0.25</td><td>1/9</td><td>0.111...</td></tr>
+      <tr><td>1/5</td><td>0.2</td><td>1/11</td><td>0.0909...</td></tr>
+      <tr><td>1/6</td><td>0.1666...</td><td>1/12</td><td>0.0833...</td></tr>
+    </table>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Cross Multiply to Compare Fractions</div>
+    <div class="trick-rule"><span class="label">Rule</span>To compare a/b and c/d — cross multiply: a×d vs b×c. Bigger product = bigger fraction.</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">3/7 vs 4/9 → 3×9=27 vs 7×4=28 → 28 > 27</span>
+        <span class="example-ans">4/9 is bigger</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Adding Fractions Fast</div>
+    <div class="formula-box">a/b + c/d = (ad + bc) / bd</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">2/3 + 3/5 → (10+9)/15 = 19/15</span>
+        <span class="example-ans">1 4/15</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 9: VEDIC MATH ===== -->
+<section class="chapter" id="ch9">
+  <div class="chapter-header">
+    <div class="chapter-num">09</div>
+    <div>
+      <div class="chapter-title">Vedic Math Sutras</div>
+      <div class="chapter-subtitle">Ancient Indian math — still the fastest methods known</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Sutra: Nikhilam — Multiply near base numbers</div>
+    <p>Use bases of 10, 100, 1000. Find how much each number deviates from the base.</p>
+    <div class="trick-rule"><span class="label">Steps</span>1) Write deviations 2) Cross-add for left part 3) Multiply deviations for right part</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">8 × 7 (base 10): dev = −2, −3 → (8−3)=5 | (−2×−3)=6</span>
+        <span class="example-ans">56</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">97 × 96 (base 100): dev = −3, −4 → (97−4)=93 | (3×4)=12</span>
+        <span class="example-ans">9312</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">103 × 104 (base 100): dev = +3, +4 → (103+4)=107 | (3×4)=12</span>
+        <span class="example-ans">10712</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Sutra: Anurupyena — Proportionality</div>
+    <p>When numbers aren't near a standard base, use a working base that's a multiple.</p>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">48 × 46 (working base 50=100/2): dev = −2, −4 → (48−4)=44, 44/2=22 | (2×4)=08 → 2208</span>
+        <span class="example-ans">2208</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Sutra: Vertically & Crosswise (2-digit multiplication)</div>
+    <div class="trick-rule"><span class="label">Steps for AB × CD</span>1) A×C (hundreds) 2) A×D + B×C (tens) 3) B×D (units)</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">23 × 41 → 2×4=8 | 2×1+3×4=2+12=14 | 3×1=3 → 8|14|3 → carry</span>
+        <span class="example-ans">943</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">32 × 24 → 3×2=6 | 3×4+2×2=12+4=16 | 2×4=8 → 6|16|8 → 768</span>
+        <span class="example-ans">768</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Sutra: Ekadhikena — Square of Numbers Ending in 5</div>
+    <p>This is the same "append 25" trick from Chapter 5 — it's a Vedic sutra called Ekadhikena Purvena ("one more than the previous").</p>
+    <div class="formula-box">n5² → n×(n+1) | 25</div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 10: NUMBER SERIES ===== -->
+<section class="chapter" id="ch10">
+  <div class="chapter-header">
+    <div class="chapter-num">10</div>
+    <div>
+      <div class="chapter-title">Number Series & Patterns</div>
+      <div class="chapter-subtitle">Spot patterns instantly in exams and real life</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Sum of First n Natural Numbers</div>
+    <div class="formula-box">1+2+3+...+n = n(n+1)/2</div>
+    <div class="examples">
+      <div class="example"><span class="example-label">n=50</span><span class="example-math">50×51÷2</span><span class="example-ans">1275</span></div>
+      <div class="example"><span class="example-label">n=100</span><span class="example-math">100×101÷2</span><span class="example-ans">5050</span></div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Sum of Squares & Cubes</div>
+    <div class="formula-box">1²+2²+...+n² = n(n+1)(2n+1)/6</div>
+    <div class="formula-box">1³+2³+...+n³ = [n(n+1)/2]²</div>
+    <div class="examples">
+      <div class="example"><span class="example-label">Cubes 1–10</span><span class="example-math">[10×11/2]² = 55²</span><span class="example-ans">3025</span></div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Arithmetic Progression (AP)</div>
+    <div class="formula-box">nth term = a + (n−1)d &nbsp;|&nbsp; Sum = n/2 × (2a + (n−1)d)</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">5, 8, 11, 14... → a=5, d=3. 10th term = 5+9×3</span>
+        <span class="example-ans">32</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Geometric Progression (GP)</div>
+    <div class="formula-box">nth term = a × rⁿ⁻¹ &nbsp;|&nbsp; Sum = a(rⁿ−1)/(r−1)</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">2, 6, 18, 54... → a=2, r=3. 5th term = 2×3⁴</span>
+        <span class="example-ans">162</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 11: ALGEBRA ===== -->
+<section class="chapter" id="ch11">
+  <div class="chapter-header">
+    <div class="chapter-num">11</div>
+    <div>
+      <div class="chapter-title">Algebra Shortcuts</div>
+      <div class="chapter-subtitle">Use identities to avoid expanding everything</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Key Algebraic Identities</div>
+    <div class="formula-box">(a+b)² = a² + 2ab + b²</div>
+    <div class="formula-box">(a−b)² = a² − 2ab + b²</div>
+    <div class="formula-box">(a+b)(a−b) = a² − b²</div>
+    <div class="formula-box">(a+b)³ = a³ + 3a²b + 3ab² + b³</div>
+    <div class="formula-box">(a+b+c)² = a²+b²+c²+2ab+2bc+2ca</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">103 × 97 = (100+3)(100−3) = 100² − 3²= 10000 − 9</span>
+        <span class="example-ans">9991</span>
+      </div>
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">998² = (1000−2)² = 1000000 − 4000 + 4</span>
+        <span class="example-ans">996004</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">If a+b = S and ab = P, find a²+b²</div>
+    <div class="formula-box">a² + b² = (a+b)² − 2ab = S² − 2P</div>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">Example</span>
+        <span class="example-math">If a+b=7, ab=10 → a²+b² = 49 − 20</span>
+        <span class="example-ans">29</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Finding a³+b³ or a³−b³ Fast</div>
+    <div class="formula-box">a³+b³ = (a+b)(a²−ab+b²) = (a+b)((a+b)²−3ab)</div>
+    <div class="formula-box">a³−b³ = (a−b)(a²+ab+b²)</div>
+  </div>
+</section>
+
+<!-- ===== CHAPTER 12: CALENDAR & CLOCK ===== -->
+<section class="chapter" id="ch12">
+  <div class="chapter-header">
+    <div class="chapter-num">12</div>
+    <div>
+      <div class="chapter-title">Calendar & Clock Math</div>
+      <div class="chapter-subtitle">Find the day of any date — mental calculation</div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Odd Days Method</div>
+    <p>Every month contributes a fixed number of "odd days" (remainder when divided by 7).</p>
+    <table>
+      <tr><th>Month</th><th>Odd Days</th><th>Month</th><th>Odd Days</th></tr>
+      <tr><td>January</td><td>3</td><td>July</td><td>3</td></tr>
+      <tr><td>February (normal)</td><td>0</td><td>August</td><td>3</td></tr>
+      <tr><td>February (leap)</td><td>1</td><td>September</td><td>2</td></tr>
+      <tr><td>March</td><td>3</td><td>October</td><td>3</td></tr>
+      <tr><td>April</td><td>2</td><td>November</td><td>2</td></tr>
+      <tr><td>May</td><td>3</td><td>December</td><td>3</td></tr>
+      <tr><td>June</td><td>2</td><td></td><td></td></tr>
+    </table>
+    <div class="trick-rule"><span class="label">Day Code</span>0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat</div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Leap Year Rules</div>
+    <ul class="steps">
+      <li><span>Divisible by 4 → Leap Year (e.g. 2024)</span></li>
+      <li><span>Divisible by 100 → NOT a leap year (e.g. 1900)</span></li>
+      <li><span>Divisible by 400 → IS a leap year (e.g. 2000)</span></li>
+    </ul>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Clock Angle Formula</div>
+    <div class="formula-box">Angle = |30H − 5.5M|</div>
+    <p>H = hours, M = minutes. If angle &gt; 180, subtract from 360.</p>
+    <div class="examples">
+      <div class="example">
+        <span class="example-label">3:40</span>
+        <span class="example-math">|30×3 − 5.5×40| = |90 − 220| = 130°</span>
+        <span class="example-ans">130°</span>
+      </div>
+      <div class="example">
+        <span class="example-label">6:00</span>
+        <span class="example-math">|30×6 − 5.5×0| = 180</span>
+        <span class="example-ans">180°</span>
+      </div>
+    </div>
+    <div class="practice">
+      <div class="practice-title">🧠 Quick Practice</div>
+      <div class="practice-grid">
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">Angle at 2:30<div class="ans">105°</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">Angle at 9:00<div class="ans">90°</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">Angle at 12:00<div class="ans">0°</div></div>
+        <div class="practice-q" onclick="this.classList.toggle('revealed')">Angle at 4:20<div class="ans">10°</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trick">
+    <div class="trick-name">Times When Hour & Minute Hands Overlap</div>
+    <div class="formula-box">They overlap every 65 minutes 27 seconds (approx 65.45 min)</div>
+    <p>Starting from 12:00, they overlap at: 12:00, ~1:05, ~2:10, ~3:16, ~4:21... (11 times in 12 hours)</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div style="font-family:'Playfair Display',serif; font-size:2rem; color:#fff; margin-bottom:1rem;">You're Ready.</div>
+  <p style="max-width:500px; margin:0 auto 1rem;">Practice 10 minutes daily. Within 30 days you'll calculate faster than anyone in the room.</p>
+  <p><strong>Math Shortcuts Mastery</strong> · Complete Course · Basic to Advanced</p>
+  <p style="margin-top:0.5rem; font-size:0.75rem;">Click any practice question to reveal the answer · All shortcuts tested and verified</p>
+</footer>
+
+<button class="scroll-top" id="scrollBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollBtn');
+    btn.classList.toggle('visible', window.scrollY > 400);
+  });
+</script>
+</body>
+</html>

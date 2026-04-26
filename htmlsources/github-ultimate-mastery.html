@@ -1,0 +1,2751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Ultimate Mastery — Complete Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--surface3:#2d333b;
+  --border:#30363d;--border2:#444c56;
+  --accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent4:#e3b341;--accent5:#bc8cff;--accent6:#39d353;
+  --text:#e6edf3;--text-muted:#7d8590;--text-dim:#484f58;
+  --tag-blue:rgba(88,166,255,.15);--tag-green:rgba(63,185,80,.15);
+  --tag-red:rgba(247,129,102,.15);--tag-yellow:rgba(227,179,65,.15);--tag-purple:rgba(188,140,255,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;min-height:100vh}
+.layout{display:flex;min-height:100vh}
+
+/* Sidebar */
+.sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;padding-bottom:60px}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:10}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent5));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--text)}
+.logo-sub{font-size:10px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+.nav-section{padding:0 10px;margin-top:4px}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);padding:10px 8px 4px}
+.nav-link{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;color:var(--text-muted);text-decoration:none;font-size:12.5px;transition:all .15s;cursor:pointer;line-height:1.4}
+.nav-link:hover{background:var(--surface2);color:var(--text)}
+.nav-link.active{background:rgba(88,166,255,.12);color:var(--accent)}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--text-dim);flex-shrink:0}
+.nav-link.active .nav-dot{background:var(--accent)}
+.nav-num{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);margin-left:auto;flex-shrink:0}
+.sidebar-footer{margin:14px 10px 0;padding:12px;background:var(--surface2);border-radius:8px;font-size:11px}
+.prog-label{color:var(--text-muted);margin-bottom:6px}
+.prog-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent5));border-radius:2px;width:0;transition:width .4s}
+.mod-count{color:var(--accent);font-weight:600}
+
+/* Main */
+.main{margin-left:290px;max-width:920px;padding:56px 56px 140px}
+
+/* Hero */
+.hero{padding:56px 0 72px;border-bottom:1px solid var(--border);margin-bottom:80px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--tag-blue);border:1px solid rgba(88,166,255,.3);color:var(--accent);font-size:11px;font-weight:600;padding:4px 12px;border-radius:100px;margin-bottom:22px;font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.hero-title{font-family:'Syne',sans-serif;font-weight:800;font-size:54px;line-height:1.02;color:var(--text);margin-bottom:18px;letter-spacing:-.025em}
+.hero-title .hl{color:var(--accent)}
+.hero-title .hl2{color:var(--accent5)}
+.hero-desc{font-size:16px;color:var(--text-muted);max-width:580px;line-height:1.75;margin-bottom:32px}
+.hero-stats{display:flex;gap:40px;flex-wrap:wrap}
+.stat-num{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* Module */
+.module{margin-bottom:96px;scroll-margin-top:28px}
+.module-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.module-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);padding-top:5px;min-width:28px}
+.module-title{font-family:'Syne',sans-serif;font-weight:700;font-size:28px;color:var(--text);letter-spacing:-.01em}
+.module-desc{color:var(--text-muted);font-size:13px;margin-top:4px}
+.section{margin-bottom:48px;scroll-margin-top:28px}
+h3{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;color:var(--text);margin-bottom:12px;letter-spacing:-.01em}
+h4{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--text-muted);margin:18px 0 8px}
+p{color:var(--text-muted);margin-bottom:12px;line-height:1.75}
+strong{color:var(--text);font-weight:500}
+ul,ol{color:var(--text-muted);padding-left:20px;margin-bottom:14px}
+li{margin-bottom:5px;line-height:1.7}
+li strong{color:var(--text)}
+
+/* Code */
+.code-block{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:18px 0;font-family:'JetBrains Mono',monospace}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px}
+.code-lang{color:var(--accent);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+.code-title{color:var(--text-muted);font-size:11px}
+.code-dots{display:flex;gap:5px}
+.code-dot{width:9px;height:9px;border-radius:50%}
+.code-dot.r{background:#f78166}.code-dot.y{background:#e3b341}.code-dot.g{background:#3fb950}
+pre{padding:18px;overflow-x:auto;font-size:12.5px;line-height:1.7;color:var(--text)}
+pre::-webkit-scrollbar{height:3px}
+pre::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+code:not(pre code){font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surface2);border:1px solid var(--border);color:var(--accent);padding:2px 6px;border-radius:4px}
+
+/* Syntax */
+.kw{color:#ff7b72}.str{color:#a5d6ff}.cm{color:#8b949e;font-style:italic}.fn{color:#d2a8ff}
+.val{color:#79c0ff}.var{color:#ffa657}.key{color:#7ee787}.op{color:#ff7b72}.num{color:#f2cc60}
+
+/* Callouts */
+.callout{border-radius:8px;padding:14px 16px;margin:18px 0;display:flex;gap:12px;align-items:flex-start;font-size:13.5px}
+.callout-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.callout-title{font-weight:600;margin-bottom:3px;font-size:12.5px}
+.callout-body{color:var(--text-muted);line-height:1.6}
+.callout.tip{background:var(--tag-blue);border:1px solid rgba(88,166,255,.25)}
+.callout.tip .callout-title{color:var(--accent)}
+.callout.warning{background:var(--tag-yellow);border:1px solid rgba(227,179,65,.25)}
+.callout.warning .callout-title{color:var(--accent4)}
+.callout.danger{background:var(--tag-red);border:1px solid rgba(247,129,102,.25)}
+.callout.danger .callout-title{color:var(--accent3)}
+.callout.success{background:var(--tag-green);border:1px solid rgba(63,185,80,.25)}
+.callout.success .callout-title{color:var(--accent2)}
+.callout.info{background:var(--tag-purple);border:1px solid rgba(188,140,255,.25)}
+.callout.info .callout-title{color:var(--accent5)}
+
+/* Table */
+.table-wrap{overflow-x:auto;margin:16px 0;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:var(--surface2)}
+th{text-align:left;padding:9px 13px;color:var(--text-muted);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--text-muted);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+
+/* Steps */
+.steps{margin:16px 0}
+.step{display:flex;gap:14px;margin-bottom:18px}
+.step-num{width:26px;height:26px;background:rgba(88,166,255,.15);border:1px solid rgba(88,166,255,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);flex-shrink:0;margin-top:2px}
+.step-content h4{margin:0 0 5px;color:var(--text);font-size:14px}
+.step-content p{margin:0;font-size:13.5px}
+
+/* Diagram */
+.diagram{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin:16px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);overflow-x:auto;white-space:pre;line-height:1.6}
+
+/* Tag pills */
+.tag{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;margin:2px}
+.tag.blue{background:var(--tag-blue);color:var(--accent);border:1px solid rgba(88,166,255,.2)}
+.tag.green{background:var(--tag-green);color:var(--accent2);border:1px solid rgba(63,185,80,.2)}
+.tag.red{background:var(--tag-red);color:var(--accent3);border:1px solid rgba(247,129,102,.2)}
+.tag.yellow{background:var(--tag-yellow);color:var(--accent4);border:1px solid rgba(227,179,65,.2)}
+.tag.purple{background:var(--tag-purple);color:var(--accent5);border:1px solid rgba(188,140,255,.2)}
+
+/* Grid cards */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card-icon{font-size:20px;margin-bottom:8px}
+.card-title{font-family:'Syne',sans-serif;font-weight:600;font-size:13px;color:var(--text);margin-bottom:4px}
+.card-desc{font-size:12px;color:var(--text-muted);line-height:1.5}
+
+.module-footer{padding:20px 0;border-top:1px solid var(--border);margin-top:56px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0;padding:28px 18px 80px}.hero-title{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-text">GitHub Ultimate</div>
+        <div class="logo-sub">Complete Mastery · 2024</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Foundation</div>
+    <a class="nav-link" href="#m1"><span class="nav-dot"></span>Git Internals &amp; Setup<span class="nav-num">01</span></a>
+    <a class="nav-link" href="#m2"><span class="nav-dot"></span>Repos, Branches &amp; Tags<span class="nav-num">02</span></a>
+    <a class="nav-link" href="#m3"><span class="nav-dot"></span>Collaboration &amp; PRs<span class="nav-num">03</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">GitHub Platform</div>
+    <a class="nav-link" href="#m4"><span class="nav-dot"></span>GitHub CLI (gh)<span class="nav-num">04</span></a>
+    <a class="nav-link" href="#m5"><span class="nav-dot"></span>Issues, Projects &amp; Wiki<span class="nav-num">05</span></a>
+    <a class="nav-link" href="#m6"><span class="nav-dot"></span>GitHub Pages<span class="nav-num">06</span></a>
+    <a class="nav-link" href="#m7"><span class="nav-dot"></span>GitHub Packages<span class="nav-num">07</span></a>
+    <a class="nav-link" href="#m8"><span class="nav-dot"></span>Codespaces<span class="nav-num">08</span></a>
+    <a class="nav-link" href="#m9"><span class="nav-dot"></span>Webhooks<span class="nav-num">09</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">GitHub Actions</div>
+    <a class="nav-link" href="#m10"><span class="nav-dot"></span>Actions Introduction<span class="nav-num">10</span></a>
+    <a class="nav-link" href="#m11"><span class="nav-dot"></span>Workflow Triggers<span class="nav-num">11</span></a>
+    <a class="nav-link" href="#m12"><span class="nav-dot"></span>Jobs, Steps &amp; Runners<span class="nav-num">12</span></a>
+    <a class="nav-link" href="#m13"><span class="nav-dot"></span>Expressions &amp; Contexts<span class="nav-num">13</span></a>
+    <a class="nav-link" href="#m14"><span class="nav-dot"></span>Matrix &amp; Caching<span class="nav-num">14</span></a>
+    <a class="nav-link" href="#m15"><span class="nav-dot"></span>Reusable Workflows<span class="nav-num">15</span></a>
+    <a class="nav-link" href="#m16"><span class="nav-dot"></span>Custom Actions<span class="nav-num">16</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Security</div>
+    <a class="nav-link" href="#m17"><span class="nav-dot"></span>Secrets &amp; Variables<span class="nav-num">17</span></a>
+    <a class="nav-link" href="#m18"><span class="nav-dot"></span>Tokens &amp; Auth<span class="nav-num">18</span></a>
+    <a class="nav-link" href="#m19"><span class="nav-dot"></span>OIDC &amp; Keyless Auth<span class="nav-num">19</span></a>
+    <a class="nav-link" href="#m20"><span class="nav-dot"></span>Secret Scanning &amp; CodeQL<span class="nav-num">20</span></a>
+    <a class="nav-link" href="#m21"><span class="nav-dot"></span>Dependabot<span class="nav-num">21</span></a>
+    <a class="nav-link" href="#m22"><span class="nav-dot"></span>Security Hardening<span class="nav-num">22</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">API &amp; Automation</div>
+    <a class="nav-link" href="#m23"><span class="nav-dot"></span>REST API<span class="nav-num">23</span></a>
+    <a class="nav-link" href="#m24"><span class="nav-dot"></span>GraphQL API<span class="nav-num">24</span></a>
+    <a class="nav-link" href="#m25"><span class="nav-dot"></span>GitHub Apps<span class="nav-num">25</span></a>
+    <a class="nav-link" href="#m26"><span class="nav-dot"></span>OAuth Apps<span class="nav-num">26</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">CI/CD &amp; Deploy</div>
+    <a class="nav-link" href="#m27"><span class="nav-dot"></span>Deploy to Cloud<span class="nav-num">27</span></a>
+    <a class="nav-link" href="#m28"><span class="nav-dot"></span>Self-Hosted Runners<span class="nav-num">28</span></a>
+    <a class="nav-link" href="#m29"><span class="nav-dot"></span>Release Automation<span class="nav-num">29</span></a>
+    <a class="nav-link" href="#m30"><span class="nav-dot"></span>Real-World Pipelines<span class="nav-num">30</span></a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="prog-label"><span class="mod-count">30</span> modules · ~14 hr read</div>
+    <div class="prog-bar"><div class="prog-fill" id="pf"></div></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="top">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">⚡ Ultimate Edition · 30 Modules · 2024</div>
+  <h1 class="hero-title">GitHub<br><span class="hl">Ultimate</span> <span class="hl2">Mastery</span></h1>
+  <p class="hero-desc">The most complete GitHub reference — covering every feature from Git fundamentals and the GitHub platform to Actions CI/CD, the REST &amp; GraphQL API, GitHub Apps, security, and real-world production pipelines.</p>
+  <div class="hero-stats">
+    <div><div class="stat-num">30</div><div class="stat-label">Modules</div></div>
+    <div><div class="stat-num">100+</div><div class="stat-label">Code Examples</div></div>
+    <div><div class="stat-num">∞</div><div class="stat-label">Offline Access</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ MODULE 01 ═══════════════════════ -->
+<section class="module" id="m1">
+<div class="module-header"><div class="module-num">01</div><div>
+<div class="module-title">Git Internals &amp; Setup</div>
+<div class="module-desc">How Git actually works under the hood, configuration, and SSH setup</div>
+</div></div>
+
+<div class="section">
+<h3>How Git Stores Data</h3>
+<p>Git is a <strong>content-addressable filesystem</strong>. Every piece of data is stored as an object identified by its SHA-1 hash. There are 4 object types:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Object</th><th>Description</th><th>Contains</th></tr></thead>
+<tbody>
+<tr><td><code>blob</code></td><td>File contents</td><td>Raw file data</td></tr>
+<tr><td><code>tree</code></td><td>Directory listing</td><td>Blob/tree pointers + names + permissions</td></tr>
+<tr><td><code>commit</code></td><td>Snapshot</td><td>Tree pointer, parent commit, author, message</td></tr>
+<tr><td><code>tag</code></td><td>Named commit</td><td>Commit pointer + tagger + message</td></tr>
+</tbody></table></div>
+
+<div class="diagram">commit abc123
+  │
+  ├─ tree def456 (root directory)
+  │    ├─ blob 111aaa  → src/index.js
+  │    ├─ blob 222bbb  → package.json
+  │    └─ tree 333ccc  → src/
+  │         └─ blob 444ddd → src/app.js
+  │
+  ├─ parent: prev-commit-sha
+  ├─ author: Shankar &lt;shankar@example.com&gt;
+  └─ message: feat: add login</div>
+
+<h3>First-Time Setup</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">global config</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Identity (required — used in every commit)</span>
+git config --global user.name <span class="str">"Shankar"</span>
+git config --global user.email <span class="str">"shankar@example.com"</span>
+
+<span class="cm"># Default branch</span>
+git config --global init.defaultBranch main
+
+<span class="cm"># Editor</span>
+git config --global core.editor <span class="str">"code --wait"</span>
+
+<span class="cm"># Diff tool</span>
+git config --global diff.tool vscode
+git config --global difftool.vscode.cmd <span class="str">'code --wait --diff $LOCAL $REMOTE'</span>
+
+<span class="cm"># Pull strategy (rebase instead of merge)</span>
+git config --global pull.rebase true
+
+<span class="cm"># Useful aliases</span>
+git config --global alias.st status
+git config --global alias.co checkout
+git config --global alias.lg <span class="str">"log --oneline --graph --all --decorate"</span>
+git config --global alias.undo <span class="str">"reset --soft HEAD~1"</span>
+
+<span class="cm"># View all config</span>
+git config --list --show-origin</pre></div>
+
+<h3>SSH Key Setup (Recommended)</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">SSH setup for GitHub</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># 1. Generate ED25519 key (modern, secure, fast)</span>
+ssh-keygen -t ed25519 -C <span class="str">"shankar@example.com"</span> -f ~/.ssh/github_ed25519
+
+<span class="cm"># 2. Add to ssh-agent</span>
+eval <span class="str">"$(ssh-agent -s)"</span>
+ssh-add ~/.ssh/github_ed25519
+
+<span class="cm"># 3. Copy public key to clipboard</span>
+cat ~/.ssh/github_ed25519.pub    <span class="cm"># then paste into GitHub → Settings → SSH Keys</span>
+
+<span class="cm"># 4. Configure SSH to use this key for GitHub (~/.ssh/config)</span>
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/github_ed25519
+  AddKeysToAgent yes
+
+<span class="cm"># 5. Test connection</span>
+ssh -T git@github.com
+<span class="cm"># Hi Shankar! You've successfully authenticated...</span>
+
+<span class="cm"># 6. Now clone with SSH</span>
+git clone git@github.com:username/repo.git</pre></div>
+
+<h3>GPG Signed Commits</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">verified commits</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Generate GPG key</span>
+gpg --full-generate-key    <span class="cm"># choose RSA 4096</span>
+
+<span class="cm"># Get key ID</span>
+gpg --list-secret-keys --keyid-format=long
+
+<span class="cm"># Export public key → paste into GitHub Settings → GPG Keys</span>
+gpg --armor --export YOUR_KEY_ID
+
+<span class="cm"># Tell git to use it</span>
+git config --global user.signingkey YOUR_KEY_ID
+git config --global commit.gpgsign true    <span class="cm"># sign all commits</span>
+
+<span class="cm"># Commits now show "Verified" badge on GitHub</span></pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 02 ═══════════════════════ -->
+<section class="module" id="m2">
+<div class="module-header"><div class="module-num">02</div><div>
+<div class="module-title">Repositories, Branches &amp; Tags</div>
+<div class="module-desc">Creating repos, advanced branching, merging strategies, and semantic versioning</div>
+</div></div>
+
+<div class="section">
+<h3>Repository Settings Worth Knowing</h3>
+<div class="card-grid">
+<div class="card"><div class="card-icon">🔀</div><div class="card-title">Merge Strategies</div><div class="card-desc">Allow merge commits, squash merging, or rebase merging — configure per repo</div></div>
+<div class="card"><div class="card-icon">🗑️</div><div class="card-title">Auto-delete branches</div><div class="card-desc">Automatically delete head branch after PR is merged</div></div>
+<div class="card"><div class="card-icon">🔒</div><div class="card-title">Branch Protection</div><div class="card-desc">Require reviews, status checks, signed commits before merge</div></div>
+<div class="card"><div class="card-icon">📦</div><div class="card-title">Topics &amp; Description</div><div class="card-desc">Make your repo discoverable via GitHub search and topics</div></div>
+</div>
+
+<h3>Advanced Git Commands</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">power commands</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Stash work-in-progress</span>
+git stash push -m <span class="str">"WIP: login feature"</span>
+git stash list
+git stash pop                       <span class="cm"># restore latest stash</span>
+git stash apply stash@{2}           <span class="cm"># restore specific stash</span>
+
+<span class="cm"># Find which commit broke something</span>
+git bisect start
+git bisect bad                      <span class="cm"># current commit is bad</span>
+git bisect good v1.0.0              <span class="cm"># this tag was good</span>
+<span class="cm"># git tests each commit, you mark good/bad until culprit found</span>
+git bisect reset
+
+<span class="cm"># See who changed each line</span>
+git blame -L 10,20 src/index.js
+git blame -w --ignore-rev abc123 src/index.js   <span class="cm"># ignore reformatting commit</span>
+
+<span class="cm"># Find a deleted file</span>
+git log --all --full-history -- path/to/file.js
+
+<span class="cm"># Recover a deleted branch</span>
+git reflog                          <span class="cm"># find the last commit SHA</span>
+git checkout -b recovered-branch SHA
+
+<span class="cm"># Clean untracked files</span>
+git clean -fd                       <span class="cm"># remove untracked files and dirs</span>
+git clean -fdn                      <span class="cm"># dry run (preview)</span>
+
+<span class="cm"># Partial commit (stage specific lines)</span>
+git add -p file.js                  <span class="cm"># interactive hunk staging</span>
+
+<span class="cm"># Rewrite author on last N commits</span>
+git rebase -i HEAD~3</pre></div>
+
+<h3>Semantic Versioning (SemVer)</h3>
+<p>GitHub releases follow <strong>MAJOR.MINOR.PATCH</strong> convention:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Version bump</th><th>When to use</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>MAJOR</strong></td><td>Breaking API change</td><td><code>1.0.0 → 2.0.0</code></td></tr>
+<tr><td><strong>MINOR</strong></td><td>New backwards-compatible feature</td><td><code>1.0.0 → 1.1.0</code></td></tr>
+<tr><td><strong>PATCH</strong></td><td>Bug fix</td><td><code>1.0.0 → 1.0.1</code></td></tr>
+<tr><td><strong>Pre-release</strong></td><td>Alpha/beta/RC</td><td><code>1.0.0-alpha.1</code></td></tr>
+</tbody></table></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 03 ═══════════════════════ -->
+<section class="module" id="m3">
+<div class="module-header"><div class="module-num">03</div><div>
+<div class="module-title">Collaboration &amp; Pull Requests</div>
+<div class="module-desc">PR templates, CODEOWNERS, review workflows, and issue/PR linking</div>
+</div></div>
+
+<div class="section">
+<h3>PR &amp; Issue Templates</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/PULL_REQUEST_TEMPLATE.md</span><span class="code-lang">markdown</span></div>
+<pre>## 📋 What does this PR do?
+&lt;!-- Brief description of changes --&gt;
+
+## 🔗 Related Issue
+Closes #&lt;issue-number&gt;
+
+## ✅ Checklist
+- [ ] Tests added/updated
+- [ ] Documentation updated
+- [ ] No console.log / debug code left
+- [ ] Screenshots attached (for UI changes)
+
+## 🧪 How to test
+1. Step one
+2. Step two
+
+## 📸 Screenshots (if UI change)
+&lt;!-- Before | After --&gt;</pre></div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/ISSUE_TEMPLATE/bug_report.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Bug Report</span>
+<span class="key">description</span>: <span class="str">File a bug report</span>
+<span class="key">title</span>: <span class="str">"[Bug]: "</span>
+<span class="key">labels</span>: [<span class="str">"bug"</span>, <span class="str">"triage"</span>]
+<span class="key">body</span>:
+  - <span class="key">type</span>: <span class="str">textarea</span>
+    <span class="key">id</span>: <span class="str">description</span>
+    <span class="key">attributes</span>:
+      <span class="key">label</span>: <span class="str">Describe the bug</span>
+      <span class="key">placeholder</span>: <span class="str">A clear and concise description</span>
+    <span class="key">validations</span>:
+      <span class="key">required</span>: <span class="val">true</span>
+  - <span class="key">type</span>: <span class="str">input</span>
+    <span class="key">id</span>: <span class="str">version</span>
+    <span class="key">attributes</span>:
+      <span class="key">label</span>: <span class="str">Version</span>
+      <span class="key">placeholder</span>: <span class="str">"e.g. 1.2.3"</span></pre></div>
+
+<h3>CODEOWNERS</h3>
+<p>Automatically request reviews from the right people when specific files change.</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/CODEOWNERS</span><span class="code-lang">text</span></div>
+<pre><span class="cm"># Global owners (fallback)</span>
+*                    @org/team-leads
+
+<span class="cm"># iOS code — Shankar reviews all Swift files</span>
+**/*.swift           @shankar
+ios/                 @shankar @org/ios-team
+
+<span class="cm"># Backend</span>
+src/api/             @org/backend-team
+*.go                 @org/backend-team
+
+<span class="cm"># CI/CD — only DevOps can approve workflow changes</span>
+.github/             @org/devops
+*.yml                @org/devops
+
+<span class="cm"># Docs</span>
+docs/                @org/docs-team
+*.md                 @org/docs-team</pre></div>
+
+<h3>Useful Commit Message Keywords</h3>
+<p>Use these in PR descriptions or commit messages to auto-close issues on merge:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Keyword</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>Closes #123</code></td><td>Closes issue 123 when PR merges</td></tr>
+<tr><td><code>Fixes #123</code></td><td>Same as Closes</td></tr>
+<tr><td><code>Resolves #123</code></td><td>Same as Closes</td></tr>
+<tr><td><code>Refs #123</code></td><td>Links without closing</td></tr>
+<tr><td><code>Closes org/repo#123</code></td><td>Close issue in different repo</td></tr>
+</tbody></table></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 04 ═══════════════════════ -->
+<section class="module" id="m4">
+<div class="module-header"><div class="module-num">04</div><div>
+<div class="module-title">GitHub CLI (gh)</div>
+<div class="module-desc">The official command-line tool to do everything GitHub from your terminal</div>
+</div></div>
+
+<div class="section">
+<h3>Installation &amp; Auth</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">install &amp; login</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># macOS</span>
+brew install gh
+
+<span class="cm"># Ubuntu</span>
+sudo apt install gh
+
+<span class="cm"># Authenticate</span>
+gh auth login
+<span class="cm"># Prompts: GitHub.com → HTTPS/SSH → browser auth</span>
+
+<span class="cm"># Check status</span>
+gh auth status</pre></div>
+
+<h3>Core gh Commands</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">everyday gh commands</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># ── Repos ────────────────────────────────────────────</span>
+gh repo create my-app --public --clone
+gh repo clone username/repo
+gh repo view --web                    <span class="cm"># open in browser</span>
+gh repo fork upstream/repo --clone
+gh repo list --limit 20
+
+<span class="cm"># ── Pull Requests ────────────────────────────────────</span>
+gh pr create --title <span class="str">"feat: login"</span> --body <span class="str">"closes #12"</span> --draft
+gh pr list
+gh pr view 42
+gh pr checkout 42                     <span class="cm"># switch to PR branch locally</span>
+gh pr review 42 --approve
+gh pr review 42 --request-changes --body <span class="str">"needs tests"</span>
+gh pr merge 42 --squash --delete-branch
+gh pr checks 42                       <span class="cm"># see CI status</span>
+
+<span class="cm"># ── Issues ──────────────────────────────────────────</span>
+gh issue create --title <span class="str">"Bug: crash on login"</span> --label <span class="str">"bug"</span>
+gh issue list --label <span class="str">"bug"</span> --state open
+gh issue close 15 --comment <span class="str">"Fixed in #42"</span>
+
+<span class="cm"># ── Workflows ────────────────────────────────────────</span>
+gh workflow list
+gh workflow run deploy.yml
+gh workflow run deploy.yml -f environment=staging
+gh run list --workflow=ci.yml
+gh run view 123456
+gh run watch                          <span class="cm"># live stream run logs</span>
+gh run rerun 123456 --failed          <span class="cm"># re-run only failed jobs</span>
+
+<span class="cm"># ── Releases ─────────────────────────────────────────</span>
+gh release create v1.2.0 --generate-notes
+gh release upload v1.2.0 dist/app.zip
+gh release list
+
+<span class="cm"># ── Secrets ──────────────────────────────────────────</span>
+gh secret set MY_TOKEN
+gh secret set MY_TOKEN --body <span class="str">"abc123"</span>
+gh secret list
+gh secret delete MY_TOKEN
+
+<span class="cm"># ── Gists ────────────────────────────────────────────</span>
+gh gist create file.js --public --desc <span class="str">"my snippet"</span>
+gh gist list</pre></div>
+
+<h3>gh in GitHub Actions Workflows</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">using gh cli inside workflows</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">steps</span>:
+  - <span class="key">name</span>: <span class="str">Comment on PR</span>
+    <span class="key">env</span>:
+      <span class="key">GH_TOKEN</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+    <span class="key">run</span>: |
+      gh pr comment ${{ github.event.pull_request.number }} \
+        --body <span class="str">"✅ Build passed! Preview: https://preview-${{ github.sha }}.example.com"</span>
+
+  - <span class="key">name</span>: <span class="str">Create release</span>
+    <span class="key">env</span>:
+      <span class="key">GH_TOKEN</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+    <span class="key">run</span>: gh release create v${{ steps.version.outputs.tag }} --generate-notes</pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 05 ═══════════════════════ -->
+<section class="module" id="m5">
+<div class="module-header"><div class="module-num">05</div><div>
+<div class="module-title">Issues, Projects &amp; Wiki</div>
+<div class="module-desc">GitHub's project management tools — issues, milestones, labels, projects, and wikis</div>
+</div></div>
+
+<div class="section">
+<h3>Labels Strategy</h3>
+<p>Good label taxonomy makes issues filterable and actionable:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Category</th><th>Labels</th><th>Color</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>bug</code>, <code>feature</code>, <code>docs</code>, <code>refactor</code>, <code>chore</code></td><td>Blue</td></tr>
+<tr><td>Priority</td><td><code>P0-critical</code>, <code>P1-high</code>, <code>P2-medium</code>, <code>P3-low</code></td><td>Red→Yellow</td></tr>
+<tr><td>Status</td><td><code>in-progress</code>, <code>blocked</code>, <code>needs-review</code>, <code>ready</code></td><td>Purple</td></tr>
+<tr><td>Effort</td><td><code>good-first-issue</code>, <code>help-wanted</code>, <code>complex</code></td><td>Green</td></tr>
+</tbody></table></div>
+
+<h3>GitHub Projects (V2)</h3>
+<p>GitHub Projects V2 is a powerful, flexible spreadsheet/board/roadmap tool built on top of issues and PRs.</p>
+<div class="card-grid">
+<div class="card"><div class="card-icon">📋</div><div class="card-title">Board View</div><div class="card-desc">Kanban-style columns: Todo → In Progress → Done. Drag cards between columns.</div></div>
+<div class="card"><div class="card-icon">📊</div><div class="card-title">Table View</div><div class="card-desc">Spreadsheet view with custom fields: text, number, date, single-select, iteration.</div></div>
+<div class="card"><div class="card-icon">🗺️</div><div class="card-title">Roadmap View</div><div class="card-desc">Timeline/Gantt view across date ranges. Set start and target dates on items.</div></div>
+<div class="card"><div class="card-icon">⚡</div><div class="card-title">Automations</div><div class="card-desc">Auto-add items, auto-set fields when PR/issue status changes.</div></div>
+</div>
+
+<h3>Milestones</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">manage milestones with gh cli</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Create milestone via API</span>
+gh api repos/:owner/:repo/milestones \
+  --method POST \
+  -f title=<span class="str">"v2.0.0"</span> \
+  -f due_on=<span class="str">"2024-12-31T00:00:00Z"</span> \
+  -f description=<span class="str">"Q4 2024 release"</span>
+
+<span class="cm"># List milestones</span>
+gh api repos/:owner/:repo/milestones
+
+<span class="cm"># Assign issue to milestone</span>
+gh issue edit 42 --milestone <span class="str">"v2.0.0"</span></pre></div>
+
+<h3>GitHub Wiki</h3>
+<p>Every repository can have a wiki for documentation. Key features:</p>
+<ul>
+<li>Supports Markdown, AsciiDoc, MediaWiki, Textile formats</li>
+<li>Clone the wiki as its own Git repo: <code>git clone https://github.com/user/repo.wiki.git</code></li>
+<li>Edit locally and push — same as any repo</li>
+<li>Sidebar navigation with <code>_Sidebar.md</code></li>
+<li>Custom footer with <code>_Footer.md</code></li>
+</ul>
+<div class="callout tip"><div class="callout-icon">💡</div><div class="callout-content">
+<div class="callout-title">Wiki vs docs/ folder</div>
+<div class="callout-body">Use the wiki for internal team documentation. Use a <code>docs/</code> folder (served via GitHub Pages) for public-facing product docs.</div>
+</div></div>
+</div>
+</section>
+
+
+<!-- ═══════════════════════ MODULE 06 ═══════════════════════ -->
+<section class="module" id="m6">
+<div class="module-header"><div class="module-num">06</div><div>
+<div class="module-title">GitHub Pages</div>
+<div class="module-desc">Host static websites, documentation, and portfolios directly from your repo — for free</div>
+</div></div>
+
+<div class="section">
+<h3>What is GitHub Pages?</h3>
+<p>GitHub Pages serves static files (HTML, CSS, JS) directly from your repository at <code>https://username.github.io/repo-name</code> or a custom domain — completely free.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th>Type</th><th>URL</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>User/Org site</td><td><code>username.github.io</code></td><td>Repo named <code>username.github.io</code></td></tr>
+<tr><td>Project site</td><td><code>username.github.io/repo</code></td><td>Any repo, <code>docs/</code> or <code>gh-pages</code> branch</td></tr>
+<tr><td>Custom domain</td><td><code>yourdomain.com</code></td><td>Add CNAME file + DNS config</td></tr>
+</tbody></table></div>
+
+<h3>Enable GitHub Pages</h3>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Go to Settings → Pages</h4><p>Repository → Settings → Pages</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Choose source</h4><p>Branch: <code>main</code> or <code>gh-pages</code>, Folder: <code>/ (root)</code> or <code>/docs</code></p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Site goes live</h4><p>Available at <code>https://username.github.io/repo</code> within ~1 minute</p></div></div>
+</div>
+
+<h3>Deploy with GitHub Actions (Recommended)</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/workflows/pages.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Deploy to GitHub Pages</span>
+
+<span class="key">on</span>:
+  <span class="key">push</span>:
+    <span class="key">branches</span>: [main]
+
+<span class="key">permissions</span>:
+  <span class="key">contents</span>: <span class="str">read</span>
+  <span class="key">pages</span>: <span class="str">write</span>
+  <span class="key">id-token</span>: <span class="str">write</span>
+
+<span class="key">concurrency</span>:
+  <span class="key">group</span>: <span class="str">pages</span>
+  <span class="key">cancel-in-progress</span>: <span class="val">true</span>
+
+<span class="key">jobs</span>:
+  <span class="key">build</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+        <span class="key">with</span>: {<span class="key">node-version</span>: <span class="str">'20'</span>, <span class="key">cache</span>: <span class="str">'npm'</span>}
+      - <span class="key">run</span>: npm ci && npm run build
+      - <span class="key">name</span>: <span class="str">Setup Pages</span>
+        <span class="key">uses</span>: <span class="val">actions/configure-pages@v4</span>
+      - <span class="key">name</span>: <span class="str">Upload artifact</span>
+        <span class="key">uses</span>: <span class="val">actions/upload-pages-artifact@v3</span>
+        <span class="key">with</span>:
+          <span class="key">path</span>: <span class="str">./dist</span>
+
+  <span class="key">deploy</span>:
+    <span class="key">needs</span>: build
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">environment</span>:
+      <span class="key">name</span>: <span class="str">github-pages</span>
+      <span class="key">url</span>: <span class="str">${{ steps.deployment.outputs.page_url }}</span>
+    <span class="key">steps</span>:
+      - <span class="key">id</span>: <span class="str">deployment</span>
+        <span class="key">uses</span>: <span class="val">actions/deploy-pages@v4</span></pre></div>
+
+<h3>Custom Domain Setup</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">CNAME + DNS</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># 1. Create CNAME file in repo root</span>
+echo <span class="str">"yourdomain.com"</span> > CNAME
+
+<span class="cm"># 2. Configure DNS at your registrar:</span>
+<span class="cm"># For apex domain (yourdomain.com) → A records pointing to:</span>
+185.199.108.153
+185.199.109.153
+185.199.110.153
+185.199.111.153
+
+<span class="cm"># For subdomain (www.yourdomain.com) → CNAME record:</span>
+www  CNAME  username.github.io
+
+<span class="cm"># 3. In GitHub Pages settings: enter custom domain
+# 4. Enable "Enforce HTTPS" (free TLS via Let's Encrypt)</span></pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 07 ═══════════════════════ -->
+<section class="module" id="m7">
+<div class="module-header"><div class="module-num">07</div><div>
+<div class="module-title">GitHub Packages</div>
+<div class="module-desc">Host npm, Docker, Maven, NuGet, and RubyGems packages directly on GitHub</div>
+</div></div>
+
+<div class="section">
+<h3>GitHub Container Registry (GHCR)</h3>
+<p>Push and pull Docker images at <code>ghcr.io/owner/image-name</code>. Integrates natively with <code>GITHUB_TOKEN</code>.</p>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">publish Docker image to GHCR</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Publish Docker Image</span>
+<span class="key">on</span>:
+  <span class="key">push</span>:
+    <span class="key">branches</span>: [main]
+    <span class="key">tags</span>: [<span class="str">'v*'</span>]
+
+<span class="key">permissions</span>:
+  <span class="key">contents</span>: <span class="str">read</span>
+  <span class="key">packages</span>: <span class="str">write</span>
+
+<span class="key">jobs</span>:
+  <span class="key">publish</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+
+      - <span class="key">name</span>: <span class="str">Log in to GHCR</span>
+        <span class="key">uses</span>: <span class="val">docker/login-action@v3</span>
+        <span class="key">with</span>:
+          <span class="key">registry</span>: <span class="str">ghcr.io</span>
+          <span class="key">username</span>: <span class="str">${{ github.actor }}</span>
+          <span class="key">password</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+
+      - <span class="key">name</span>: <span class="str">Build and push</span>
+        <span class="key">run</span>: |
+          IMAGE=ghcr.io/<span class="str">${{ github.repository_owner }}</span>/my-app
+          docker build -t $IMAGE:latest -t $IMAGE:<span class="str">${{ github.sha }}</span> .
+          docker push $IMAGE --all-tags</pre></div>
+
+<h3>npm Package Registry</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">publish npm package to GitHub</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Publish npm Package</span>
+<span class="key">on</span>:
+  <span class="key">release</span>:
+    <span class="key">types</span>: [published]
+
+<span class="key">jobs</span>:
+  <span class="key">publish</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">permissions</span>:
+      <span class="key">contents</span>: <span class="str">read</span>
+      <span class="key">packages</span>: <span class="str">write</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+        <span class="key">with</span>:
+          <span class="key">node-version</span>: <span class="str">'20'</span>
+          <span class="key">registry-url</span>: <span class="str">'https://npm.pkg.github.com'</span>
+          <span class="key">scope</span>: <span class="str">'@your-org'</span>
+      - <span class="key">run</span>: npm ci && npm publish
+        <span class="key">env</span>:
+          <span class="key">NODE_AUTH_TOKEN</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span></pre></div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">package.json for GitHub registry</span><span class="code-lang">json</span></div>
+<pre>{
+  <span class="key">"name"</span>: <span class="str">"@your-org/my-package"</span>,
+  <span class="key">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="key">"publishConfig"</span>: {
+    <span class="key">"registry"</span>: <span class="str">"https://npm.pkg.github.com"</span>
+  }
+}</pre></div>
+
+<div class="callout tip"><div class="callout-icon">💡</div><div class="callout-content">
+<div class="callout-title">Installing from GitHub Packages</div>
+<div class="callout-body">Users installing your package need to authenticate with a PAT that has <code>read:packages</code> scope. They add it to their <code>~/.npmrc</code>: <code>//npm.pkg.github.com/:_authToken=TOKEN</code></div>
+</div></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 08 ═══════════════════════ -->
+<section class="module" id="m8">
+<div class="module-header"><div class="module-num">08</div><div>
+<div class="module-title">GitHub Codespaces</div>
+<div class="module-desc">Cloud development environments — full VS Code in the browser with zero setup</div>
+</div></div>
+
+<div class="section">
+<h3>What is Codespaces?</h3>
+<p>A Codespace is a complete cloud-based development environment running VS Code (browser or desktop) on a GitHub-managed virtual machine. It is configured entirely via <code>.devcontainer/</code> in your repo.</p>
+
+<div class="card-grid">
+<div class="card"><div class="card-icon">⚡</div><div class="card-title">Instant Setup</div><div class="card-desc">Any contributor gets a working dev environment in 30 seconds — no "it works on my machine"</div></div>
+<div class="card"><div class="card-icon">🔧</div><div class="card-title">Configurable</div><div class="card-desc">Define tools, extensions, ports, and startup commands in <code>devcontainer.json</code></div></div>
+<div class="card"><div class="card-icon">💾</div><div class="card-title">Persistent</div><div class="card-desc">Codespace persists between sessions. Changes saved automatically.</div></div>
+<div class="card"><div class="card-icon">🆓</div><div class="card-title">Free Tier</div><div class="card-desc">120 core-hours/month free on personal accounts (2-core = 60 hours)</div></div>
+</div>
+
+<h3>devcontainer.json</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.devcontainer/devcontainer.json</span><span class="code-lang">json</span></div>
+<pre>{
+  <span class="key">"name"</span>: <span class="str">"My App Dev Environment"</span>,
+  <span class="key">"image"</span>: <span class="str">"mcr.microsoft.com/devcontainers/javascript-node:20"</span>,
+
+  <span class="key">"features"</span>: {
+    <span class="key">"ghcr.io/devcontainers/features/git:1"</span>: {},
+    <span class="key">"ghcr.io/devcontainers/features/github-cli:1"</span>: {},
+    <span class="key">"ghcr.io/devcontainers/features/docker-in-docker:2"</span>: {}
+  },
+
+  <span class="key">"forwardPorts"</span>: [<span class="num">3000</span>, <span class="num">5432</span>],
+  <span class="key">"portsAttributes"</span>: {
+    <span class="key">"3000"</span>: {<span class="key">"label"</span>: <span class="str">"App"</span>, <span class="key">"onAutoForward"</span>: <span class="str">"openBrowser"</span>},
+    <span class="key">"5432"</span>: {<span class="key">"label"</span>: <span class="str">"Postgres"</span>}
+  },
+
+  <span class="key">"postCreateCommand"</span>: <span class="str">"npm install"</span>,
+  <span class="key">"postStartCommand"</span>: <span class="str">"npm run dev"</span>,
+
+  <span class="key">"customizations"</span>: {
+    <span class="key">"vscode"</span>: {
+      <span class="key">"extensions"</span>: [
+        <span class="str">"dbaeumer.vscode-eslint"</span>,
+        <span class="str">"esbenp.prettier-vscode"</span>,
+        <span class="str">"ms-vscode.vscode-typescript-next"</span>
+      ],
+      <span class="key">"settings"</span>: {
+        <span class="key">"editor.formatOnSave"</span>: <span class="val">true</span>
+      }
+    }
+  }
+}</pre></div>
+
+<h3>Codespace Secrets</h3>
+<p>Store secrets for Codespaces at <strong>Settings → Codespaces → New secret</strong>. They become environment variables inside all your Codespaces automatically — useful for API keys during development.</p>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 09 ═══════════════════════ -->
+<section class="module" id="m9">
+<div class="module-header"><div class="module-num">09</div><div>
+<div class="module-title">Webhooks</div>
+<div class="module-desc">Trigger your own servers when GitHub events happen — build integrations and bots</div>
+</div></div>
+
+<div class="section">
+<h3>What are Webhooks?</h3>
+<p>Webhooks send an HTTP POST request to your server whenever specific events occur on GitHub. This lets you build custom integrations without polling the API.</p>
+
+<h3>Creating a Webhook</h3>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Go to Settings → Webhooks → Add webhook</h4><p>In your repo or organization settings</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Enter your Payload URL</h4><p><code>https://yourserver.com/github/webhook</code></p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Set a Secret</h4><p>A random string used to verify the payload signature. Store this as a server env var.</p></div></div>
+<div class="step"><div class="step-num">4</div><div class="step-content"><h4>Select events</h4><p>Choose specific events or "Send me everything"</p></div></div>
+</div>
+
+<h3>Handling Webhooks in Node.js</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">webhook receiver (Express)</span><span class="code-lang">javascript</span></div>
+<pre><span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> crypto = <span class="fn">require</span>(<span class="str">'crypto'</span>);
+
+<span class="kw">const</span> app = <span class="fn">express</span>();
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());
+
+<span class="kw">function</span> <span class="fn">verifySignature</span>(req) {
+  <span class="kw">const</span> signature = req.headers[<span class="str">'x-hub-signature-256'</span>];
+  <span class="kw">const</span> hmac = crypto.<span class="fn">createHmac</span>(<span class="str">'sha256'</span>, process.env.WEBHOOK_SECRET);
+  <span class="kw">const</span> digest = <span class="str">'sha256='</span> + hmac.<span class="fn">update</span>(JSON.<span class="fn">stringify</span>(req.body)).<span class="fn">digest</span>(<span class="str">'hex'</span>);
+  <span class="kw">return</span> crypto.<span class="fn">timingSafeEqual</span>(Buffer.<span class="fn">from</span>(signature), Buffer.<span class="fn">from</span>(digest));
+}
+
+app.<span class="fn">post</span>(<span class="str">'/github/webhook'</span>, (req, res) => {
+  <span class="kw">if</span> (!<span class="fn">verifySignature</span>(req)) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">send</span>(<span class="str">'Unauthorized'</span>);
+  }
+
+  <span class="kw">const</span> event = req.headers[<span class="str">'x-github-event'</span>];
+  <span class="kw">const</span> payload = req.body;
+
+  <span class="kw">switch</span> (event) {
+    <span class="kw">case</span> <span class="str">'push'</span>:
+      console.<span class="fn">log</span>(<span class="str">`Push to ${payload.ref} by ${payload.pusher.name}`</span>);
+      <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'pull_request'</span>:
+      <span class="kw">if</span> (payload.action === <span class="str">'opened'</span>) {
+        console.<span class="fn">log</span>(<span class="str">`New PR: ${payload.pull_request.title}`</span>);
+        <span class="cm">// Trigger your CI, notify Slack, etc.</span>
+      }
+      <span class="kw">break</span>;
+  }
+
+  res.<span class="fn">status</span>(<span class="num">200</span>).<span class="fn">send</span>(<span class="str">'OK'</span>);
+});
+
+app.<span class="fn">listen</span>(<span class="num">3000</span>);</pre></div>
+
+<div class="callout danger"><div class="callout-icon">🚫</div><div class="callout-content">
+<div class="callout-title">Always Verify the Signature</div>
+<div class="callout-body">Anyone can POST to your webhook URL. Always verify the <code>X-Hub-Signature-256</code> header using HMAC-SHA256 with your webhook secret to confirm the request is genuinely from GitHub.</div>
+</div></div>
+</div>
+</section>
+
+
+<!-- ═══════════════════════ MODULE 10 ═══════════════════════ -->
+<section class="module" id="m10">
+<div class="module-header"><div class="module-num">10</div><div>
+<div class="module-title">GitHub Actions Introduction</div>
+<div class="module-desc">Workflow anatomy, YAML syntax, the Actions ecosystem, and your first pipeline</div>
+</div></div>
+
+<div class="section">
+<h3>Workflow File Anatomy</h3>
+<div class="diagram">  .github/workflows/ci.yml
+  ├── name:          → Display name in GitHub UI
+  ├── on:            → Events that trigger this workflow
+  ├── env:           → Workflow-level environment variables
+  ├── permissions:   → GITHUB_TOKEN permission scope
+  ├── concurrency:   → Cancel/queue duplicate runs
+  └── jobs:
+       ├── job-id:
+       │    ├── name:        → Display name
+       │    ├── runs-on:     → Runner OS
+       │    ├── needs:       → Dependency on other jobs
+       │    ├── if:          → Conditional execution
+       │    ├── environment: → Deployment environment
+       │    ├── env:         → Job-level vars
+       │    ├── outputs:     → Expose values to other jobs
+       │    └── steps:
+       │         ├── uses:   → Run a reusable Action
+       │         ├── run:    → Run shell commands
+       │         ├── with:   → Pass inputs to an Action
+       │         ├── env:    → Step-level vars
+       │         └── if:     → Conditional step</div>
+
+<h3>Complete Annotated Workflow</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">fully annotated workflow</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">CI</span>
+
+<span class="key">on</span>:
+  <span class="key">push</span>:
+    <span class="key">branches</span>: [main]
+
+<span class="cm"># Restrict default token permissions</span>
+<span class="key">permissions</span>:
+  <span class="key">contents</span>: <span class="str">read</span>
+
+<span class="cm"># Don't run duplicate workflows for same branch</span>
+<span class="key">concurrency</span>:
+  <span class="key">group</span>: <span class="str">ci-${{ github.ref }}</span>
+  <span class="key">cancel-in-progress</span>: <span class="val">true</span>
+
+<span class="key">env</span>:
+  <span class="key">NODE_VERSION</span>: <span class="str">'20'</span>
+
+<span class="key">jobs</span>:
+  <span class="key">test</span>:
+    <span class="key">name</span>: <span class="str">Test Suite</span>
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">timeout-minutes</span>: <span class="num">15</span>      <span class="cm"># fail if job hangs</span>
+
+    <span class="key">steps</span>:
+      - <span class="key">name</span>: <span class="str">Checkout</span>
+        <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+
+      - <span class="key">name</span>: <span class="str">Setup Node</span>
+        <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+        <span class="key">with</span>:
+          <span class="key">node-version</span>: <span class="str">${{ env.NODE_VERSION }}</span>
+          <span class="key">cache</span>: <span class="str">'npm'</span>
+
+      - <span class="key">run</span>: npm ci
+      - <span class="key">run</span>: npm test
+
+      <span class="cm"># Continue if previous step failed</span>
+      - <span class="key">name</span>: <span class="str">Upload test results</span>
+        <span class="key">if</span>: <span class="str">always()</span>
+        <span class="key">uses</span>: <span class="val">actions/upload-artifact@v4</span>
+        <span class="key">with</span>:
+          <span class="key">name</span>: <span class="str">test-results</span>
+          <span class="key">path</span>: <span class="str">test-results/</span></pre></div>
+
+<h3>Popular Marketplace Actions</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Action</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>actions/checkout@v4</code></td><td>Checkout source code</td></tr>
+<tr><td><code>actions/setup-node@v4</code></td><td>Setup Node.js + npm cache</td></tr>
+<tr><td><code>actions/setup-python@v5</code></td><td>Setup Python + pip cache</td></tr>
+<tr><td><code>actions/setup-java@v4</code></td><td>Setup Java/JDK</td></tr>
+<tr><td><code>actions/cache@v4</code></td><td>Cache dependencies</td></tr>
+<tr><td><code>actions/upload-artifact@v4</code></td><td>Upload build output</td></tr>
+<tr><td><code>actions/download-artifact@v4</code></td><td>Download artifact between jobs</td></tr>
+<tr><td><code>docker/build-push-action@v5</code></td><td>Build &amp; push Docker images</td></tr>
+<tr><td><code>aws-actions/configure-aws-credentials@v4</code></td><td>Auth with AWS via OIDC</td></tr>
+<tr><td><code>softprops/action-gh-release@v2</code></td><td>Create GitHub releases</td></tr>
+<tr><td><code>codecov/codecov-action@v4</code></td><td>Upload code coverage</td></tr>
+<tr><td><code>peter-evans/create-pull-request@v6</code></td><td>Auto-create PRs from workflow</td></tr>
+</tbody></table></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 11 ═══════════════════════ -->
+<section class="module" id="m11">
+<div class="module-header"><div class="module-num">11</div><div>
+<div class="module-title">Workflow Triggers (on:)</div>
+<div class="module-desc">Every way to trigger a workflow — events, filters, schedules, and manual dispatch</div>
+</div></div>
+
+<div class="section">
+<h3>Complete Trigger Reference</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">all triggers</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">on</span>:
+  <span class="cm"># Push with branch/path/tag filters</span>
+  <span class="key">push</span>:
+    <span class="key">branches</span>: [main, <span class="str">'release/**'</span>]
+    <span class="key">branches-ignore</span>: [<span class="str">'dependabot/**'</span>]
+    <span class="key">paths</span>: [<span class="str">'src/**'</span>, <span class="str">'package.json'</span>]
+    <span class="key">paths-ignore</span>: [<span class="str">'**.md'</span>]
+    <span class="key">tags</span>: [<span class="str">'v*'</span>]
+
+  <span class="cm"># Pull request events</span>
+  <span class="key">pull_request</span>:
+    <span class="key">types</span>: [opened, synchronize, reopened, ready_for_review, labeled]
+    <span class="key">branches</span>: [main]
+
+  <span class="cm"># PR from fork — has write permissions (use carefully!)</span>
+  <span class="key">pull_request_target</span>:
+    <span class="key">types</span>: [opened]
+
+  <span class="cm"># Cron schedule (UTC)</span>
+  <span class="key">schedule</span>:
+    - <span class="key">cron</span>: <span class="str">'0 9 * * 1-5'</span>    <span class="cm"># Mon-Fri 9 AM UTC</span>
+    - <span class="key">cron</span>: <span class="str">'0 0 1 * *'</span>     <span class="cm"># 1st of every month</span>
+
+  <span class="cm"># Manual trigger with inputs</span>
+  <span class="key">workflow_dispatch</span>:
+    <span class="key">inputs</span>:
+      <span class="key">environment</span>:
+        <span class="key">type</span>: <span class="str">choice</span>
+        <span class="key">options</span>: [staging, production]
+        <span class="key">required</span>: <span class="val">true</span>
+      <span class="key">version</span>:
+        <span class="key">type</span>: <span class="str">string</span>
+      <span class="key">dry-run</span>:
+        <span class="key">type</span>: <span class="str">boolean</span>
+        <span class="key">default</span>: <span class="val">false</span>
+
+  <span class="cm"># Called by another workflow</span>
+  <span class="key">workflow_call</span>:
+    <span class="key">inputs</span>:
+      <span class="key">version</span>: {<span class="key">type</span>: <span class="str">string</span>, <span class="key">required</span>: <span class="val">true</span>}
+    <span class="key">secrets</span>:
+      <span class="key">deploy-token</span>: {<span class="key">required</span>: <span class="val">true</span>}
+
+  <span class="cm"># External trigger (repository_dispatch)</span>
+  <span class="key">repository_dispatch</span>:
+    <span class="key">types</span>: [deploy, rebuild]
+
+  <span class="cm"># Other events</span>
+  <span class="key">release</span>:
+    <span class="key">types</span>: [published, prereleased]
+  <span class="key">issues</span>:
+    <span class="key">types</span>: [opened, labeled]
+  <span class="key">issue_comment</span>:
+    <span class="key">types</span>: [created]
+  <span class="key">create</span>:          <span class="cm"># branch or tag created</span>
+  <span class="key">delete</span>:          <span class="cm"># branch or tag deleted</span>
+  <span class="key">fork</span>:
+  <span class="key">star</span>:
+    <span class="key">types</span>: [created]</pre></div>
+
+<h3>Trigger from External System</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">repository_dispatch via API</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Trigger workflow from any HTTP client (CI system, script, etc.)</span>
+curl -X POST \
+  -H <span class="str">"Authorization: token $PAT"</span> \
+  -H <span class="str">"Accept: application/vnd.github.v3+json"</span> \
+  https://api.github.com/repos/owner/repo/dispatches \
+  -d <span class="str">'{"event_type":"deploy","client_payload":{"version":"1.2.3","env":"production"}}'</span>
+
+<span class="cm"># Access payload in workflow</span>
+<span class="cm"># ${{ github.event.client_payload.version }}</span></pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 12 ═══════════════════════ -->
+<section class="module" id="m12">
+<div class="module-header"><div class="module-num">12</div><div>
+<div class="module-title">Jobs, Steps &amp; Runners</div>
+<div class="module-desc">Parallel and sequential jobs, runner types, environments, and step control</div>
+</div></div>
+
+<div class="section">
+<h3>Job Dependency Graph</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">complex job dependencies</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">jobs</span>:
+  <span class="key">lint</span>:                          <span class="cm"># ┐ run in parallel</span>
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>       <span class="cm"># │</span>
+    <span class="key">steps</span>: [...]                  <span class="cm"># │</span>
+                                   <span class="cm"># │</span>
+  <span class="key">test</span>:                          <span class="cm"># ┘ run in parallel</span>
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">outputs</span>:
+      <span class="key">version</span>: <span class="str">${{ steps.v.outputs.version }}</span>
+    <span class="key">steps</span>:
+      - <span class="key">id</span>: <span class="str">v</span>
+        <span class="key">run</span>: echo <span class="str">"version=$(cat VERSION)"</span> >> $GITHUB_OUTPUT
+
+  <span class="key">build</span>:
+    <span class="key">needs</span>: [lint, test]           <span class="cm"># wait for BOTH</span>
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">run</span>: echo <span class="str">"v${{ needs.test.outputs.version }}"</span>
+
+  <span class="key">deploy</span>:
+    <span class="key">needs</span>: build
+    <span class="key">if</span>: <span class="str">github.ref == 'refs/heads/main' && success()</span>
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">environment</span>:
+      <span class="key">name</span>: <span class="str">production</span>
+      <span class="key">url</span>: <span class="str">https://example.com</span>
+    <span class="key">steps</span>: [...]
+
+  <span class="cm"># Always run — even if build fails</span>
+  <span class="key">notify</span>:
+    <span class="key">needs</span>: [build, deploy]
+    <span class="key">if</span>: <span class="str">always()</span>
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">run</span>: echo <span class="str">"Build: ${{ needs.build.result }}, Deploy: ${{ needs.deploy.result }}"</span></pre></div>
+
+<h3>Runner Comparison</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Runner</th><th>OS</th><th>RAM</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>ubuntu-latest</code></td><td>Ubuntu 22.04</td><td>7GB</td><td>Fastest, cheapest, most common</td></tr>
+<tr><td><code>ubuntu-22.04</code></td><td>Ubuntu 22.04</td><td>7GB</td><td>Pinned version</td></tr>
+<tr><td><code>windows-latest</code></td><td>Win Server 2022</td><td>16GB</td><td>For .NET / Windows</td></tr>
+<tr><td><code>macos-latest</code></td><td>macOS 14</td><td>14GB</td><td>iOS/macOS only, ~10× cost</td></tr>
+<tr><td><code>macos-13</code></td><td>macOS 13 (Intel)</td><td>14GB</td><td>x86_64 builds</td></tr>
+<tr><td><code>self-hosted</code></td><td>Any</td><td>Your spec</td><td>No billing, full control</td></tr>
+</tbody></table></div>
+
+<h3>Service Containers</h3>
+<p>Run databases, queues, or other services alongside your job:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">postgres + redis in tests</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">jobs</span>:
+  <span class="key">test</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+
+    <span class="key">services</span>:
+      <span class="key">postgres</span>:
+        <span class="key">image</span>: <span class="str">postgres:16</span>
+        <span class="key">env</span>:
+          <span class="key">POSTGRES_DB</span>: <span class="str">testdb</span>
+          <span class="key">POSTGRES_USER</span>: <span class="str">test</span>
+          <span class="key">POSTGRES_PASSWORD</span>: <span class="str">test</span>
+        <span class="key">ports</span>: [<span class="str">'5432:5432'</span>]
+        <span class="key">options</span>: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+
+      <span class="key">redis</span>:
+        <span class="key">image</span>: <span class="str">redis:7</span>
+        <span class="key">ports</span>: [<span class="str">'6379:6379'</span>]
+
+    <span class="key">env</span>:
+      <span class="key">DATABASE_URL</span>: <span class="str">postgresql://test:test@localhost:5432/testdb</span>
+      <span class="key">REDIS_URL</span>: <span class="str">redis://localhost:6379</span>
+
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">run</span>: npm test</pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 13 ═══════════════════════ -->
+<section class="module" id="m13">
+<div class="module-header"><div class="module-num">13</div><div>
+<div class="module-title">Expressions &amp; Contexts</div>
+<div class="module-desc">Dynamic values in workflows — all contexts, functions, and env variables</div>
+</div></div>
+
+<div class="section">
+<h3>All Available Contexts</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Context</th><th>Key Properties</th></tr></thead>
+<tbody>
+<tr><td><code>github</code></td><td><code>.ref</code>, <code>.sha</code>, <code>.actor</code>, <code>.repository</code>, <code>.event_name</code>, <code>.run_id</code>, <code>.ref_name</code></td></tr>
+<tr><td><code>env</code></td><td>All environment variables set in the workflow</td></tr>
+<tr><td><code>vars</code></td><td>Repository/org variables (non-secret)</td></tr>
+<tr><td><code>secrets</code></td><td>All secrets (masked in logs)</td></tr>
+<tr><td><code>job</code></td><td><code>.status</code> (success/failure/cancelled)</td></tr>
+<tr><td><code>steps</code></td><td><code>.step-id.outputs.key</code>, <code>.step-id.conclusion</code></td></tr>
+<tr><td><code>runner</code></td><td><code>.os</code>, <code>.arch</code>, <code>.temp</code>, <code>.tool_cache</code></td></tr>
+<tr><td><code>needs</code></td><td><code>.job-id.outputs.key</code>, <code>.job-id.result</code></td></tr>
+<tr><td><code>inputs</code></td><td>Inputs from <code>workflow_dispatch</code> or <code>workflow_call</code></td></tr>
+<tr><td><code>matrix</code></td><td>Current matrix values (<code>.os</code>, <code>.node</code>, etc.)</td></tr>
+</tbody></table></div>
+
+<h3>Passing Data Between Steps</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">GITHUB_OUTPUT and GITHUB_ENV</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">steps</span>:
+  - <span class="key">name</span>: <span class="str">Produce values</span>
+    <span class="key">id</span>: <span class="str">producer</span>
+    <span class="key">run</span>: |
+      <span class="cm"># Set step output (use in subsequent steps via steps.producer.outputs.key)</span>
+      echo <span class="str">"version=1.2.3"</span> >> $GITHUB_OUTPUT
+      echo <span class="str">"sha=${GITHUB_SHA::7}"</span> >> $GITHUB_OUTPUT
+
+      <span class="cm"># Set env var (available to ALL subsequent steps in this job)</span>
+      echo <span class="str">"BUILD_TAG=v1.2.3-abc1234"</span> >> $GITHUB_ENV
+
+      <span class="cm"># Append to PATH</span>
+      echo <span class="str">"/custom/bin"</span> >> $GITHUB_PATH
+
+      <span class="cm"># Write to summary (shown in Actions UI)</span>
+      echo <span class="str">"## Build Complete 🚀"</span> >> $GITHUB_STEP_SUMMARY
+      echo <span class="str">"| Version | SHA |"</span> >> $GITHUB_STEP_SUMMARY
+      echo <span class="str">"| --- | --- |"</span> >> $GITHUB_STEP_SUMMARY
+      echo <span class="str">"| 1.2.3 | abc1234 |"</span> >> $GITHUB_STEP_SUMMARY
+
+  - <span class="key">name</span>: <span class="str">Consume values</span>
+    <span class="key">run</span>: |
+      echo <span class="str">"Version: ${{ steps.producer.outputs.version }}"</span>
+      echo <span class="str">"SHA: ${{ steps.producer.outputs.sha }}"</span>
+      echo <span class="str">"Tag: $BUILD_TAG"</span>   <span class="cm"># from GITHUB_ENV</span></pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 14 ═══════════════════════ -->
+<section class="module" id="m14">
+<div class="module-header"><div class="module-num">14</div><div>
+<div class="module-title">Matrix Builds &amp; Caching</div>
+<div class="module-desc">Test across multiple OS/versions in parallel and dramatically speed up workflows</div>
+</div></div>
+
+<div class="section">
+<h3>Matrix Strategy</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">advanced matrix</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">jobs</span>:
+  <span class="key">test</span>:
+    <span class="key">runs-on</span>: <span class="str">${{ matrix.os }}</span>
+    <span class="key">strategy</span>:
+      <span class="key">fail-fast</span>: <span class="val">false</span>
+      <span class="key">max-parallel</span>: <span class="num">6</span>
+      <span class="key">matrix</span>:
+        <span class="key">os</span>: [ubuntu-latest, macos-latest, windows-latest]
+        <span class="key">node</span>: [<span class="str">'18'</span>, <span class="str">'20'</span>, <span class="str">'22'</span>]
+
+        <span class="cm"># Add extra properties to specific combinations</span>
+        <span class="key">include</span>:
+          - <span class="key">os</span>: <span class="str">ubuntu-latest</span>
+            <span class="key">node</span>: <span class="str">'20'</span>
+            <span class="key">coverage</span>: <span class="val">true</span>    <span class="cm"># extra property</span>
+
+        <span class="cm"># Remove specific combinations</span>
+        <span class="key">exclude</span>:
+          - <span class="key">os</span>: <span class="str">windows-latest</span>
+            <span class="key">node</span>: <span class="str">'18'</span>
+
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+        <span class="key">with</span>:
+          <span class="key">node-version</span>: <span class="str">${{ matrix.node }}</span>
+      - <span class="key">run</span>: npm test
+
+      <span class="cm"># Only upload coverage for the ubuntu/node20 job</span>
+      - <span class="key">if</span>: <span class="str">matrix.coverage</span>
+        <span class="key">uses</span>: <span class="val">codecov/codecov-action@v4</span></pre></div>
+
+<h3>Dynamic Matrix from Previous Job</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">computed matrix</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">jobs</span>:
+  <span class="key">setup</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">outputs</span>:
+      <span class="key">matrix</span>: <span class="str">${{ steps.set-matrix.outputs.matrix }}</span>
+    <span class="key">steps</span>:
+      - <span class="key">id</span>: <span class="str">set-matrix</span>
+        <span class="key">run</span>: |
+          echo <span class="str">'matrix={"app":["api","web","admin"]}'</span> >> $GITHUB_OUTPUT
+
+  <span class="key">build</span>:
+    <span class="key">needs</span>: setup
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">strategy</span>:
+      <span class="key">matrix</span>: <span class="str">${{ fromJSON(needs.setup.outputs.matrix) }}</span>
+    <span class="key">steps</span>:
+      - <span class="key">run</span>: echo <span class="str">"Building ${{ matrix.app }}"</span></pre></div>
+
+<h3>Caching Reference</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">cache strategies for common tools</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">steps</span>:
+  <span class="cm"># npm (recommended: use setup-node cache option)</span>
+  - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+    <span class="key">with</span>: {<span class="key">node-version</span>: <span class="str">'20'</span>, <span class="key">cache</span>: <span class="str">'npm'</span>}
+
+  <span class="cm"># yarn</span>
+  - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+    <span class="key">with</span>: {<span class="key">node-version</span>: <span class="str">'20'</span>, <span class="key">cache</span>: <span class="str">'yarn'</span>}
+
+  <span class="cm"># pip / Python</span>
+  - <span class="key">uses</span>: <span class="val">actions/setup-python@v5</span>
+    <span class="key">with</span>: {<span class="key">python-version</span>: <span class="str">'3.12'</span>, <span class="key">cache</span>: <span class="str">'pip'</span>}
+
+  <span class="cm"># Gradle / Android</span>
+  - <span class="key">uses</span>: <span class="val">actions/cache@v4</span>
+    <span class="key">with</span>:
+      <span class="key">path</span>: |
+        ~/.gradle/caches
+        ~/.gradle/wrapper
+      <span class="key">key</span>: <span class="str">${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*','**/gradle-wrapper.properties') }}</span>
+      <span class="key">restore-keys</span>: <span class="str">${{ runner.os }}-gradle-</span>
+
+  <span class="cm"># CocoaPods (iOS)</span>
+  - <span class="key">uses</span>: <span class="val">actions/cache@v4</span>
+    <span class="key">with</span>:
+      <span class="key">path</span>: <span class="str">Pods</span>
+      <span class="key">key</span>: <span class="str">${{ runner.os }}-pods-${{ hashFiles('Podfile.lock') }}</span>
+
+  <span class="cm"># Rust / Cargo</span>
+  - <span class="key">uses</span>: <span class="val">actions/cache@v4</span>
+    <span class="key">with</span>:
+      <span class="key">path</span>: |
+        ~/.cargo/registry
+        ~/.cargo/git
+        target/
+      <span class="key">key</span>: <span class="str">${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}</span></pre></div>
+</div>
+</section>
+
+
+<!-- ═══════════════════════ MODULE 15 ═══════════════════════ -->
+<section class="module" id="m15">
+<div class="module-header"><div class="module-num">15</div><div>
+<div class="module-title">Reusable Workflows &amp; Composite Actions</div>
+<div class="module-desc">DRY your CI/CD — share workflow logic across repositories and teams</div>
+</div></div>
+
+<div class="section">
+<h3>Reusable Workflow (workflow_call)</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/workflows/reusable-deploy.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Reusable Deploy Workflow</span>
+
+<span class="key">on</span>:
+  <span class="key">workflow_call</span>:
+    <span class="key">inputs</span>:
+      <span class="key">environment</span>:
+        <span class="key">type</span>: <span class="str">string</span>
+        <span class="key">required</span>: <span class="val">true</span>
+      <span class="key">image-tag</span>:
+        <span class="key">type</span>: <span class="str">string</span>
+        <span class="key">required</span>: <span class="val">true</span>
+      <span class="key">dry-run</span>:
+        <span class="key">type</span>: <span class="str">boolean</span>
+        <span class="key">default</span>: <span class="val">false</span>
+    <span class="key">secrets</span>:
+      <span class="key">AWS_ROLE_ARN</span>: {<span class="key">required</span>: <span class="val">true</span>}
+    <span class="key">outputs</span>:
+      <span class="key">deployed-url</span>:
+        <span class="key">description</span>: <span class="str">The URL of the deployed app</span>
+        <span class="key">value</span>: <span class="str">${{ jobs.deploy.outputs.url }}</span>
+
+<span class="key">jobs</span>:
+  <span class="key">deploy</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">environment</span>: <span class="str">${{ inputs.environment }}</span>
+    <span class="key">outputs</span>:
+      <span class="key">url</span>: <span class="str">https://${{ inputs.environment }}.example.com</span>
+    <span class="key">steps</span>:
+      - <span class="key">if</span>: <span class="str">inputs.dry-run</span>
+        <span class="key">run</span>: echo <span class="str">"DRY RUN — would deploy ${{ inputs.image-tag }}"</span>
+      - <span class="key">if</span>: <span class="str">!inputs.dry-run</span>
+        <span class="key">run</span>: echo <span class="str">"DEPLOYING ${{ inputs.image-tag }} to ${{ inputs.environment }}"</span></pre></div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">caller workflow</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">jobs</span>:
+  <span class="key">deploy-staging</span>:
+    <span class="key">uses</span>: <span class="val">./.github/workflows/reusable-deploy.yml</span>      <span class="cm"># same repo</span>
+    <span class="key">with</span>:
+      <span class="key">environment</span>: <span class="str">staging</span>
+      <span class="key">image-tag</span>: <span class="str">latest</span>
+    <span class="key">secrets</span>:
+      <span class="key">AWS_ROLE_ARN</span>: <span class="str">${{ secrets.STAGING_ROLE_ARN }}</span>
+
+  <span class="key">deploy-prod</span>:
+    <span class="key">needs</span>: deploy-staging
+    <span class="key">uses</span>: <span class="val">org/shared-infra/.github/workflows/deploy.yml@v2</span>   <span class="cm"># other repo</span>
+    <span class="key">with</span>:
+      <span class="key">environment</span>: <span class="str">production</span>
+      <span class="key">image-tag</span>: <span class="str">latest</span>
+    <span class="key">secrets</span>: inherit              <span class="cm"># pass all secrets automatically</span></pre></div>
+
+<h3>Composite Action</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/actions/setup-env/action.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Setup Build Environment</span>
+<span class="key">description</span>: <span class="str">Checkout + setup Node + install deps</span>
+
+<span class="key">inputs</span>:
+  <span class="key">node-version</span>: {<span class="key">default</span>: <span class="str">'20'</span>}
+  <span class="key">install-cmd</span>: {<span class="key">default</span>: <span class="str">'npm ci'</span>}
+
+<span class="key">outputs</span>:
+  <span class="key">cache-hit</span>:
+    <span class="key">value</span>: <span class="str">${{ steps.node.outputs.cache-hit }}</span>
+
+<span class="key">runs</span>:
+  <span class="key">using</span>: <span class="str">composite</span>
+  <span class="key">steps</span>:
+    - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+    - <span class="key">id</span>: <span class="str">node</span>
+      <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+      <span class="key">with</span>:
+        <span class="key">node-version</span>: <span class="str">${{ inputs.node-version }}</span>
+        <span class="key">cache</span>: <span class="str">npm</span>
+    - <span class="key">run</span>: <span class="str">${{ inputs.install-cmd }}</span>
+      <span class="key">shell</span>: bash
+
+<span class="cm"># Usage: - uses: ./.github/actions/setup-env</span></pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 16 ═══════════════════════ -->
+<section class="module" id="m16">
+<div class="module-header"><div class="module-num">16</div><div>
+<div class="module-title">Custom Actions</div>
+<div class="module-desc">Build JavaScript, Docker, and composite actions for internal use or the Marketplace</div>
+</div></div>
+
+<div class="section">
+<h3>Action Types Comparison</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Type</th><th>Runtime</th><th>Speed</th><th>Best For</th></tr></thead>
+<tbody>
+<tr><td>JavaScript</td><td>Node.js (runs directly on runner)</td><td>⚡ Fast</td><td>Most use cases, simple logic</td></tr>
+<tr><td>Docker</td><td>Docker container</td><td>🐢 Slower start</td><td>Linux-only, specific environment</td></tr>
+<tr><td>Composite</td><td>Shell commands + other actions</td><td>⚡ Fast</td><td>Grouping existing actions</td></tr>
+</tbody></table></div>
+
+<h3>JavaScript Action</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">src/index.js — full example</span><span class="code-lang">javascript</span></div>
+<pre><span class="kw">const</span> core = <span class="fn">require</span>(<span class="str">'@actions/core'</span>);
+<span class="kw">const</span> github = <span class="fn">require</span>(<span class="str">'@actions/github'</span>);
+<span class="kw">const</span> exec = <span class="fn">require</span>(<span class="str">'@actions/exec'</span>);
+<span class="kw">const</span> io = <span class="fn">require</span>(<span class="str">'@actions/io'</span>);
+
+<span class="kw">async function</span> <span class="fn">run</span>() {
+  <span class="kw">try</span> {
+    <span class="cm">// ── Inputs ────────────────────────────────────────</span>
+    <span class="kw">const</span> token = core.<span class="fn">getInput</span>(<span class="str">'token'</span>, { required: <span class="val">true</span> });
+    <span class="kw">const</span> message = core.<span class="fn">getInput</span>(<span class="str">'message'</span>);
+    <span class="kw">const</span> failOnError = core.<span class="fn">getBooleanInput</span>(<span class="str">'fail-on-error'</span>);
+
+    <span class="cm">// ── GitHub API ────────────────────────────────────</span>
+    <span class="kw">const</span> octokit = github.<span class="fn">getOctokit</span>(token);
+    <span class="kw">const</span> { owner, repo } = github.context.repo;
+
+    <span class="cm">// Create a comment on the PR</span>
+    <span class="kw">if</span> (github.context.payload.pull_request) {
+      <span class="kw">await</span> octokit.rest.issues.<span class="fn">createComment</span>({
+        owner, repo,
+        issue_number: github.context.payload.pull_request.number,
+        body: message
+      });
+    }
+
+    <span class="cm">// ── Run commands ──────────────────────────────────</span>
+    <span class="kw">let</span> output = <span class="str">''</span>;
+    <span class="kw">await</span> exec.<span class="fn">exec</span>(<span class="str">'npm'</span>, [<span class="str">'audit'</span>, <span class="str">'--json'</span>], {
+      listeners: { stdout: (data) => { output += data.<span class="fn">toString</span>(); }}
+    });
+
+    <span class="cm">// ── Outputs ───────────────────────────────────────</span>
+    core.<span class="fn">setOutput</span>(<span class="str">'result'</span>, <span class="str">'success'</span>);
+
+    <span class="cm">// ── Debug / Logging ───────────────────────────────</span>
+    core.<span class="fn">debug</span>(<span class="str">'Debug message (only shown with ACTIONS_STEP_DEBUG=true)'</span>);
+    core.<span class="fn">info</span>(<span class="str">'Info message'</span>);
+    core.<span class="fn">warning</span>(<span class="str">'Warning — shows in annotations'</span>);
+
+    <span class="cm">// ── Masking secrets ───────────────────────────────</span>
+    core.<span class="fn">setSecret</span>(token);  <span class="cm">// masks this value in all subsequent logs</span>
+
+    <span class="cm">// ── Groups in logs ───────────────────────────────</span>
+    core.<span class="fn">startGroup</span>(<span class="str">'Detailed output'</span>);
+    console.<span class="fn">log</span>(output);
+    core.<span class="fn">endGroup</span>();
+
+  } <span class="kw">catch</span> (error) {
+    core.<span class="fn">setFailed</span>(error.message);
+  }
+}
+
+<span class="fn">run</span>();</pre></div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">action.yml metadata</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">'My Custom Action'</span>
+<span class="key">description</span>: <span class="str">'Does something awesome'</span>
+<span class="key">author</span>: <span class="str">'Shankar'</span>
+
+<span class="key">inputs</span>:
+  <span class="key">token</span>:
+    <span class="key">description</span>: <span class="str">'GitHub token'</span>
+    <span class="key">required</span>: <span class="val">true</span>
+  <span class="key">message</span>:
+    <span class="key">description</span>: <span class="str">'Message to post'</span>
+    <span class="key">required</span>: <span class="val">false</span>
+    <span class="key">default</span>: <span class="str">'Hello!'</span>
+  <span class="key">fail-on-error</span>:
+    <span class="key">description</span>: <span class="str">'Fail if errors found'</span>
+    <span class="key">default</span>: <span class="str">'true'</span>
+
+<span class="key">outputs</span>:
+  <span class="key">result</span>:
+    <span class="key">description</span>: <span class="str">'Result of the action'</span>
+
+<span class="key">runs</span>:
+  <span class="key">using</span>: <span class="str">'node20'</span>
+  <span class="key">main</span>: <span class="str">'dist/index.js'</span>    <span class="cm"># bundle with @vercel/ncc</span>
+
+<span class="key">branding</span>:
+  <span class="key">icon</span>: <span class="str">'check-circle'</span>
+  <span class="key">color</span>: <span class="str">'green'</span></pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 17 ═══════════════════════ -->
+<section class="module" id="m17">
+<div class="module-header"><div class="module-num">17</div><div>
+<div class="module-title">Secrets &amp; Variables</div>
+<div class="module-desc">All levels of secrets, when to use each, and the vars: context for non-sensitive config</div>
+</div></div>
+
+<div class="section">
+<h3>Secret Levels &amp; Scope</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Level</th><th>Where to Add</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td><strong>Repository</strong></td><td>Repo → Settings → Secrets → Actions</td><td>One repository</td></tr>
+<tr><td><strong>Environment</strong></td><td>Repo → Settings → Environments → [name] → Secrets</td><td>One repo, one environment</td></tr>
+<tr><td><strong>Organization</strong></td><td>Org → Settings → Secrets → Actions</td><td>Selected repos in org</td></tr>
+<tr><td><strong>Codespace</strong></td><td>Profile → Settings → Codespaces → Secrets</td><td>Your Codespaces only</td></tr>
+</tbody></table></div>
+
+<h3>Variables vs Secrets</h3>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>Secrets (<code>secrets.X</code>)</th><th>Variables (<code>vars.X</code>)</th></tr></thead>
+<tbody>
+<tr><td>Encrypted</td><td>✅ Yes</td><td>❌ No</td></tr>
+<tr><td>Masked in logs</td><td>✅ Yes</td><td>❌ No</td></tr>
+<tr><td>Visible in UI</td><td>❌ Never</td><td>✅ Yes</td></tr>
+<tr><td>Use for</td><td>API keys, passwords, tokens</td><td>URLs, versions, config</td></tr>
+</tbody></table></div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">using both in a workflow</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">env</span>:
+  <span class="cm"># Non-sensitive config from vars</span>
+  <span class="key">NODE_ENV</span>: <span class="str">${{ vars.NODE_ENV }}</span>
+  <span class="key">API_URL</span>: <span class="str">${{ vars.API_BASE_URL }}</span>
+  <span class="key">APP_VERSION</span>: <span class="str">${{ vars.APP_VERSION }}</span>
+
+<span class="key">jobs</span>:
+  <span class="key">deploy</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">environment</span>: production  <span class="cm"># enables env-specific secrets + vars</span>
+    <span class="key">steps</span>:
+      - <span class="key">name</span>: <span class="str">Deploy</span>
+        <span class="key">env</span>:
+          <span class="cm"># Sensitive — from secrets</span>
+          <span class="key">DB_PASSWORD</span>: <span class="str">${{ secrets.DB_PASSWORD }}</span>
+          <span class="key">AWS_ROLE</span>: <span class="str">${{ secrets.AWS_ROLE_ARN }}</span>
+        <span class="key">run</span>: ./deploy.sh</pre></div>
+
+<div class="callout warning"><div class="callout-icon">⚠️</div><div class="callout-content">
+<div class="callout-title">Fork PR Limitation</div>
+<div class="callout-body">Workflows triggered by <code>pull_request</code> from forks do NOT have access to secrets by default. Use <code>pull_request_target</code> carefully (it runs in the base repo context with write permissions) or use <code>if: github.event.pull_request.head.repo.full_name == github.repository</code> to only run with secrets on non-fork PRs.</div>
+</div></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 18 ═══════════════════════ -->
+<section class="module" id="m18">
+<div class="module-header"><div class="module-num">18</div><div>
+<div class="module-title">Tokens &amp; Authentication</div>
+<div class="module-desc">GITHUB_TOKEN, Personal Access Tokens (classic vs fine-grained), and SSH deploy keys</div>
+</div></div>
+
+<div class="section">
+<h3>GITHUB_TOKEN Permissions</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">all permission scopes</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">permissions</span>:
+  <span class="key">actions</span>: <span class="str">read</span>           <span class="cm"># list/view workflow runs</span>
+  <span class="key">checks</span>: <span class="str">write</span>           <span class="cm"># create check runs/suites</span>
+  <span class="key">contents</span>: <span class="str">write</span>         <span class="cm"># commits, releases, tags</span>
+  <span class="key">deployments</span>: <span class="str">write</span>      <span class="cm"># deployment status</span>
+  <span class="key">id-token</span>: <span class="str">write</span>         <span class="cm"># OIDC JWT (cloud auth)</span>
+  <span class="key">issues</span>: <span class="str">write</span>           <span class="cm"># create/edit issues</span>
+  <span class="key">packages</span>: <span class="str">write</span>         <span class="cm"># GitHub Packages/GHCR</span>
+  <span class="key">pages</span>: <span class="str">write</span>            <span class="cm"># GitHub Pages deploy</span>
+  <span class="key">pull-requests</span>: <span class="str">write</span>    <span class="cm"># create/review PRs</span>
+  <span class="key">repository-projects</span>: <span class="str">read</span>
+  <span class="key">security-events</span>: <span class="str">write</span>  <span class="cm"># upload SARIF for code scanning</span>
+  <span class="key">statuses</span>: <span class="str">write</span>         <span class="cm"># commit status checks</span></pre></div>
+
+<h3>Fine-Grained PAT (Recommended)</h3>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Create</h4><p>GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Configure</h4><p>Set <strong>expiry</strong> (max 1 year), select <strong>specific repositories</strong> (never "All repositories" unless needed), choose <strong>minimum permissions</strong></p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Store as secret</h4><p>Copy token immediately → add as <code>MY_PAT</code> in repo/org secrets → never store in code</p></div></div>
+</div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">PAT use cases</span><span class="code-lang">yaml</span></div>
+<pre><span class="cm"># Access another private repo</span>
+- <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+  <span class="key">with</span>:
+    <span class="key">repository</span>: <span class="str">org/private-lib</span>
+    <span class="key">token</span>: <span class="str">${{ secrets.MY_PAT }}</span>
+
+<span class="cm"># Trigger workflow in another repo</span>
+- <span class="key">run</span>: |
+    gh workflow run deploy.yml \
+      --repo org/other-repo \
+      -f environment=production
+  <span class="key">env</span>:
+    <span class="key">GH_TOKEN</span>: <span class="str">${{ secrets.MY_PAT }}</span>
+
+<span class="cm"># Push to protected branch (bypassing protection rules)</span>
+- <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+  <span class="key">with</span>:
+    <span class="key">token</span>: <span class="str">${{ secrets.BOT_PAT }}</span>   <span class="cm"># PAT of user with bypass permission</span>
+- <span class="key">run</span>: |
+    git config user.name <span class="str">"release-bot"</span>
+    git config user.email <span class="str">"bot@example.com"</span>
+    git push origin main</pre></div>
+
+<h3>SSH Deploy Keys</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">setup SSH deploy key</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Generate key pair (no passphrase)</span>
+ssh-keygen -t ed25519 -C <span class="str">"github-deploy-key"</span> -f ./deploy_key -N <span class="str">""</span>
+
+<span class="cm"># Public key → GitHub: Repo Settings → Deploy Keys → Add key
+# (Check "Allow write access" only if needed)</span>
+cat deploy_key.pub
+
+<span class="cm"># Private key → GitHub: Repo Settings → Secrets → SSH_PRIVATE_KEY</span>
+cat deploy_key    <span class="cm"># copy this value as the secret</span>
+
+<span class="cm"># Clean up local files</span>
+rm deploy_key deploy_key.pub</pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 19 ═══════════════════════ -->
+<section class="module" id="m19">
+<div class="module-header"><div class="module-num">19</div><div>
+<div class="module-title">OIDC &amp; Keyless Cloud Authentication</div>
+<div class="module-desc">Authenticate to AWS, GCP, and Azure without storing any long-lived credentials</div>
+</div></div>
+
+<div class="section">
+<h3>How OIDC Works</h3>
+<div class="diagram">GitHub Actions                GitHub OIDC           Cloud Provider (AWS/GCP/Azure)
+     │                             │                         │
+     │   1. Request JWT token      │                         │
+     │────────────────────────────►│                         │
+     │                             │                         │
+     │   2. JWT (15 min lifetime)  │                         │
+     │◄────────────────────────────│                         │
+     │                                                       │
+     │   3. Exchange JWT for temp credentials                │
+     │──────────────────────────────────────────────────────►│
+     │                                                       │
+     │   4. Temp access token (15-60 min)                    │
+     │◄──────────────────────────────────────────────────────│
+     │
+     │   5. Access cloud resources with temp token
+     │──────────────────────────────────────────────────────►</div>
+
+<h3>OIDC with AWS</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">AWS IAM trust policy (JSON)</span><span class="code-lang">json</span></div>
+<pre>{
+  <span class="key">"Version"</span>: <span class="str">"2012-10-17"</span>,
+  <span class="key">"Statement"</span>: [{
+    <span class="key">"Effect"</span>: <span class="str">"Allow"</span>,
+    <span class="key">"Principal"</span>: {
+      <span class="key">"Federated"</span>: <span class="str">"arn:aws:iam::ACCOUNT:oidc-provider/token.actions.githubusercontent.com"</span>
+    },
+    <span class="key">"Action"</span>: <span class="str">"sts:AssumeRoleWithWebIdentity"</span>,
+    <span class="key">"Condition"</span>: {
+      <span class="key">"StringEquals"</span>: {
+        <span class="key">"token.actions.githubusercontent.com:aud"</span>: <span class="str">"sts.amazonaws.com"</span>
+      },
+      <span class="key">"StringLike"</span>: {
+        <span class="cm">// Only allow from this specific repo + branch</span>
+        <span class="key">"token.actions.githubusercontent.com:sub"</span>:
+          <span class="str">"repo:myorg/myrepo:ref:refs/heads/main"</span>
+      }
+    }
+  }]
+}</pre></div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">OIDC workflow for AWS</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">permissions</span>:
+  <span class="key">id-token</span>: <span class="str">write</span>    <span class="cm"># REQUIRED — request JWT from GitHub</span>
+  <span class="key">contents</span>: <span class="str">read</span>
+
+<span class="key">steps</span>:
+  - <span class="key">name</span>: <span class="str">Assume AWS role via OIDC</span>
+    <span class="key">uses</span>: <span class="val">aws-actions/configure-aws-credentials@v4</span>
+    <span class="key">with</span>:
+      <span class="key">role-to-assume</span>: <span class="str">arn:aws:iam::123456789:role/GitHubActionsRole</span>
+      <span class="key">aws-region</span>: <span class="str">ap-south-1</span>
+      <span class="key">role-session-name</span>: <span class="str">GitHubActions-${{ github.run_id }}</span>
+      <span class="cm"># NO secrets.AWS_ACCESS_KEY_ID needed!</span>
+
+  - <span class="key">run</span>: aws s3 ls</pre></div>
+
+<h3>OIDC with GCP</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">GCP OIDC workflow</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">permissions</span>:
+  <span class="key">id-token</span>: <span class="str">write</span>
+  <span class="key">contents</span>: <span class="str">read</span>
+
+<span class="key">steps</span>:
+  - <span class="key">name</span>: <span class="str">Auth to GCP</span>
+    <span class="key">uses</span>: <span class="val">google-github-actions/auth@v2</span>
+    <span class="key">with</span>:
+      <span class="key">workload_identity_provider</span>: <span class="str">projects/PROJECT_NUM/locations/global/workloadIdentityPools/POOL/providers/PROVIDER</span>
+      <span class="key">service_account</span>: <span class="str">my-sa@my-project.iam.gserviceaccount.com</span>
+
+  - <span class="key">name</span>: <span class="str">Use gcloud</span>
+    <span class="key">run</span>: gcloud storage ls gs://my-bucket</pre></div>
+</div>
+</section>
+
+
+<!-- ═══════════════════════ MODULE 20 ═══════════════════════ -->
+<section class="module" id="m20">
+<div class="module-header"><div class="module-num">20</div><div>
+<div class="module-title">Secret Scanning &amp; CodeQL</div>
+<div class="module-desc">Automatically detect exposed secrets and security vulnerabilities in your code</div>
+</div></div>
+
+<div class="section">
+<h3>Secret Scanning</h3>
+<p>GitHub automatically scans all commits for known secret patterns (AWS keys, Stripe keys, GitHub tokens, etc.) and alerts you immediately.</p>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Enable</h4><p>Repo → Settings → Security → Secret scanning → Enable</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Push protection</h4><p>Blocks pushes containing secrets before they reach the repo. Enable in the same settings page.</p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Custom patterns</h4><p>Define your own regex patterns to scan for internal secrets (internal API keys with custom formats)</p></div></div>
+</div>
+
+<div class="callout danger"><div class="callout-icon">🚨</div><div class="callout-content">
+<div class="callout-title">If a secret IS committed</div>
+<div class="callout-body">1. <strong>Revoke the secret immediately</strong> — even before removing it from history. 2. Use <code>git filter-repo</code> (not BFG) to remove from history. 3. Force-push all branches. 4. Generate a new secret. Assume it is compromised from the moment it was committed.</div>
+</div></div>
+
+<h3>CodeQL — Code Scanning</h3>
+<p>CodeQL is GitHub's semantic code analysis engine that finds security vulnerabilities by understanding your code logic, not just patterns.</p>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/workflows/codeql.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">CodeQL Security Scan</span>
+
+<span class="key">on</span>:
+  <span class="key">push</span>:
+    <span class="key">branches</span>: [main]
+  <span class="key">pull_request</span>:
+    <span class="key">branches</span>: [main]
+  <span class="key">schedule</span>:
+    - <span class="key">cron</span>: <span class="str">'0 4 * * 1'</span>     <span class="cm"># weekly scan</span>
+
+<span class="key">permissions</span>:
+  <span class="key">security-events</span>: <span class="str">write</span>
+  <span class="key">contents</span>: <span class="str">read</span>
+
+<span class="key">jobs</span>:
+  <span class="key">analyze</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">strategy</span>:
+      <span class="key">matrix</span>:
+        <span class="key">language</span>: [javascript, python]   <span class="cm"># add java, cpp, csharp, go, ruby</span>
+
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+
+      - <span class="key">name</span>: <span class="str">Initialize CodeQL</span>
+        <span class="key">uses</span>: <span class="val">github/codeql-action/init@v3</span>
+        <span class="key">with</span>:
+          <span class="key">languages</span>: <span class="str">${{ matrix.language }}</span>
+          <span class="key">queries</span>: <span class="str">+security-and-quality</span>   <span class="cm"># extended query suite</span>
+
+      - <span class="key">name</span>: <span class="str">Autobuild</span>
+        <span class="key">uses</span>: <span class="val">github/codeql-action/autobuild@v3</span>
+
+      - <span class="key">name</span>: <span class="str">Perform CodeQL Analysis</span>
+        <span class="key">uses</span>: <span class="val">github/codeql-action/analyze@v3</span>
+        <span class="key">with</span>:
+          <span class="key">category</span>: <span class="str">/language:${{ matrix.language }}</span></pre></div>
+
+<p>Results appear under <strong>Security → Code scanning alerts</strong>. Each alert shows the vulnerable code path, severity, and remediation guidance.</p>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 21 ═══════════════════════ -->
+<section class="module" id="m21">
+<div class="module-header"><div class="module-num">21</div><div>
+<div class="module-title">Dependabot</div>
+<div class="module-desc">Automated dependency updates and security alerts for your projects</div>
+</div></div>
+
+<div class="section">
+<h3>Dependabot Alerts vs Updates</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Feature</th><th>Purpose</th><th>Enable in</th></tr></thead>
+<tbody>
+<tr><td><strong>Dependabot alerts</strong></td><td>Warns when a dep has a known CVE</td><td>Settings → Security → Dependabot alerts</td></tr>
+<tr><td><strong>Security updates</strong></td><td>Auto-creates PRs to fix vulnerable deps</td><td>Settings → Security → Dependabot security updates</td></tr>
+<tr><td><strong>Version updates</strong></td><td>Auto-creates PRs to keep deps up-to-date</td><td><code>.github/dependabot.yml</code></td></tr>
+</tbody></table></div>
+
+<h3>dependabot.yml Configuration</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/dependabot.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">version</span>: <span class="num">2</span>
+<span class="key">updates</span>:
+  <span class="cm"># npm / Node.js</span>
+  - <span class="key">package-ecosystem</span>: <span class="str">npm</span>
+    <span class="key">directory</span>: <span class="str">/</span>
+    <span class="key">schedule</span>:
+      <span class="key">interval</span>: <span class="str">weekly</span>
+      <span class="key">day</span>: <span class="str">monday</span>
+      <span class="key">time</span>: <span class="str">"09:00"</span>
+      <span class="key">timezone</span>: <span class="str">Asia/Kolkata</span>
+    <span class="key">open-pull-requests-limit</span>: <span class="num">10</span>
+    <span class="key">labels</span>: [<span class="str">dependencies</span>, <span class="str">npm</span>]
+    <span class="key">assignees</span>: [<span class="str">shankar</span>]
+    <span class="key">groups</span>:
+      <span class="key">dev-dependencies</span>:
+        <span class="key">patterns</span>: [<span class="str">"@types/*"</span>, <span class="str">"eslint*"</span>, <span class="str">"jest*"</span>, <span class="str">"prettier"</span>]
+        <span class="key">update-types</span>: [<span class="str">minor</span>, <span class="str">patch</span>]
+    <span class="key">ignore</span>:
+      - <span class="key">dependency-name</span>: <span class="str">"some-legacy-package"</span>
+        <span class="key">versions</span>: [<span class="str">">= 2.0.0"</span>]
+
+  <span class="cm"># GitHub Actions</span>
+  - <span class="key">package-ecosystem</span>: <span class="str">github-actions</span>
+    <span class="key">directory</span>: <span class="str">/</span>
+    <span class="key">schedule</span>:
+      <span class="key">interval</span>: <span class="str">weekly</span>
+
+  <span class="cm"># Docker</span>
+  - <span class="key">package-ecosystem</span>: <span class="str">docker</span>
+    <span class="key">directory</span>: <span class="str">/</span>
+    <span class="key">schedule</span>:
+      <span class="key">interval</span>: <span class="str">monthly</span>
+
+  <span class="cm"># Python / pip</span>
+  - <span class="key">package-ecosystem</span>: <span class="str">pip</span>
+    <span class="key">directory</span>: <span class="str">/backend</span>
+    <span class="key">schedule</span>:
+      <span class="key">interval</span>: <span class="str">weekly</span></pre></div>
+
+<h3>Auto-merge Dependabot PRs</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">auto-merge safe dependency updates</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Auto-merge Dependabot PRs</span>
+
+<span class="key">on</span>:
+  <span class="key">pull_request</span>:
+
+<span class="key">permissions</span>:
+  <span class="key">contents</span>: <span class="str">write</span>
+  <span class="key">pull-requests</span>: <span class="str">write</span>
+
+<span class="key">jobs</span>:
+  <span class="key">auto-merge</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">if</span>: <span class="str">github.actor == 'dependabot[bot]'</span>
+    <span class="key">steps</span>:
+      - <span class="key">name</span>: <span class="str">Get metadata</span>
+        <span class="key">id</span>: <span class="str">meta</span>
+        <span class="key">uses</span>: <span class="val">dependabot/fetch-metadata@v2</span>
+        <span class="key">with</span>:
+          <span class="key">github-token</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+
+      <span class="cm"># Auto-merge only patch + minor updates</span>
+      - <span class="key">name</span>: <span class="str">Enable auto-merge</span>
+        <span class="key">if</span>: |
+          steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+          steps.meta.outputs.update-type == 'version-update:semver-minor'
+        <span class="key">run</span>: gh pr merge --auto --squash "$PR_URL"
+        <span class="key">env</span>:
+          <span class="key">PR_URL</span>: <span class="str">${{ github.event.pull_request.html_url }}</span>
+          <span class="key">GH_TOKEN</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span></pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 22 ═══════════════════════ -->
+<section class="module" id="m22">
+<div class="module-header"><div class="module-num">22</div><div>
+<div class="module-title">Security Hardening</div>
+<div class="module-desc">Comprehensive checklist to secure your repos, workflows, and supply chain</div>
+</div></div>
+
+<div class="section">
+<h3>Workflow Security Rules</h3>
+
+<h4>1 — Pin all actions to full SHA</h4>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-lang">yaml</span></div>
+<pre><span class="cm"># ❌ Tag can be moved to malicious commit</span>
+- <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+
+<span class="cm"># ✅ Immutable SHA — add tag as comment</span>
+- <span class="key">uses</span>: <span class="val">actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683</span>  <span class="cm"># v4.2.2</span></pre></div>
+
+<h4>2 — Prevent script injection</h4>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-lang">yaml</span></div>
+<pre><span class="cm"># ❌ Injection vulnerability — title could contain: $(malicious_command)</span>
+- <span class="key">run</span>: echo <span class="str">"PR title: ${{ github.event.pull_request.title }}"</span>
+
+<span class="cm"># ✅ Pass via env variable — treated as data, not code</span>
+- <span class="key">env</span>:
+    <span class="key">TITLE</span>: <span class="str">${{ github.event.pull_request.title }}</span>
+  <span class="key">run</span>: echo <span class="str">"PR title: $TITLE"</span></pre></div>
+
+<h4>3 — Minimal permissions everywhere</h4>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-lang">yaml</span></div>
+<pre><span class="cm"># Set restrictive defaults at workflow level</span>
+<span class="key">permissions</span>: read-all   <span class="cm"># or specify each as 'none'</span>
+
+<span class="key">jobs</span>:
+  <span class="key">deploy</span>:
+    <span class="key">permissions</span>:
+      <span class="key">contents</span>: <span class="str">write</span>   <span class="cm"># only grant write where specifically needed</span></pre></div>
+
+<h3>Complete Security Checklist</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Area</th><th>Action</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Actions</td><td>Pin to full SHA, not tags</td><td><span class="tag red">Critical</span></td></tr>
+<tr><td>Permissions</td><td>Set <code>permissions: read-all</code> at top, grant write per-job</td><td><span class="tag red">Critical</span></td></tr>
+<tr><td>Secrets</td><td>Never echo secrets; always use env vars</td><td><span class="tag red">Critical</span></td></tr>
+<tr><td>OIDC</td><td>Use OIDC instead of static cloud credentials</td><td><span class="tag yellow">High</span></td></tr>
+<tr><td>Forks</td><td>Don't give secrets to fork PRs (<code>pull_request</code> is safe)</td><td><span class="tag yellow">High</span></td></tr>
+<tr><td>Inputs</td><td>Sanitize all user-controlled inputs via env vars</td><td><span class="tag yellow">High</span></td></tr>
+<tr><td>Dependabot</td><td>Enable for all ecosystems; auto-merge patches</td><td><span class="tag yellow">High</span></td></tr>
+<tr><td>CodeQL</td><td>Enable code scanning on all main repos</td><td><span class="tag yellow">High</span></td></tr>
+<tr><td>Secret scanning</td><td>Enable push protection</td><td><span class="tag yellow">High</span></td></tr>
+<tr><td>PATs</td><td>Use fine-grained over classic; rotate regularly</td><td><span class="tag blue">Medium</span></td></tr>
+<tr><td>Branch protection</td><td>Require reviews + status checks on main</td><td><span class="tag blue">Medium</span></td></tr>
+<tr><td>Signed commits</td><td>Require GPG signed commits on main</td><td><span class="tag blue">Medium</span></td></tr>
+<tr><td>Actions reviews</td><td>Review third-party action source before using</td><td><span class="tag blue">Medium</span></td></tr>
+</tbody></table></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 23 ═══════════════════════ -->
+<section class="module" id="m23">
+<div class="module-header"><div class="module-num">23</div><div>
+<div class="module-title">GitHub REST API</div>
+<div class="module-desc">Automate everything on GitHub programmatically — repos, issues, PRs, releases, and more</div>
+</div></div>
+
+<div class="section">
+<h3>API Basics</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">REST API fundamentals</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Base URL</span>
+https://api.github.com
+
+<span class="cm"># Authentication header</span>
+-H <span class="str">"Authorization: Bearer YOUR_TOKEN"</span>
+<span class="cm"># or for PAT:</span>
+-H <span class="str">"Authorization: token YOUR_PAT"</span>
+
+<span class="cm"># Required accept header</span>
+-H <span class="str">"Accept: application/vnd.github+json"</span>
+
+<span class="cm"># API version header (recommended)</span>
+-H <span class="str">"X-GitHub-Api-Version: 2022-11-28"</span>
+
+<span class="cm"># Use :owner/:repo shorthand (gh cli auto-fills these)</span>
+gh api /repos/:owner/:repo/issues</pre></div>
+
+<h3>Common REST API Operations</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">frequently used endpoints</span><span class="code-lang">bash</span></div>
+<pre"><span class="cm"># ── Repos ────────────────────────────────────────────</span>
+<span class="cm"># List user repos</span>
+gh api /user/repos?per_page=100&type=all
+
+<span class="cm"># Create repo</span>
+gh api /user/repos --method POST \
+  -f name=my-repo -f private=true -f auto_init=true
+
+<span class="cm"># Update repo settings</span>
+gh api /repos/:owner/:repo --method PATCH \
+  -f description=<span class="str">"New description"</span> -f has_wiki=false
+
+<span class="cm"># ── Issues ───────────────────────────────────────────</span>
+<span class="cm"># List open issues</span>
+gh api /repos/:owner/:repo/issues?state=open&labels=bug
+
+<span class="cm"># Create issue</span>
+gh api /repos/:owner/:repo/issues --method POST \
+  -f title=<span class="str">"Bug: crash on login"</span> \
+  -f body=<span class="str">"Steps to reproduce..."</span> \
+  -f labels[]=bug -f labels[]=P1-high
+
+<span class="cm"># Add comment</span>
+gh api /repos/:owner/:repo/issues/42/comments --method POST \
+  -f body=<span class="str">"Fixed in PR #55"</span>
+
+<span class="cm"># ── Pull Requests ─────────────────────────────────────</span>
+<span class="cm"># List PRs</span>
+gh api /repos/:owner/:repo/pulls?state=open
+
+<span class="cm"># Create PR</span>
+gh api /repos/:owner/:repo/pulls --method POST \
+  -f title=<span class="str">"feat: login"</span> -f head=<span class="str">"feature/login"</span> -f base=<span class="str">"main"</span>
+
+<span class="cm"># Merge PR</span>
+gh api /repos/:owner/:repo/pulls/42/merge --method PUT \
+  -f merge_method=squash -f commit_title=<span class="str">"feat: login (#42)"</span>
+
+<span class="cm"># ── Releases ─────────────────────────────────────────</span>
+gh api /repos/:owner/:repo/releases --method POST \
+  -f tag_name=v1.2.0 -f name=<span class="str">"Release v1.2.0"</span> \
+  -f body=<span class="str">"## Changes\n- feat: login\n- fix: crash"</span> \
+  -F draft=false -F prerelease=false
+
+<span class="cm"># ── Actions ──────────────────────────────────────────</span>
+<span class="cm"># List workflow runs</span>
+gh api /repos/:owner/:repo/actions/runs?branch=main&status=success
+
+<span class="cm"># Re-run failed jobs</span>
+gh api /repos/:owner/:repo/actions/runs/RUN_ID/rerun-failed-jobs --method POST
+
+<span class="cm"># Delete old artifacts (cleanup)</span>
+gh api /repos/:owner/:repo/actions/artifacts?per_page=100 \
+  | jq '.artifacts[].id' \
+  | xargs -I{} gh api /repos/:owner/:repo/actions/artifacts/{} --method DELETE</pre></div>
+
+<h3>Octokit (JavaScript SDK)</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">octokit.js usage</span><span class="code-lang">javascript</span></div>
+<pre><span class="kw">import</span> { Octokit } <span class="kw">from</span> <span class="str">"@octokit/rest"</span>;
+
+<span class="kw">const</span> octokit = <span class="kw">new</span> <span class="fn">Octokit</span>({ auth: process.env.GITHUB_TOKEN });
+
+<span class="cm">// Get all repos for org</span>
+<span class="kw">const</span> repos = <span class="kw">await</span> octokit.<span class="fn">paginate</span>(octokit.rest.repos.listForOrg, {
+  org: <span class="str">'my-org'</span>,
+  type: <span class="str">'all'</span>,
+  per_page: <span class="num">100</span>
+});
+
+<span class="cm">// Create issue</span>
+<span class="kw">const</span> { data: issue } = <span class="kw">await</span> octokit.rest.issues.<span class="fn">create</span>({
+  owner: <span class="str">'myorg'</span>,
+  repo: <span class="str">'myrepo'</span>,
+  title: <span class="str">'Automated issue'</span>,
+  body: <span class="str">'Created via API'</span>,
+  labels: [<span class="str">'bug'</span>]
+});
+
+<span class="cm">// Create release</span>
+<span class="kw">await</span> octokit.rest.repos.<span class="fn">createRelease</span>({
+  owner: <span class="str">'myorg'</span>,
+  repo: <span class="str">'myrepo'</span>,
+  tag_name: <span class="str">'v1.0.0'</span>,
+  name: <span class="str">'Release v1.0.0'</span>,
+  generate_release_notes: <span class="val">true</span>
+});
+
+<span class="cm">// Pagination helper</span>
+<span class="kw">for await</span> (<span class="kw">const</span> response <span class="kw">of</span> octokit.<span class="fn">paginate</span>.iterator(
+  octokit.rest.issues.listForRepo,
+  { owner: <span class="str">'myorg'</span>, repo: <span class="str">'myrepo'</span>, state: <span class="str">'open'</span> }
+)) {
+  response.data.<span class="fn">forEach</span>(issue => console.<span class="fn">log</span>(issue.title));
+}</pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 24 ═══════════════════════ -->
+<section class="module" id="m24">
+<div class="module-header"><div class="module-num">24</div><div>
+<div class="module-title">GitHub GraphQL API</div>
+<div class="module-desc">Fetch exactly the data you need in a single request — more efficient than REST</div>
+</div></div>
+
+<div class="section">
+<h3>Why GraphQL over REST?</h3>
+<ul>
+<li><strong>Single request</strong> — get data from multiple resources at once</li>
+<li><strong>No over-fetching</strong> — ask for exactly the fields you need</li>
+<li><strong>Strongly typed</strong> — schema-first, auto-documented</li>
+<li><strong>Better rate limits</strong> — measured in points, not requests</li>
+</ul>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">GraphQL queries with gh cli</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Endpoint</span>
+https://api.github.com/graphql
+
+<span class="cm"># Get repo info with PRs in one query</span>
+gh api graphql -f query=<span class="str">'
+  query($owner: String!, $repo: String!) {
+    repository(owner: $owner, name: $repo) {
+      name
+      stargazerCount
+      forkCount
+      pullRequests(states: OPEN, first: 10) {
+        totalCount
+        nodes {
+          title
+          number
+          author { login }
+          reviews(first: 5) {
+            nodes { state author { login } }
+          }
+        }
+      }
+    }
+  }
+'</span> -f owner=<span class="str">'myorg'</span> -f repo=<span class="str">'myrepo'</span></pre></div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">GraphQL mutations</span><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Add label to issue (mutation)</span>
+gh api graphql -f query=<span class="str">'
+  mutation($issueId: ID!, $labelId: ID!) {
+    addLabelsToLabelable(input: {
+      labelableId: $issueId
+      labelIds: [$labelId]
+    }) {
+      labelable {
+        ... on Issue { title }
+      }
+    }
+  }
+'</span> -f issueId=<span class="str">"ISSUE_NODE_ID"</span> -f labelId=<span class="str">"LABEL_NODE_ID"</span>
+
+<span class="cm"># Get node IDs first</span>
+gh api graphql -f query=<span class="str">'
+  query { repository(owner:"org", name:"repo") {
+    issue(number: 42) { id }
+  }}
+'</span></pre></div>
+
+<h3>GraphQL with JavaScript</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">graphql-request usage</span><span class="code-lang">javascript</span></div>
+<pre><span class="kw">import</span> { GraphQLClient, gql } <span class="kw">from</span> <span class="str">'graphql-request'</span>;
+
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">GraphQLClient</span>(<span class="str">'https://api.github.com/graphql'</span>, {
+  headers: { Authorization: <span class="str">`Bearer ${process.env.GITHUB_TOKEN}`</span> }
+});
+
+<span class="kw">const</span> GET_ISSUES = gql`
+  query GetIssues($owner: String!, $repo: String!, $cursor: String) {
+    repository(owner: $owner, name: $repo) {
+      issues(first: 50, after: $cursor, states: OPEN) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          number title
+          labels(first: 5) { nodes { name color } }
+          assignees(first: 3) { nodes { login } }
+        }
+      }
+    }
+  }
+`;
+
+<span class="kw">const</span> data = <span class="kw">await</span> client.<span class="fn">request</span>(GET_ISSUES, {
+  owner: <span class="str">'myorg'</span>, repo: <span class="str">'myrepo'</span>
+});
+console.<span class="fn">log</span>(data.repository.issues.nodes);</pre></div>
+</div>
+</section>
+
+
+<!-- ═══════════════════════ MODULE 25 ═══════════════════════ -->
+<section class="module" id="m25">
+<div class="module-header"><div class="module-num">25</div><div>
+<div class="module-title">GitHub Apps</div>
+<div class="module-desc">Build powerful integrations that act as first-class GitHub citizens with their own identity</div>
+</div></div>
+
+<div class="section">
+<h3>GitHub App vs OAuth App vs PAT</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Feature</th><th>GitHub App</th><th>OAuth App</th><th>PAT</th></tr></thead>
+<tbody>
+<tr><td>Acts as</td><td>Bot with own identity</td><td>User</td><td>User</td></tr>
+<tr><td>Rate limits</td><td>5000/hr per install</td><td>5000/hr per user</td><td>5000/hr</td></tr>
+<tr><td>Granular permissions</td><td>✅ Per-repo, per-permission</td><td>❌ Coarse scopes</td><td>✅ Fine-grained (new)</td></tr>
+<tr><td>Short-lived tokens</td><td>✅ 1 hour installation tokens</td><td>❌ Long-lived</td><td>❌ Long-lived</td></tr>
+<tr><td>Webhooks</td><td>✅ Built-in</td><td>✅ Yes</td><td>❌ No</td></tr>
+<tr><td>Best for</td><td>Production integrations</td><td>User auth flows</td><td>Personal automation</td></tr>
+</tbody></table></div>
+
+<h3>Creating a GitHub App</h3>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Register</h4><p>Settings → Developer settings → GitHub Apps → New GitHub App. Set name, homepage URL, webhook URL.</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Set permissions</h4><p>Choose only the permissions your app needs (read issues, write PRs, etc.)</p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Generate private key</h4><p>Download the .pem file — this is your App's credential. Store safely.</p></div></div>
+<div class="step"><div class="step-num">4</div><div class="step-content"><h4>Install to repos</h4><p>Users/orgs install your app and grant it access to specific repositories.</p></div></div>
+</div>
+
+<h3>Using GitHub App Token in Actions</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">get app installation token</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">steps</span>:
+  <span class="cm"># Generate installation token from App credentials</span>
+  - <span class="key">name</span>: <span class="str">Get GitHub App token</span>
+    <span class="key">id</span>: <span class="str">app-token</span>
+    <span class="key">uses</span>: <span class="val">actions/create-github-app-token@v1</span>
+    <span class="key">with</span>:
+      <span class="key">app-id</span>: <span class="str">${{ vars.APP_ID }}</span>
+      <span class="key">private-key</span>: <span class="str">${{ secrets.APP_PRIVATE_KEY }}</span>
+
+  <span class="cm"># Use the token like GITHUB_TOKEN</span>
+  - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+    <span class="key">with</span>:
+      <span class="key">token</span>: <span class="str">${{ steps.app-token.outputs.token }}</span>
+
+  - <span class="key">name</span>: <span class="str">Create PR with App identity</span>
+    <span class="key">env</span>:
+      <span class="key">GH_TOKEN</span>: <span class="str">${{ steps.app-token.outputs.token }}</span>
+    <span class="key">run</span>: gh pr create --title <span class="str">"chore: auto-update"</span> --body <span class="str">"Auto-generated"</span></pre></div>
+
+<h3>Building a Simple GitHub App (Node.js)</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">app.js using @octokit/app</span><span class="code-lang">javascript</span></div>
+<pre><span class="kw">import</span> { App, createNodeMiddleware } <span class="kw">from</span> <span class="str">"@octokit/app"</span>;
+<span class="kw">import</span> { createServer } <span class="kw">from</span> <span class="str">"http"</span>;
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">App</span>({
+  appId: process.env.APP_ID,
+  privateKey: process.env.PRIVATE_KEY,
+  webhooks: { secret: process.env.WEBHOOK_SECRET },
+});
+
+<span class="cm">// Auto-label new issues</span>
+app.webhooks.<span class="fn">on</span>(<span class="str">"issues.opened"</span>, <span class="kw">async</span> ({ octokit, payload }) => {
+  <span class="kw">await</span> octokit.rest.issues.<span class="fn">addLabels</span>({
+    owner: payload.repository.owner.login,
+    repo: payload.repository.name,
+    issue_number: payload.issue.number,
+    labels: [<span class="str">"triage"</span>]
+  });
+});
+
+<span class="cm">// Auto-approve Dependabot PRs</span>
+app.webhooks.<span class="fn">on</span>(<span class="str">"pull_request.opened"</span>, <span class="kw">async</span> ({ octokit, payload }) => {
+  <span class="kw">if</span> (payload.sender.login === <span class="str">"dependabot[bot]"</span>) {
+    <span class="kw">await</span> octokit.rest.pulls.<span class="fn">createReview</span>({
+      owner: payload.repository.owner.login,
+      repo: payload.repository.name,
+      pull_number: payload.pull_request.number,
+      event: <span class="str">"APPROVE"</span>
+    });
+  }
+});
+
+<span class="kw">const</span> server = <span class="fn">createServer</span>(<span class="fn">createNodeMiddleware</span>(app));
+server.<span class="fn">listen</span>(<span class="num">3000</span>);</pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 26 ═══════════════════════ -->
+<section class="module" id="m26">
+<div class="module-header"><div class="module-num">26</div><div>
+<div class="module-title">OAuth Apps</div>
+<div class="module-desc">Let users log in with GitHub — implement OAuth 2.0 in your web applications</div>
+</div></div>
+
+<div class="section">
+<h3>OAuth Flow</h3>
+<div class="diagram">User clicks "Login with GitHub"
+       │
+       ▼
+Your app redirects to GitHub authorization:
+  https://github.com/login/oauth/authorize
+    ?client_id=YOUR_CLIENT_ID
+    &redirect_uri=https://yourapp.com/callback
+    &scope=read:user,user:email
+    &state=RANDOM_STRING         ← CSRF protection
+       │
+       ▼ (User approves)
+GitHub redirects back to your callback URL:
+  https://yourapp.com/callback?code=TEMP_CODE&state=RANDOM_STRING
+       │
+       ▼ (Backend only — never expose client_secret!)
+POST https://github.com/login/oauth/access_token
+  client_id + client_secret + code
+       │
+       ▼
+Receive: access_token + scope + token_type
+       │
+       ▼
+Use token to call GitHub API as the user</div>
+
+<h3>OAuth Implementation (Node.js/Express)</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">oauth-server.js</span><span class="code-lang">javascript</span></div>
+<pre"><span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> crypto = <span class="fn">require</span>(<span class="str">'crypto'</span>);
+
+<span class="kw">const</span> CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+<span class="kw">const</span> CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+<span class="kw">const</span> stateStore = <span class="kw">new</span> <span class="fn">Map</span>();
+
+<span class="cm">// Step 1: Redirect to GitHub</span>
+app.<span class="fn">get</span>(<span class="str">'/auth/github'</span>, (req, res) => {
+  <span class="kw">const</span> state = crypto.<span class="fn">randomBytes</span>(<span class="num">16</span>).<span class="fn">toString</span>(<span class="str">'hex'</span>);
+  stateStore.<span class="fn">set</span>(state, <span class="val">true</span>);
+
+  <span class="kw">const</span> params = <span class="kw">new</span> <span class="fn">URLSearchParams</span>({
+    client_id: CLIENT_ID,
+    redirect_uri: <span class="str">'https://yourapp.com/auth/callback'</span>,
+    scope: <span class="str">'read:user user:email'</span>,
+    state
+  });
+  res.<span class="fn">redirect</span>(<span class="str">`https://github.com/login/oauth/authorize?${params}`</span>);
+});
+
+<span class="cm">// Step 2: Handle callback</span>
+app.<span class="fn">get</span>(<span class="str">'/auth/callback'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> { code, state } = req.query;
+
+  <span class="cm">// Validate state (CSRF protection)</span>
+  <span class="kw">if</span> (!stateStore.<span class="fn">has</span>(state)) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">403</span>).<span class="fn">send</span>(<span class="str">'Invalid state'</span>);
+  stateStore.<span class="fn">delete</span>(state);
+
+  <span class="cm">// Exchange code for token (server-side only)</span>
+  <span class="kw">const</span> tokenRes = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://github.com/login/oauth/access_token'</span>, {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'Accept'</span>: <span class="str">'application/json'</span>, <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+    body: JSON.<span class="fn">stringify</span>({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code })
+  });
+  <span class="kw">const</span> { access_token } = <span class="kw">await</span> tokenRes.<span class="fn">json</span>();
+
+  <span class="cm">// Get user info</span>
+  <span class="kw">const</span> userRes = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.github.com/user'</span>, {
+    headers: { <span class="str">'Authorization'</span>: <span class="str">`token ${access_token}`</span> }
+  });
+  <span class="kw">const</span> user = <span class="kw">await</span> userRes.<span class="fn">json</span>();
+
+  <span class="cm">// Store in session, redirect to app</span>
+  req.session.user = { id: user.id, login: user.login, name: user.name };
+  res.<span class="fn">redirect</span>(<span class="str">'/dashboard'</span>);
+});</pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 27 ═══════════════════════ -->
+<section class="module" id="m27">
+<div class="module-header"><div class="module-num">27</div><div>
+<div class="module-title">Deploy to Cloud</div>
+<div class="module-desc">Production deployment workflows for AWS, GCP, Azure, Vercel, and more</div>
+</div></div>
+
+<div class="section">
+<h3>Deploy to AWS S3 + CloudFront (OIDC)</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">deploy-s3.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Deploy Frontend to S3</span>
+
+<span class="key">on</span>:
+  <span class="key">push</span>:
+    <span class="key">branches</span>: [main]
+
+<span class="key">permissions</span>:
+  <span class="key">id-token</span>: <span class="str">write</span>
+  <span class="key">contents</span>: <span class="str">read</span>
+
+<span class="key">jobs</span>:
+  <span class="key">deploy</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+        <span class="key">with</span>: {<span class="key">node-version</span>: <span class="str">'20'</span>, <span class="key">cache</span>: <span class="str">'npm'</span>}
+      - <span class="key">run</span>: npm ci && npm run build
+
+      - <span class="key">name</span>: <span class="str">Configure AWS via OIDC</span>
+        <span class="key">uses</span>: <span class="val">aws-actions/configure-aws-credentials@v4</span>
+        <span class="key">with</span>:
+          <span class="key">role-to-assume</span>: <span class="str">${{ secrets.AWS_DEPLOY_ROLE }}</span>
+          <span class="key">aws-region</span>: <span class="str">ap-south-1</span>
+
+      - <span class="key">name</span>: <span class="str">Deploy to S3</span>
+        <span class="key">run</span>: |
+          aws s3 sync dist/ s3://${{ vars.S3_BUCKET }} \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html"
+          aws s3 cp dist/index.html s3://${{ vars.S3_BUCKET }}/index.html \
+            --cache-control "no-cache, no-store"
+
+      - <span class="key">name</span>: <span class="str">Invalidate CloudFront</span>
+        <span class="key">run</span>: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
+            --paths "/*"</pre></div>
+
+<h3>Deploy to Vercel</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">deploy-vercel.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">jobs</span>:
+  <span class="key">deploy</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">name</span>: <span class="str">Deploy to Vercel</span>
+        <span class="key">uses</span>: <span class="val">amondnet/vercel-action@v25</span>
+        <span class="key">with</span>:
+          <span class="key">vercel-token</span>: <span class="str">${{ secrets.VERCEL_TOKEN }}</span>
+          <span class="key">vercel-org-id</span>: <span class="str">${{ secrets.VERCEL_ORG_ID }}</span>
+          <span class="key">vercel-project-id</span>: <span class="str">${{ secrets.VERCEL_PROJECT_ID }}</span>
+          <span class="key">vercel-args</span>: <span class="str">'--prod'</span></pre></div>
+
+<h3>Deploy Node.js App to EC2 via SSH</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">deploy-ec2.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">jobs</span>:
+  <span class="key">deploy</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">environment</span>: production
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+
+      - <span class="key">name</span>: <span class="str">Deploy via SSH</span>
+        <span class="key">uses</span>: <span class="val">appleboy/ssh-action@v1.0.3</span>
+        <span class="key">with</span>:
+          <span class="key">host</span>: <span class="str">${{ secrets.EC2_HOST }}</span>
+          <span class="key">username</span>: <span class="str">ubuntu</span>
+          <span class="key">key</span>: <span class="str">${{ secrets.EC2_SSH_KEY }}</span>
+          <span class="key">script</span>: |
+            cd /var/www/app
+            git pull origin main
+            npm ci --production
+            pm2 restart app --update-env
+            pm2 save</pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 28 ═══════════════════════ -->
+<section class="module" id="m28">
+<div class="module-header"><div class="module-num">28</div><div>
+<div class="module-title">Self-Hosted Runners</div>
+<div class="module-desc">Run workflows on your own machines for full control, no billing, and custom environments</div>
+</div></div>
+
+<div class="section">
+<h3>When to Use Self-Hosted Runners</h3>
+<ul>
+<li><strong>Cost</strong> — No GitHub billing minutes for private repos</li>
+<li><strong>Hardware</strong> — Need specific CPU/GPU/RAM not available on GitHub-hosted runners</li>
+<li><strong>Network</strong> — Need access to private VPC resources (databases, internal APIs)</li>
+<li><strong>Compliance</strong> — Code must not leave your infrastructure</li>
+<li><strong>Caching</strong> — Local cache persists across runs (faster builds)</li>
+</ul>
+
+<h3>Setting Up a Self-Hosted Runner</h3>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Register</h4><p>Repo → Settings → Actions → Runners → New self-hosted runner → Choose OS</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Install &amp; configure on your machine</h4>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-lang">bash</span></div>
+<pre><span class="cm"># Download runner (version from GitHub UI)</span>
+mkdir actions-runner && cd actions-runner
+curl -o actions-runner-linux-x64.tar.gz -L \
+  https://github.com/actions/runner/releases/download/v2.x.x/actions-runner-linux-x64-2.x.x.tar.gz
+tar xzf ./actions-runner-linux-x64.tar.gz
+
+<span class="cm"># Configure (use token from GitHub UI)</span>
+./config.sh --url https://github.com/your-org/your-repo \
+  --token YOUR_REGISTRATION_TOKEN \
+  --name <span class="str">"my-runner"</span> \
+  --labels <span class="str">"self-hosted,linux,x64,gpu"</span>
+
+<span class="cm"># Run as a service (recommended)</span>
+sudo ./svc.sh install
+sudo ./svc.sh start</pre></div>
+</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Use in workflow</h4>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-lang">yaml</span></div>
+<pre><span class="key">jobs</span>:
+  <span class="key">build</span>:
+    <span class="key">runs-on</span>: [self-hosted, linux, gpu]  <span class="cm"># match your labels</span>
+    <span class="key">steps</span>:
+      - <span class="key">run</span>: nvidia-smi  <span class="cm"># GPU available!</span></pre></div>
+</div></div>
+</div>
+
+<h3>Runner Groups (Organization)</h3>
+<p>Organization runners can be grouped and assigned to specific repositories:</p>
+<ul>
+<li><strong>Default group</strong> — all repos can use</li>
+<li><strong>Custom groups</strong> — restrict to specific repos (e.g., only production-deploy repo can use prod-runners)</li>
+<li>Configure at: Org Settings → Actions → Runner groups</li>
+</ul>
+
+<div class="callout warning"><div class="callout-icon">⚠️</div><div class="callout-content">
+<div class="callout-title">Security Warning for Public Repos</div>
+<div class="callout-body">Never use self-hosted runners for public repositories — any fork PR can execute arbitrary code on your machine. Self-hosted runners should only be used for private repos or organization repos with proper access controls.</div>
+</div></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 29 ═══════════════════════ -->
+<section class="module" id="m29">
+<div class="module-header"><div class="module-num">29</div><div>
+<div class="module-title">Release Automation</div>
+<div class="module-desc">Semantic versioning, automated changelogs, and tag-triggered release pipelines</div>
+</div></div>
+
+<div class="section">
+<h3>Conventional Commits</h3>
+<p>Standardized commit messages that enable automated changelog generation and version bumping.</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">commit format</span><span class="code-lang">text</span></div>
+<pre><span class="cm"># Format: type(scope): description</span>
+
+feat: add user authentication          → bumps MINOR version
+fix: correct login redirect URL        → bumps PATCH version
+docs: update API documentation         → no version bump
+chore: update dependencies             → no version bump
+refactor: extract auth helper          → no version bump
+perf: optimize database queries        → bumps PATCH
+test: add login unit tests             → no bump
+
+<span class="cm"># Breaking change (! or BREAKING CHANGE footer)</span>
+feat!: redesign authentication API     → bumps MAJOR version
+feat(auth): new login
+BREAKING CHANGE: removed /login/v1    → bumps MAJOR version</pre></div>
+
+<h3>Automated Release with Semantic Release</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.github/workflows/release.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Semantic Release</span>
+
+<span class="key">on</span>:
+  <span class="key">push</span>:
+    <span class="key">branches</span>: [main]
+
+<span class="key">permissions</span>:
+  <span class="key">contents</span>: <span class="str">write</span>
+  <span class="key">issues</span>: <span class="str">write</span>
+  <span class="key">pull-requests</span>: <span class="str">write</span>
+
+<span class="key">jobs</span>:
+  <span class="key">release</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+        <span class="key">with</span>:
+          <span class="key">fetch-depth</span>: <span class="num">0</span>         <span class="cm"># full history for changelog</span>
+      - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+        <span class="key">with</span>: {<span class="key">node-version</span>: <span class="str">'20'</span>}
+      - <span class="key">run</span>: npm ci
+      - <span class="key">name</span>: <span class="str">Semantic Release</span>
+        <span class="key">env</span>:
+          <span class="key">GITHUB_TOKEN</span>: <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+          <span class="key">NPM_TOKEN</span>: <span class="str">${{ secrets.NPM_TOKEN }}</span>      <span class="cm"># if publishing npm</span>
+        <span class="key">run</span>: npx semantic-release</pre></div>
+
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">.releaserc.json</span><span class="code-lang">json</span></div>
+<pre>{
+  <span class="key">"branches"</span>: [<span class="str">"main"</span>, {<span class="key">"name"</span>: <span class="str">"beta"</span>, <span class="key">"prerelease"</span>: <span class="val">true</span>}],
+  <span class="key">"plugins"</span>: [
+    <span class="str">"@semantic-release/commit-analyzer"</span>,
+    <span class="str">"@semantic-release/release-notes-generator"</span>,
+    <span class="str">"@semantic-release/changelog"</span>,
+    [<span class="str">"@semantic-release/npm"</span>, {<span class="key">"npmPublish"</span>: <span class="val">true</span>}],
+    [<span class="str">"@semantic-release/git"</span>, {
+      <span class="key">"assets"</span>: [<span class="str">"CHANGELOG.md"</span>, <span class="str">"package.json"</span>],
+      <span class="key">"message"</span>: <span class="str">"chore(release): ${nextRelease.version} [skip ci]"</span>
+    }],
+    <span class="str">"@semantic-release/github"</span>
+  ]
+}</pre></div>
+</div>
+</section>
+
+<!-- ═══════════════════════ MODULE 30 ═══════════════════════ -->
+<section class="module" id="m30">
+<div class="module-header"><div class="module-num">30</div><div>
+<div class="module-title">Real-World Pipelines</div>
+<div class="module-desc">Complete, production-grade CI/CD workflows you can drop into your projects today</div>
+</div></div>
+
+<div class="section">
+<h3>Complete Mono-Repo CI/CD</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-title">monorepo-pipeline.yml</span><span class="code-lang">yaml</span></div>
+<pre><span class="key">name</span>: <span class="str">Mono-repo CI/CD</span>
+
+<span class="key">on</span>:
+  <span class="key">push</span>:
+    <span class="key">branches</span>: [main]
+  <span class="key">pull_request</span>:
+    <span class="key">branches</span>: [main]
+
+<span class="key">concurrency</span>:
+  <span class="key">group</span>: <span class="str">${{ github.workflow }}-${{ github.ref }}</span>
+  <span class="key">cancel-in-progress</span>: <span class="val">true</span>
+
+<span class="key">permissions</span>:
+  <span class="key">contents</span>: <span class="str">read</span>
+  <span class="key">pull-requests</span>: <span class="str">write</span>
+
+<span class="key">jobs</span>:
+  <span class="cm"># Detect what changed to only run relevant jobs</span>
+  <span class="key">changes</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">outputs</span>:
+      <span class="key">api</span>: <span class="str">${{ steps.filter.outputs.api }}</span>
+      <span class="key">web</span>: <span class="str">${{ steps.filter.outputs.web }}</span>
+      <span class="key">mobile</span>: <span class="str">${{ steps.filter.outputs.mobile }}</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">id</span>: <span class="str">filter</span>
+        <span class="key">uses</span>: <span class="val">dorny/paths-filter@v3</span>
+        <span class="key">with</span>:
+          <span class="key">filters</span>: |
+            api:   [<span class="str">'packages/api/**'</span>]
+            web:   [<span class="str">'packages/web/**'</span>]
+            mobile: [<span class="str">'packages/mobile/**'</span>]
+
+  <span class="key">api-tests</span>:
+    <span class="key">needs</span>: changes
+    <span class="key">if</span>: <span class="str">needs.changes.outputs.api == 'true'</span>
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">services</span>:
+      <span class="key">postgres</span>:
+        <span class="key">image</span>: <span class="str">postgres:16</span>
+        <span class="key">env</span>: {<span class="key">POSTGRES_DB</span>: <span class="str">test</span>, <span class="key">POSTGRES_USER</span>: <span class="str">test</span>, <span class="key">POSTGRES_PASSWORD</span>: <span class="str">test</span>}
+        <span class="key">ports</span>: [<span class="str">'5432:5432'</span>]
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+        <span class="key">with</span>: {<span class="key">node-version</span>: <span class="str">'20'</span>, <span class="key">cache</span>: <span class="str">'npm'</span>}
+      - <span class="key">run</span>: npm ci && npm test --workspace=packages/api
+        <span class="key">env</span>:
+          <span class="key">DATABASE_URL</span>: <span class="str">postgresql://test:test@localhost:5432/test</span>
+
+  <span class="key">web-tests</span>:
+    <span class="key">needs</span>: changes
+    <span class="key">if</span>: <span class="str">needs.changes.outputs.web == 'true'</span>
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="val">actions/checkout@v4</span>
+      - <span class="key">uses</span>: <span class="val">actions/setup-node@v4</span>
+        <span class="key">with</span>: {<span class="key">node-version</span>: <span class="str">'20'</span>, <span class="key">cache</span>: <span class="str">'npm'</span>}
+      - <span class="key">run</span>: npm ci && npm test --workspace=packages/web
+
+  <span class="key">deploy</span>:
+    <span class="key">needs</span>: [api-tests, web-tests]
+    <span class="key">if</span>: |
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      !contains(needs.*.result, 'failure')
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">permissions</span>:
+      <span class="key">id-token</span>: <span class="str">write</span>
+      <span class="key">contents</span>: <span class="str">read</span>
+    <span class="key">steps</span>:
+      - <span class="key">run</span>: echo <span class="str">"Deploying changed packages..."</span></pre></div>
+
+<h3>Full Quick Reference</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Task</th><th>How To</th></tr></thead>
+<tbody>
+<tr><td>Add secret</td><td>Repo Settings → Secrets → Actions → New secret</td></tr>
+<tr><td>Use secret</td><td><code>${{ secrets.MY_SECRET }}</code></td></tr>
+<tr><td>Use variable</td><td><code>${{ vars.MY_VAR }}</code></td></tr>
+<tr><td>Current branch name</td><td><code>${{ github.ref_name }}</code></td></tr>
+<tr><td>Short commit SHA</td><td><code>${{ github.sha }}</code> then <code>:0:7</code> in bash</td></tr>
+<tr><td>Skip CI</td><td>Add <code>[skip ci]</code> to commit message</td></tr>
+<tr><td>Manual trigger</td><td><code>workflow_dispatch:</code> trigger</td></tr>
+<tr><td>Cross-job data</td><td><code>outputs:</code> + <code>${{ needs.job.outputs.key }}</code></td></tr>
+<tr><td>Dynamic env var</td><td><code>echo "KEY=val" >> $GITHUB_ENV</code></td></tr>
+<tr><td>Step output</td><td><code>echo "key=val" >> $GITHUB_OUTPUT</code></td></tr>
+<tr><td>Job summary</td><td><code>echo "# Title" >> $GITHUB_STEP_SUMMARY</code></td></tr>
+<tr><td>Always run step</td><td><code>if: always()</code></td></tr>
+<tr><td>Auto token</td><td><code>${{ secrets.GITHUB_TOKEN }}</code></td></tr>
+<tr><td>Keyless AWS auth</td><td>OIDC + <code>aws-actions/configure-aws-credentials</code></td></tr>
+<tr><td>Cache npm</td><td><code>cache: 'npm'</code> in <code>setup-node</code></td></tr>
+<tr><td>Multi-OS test</td><td>Matrix with <code>os: [ubuntu, macos, windows]</code></td></tr>
+<tr><td>Parallel jobs</td><td>Multiple jobs without <code>needs:</code></td></tr>
+<tr><td>Sequential jobs</td><td><code>needs: [job1, job2]</code></td></tr>
+<tr><td>Reusable workflow</td><td><code>uses: ./.github/workflows/name.yml</code></td></tr>
+<tr><td>Publish Docker</td><td>Login to <code>ghcr.io</code> + <code>docker/build-push-action</code></td></tr>
+<tr><td>Auto release</td><td>Conventional Commits + <code>semantic-release</code></td></tr>
+<tr><td>Trigger externally</td><td><code>repository_dispatch</code> + API POST</td></tr>
+<tr><td>GitHub CLI in workflow</td><td>Set <code>GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}</code></td></tr>
+</tbody></table></div>
+
+<div class="callout success"><div class="callout-icon">🎓</div><div class="callout-content">
+<div class="callout-title">GitHub Ultimate Mastery Complete!</div>
+<div class="callout-body">You've covered everything — from Git internals, the full GitHub platform (Pages, Packages, Codespaces, Webhooks, Projects), GitHub Actions CI/CD, all security layers (OIDC, CodeQL, Dependabot, secret scanning), the REST &amp; GraphQL APIs, GitHub Apps, OAuth, self-hosted runners, and real-world pipelines. You now have everything needed to build, automate, and secure any project on GitHub.</div>
+</div></div>
+
+<div class="module-footer">
+github-ultimate-mastery.html · 30 modules · Shankar @ TriByte Technologies · 2024
+</div>
+</div>
+</section>
+
+</main>
+</div>
+
+<script>
+// Progress bar
+function updateProgress() {
+  const el = document.querySelector('.main');
+  const pct = Math.min(100, (window.scrollY / (el.scrollHeight - window.innerHeight)) * 100);
+  document.getElementById('pf').style.width = pct + '%';
+}
+window.addEventListener('scroll', updateProgress, {passive: true});
+
+// Active nav
+const modules = document.querySelectorAll('.module');
+const navLinks = document.querySelectorAll('.nav-link');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (a) { a.classList.add('active'); a.scrollIntoView({block:'nearest'}); }
+    }
+  });
+}, {rootMargin: '-15% 0px -75% 0px'});
+modules.forEach(m => io.observe(m));
+</script>
+</body>
+</html>

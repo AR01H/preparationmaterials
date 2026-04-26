@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software Product Development — End-to-End Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #12151c;
+    --surface2: #1a1e28;
+    --border: #232838;
+    --accent: #f0c060;
+    --accent2: #5b9cf6;
+    --accent3: #64d98a;
+    --accent4: #e06b8b;
+    --text: #e8eaf0;
+    --muted: #8892a4;
+    --phase1: #5b9cf6;
+    --phase2: #a78bfa;
+    --phase3: #f0c060;
+    --phase4: #64d98a;
+    --phase5: #e06b8b;
+    --phase6: #f97316;
+    --phase7: #22d3ee;
+    --phase8: #a3e635;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0a0c10 0%, #111827 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 70px 60px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(91,156,246,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 5vw, 58px);
+    font-weight: 900;
+    line-height: 1.1;
+    max-width: 700px;
+    margin-bottom: 20px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 560px;
+    margin-bottom: 30px;
+  }
+  .hero-stats {
+    display: flex; gap: 40px; flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-label { font-size: 12px; color: var(--muted); letter-spacing: 0.05em; }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+
+  /* TOC */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin: 50px auto;
+    max-width: 1100px;
+    margin-left: 40px; margin-right: 40px;
+  }
+  .toc-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .toc-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .toc-item:hover { background: var(--surface2); border-color: var(--border); color: var(--text); }
+  .toc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* PHASES */
+  .phases { padding: 10px 40px 60px; max-width: 1100px; margin: 0 auto; }
+
+  .phase {
+    margin-bottom: 56px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+  .phase::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+
+  .phase-header {
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 20px;
+  }
+  .phase-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 44px; font-weight: 900;
+    line-height: 1;
+    opacity: 0.18;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .phase-meta { flex: 1; }
+  .phase-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+  .phase-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .phase-desc { color: var(--muted); font-size: 14px; max-width: 640px; }
+
+  .phase-body { padding: 32px 40px; }
+
+  .steps-list { list-style: none; }
+  .step-item {
+    display: flex; gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    opacity: 0.4;
+    flex-shrink: 0;
+    padding-top: 3px;
+    min-width: 28px;
+  }
+  .step-content { flex: 1; }
+  .step-title {
+    font-weight: 700; font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .step-detail { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  /* Deliverables / checklist */
+  .deliverables {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-top: 24px;
+  }
+  .deliverables-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .checklist { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+  .checklist li {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+  }
+  .checklist li::before { content: '✓ '; color: var(--accent3); }
+
+  /* System Design section */
+  .system-design {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    margin: 0 40px 56px;
+    max-width: 1100px;
+    margin-left: 40px; margin-right: 40px;
+  }
+  .sd-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .sd-sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+  .sd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  .sd-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+  }
+  .sd-card-icon { font-size: 22px; margin-bottom: 10px; }
+  .sd-card-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .sd-card-text { color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .sd-card ul { margin-top: 8px; padding-left: 16px; }
+  .sd-card li { color: var(--muted); font-size: 12px; margin-bottom: 3px; }
+
+  /* Architecture diagram */
+  .arch-diagram {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    overflow-x: auto;
+  }
+  .arch-diagram pre { white-space: pre; line-height: 1.8; }
+  .arch-highlight { color: var(--accent2); }
+  .arch-arrow { color: var(--accent); }
+  .arch-box { color: var(--accent3); }
+
+  /* Color coding */
+  .p1 { color: var(--phase1); } .p1b::before { background: var(--phase1) !important; }
+  .p2 { color: var(--phase2); }
+  .p3 { color: var(--phase3); }
+  .p4 { color: var(--phase4); }
+  .p5 { color: var(--phase5); }
+  .p6 { color: var(--phase6); }
+  .p7 { color: var(--phase7); }
+  .p8 { color: var(--phase8); }
+
+  .phase:nth-child(1)::before { background: var(--phase1); }
+  .phase:nth-child(2)::before { background: var(--phase2); }
+  .phase:nth-child(3)::before { background: var(--phase3); }
+  .phase:nth-child(4)::before { background: var(--phase4); }
+  .phase:nth-child(5)::before { background: var(--phase5); }
+  .phase:nth-child(6)::before { background: var(--phase6); }
+  .phase:nth-child(7)::before { background: var(--phase7); }
+  .phase:nth-child(8)::before { background: var(--phase8); }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 30px 40px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 700px) {
+    .hero, .toc, .phases, .system-design { padding-left: 20px; padding-right: 20px; }
+    .toc, .system-design { margin-left: 16px; margin-right: 16px; }
+    .phases { padding-left: 16px; padding-right: 16px; }
+    .phase-header, .phase-body { padding: 20px; }
+    .hero-stats { gap: 20px; }
+    .sd-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">// Complete Playbook</div>
+  <h1>Software Product<br><span>Development</span><br>End-to-End Guide</h1>
+  <p>Every step you need — from raw idea to live product — with system design, deliverables, and what to think about before you write a single line of code.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">8</span><span class="stat-label">Phases</span></div>
+    <div class="stat"><span class="stat-num">60+</span><span class="stat-label">Action Steps</span></div>
+    <div class="stat"><span class="stat-num">1</span><span class="stat-label">Complete System Design</span></div>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">// Table of Contents</div>
+  <div class="toc-grid">
+    <a href="#phase1" class="toc-item"><span class="toc-dot" style="background:var(--phase1)"></span>1. Discovery & Ideation</a>
+    <a href="#phase2" class="toc-item"><span class="toc-dot" style="background:var(--phase2)"></span>2. Requirements & Scope</a>
+    <a href="#phase3" class="toc-item"><span class="toc-dot" style="background:var(--phase3)"></span>3. System Design</a>
+    <a href="#phase4" class="toc-item"><span class="toc-dot" style="background:var(--phase4)"></span>4. Design & UX</a>
+    <a href="#phase5" class="toc-item"><span class="toc-dot" style="background:var(--phase5)"></span>5. Development</a>
+    <a href="#phase6" class="toc-item"><span class="toc-dot" style="background:var(--phase6)"></span>6. Testing & QA</a>
+    <a href="#phase7" class="toc-item"><span class="toc-dot" style="background:var(--phase7)"></span>7. Deployment</a>
+    <a href="#phase8" class="toc-item"><span class="toc-dot" style="background:var(--phase8)"></span>8. Post-Launch</a>
+    <a href="#sysdesign" class="toc-item"><span class="toc-dot" style="background:var(--accent)"></span>Complete System Design</a>
+  </div>
+</div>
+
+<!-- PHASES -->
+<div class="phases">
+
+  <!-- PHASE 1 -->
+  <div class="phase" id="phase1">
+    <div class="phase-header">
+      <div class="phase-num p1">01</div>
+      <div class="phase-meta">
+        <div class="phase-tag p1">Phase 1</div>
+        <div class="phase-title">Discovery & Ideation</div>
+        <div class="phase-desc">Clarify the problem you're actually solving, who it's for, and whether it's worth building. Most failures happen because this phase was skipped.</div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <ul class="steps-list">
+        <li class="step-item">
+          <span class="step-num">01</span>
+          <div class="step-content">
+            <div class="step-title">Define the Problem Statement</div>
+            <div class="step-detail">Write one clear sentence: "Users struggle to [X] because [Y], which causes [Z]." If you can't write this, you don't know what you're building yet.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">02</span>
+          <div class="step-content">
+            <div class="step-title">Identify Your Target Users</div>
+            <div class="step-detail">Create 1–3 user personas. Define their demographics, goals, pain points, and tech comfort level. Be specific — "everyone" is not a user.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">03</span>
+          <div class="step-content">
+            <div class="step-title">Market & Competitor Research</div>
+            <div class="step-detail">List existing solutions. Identify their gaps. Answer: why would a user choose your product over them? Your differentiation must be real and defensible.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">04</span>
+          <div class="step-content">
+            <div class="step-title">Validate the Idea (Before Building)</div>
+            <div class="step-detail">Talk to 5–10 potential users. Use surveys, landing pages, or fake-door tests. Confirm there is real demand before investing in development.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">05</span>
+          <div class="step-content">
+            <div class="step-title">Define Success Metrics</div>
+            <div class="step-detail">How will you know if this product succeeded? Choose 2–3 KPIs upfront: activation rate, DAU, NPS, revenue, churn. Make them measurable.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">06</span>
+          <div class="step-content">
+            <div class="step-title">Decide on Business Model</div>
+            <div class="step-detail">Free / freemium / subscription / one-time / marketplace / B2B / B2C? Nail this early — it affects your entire product strategy and architecture.</div>
+          </div>
+        </li>
+      </ul>
+      <div class="deliverables">
+        <div class="deliverables-title">Deliverables</div>
+        <ul class="checklist">
+          <li>Problem Statement Doc</li>
+          <li>User Personas</li>
+          <li>Competitive Analysis</li>
+          <li>Validation Report</li>
+          <li>KPI Dashboard Plan</li>
+          <li>Business Model Canvas</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase" id="phase2">
+    <div class="phase-header">
+      <div class="phase-num p2">02</div>
+      <div class="phase-meta">
+        <div class="phase-tag p2">Phase 2</div>
+        <div class="phase-title">Requirements & Scope</div>
+        <div class="phase-desc">Translate the problem into concrete features, user stories, and a defined MVP. Scope creep kills projects — be ruthlessly specific here.</div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <ul class="steps-list">
+        <li class="step-item">
+          <span class="step-num">07</span>
+          <div class="step-content">
+            <div class="step-title">Write User Stories</div>
+            <div class="step-detail">Format: "As a [user type], I want to [action] so that [benefit]." Write stories for every feature idea. These become your development tickets.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">08</span>
+          <div class="step-content">
+            <div class="step-title">Prioritize with MoSCoW</div>
+            <div class="step-detail">Sort features into: Must Have, Should Have, Could Have, Won't Have (this time). Fight to keep Must Have small. Your MVP must be truly minimal.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">09</span>
+          <div class="step-content">
+            <div class="step-title">Define Functional Requirements</div>
+            <div class="step-detail">What the system must DO: user registration, search, payment processing, file upload, notifications, etc. List every function needed for the MVP.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">10</span>
+          <div class="step-content">
+            <div class="step-title">Define Non-Functional Requirements</div>
+            <div class="step-detail">How the system must PERFORM: response time (&lt;200ms), uptime (99.9%), concurrent users (10k), data security (SOC2/GDPR), accessibility (WCAG AA).</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">11</span>
+          <div class="step-content">
+            <div class="step-title">Create a Product Roadmap</div>
+            <div class="step-detail">Break into phases: MVP → V1 → V2. Each phase should deliver standalone value. Set rough timelines. This is a living document — revisit it monthly.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">12</span>
+          <div class="step-content">
+            <div class="step-title">Set Up Project Management</div>
+            <div class="step-detail">Choose a tool (Jira, Linear, Notion, Trello). Create a backlog. Define sprints (1–2 weeks). Assign ownership. Define definition of done for every ticket.</div>
+          </div>
+        </li>
+      </ul>
+      <div class="deliverables">
+        <div class="deliverables-title">Deliverables</div>
+        <ul class="checklist">
+          <li>User Stories Backlog</li>
+          <li>MoSCoW Prioritization</li>
+          <li>Functional Spec (FRD)</li>
+          <li>Non-Functional Spec</li>
+          <li>Product Roadmap</li>
+          <li>Sprint Board Setup</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase" id="phase3">
+    <div class="phase-header">
+      <div class="phase-num p3">03</div>
+      <div class="phase-meta">
+        <div class="phase-tag p3">Phase 3</div>
+        <div class="phase-title">System Design & Architecture</div>
+        <div class="phase-desc">Design the technical skeleton of your product. Bad architecture is the most expensive mistake you can make — it compounds forever.</div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <ul class="steps-list">
+        <li class="step-item">
+          <span class="step-num">13</span>
+          <div class="step-content">
+            <div class="step-title">Choose Architecture Pattern</div>
+            <div class="step-detail">Monolith (start here for most MVPs), Microservices (when teams and scale demand it), Serverless (for event-driven low-traffic apps). Don't over-engineer early.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">14</span>
+          <div class="step-content">
+            <div class="step-title">Select the Tech Stack</div>
+            <div class="step-detail">Frontend (React / Vue / Next.js), Backend (Node / Python / Go / Java), Database (PostgreSQL / MongoDB / Redis), Cloud (AWS / GCP / Azure). Choose based on team expertise and use-case fit.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">15</span>
+          <div class="step-content">
+            <div class="step-title">Design the Data Model</div>
+            <div class="step-detail">Draw all entities (tables/collections), their fields, and relationships (one-to-many, many-to-many). Normalize for integrity, denormalize for performance where needed. Write migration strategy.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">16</span>
+          <div class="step-content">
+            <div class="step-title">Define the API Contract</div>
+            <div class="step-detail">Design REST or GraphQL endpoints. Write an OpenAPI / Swagger spec for every endpoint: method, path, request body, response schema, error codes. This is the contract between frontend and backend.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">17</span>
+          <div class="step-content">
+            <div class="step-title">Plan Authentication & Authorization</div>
+            <div class="step-detail">Choose auth strategy: JWT, OAuth2, session-based, SSO. Design RBAC (Role-Based Access Control). Define what each role can read, write, delete. Never skip this step.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">18</span>
+          <div class="step-content">
+            <div class="step-title">Plan Infrastructure & DevOps</div>
+            <div class="step-detail">Define environments: Local → Dev → Staging → Production. Choose containerization (Docker), orchestration (Kubernetes/ECS), CI/CD pipeline (GitHub Actions / GitLab CI). Plan from day one.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">19</span>
+          <div class="step-content">
+            <div class="step-title">Plan Security Architecture</div>
+            <div class="step-detail">HTTPS everywhere. Input validation and sanitization. Rate limiting. Secrets management (env vars, Vault). OWASP Top 10 checklist. Data encryption at rest and in transit.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">20</span>
+          <div class="step-content">
+            <div class="step-title">Plan Scalability & Performance</div>
+            <div class="step-detail">Caching strategy (Redis / CDN). Database indexing plan. Horizontal vs vertical scaling decisions. Message queues for async jobs (RabbitMQ / SQS). Load balancing approach.</div>
+          </div>
+        </li>
+      </ul>
+      <div class="deliverables">
+        <div class="deliverables-title">Deliverables</div>
+        <ul class="checklist">
+          <li>Architecture Diagram (C4)</li>
+          <li>Tech Stack Decision Log</li>
+          <li>Entity Relationship Diagram</li>
+          <li>OpenAPI Spec</li>
+          <li>Auth & RBAC Design</li>
+          <li>Infrastructure Diagram</li>
+          <li>Security Checklist</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase" id="phase4">
+    <div class="phase-header">
+      <div class="phase-num p4">04</div>
+      <div class="phase-meta">
+        <div class="phase-tag p4">Phase 4</div>
+        <div class="phase-title">Design & User Experience</div>
+        <div class="phase-desc">Build the user interface — from information architecture to high-fidelity mockups and a design system. Users judge your product in milliseconds.</div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <ul class="steps-list">
+        <li class="step-item">
+          <span class="step-num">21</span>
+          <div class="step-content">
+            <div class="step-title">Create Information Architecture</div>
+            <div class="step-detail">Map all screens and their hierarchy. Draw a site map / screen flow. Identify the critical path (the key journey every user must complete successfully).</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">22</span>
+          <div class="step-content">
+            <div class="step-title">Build Low-Fidelity Wireframes</div>
+            <div class="step-detail">Sketch or use Figma/Balsamiq for rough wireframes of every screen. Focus on layout and functionality — not colors or fonts. Validate flow with stakeholders early.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">23</span>
+          <div class="step-content">
+            <div class="step-title">Create Design System / UI Kit</div>
+            <div class="step-detail">Define: color palette, typography scale, spacing system (4px grid), button states, form elements, icons, component library. This ensures consistency across the entire product.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">24</span>
+          <div class="step-content">
+            <div class="step-title">Build High-Fidelity Mockups</div>
+            <div class="step-detail">Apply the design system to all screens. Design for all states: loading, empty, error, success, mobile, desktop. Use real content — never lorem ipsum in hi-fi mocks.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">25</span>
+          <div class="step-content">
+            <div class="step-title">Create Interactive Prototype</div>
+            <div class="step-detail">Link mockups into a clickable prototype (Figma, InVision). Test the full user journey. Conduct user testing with 5 real people — watch where they get confused.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">26</span>
+          <div class="step-content">
+            <div class="step-title">Accessibility & Responsiveness Plan</div>
+            <div class="step-detail">Design for mobile-first. WCAG AA compliance: color contrast 4.5:1, keyboard navigation, ARIA labels, focus indicators. Accessibility is not optional.</div>
+          </div>
+        </li>
+      </ul>
+      <div class="deliverables">
+        <div class="deliverables-title">Deliverables</div>
+        <ul class="checklist">
+          <li>Site Map</li>
+          <li>Wireframes (all screens)</li>
+          <li>Design System</li>
+          <li>Hi-Fi Mockups</li>
+          <li>Clickable Prototype</li>
+          <li>User Test Report</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 5 -->
+  <div class="phase" id="phase5">
+    <div class="phase-header">
+      <div class="phase-num p5">05</div>
+      <div class="phase-meta">
+        <div class="phase-tag p5">Phase 5</div>
+        <div class="phase-title">Development</div>
+        <div class="phase-desc">Build the actual product. Work iteratively in short sprints. Ship working features, not perfect features. Done beats perfect for an MVP.</div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <ul class="steps-list">
+        <li class="step-item">
+          <span class="step-num">27</span>
+          <div class="step-content">
+            <div class="step-title">Set Up Dev Environment & Repo</div>
+            <div class="step-detail">Initialize Git repo. Define branching strategy (GitFlow or trunk-based). Set up linting, formatting (ESLint, Prettier), pre-commit hooks, README with setup instructions.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">28</span>
+          <div class="step-content">
+            <div class="step-title">Build the Database Layer</div>
+            <div class="step-detail">Implement the data model with migrations. Write seeds for development data. Set up connection pooling. Test all CRUD operations. Document every table and column.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">29</span>
+          <div class="step-content">
+            <div class="step-title">Build Backend / API</div>
+            <div class="step-detail">Implement endpoints per your API spec. Add middleware: auth, rate limiting, logging, error handling. Write business logic. Return consistent error responses with proper HTTP codes.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">30</span>
+          <div class="step-content">
+            <div class="step-title">Implement Authentication</div>
+            <div class="step-detail">Build signup, login, logout, password reset, email verification. Use a battle-tested library (Passport.js, Auth.js, Supabase Auth). Never roll your own crypto.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">31</span>
+          <div class="step-content">
+            <div class="step-title">Build Frontend / UI</div>
+            <div class="step-detail">Implement components from the design system. Connect to the API. Handle all states: loading, error, empty, success. Write accessible markup with semantic HTML.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">32</span>
+          <div class="step-content">
+            <div class="step-title">Integrate Third-Party Services</div>
+            <div class="step-detail">Payments (Stripe), Email (SendGrid/Resend), Storage (S3), Analytics (PostHog/Amplitude), Monitoring (Sentry), Search (Algolia). Use official SDKs. Handle API failures gracefully.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">33</span>
+          <div class="step-content">
+            <div class="step-title">Set Up CI/CD Pipeline</div>
+            <div class="step-detail">Automate: lint → test → build → deploy. Every PR must pass all checks before merge. Deploy to staging automatically on merge to main. Never manually deploy to production.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">34</span>
+          <div class="step-content">
+            <div class="step-title">Code Review Process</div>
+            <div class="step-detail">Require at least one approving review per PR. Write a PR template. Check for: correctness, security, test coverage, performance, and readability. Automate what you can.</div>
+          </div>
+        </li>
+      </ul>
+      <div class="deliverables">
+        <div class="deliverables-title">Deliverables</div>
+        <ul class="checklist">
+          <li>Git Repo + Branching Rules</li>
+          <li>Database Migrations</li>
+          <li>REST/GraphQL API</li>
+          <li>Auth System</li>
+          <li>Frontend App</li>
+          <li>CI/CD Pipeline</li>
+          <li>Integration Tests</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 6 -->
+  <div class="phase" id="phase6">
+    <div class="phase-header">
+      <div class="phase-num p6">06</div>
+      <div class="phase-meta">
+        <div class="phase-tag p6">Phase 6</div>
+        <div class="phase-title">Testing & Quality Assurance</div>
+        <div class="phase-desc">Catch bugs before your users do. Testing is not optional — untested code is broken code you haven't found yet.</div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <ul class="steps-list">
+        <li class="step-item">
+          <span class="step-num">35</span>
+          <div class="step-content">
+            <div class="step-title">Unit Testing</div>
+            <div class="step-detail">Test every pure function and business logic unit in isolation. Target 70–80% code coverage on critical paths. Use Jest, Vitest, PyTest, JUnit depending on stack.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">36</span>
+          <div class="step-content">
+            <div class="step-title">Integration Testing</div>
+            <div class="step-detail">Test that services work together: API + database, auth flow, payment flow. Use a test database. Test happy paths and all error branches.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">37</span>
+          <div class="step-content">
+            <div class="step-title">End-to-End Testing</div>
+            <div class="step-detail">Automate critical user journeys in a real browser: signup → onboarding → core action → payment. Use Playwright or Cypress. These are your safety net before every deploy.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">38</span>
+          <div class="step-content">
+            <div class="step-title">Performance Testing</div>
+            <div class="step-detail">Load test with realistic traffic (k6, Locust). Measure p50, p95, p99 response times. Find your breaking point before your users do. Optimize database queries with EXPLAIN ANALYZE.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">39</span>
+          <div class="step-content">
+            <div class="step-title">Security Testing</div>
+            <div class="step-detail">Run OWASP ZAP scan. Check: SQL injection, XSS, CSRF, auth bypass, insecure direct object references, broken access control. Rotate all secrets before production.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">40</span>
+          <div class="step-content">
+            <div class="step-title">User Acceptance Testing (UAT)</div>
+            <div class="step-detail">Have real users test on staging. Provide test scenarios matching user stories. Log all feedback. Fix critical issues before launch — this is your last chance.</div>
+          </div>
+        </li>
+      </ul>
+      <div class="deliverables">
+        <div class="deliverables-title">Deliverables</div>
+        <ul class="checklist">
+          <li>Unit Test Suite (70%+ coverage)</li>
+          <li>Integration Test Suite</li>
+          <li>E2E Test Suite</li>
+          <li>Load Test Report</li>
+          <li>Security Audit Report</li>
+          <li>UAT Sign-Off</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 7 -->
+  <div class="phase" id="phase7">
+    <div class="phase-header">
+      <div class="phase-num p7">07</div>
+      <div class="phase-meta">
+        <div class="phase-tag p7">Phase 7</div>
+        <div class="phase-title">Deployment & Launch</div>
+        <div class="phase-desc">Get the product in front of real users. Plan for things to go wrong. A good deployment is boring — that's the goal.</div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <ul class="steps-list">
+        <li class="step-item">
+          <span class="step-num">41</span>
+          <div class="step-content">
+            <div class="step-title">Set Up Production Infrastructure</div>
+            <div class="step-detail">Provision servers / cloud resources. Configure DNS, SSL certificates (Let's Encrypt), CDN. Set up load balancer. Configure environment variables securely — never commit secrets.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">42</span>
+          <div class="step-content">
+            <div class="step-title">Set Up Monitoring & Alerting</div>
+            <div class="step-detail">Application monitoring (Sentry for errors), infrastructure monitoring (Datadog / CloudWatch), uptime monitoring (Better Uptime). Set alerts for error spikes, high latency, and downtime.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">43</span>
+          <div class="step-content">
+            <div class="step-title">Set Up Logging</div>
+            <div class="step-detail">Structured JSON logs for every request, error, and important business event. Use a centralized log platform (Datadog, Logtail, AWS CloudWatch Logs). Log enough to debug any incident.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">44</span>
+          <div class="step-content">
+            <div class="step-title">Create a Deployment Runbook</div>
+            <div class="step-detail">Document the exact steps to deploy and to rollback. Include: pre-deploy checklist, deploy commands, post-deploy verification tests, rollback procedure. Practice the rollback before you need it.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">45</span>
+          <div class="step-content">
+            <div class="step-title">Database Backup Strategy</div>
+            <div class="step-detail">Automated daily backups to a separate region. Point-in-time recovery enabled. Test your restore procedure — a backup you haven't tested is not a backup.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">46</span>
+          <div class="step-content">
+            <div class="step-title">Soft Launch / Beta</div>
+            <div class="step-detail">Release to a small group first (friends, waitlist, internal users). Collect feedback. Fix critical issues. Validate that everything works at real traffic. Then announce publicly.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">47</span>
+          <div class="step-content">
+            <div class="step-title">Public Launch</div>
+            <div class="step-detail">Announce across channels: Product Hunt, social media, email list, communities. Have a war room for the first 24 hours. Monitor dashboards in real time. Have team on standby.</div>
+          </div>
+        </li>
+      </ul>
+      <div class="deliverables">
+        <div class="deliverables-title">Deliverables</div>
+        <ul class="checklist">
+          <li>Production Environment</li>
+          <li>Monitoring Dashboard</li>
+          <li>Alerting Rules</li>
+          <li>Deployment Runbook</li>
+          <li>Backup & Recovery Plan</li>
+          <li>Launch Checklist</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 8 -->
+  <div class="phase" id="phase8">
+    <div class="phase-header">
+      <div class="phase-num p8">08</div>
+      <div class="phase-meta">
+        <div class="phase-tag p8">Phase 8</div>
+        <div class="phase-title">Post-Launch & Iteration</div>
+        <div class="phase-desc">Launch is not the end — it's the beginning. Now you learn what users actually want and build toward it. This phase never ends.</div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <ul class="steps-list">
+        <li class="step-item">
+          <span class="step-num">48</span>
+          <div class="step-content">
+            <div class="step-title">Measure Your KPIs</div>
+            <div class="step-detail">Are your success metrics moving? Check weekly: activation, retention, conversion, NPS. Use product analytics (PostHog, Mixpanel, Amplitude) with funnel tracking set up from day one.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">49</span>
+          <div class="step-content">
+            <div class="step-title">Collect User Feedback</div>
+            <div class="step-detail">In-app surveys (Typeform, Hotjar), user interviews, support tickets, NPS surveys, session recordings. The most valuable feedback is often in support tickets — read every one.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">50</span>
+          <div class="step-content">
+            <div class="step-title">Fix Bugs & Stability</div>
+            <div class="step-detail">P0 bugs (product broken) → fix within hours. P1 (major feature broken) → fix within 24h. P2 (minor issues) → fix within sprint. Stability earns user trust more than features do.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">51</span>
+          <div class="step-content">
+            <div class="step-title">Prioritize Next Features</div>
+            <div class="step-detail">Use the ICE framework: Impact × Confidence ÷ Effort. Build features with the highest score first. Resist the temptation to build everything users ask for — find the underlying need.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">52</span>
+          <div class="step-content">
+            <div class="step-title">Performance Optimization</div>
+            <div class="step-detail">Audit Core Web Vitals (LCP, CLS, FID). Optimize slow database queries. Add caching where needed. Reduce bundle size. Performance is a feature — users notice slowness.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">53</span>
+          <div class="step-content">
+            <div class="step-title">Technical Debt Management</div>
+            <div class="step-detail">Reserve 20% of each sprint for refactoring and debt reduction. Document known debt in a tech debt register. Unmanaged debt compounds — eventually it stops all feature development.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-num">54</span>
+          <div class="step-content">
+            <div class="step-title">Plan for Scale</div>
+            <div class="step-detail">At 10x current users, what breaks first? Identify bottlenecks proactively. Consider database read replicas, horizontal scaling, CDN expansion, async job queues before you need them.</div>
+          </div>
+        </li>
+      </ul>
+      <div class="deliverables">
+        <div class="deliverables-title">Deliverables</div>
+        <ul class="checklist">
+          <li>KPI Weekly Report</li>
+          <li>User Feedback Log</li>
+          <li>Bug Priority Queue</li>
+          <li>ICE-Scored Feature Backlog</li>
+          <li>Performance Audit</li>
+          <li>Tech Debt Register</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- COMPLETE SYSTEM DESIGN -->
+<div class="system-design" id="sysdesign">
+  <div class="sd-title">Complete System Design</div>
+  <div class="sd-sub">The full technical blueprint you need to think through before writing code.</div>
+
+  <div class="sd-grid">
+    <div class="sd-card">
+      <div class="sd-card-icon">🏗️</div>
+      <div class="sd-card-title">Frontend Layer</div>
+      <div class="sd-card-text">Single Page App or Server-Side Rendered web app. Mobile app if required.</div>
+      <ul>
+        <li>React / Next.js / Vue</li>
+        <li>Component library (Shadcn, MUI)</li>
+        <li>State management (Zustand, Redux)</li>
+        <li>API client (TanStack Query, SWR)</li>
+        <li>Deployed via CDN / Vercel / Netlify</li>
+      </ul>
+    </div>
+    <div class="sd-card">
+      <div class="sd-card-icon">⚙️</div>
+      <div class="sd-card-title">API Gateway / BFF</div>
+      <div class="sd-card-text">Entry point for all client requests. Handles routing, auth, rate limiting.</div>
+      <ul>
+        <li>REST or GraphQL API</li>
+        <li>JWT / OAuth2 token validation</li>
+        <li>Rate limiting per IP / user</li>
+        <li>Request logging & tracing</li>
+        <li>API versioning strategy</li>
+      </ul>
+    </div>
+    <div class="sd-card">
+      <div class="sd-card-icon">🧠</div>
+      <div class="sd-card-title">Application / Business Logic</div>
+      <div class="sd-card-text">Where your product's actual value lives. Stateless, horizontally scalable.</div>
+      <ul>
+        <li>Node.js / Python / Go / Java</li>
+        <li>Service layer (business rules)</li>
+        <li>Repository pattern (data access)</li>
+        <li>Event emitters for side effects</li>
+        <li>Background workers (Bull, Celery)</li>
+      </ul>
+    </div>
+    <div class="sd-card">
+      <div class="sd-card-icon">🗄️</div>
+      <div class="sd-card-title">Data Layer</div>
+      <div class="sd-card-text">Persistent storage for all application data. The most important design decision you'll make.</div>
+      <ul>
+        <li>Primary DB: PostgreSQL / MySQL</li>
+        <li>Cache: Redis (sessions, hot data)</li>
+        <li>Search: Elasticsearch / Algolia</li>
+        <li>File storage: S3 / GCS</li>
+        <li>Read replicas for scale</li>
+      </ul>
+    </div>
+    <div class="sd-card">
+      <div class="sd-card-icon">📨</div>
+      <div class="sd-card-title">Async / Event System</div>
+      <div class="sd-card-text">Decouple services. Handle long-running tasks without blocking the request.</div>
+      <ul>
+        <li>Message queue: SQS / RabbitMQ</li>
+        <li>Email: SendGrid / Resend</li>
+        <li>Push notifications: FCM / APNs</li>
+        <li>Webhooks for external systems</li>
+        <li>Scheduled jobs (cron)</li>
+      </ul>
+    </div>
+    <div class="sd-card">
+      <div class="sd-card-icon">🔐</div>
+      <div class="sd-card-title">Auth & Security</div>
+      <div class="sd-card-text">Every entry point must be authenticated and authorized.</div>
+      <ul>
+        <li>Auth provider (Auth0, Supabase)</li>
+        <li>JWT with short expiry + refresh tokens</li>
+        <li>RBAC with row-level security</li>
+        <li>Secrets in Vault / AWS Secrets Manager</li>
+        <li>HTTPS + HSTS everywhere</li>
+      </ul>
+    </div>
+    <div class="sd-card">
+      <div class="sd-card-icon">☁️</div>
+      <div class="sd-card-title">Infrastructure</div>
+      <div class="sd-card-text">Where everything runs. Infrastructure as Code from day one.</div>
+      <ul>
+        <li>Cloud: AWS / GCP / Azure</li>
+        <li>Containers: Docker + Kubernetes/ECS</li>
+        <li>IaC: Terraform / Pulumi</li>
+        <li>Multi-AZ for high availability</li>
+        <li>CDN: CloudFront / Cloudflare</li>
+      </ul>
+    </div>
+    <div class="sd-card">
+      <div class="sd-card-icon">📊</div>
+      <div class="sd-card-title">Observability</div>
+      <div class="sd-card-text">You can't fix what you can't see. Full-stack visibility from the start.</div>
+      <ul>
+        <li>Error tracking: Sentry</li>
+        <li>Metrics: Datadog / Grafana</li>
+        <li>Logs: Logtail / CloudWatch</li>
+        <li>Traces: OpenTelemetry</li>
+        <li>Uptime: Better Uptime / Pingdom</li>
+      </ul>
+    </div>
+    <div class="sd-card">
+      <div class="sd-card-icon">🚀</div>
+      <div class="sd-card-title">CI/CD Pipeline</div>
+      <div class="sd-card-text">Automated, repeatable delivery. Every commit should be deployable.</div>
+      <ul>
+        <li>Source: GitHub / GitLab</li>
+        <li>CI: GitHub Actions / GitLab CI</li>
+        <li>Lint → Test → Build → Push image</li>
+        <li>Auto-deploy to staging on merge</li>
+        <li>Manual gate for production</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Architecture ASCII Diagram -->
+  <div class="deliverables-title" style="margin-bottom:16px; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent);">Architecture Diagram</div>
+  <div class="arch-diagram">
+<pre>
+<span class="arch-highlight">USER</span> (Browser / Mobile App)
+        │
+        ▼
+<span class="arch-box">┌─────────────────────────────────────────────┐</span>
+<span class="arch-box">│           CDN / Load Balancer               │</span>
+<span class="arch-box">│        (Cloudflare / AWS ALB)               │</span>
+<span class="arch-box">└──────────────────┬──────────────────────────┘</span>
+                   │
+        <span class="arch-arrow">┌──────────┴──────────┐</span>
+        ▼                    ▼
+<span class="arch-box">┌───────────────┐</span>   <span class="arch-box">┌───────────────────────┐</span>
+<span class="arch-box">│  Frontend App │</span>   <span class="arch-box">│    API Gateway        │</span>
+<span class="arch-box">│ (Next.js/CDN) │</span>   <span class="arch-box">│ (Auth, Rate Limit,    │</span>
+<span class="arch-box">└───────────────┘</span>   <span class="arch-box">│  Routing, Logging)   │</span>
+                    <span class="arch-box">└──────────┬────────────┘</span>
+                               │
+                    <span class="arch-arrow">┌──────────┴──────────┐</span>
+                    ▼                    ▼
+          <span class="arch-box">┌───────────────┐</span>   <span class="arch-box">┌───────────────┐</span>
+          <span class="arch-box">│  Auth Service │</span>   <span class="arch-box">│  App Services │</span>
+          <span class="arch-box">│ (JWT, OAuth2) │</span>   <span class="arch-box">│ (Business Logic│</span>
+          <span class="arch-box">└───────────────┘</span>   <span class="arch-box">└───────┬───────┘</span>
+                                        │
+                   <span class="arch-arrow">┌──────────┬────────┴────────┐</span>
+                   ▼          ▼                   ▼
+          <span class="arch-box">┌──────────┐</span>  <span class="arch-box">┌──────────────┐</span>  <span class="arch-box">┌─────────┐</span>
+          <span class="arch-box">│ PostgreSQL│</span>  <span class="arch-box">│ Redis Cache  │</span>  <span class="arch-box">│  S3     │</span>
+          <span class="arch-box">│ (Primary) │</span>  <span class="arch-box">│ (Sessions,   │</span>  <span class="arch-box">│ (Files) │</span>
+          <span class="arch-box">│ + Replica │</span>  <span class="arch-box">│  Hot Data)   │</span>  <span class="arch-box">└─────────┘</span>
+          <span class="arch-box">└──────────┘</span>  <span class="arch-box">└──────────────┘</span>
+                   │
+                   ▼
+          <span class="arch-box">┌──────────────────────┐</span>
+          <span class="arch-box">│  Message Queue       │</span>
+          <span class="arch-box">│  (SQS / RabbitMQ)    │</span>
+          <span class="arch-box">└───────────┬──────────┘</span>
+                      │
+                      ▼
+          <span class="arch-box">┌──────────────────────┐</span>
+          <span class="arch-box">│  Background Workers  │</span>
+          <span class="arch-box">│  (Email, Reports,    │</span>
+          <span class="arch-box">│   Notifications)     │</span>
+          <span class="arch-box">└──────────────────────┘</span>
+
+<span class="arch-highlight">OBSERVABILITY:</span> Sentry (errors) + Datadog (metrics) + Logtail (logs) → <span class="arch-highlight">PagerDuty (alerts)</span>
+<span class="arch-highlight">CI/CD:</span>  GitHub → Actions → Docker → Registry → ECS/K8s (Staging) → [Gate] → Production
+</pre>
+  </div>
+</div>
+
+<footer>
+  End-to-End Software Product Development Guide &nbsp;·&nbsp; 8 Phases · 54 Steps · 1 Complete System Design
+</footer>
+
+</body>
+</html>

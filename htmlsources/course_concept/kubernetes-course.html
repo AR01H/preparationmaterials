@@ -1,0 +1,2569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes: Complete Course — Zero to Production</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #0f1525;
+    --surface2: #141c30;
+    --surface3: #1a2340;
+    --border: #1e2d50;
+    --accent: #4f9cf9;
+    --accent2: #7c6af7;
+    --accent3: #38d9a9;
+    --accent4: #f7c948;
+    --accent5: #f76f6f;
+    --text: #e2e8f8;
+    --text-muted: #7a8bb5;
+    --text-dim: #4a5a80;
+    --heading: #ffffff;
+    --code-bg: #080d1a;
+    --code-border: #1a2850;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lora', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.8;
+  }
+
+  /* ---- SIDEBAR ---- */
+  #sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    padding: 0 0 40px 0;
+  }
+
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .sidebar-logo .k8s-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-logo h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.3;
+  }
+
+  .nav-section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 16px 24px 6px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 8px 24px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+
+  .nav-item:hover {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(79,156,249,0.05);
+  }
+
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(79,156,249,0.08);
+  }
+
+  .nav-item .nav-num {
+    color: var(--text-dim);
+    font-size: 11px;
+    margin-right: 6px;
+  }
+
+  /* ---- MAIN CONTENT ---- */
+  #main {
+    margin-left: 280px;
+    min-height: 100vh;
+  }
+
+  /* ---- HERO ---- */
+  #hero {
+    background: linear-gradient(135deg, #070b16 0%, #0a1228 50%, #080f20 100%);
+    padding: 100px 80px 80px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(79,156,249,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  #hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: 20%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,106,247,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(79,156,249,0.12);
+    border: 1px solid rgba(79,156,249,0.3);
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 28px;
+  }
+
+  #hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 58px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.1;
+    margin-bottom: 24px;
+    max-width: 700px;
+  }
+
+  #hero h1 span { color: var(--accent); }
+
+  #hero p.subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin-bottom: 40px;
+    font-style: italic;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+  }
+
+  .hero-stat .label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ---- CONTENT AREA ---- */
+  .content-wrap {
+    padding: 60px 80px;
+    max-width: 900px;
+  }
+
+  /* ---- MODULE HEADERS ---- */
+  .module {
+    margin-bottom: 80px;
+    scroll-margin-top: 40px;
+  }
+
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .module-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(79,156,249,0.1);
+    border: 1px solid rgba(79,156,249,0.25);
+    padding: 4px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .module-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.2;
+  }
+
+  /* ---- SECTION HEADERS ---- */
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--heading);
+    margin: 40px 0 16px;
+    padding-left: 16px;
+    border-left: 3px solid var(--accent2);
+  }
+
+  h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent3);
+    margin: 28px 0 12px;
+    letter-spacing: 0.5px;
+  }
+
+  p { margin-bottom: 16px; }
+
+  /* ---- CODE BLOCKS ---- */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 10px;
+    margin: 24px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--code-border);
+  }
+
+  .code-lang {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .code-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .code-dots span:nth-child(1) { background: #f76f6f; }
+  .code-dots span:nth-child(2) { background: var(--accent4); }
+  .code-dots span:nth-child(3) { background: var(--accent3); }
+
+  pre {
+    padding: 20px 24px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #c9d8f0;
+  }
+
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-track { background: transparent; }
+  pre::-webkit-scrollbar-thumb { background: var(--border); }
+
+  code { font-family: 'JetBrains Mono', monospace; }
+
+  .inline-code {
+    background: rgba(79,156,249,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(79,156,249,0.2);
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+  }
+
+  /* Syntax coloring */
+  .kw { color: #c792ea; }
+  .str { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .num { color: var(--accent4); }
+  .fn { color: #82aaff; }
+  .key { color: #89ddff; }
+  .val { color: #f78c6c; }
+  .yaml-key { color: #89ddff; }
+  .yaml-val { color: #c3e88d; }
+  .yaml-str { color: #c3e88d; }
+  .yaml-num { color: var(--accent4); }
+  .yaml-com { color: #546e7a; font-style: italic; }
+  .bash-cmd { color: #82aaff; }
+  .bash-flag { color: #c792ea; }
+  .bash-arg { color: var(--accent3); }
+  .bash-com { color: #546e7a; font-style: italic; }
+
+  /* ---- CALLOUT BOXES ---- */
+  .callout {
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    border: 1px solid;
+  }
+
+  .callout-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .callout-content { flex: 1; }
+
+  .callout-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .callout.info {
+    background: rgba(79,156,249,0.07);
+    border-color: rgba(79,156,249,0.25);
+  }
+  .callout.info .callout-title { color: var(--accent); }
+
+  .callout.tip {
+    background: rgba(56,217,169,0.07);
+    border-color: rgba(56,217,169,0.25);
+  }
+  .callout.tip .callout-title { color: var(--accent3); }
+
+  .callout.warning {
+    background: rgba(247,201,72,0.07);
+    border-color: rgba(247,201,72,0.25);
+  }
+  .callout.warning .callout-title { color: var(--accent4); }
+
+  .callout.danger {
+    background: rgba(247,111,111,0.07);
+    border-color: rgba(247,111,111,0.25);
+  }
+  .callout.danger .callout-title { color: var(--accent5); }
+
+  /* ---- ARCHITECTURE DIAGRAMS ---- */
+  .arch-diagram {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin: 28px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    overflow-x: auto;
+  }
+
+  /* ---- COMPARISON TABLES ---- */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 24px 0;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  thead {
+    background: var(--surface3);
+  }
+
+  th {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 20px;
+    text-align: left;
+  }
+
+  td {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  td code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--accent); }
+
+  /* ---- CONCEPT CARDS ---- */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .concept-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .concept-card:hover { border-color: var(--accent2); }
+
+  .concept-card .icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .concept-card h5 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+
+  .concept-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* ---- PROGRESS INDICATOR ---- */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: transparent;
+    z-index: 200;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%;
+    transition: width 0.1s;
+  }
+
+  /* ---- DIVIDERS ---- */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 50px 0;
+  }
+
+  /* ---- LISTS ---- */
+  ul, ol {
+    padding-left: 24px;
+    margin-bottom: 16px;
+  }
+
+  li {
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  ul li::marker { color: var(--accent); }
+  ol li::marker { color: var(--accent); font-family: 'Syne', sans-serif; font-weight: 700; }
+
+  /* ---- HIGHLIGHT ---- */
+  .highlight {
+    background: linear-gradient(90deg, rgba(79,156,249,0.15), transparent);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  /* ---- FOOTER ---- */
+  .content-footer {
+    padding: 40px 80px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 1024px) {
+    #sidebar { display: none; }
+    #main { margin-left: 0; }
+    #hero, .content-wrap { padding: 40px 24px; }
+    #hero h1 { font-size: 38px; }
+    .concept-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <span class="k8s-badge">⎈ Complete Course</span>
+    <h2>Kubernetes<br>Zero to Production</h2>
+  </div>
+
+  <div class="nav-section-label">Foundation</div>
+  <a href="#module-1" class="nav-item"><span class="nav-num">01</span> What is Kubernetes?</a>
+  <a href="#module-2" class="nav-item"><span class="nav-num">02</span> Architecture Deep Dive</a>
+  <a href="#module-3" class="nav-item"><span class="nav-num">03</span> Installation & Setup</a>
+
+  <div class="nav-section-label">Core Objects</div>
+  <a href="#module-4" class="nav-item"><span class="nav-num">04</span> Pods</a>
+  <a href="#module-5" class="nav-item"><span class="nav-num">05</span> ReplicaSets & Deployments</a>
+  <a href="#module-6" class="nav-item"><span class="nav-num">06</span> Services & Networking</a>
+  <a href="#module-7" class="nav-item"><span class="nav-num">07</span> ConfigMaps & Secrets</a>
+  <a href="#module-8" class="nav-item"><span class="nav-num">08</span> Volumes & Storage</a>
+  <a href="#module-9" class="nav-item"><span class="nav-num">09</span> Namespaces & RBAC</a>
+
+  <div class="nav-section-label">Workloads</div>
+  <a href="#module-10" class="nav-item"><span class="nav-num">10</span> StatefulSets</a>
+  <a href="#module-11" class="nav-item"><span class="nav-num">11</span> DaemonSets & Jobs</a>
+  <a href="#module-12" class="nav-item"><span class="nav-num">12</span> Ingress Controllers</a>
+
+  <div class="nav-section-label">Advanced</div>
+  <a href="#module-13" class="nav-item"><span class="nav-num">13</span> Helm Package Manager</a>
+  <a href="#module-14" class="nav-item"><span class="nav-num">14</span> Auto-scaling</a>
+  <a href="#module-15" class="nav-item"><span class="nav-num">15</span> Resource Management</a>
+  <a href="#module-16" class="nav-item"><span class="nav-num">16</span> Health Probes</a>
+  <a href="#module-17" class="nav-item"><span class="nav-num">17</span> Monitoring & Logging</a>
+  <a href="#module-18" class="nav-item"><span class="nav-num">18</span> CI/CD Pipelines</a>
+
+  <div class="nav-section-label">Production</div>
+  <a href="#module-19" class="nav-item"><span class="nav-num">19</span> Security Hardening</a>
+  <a href="#module-20" class="nav-item"><span class="nav-num">20</span> Multi-cluster & Service Mesh</a>
+  <a href="#module-21" class="nav-item"><span class="nav-num">21</span> Troubleshooting Guide</a>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-badge">⎈ Complete Learning Path</div>
+    <h1>Kubernetes:<br><span>Zero to Production</span></h1>
+    <p class="subtitle">A comprehensive, hands-on course taking you from first principles to running production-grade containerized workloads at scale.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="num">21</span><span class="label">Modules</span></div>
+      <div class="hero-stat"><span class="num">100+</span><span class="label">Examples</span></div>
+      <div class="hero-stat"><span class="num">YAML</span><span class="label">Manifests</span></div>
+      <div class="hero-stat"><span class="num">CKA</span><span class="label">Aligned</span></div>
+    </div>
+  </section>
+
+  <div class="content-wrap">
+
+  <!-- ============================================================ -->
+  <!-- MODULE 1: WHAT IS KUBERNETES -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-1">
+    <div class="module-header">
+      <span class="module-num">Module 01</span>
+      <h2 class="module-title">What is Kubernetes?</h2>
+    </div>
+
+    <p>Kubernetes (often abbreviated as <span class="inline-code">K8s</span>) is an open-source container orchestration platform originally developed by Google, inspired by their internal system called <em>Borg</em>. It was donated to the Cloud Native Computing Foundation (CNCF) in 2014 and has since become the de-facto standard for deploying, scaling, and managing containerized applications.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-content">
+        <div class="callout-title">Why "K8s"?</div>
+        <p>The name "K8s" is a numeronym — the 8 replaces the eight letters between "K" and "s" in Kubernetes. Similarly, i18n = internationalization, a11y = accessibility.</p>
+      </div>
+    </div>
+
+    <h3>The Problem Kubernetes Solves</h3>
+
+    <p>Before container orchestration, deploying applications at scale required enormous manual effort. Consider what happens when you have hundreds of microservices that need to:</p>
+
+    <ul>
+      <li>Be distributed intelligently across dozens of servers</li>
+      <li>Restart automatically if they crash</li>
+      <li>Scale up when traffic increases, scale down to save costs</li>
+      <li>Get new versions deployed with zero downtime</li>
+      <li>Communicate securely with each other</li>
+      <li>Have secrets and configuration injected at runtime</li>
+    </ul>
+
+    <p>Kubernetes automates all of this. It acts as a "data center operating system" — you describe the <em>desired state</em> of your system in declarative configuration files, and Kubernetes continuously works to make the actual state match that desired state.</p>
+
+    <h3>Kubernetes vs. Docker</h3>
+
+    <p>A common point of confusion for newcomers: Docker and Kubernetes are complementary, not competing technologies.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Docker</th><th>Kubernetes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Builds and runs containers on a single machine</td><td>Orchestrates containers across many machines</td></tr>
+          <tr><td>Great for development and simple deployments</td><td>Designed for production at scale</td></tr>
+          <tr><td>Manual scaling and restart</td><td>Automatic self-healing and scaling</td></tr>
+          <tr><td>Docker Compose for multi-container apps</td><td>Rich abstractions for complex workloads</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <div class="callout-title">Key Mental Model</div>
+        <p>Think of Kubernetes like an airline operations system. You (the operator) declare "I need 10 planes flying route X." The system handles which specific planes, reassigns if one breaks down, and reroutes to meet demand — you don't manage individual planes manually.</p>
+      </div>
+    </div>
+
+    <h3>Core Kubernetes Principles</h3>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">📋</div>
+        <h5>Declarative Configuration</h5>
+        <p>You describe the desired end state in YAML/JSON. Kubernetes figures out how to get there and maintain it.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔄</div>
+        <h5>Control Loops</h5>
+        <p>Controllers constantly watch the current state and take actions to reconcile it with the desired state.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🏥</div>
+        <h5>Self-Healing</h5>
+        <p>Failed containers are restarted. Pods are rescheduled if nodes fail. Unhealthy instances are replaced.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📈</div>
+        <h5>Horizontal Scaling</h5>
+        <p>Scale workloads in or out with a single command or automatically based on CPU/memory metrics.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 2: ARCHITECTURE -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-2">
+    <div class="module-header">
+      <span class="module-num">Module 02</span>
+      <h2 class="module-title">Architecture Deep Dive</h2>
+    </div>
+
+    <p>A Kubernetes cluster consists of a set of machines called <strong>nodes</strong>. Every cluster has at least one <strong>Control Plane</strong> (formerly called "master") and one or more <strong>Worker Nodes</strong>. Understanding each component is critical for debugging and operating clusters effectively.</p>
+
+    <div class="arch-diagram">
+<pre style="background:none;padding:0;border:none;font-size:13px;color:var(--text-muted)">
+┌──────────────────────────────────────────────────────────────────┐
+│                        KUBERNETES CLUSTER                         │
+│                                                                   │
+│  ┌─────────────────────── CONTROL PLANE ───────────────────────┐ │
+│  │                                                               │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌───────────────────┐  │ │
+│  │  │  API Server  │  │    etcd      │  │ Controller Manager│  │ │
+│  │  │  (kube-      │  │  (key-value  │  │ (Node, ReplicaSet,│  │ │
+│  │  │  apiserver)  │  │   store)     │  │  Deployment, etc.)│  │ │
+│  │  └──────┬───────┘  └──────────────┘  └───────────────────┘  │ │
+│  │         │                                                     │ │
+│  │  ┌──────┴───────┐                                            │ │
+│  │  │   Scheduler  │                                            │ │
+│  │  │ (kube-sched.)│                                            │ │
+│  │  └──────────────┘                                            │ │
+│  └───────────────────────────────────────────────────────────────┘ │
+│                              │                                   │
+│         ┌────────────────────┼────────────────────┐             │
+│         ▼                    ▼                    ▼             │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐       │
+│  │  WORKER 1   │     │  WORKER 2   │     │  WORKER 3   │       │
+│  │             │     │             │     │             │       │
+│  │  ┌───────┐  │     │  ┌───────┐  │     │  ┌───────┐  │       │
+│  │  │kubelet│  │     │  │kubelet│  │     │  │kubelet│  │       │
+│  │  └───────┘  │     │  └───────┘  │     │  └───────┘  │       │
+│  │  ┌───────┐  │     │  ┌───────┐  │     │  ┌───────┐  │       │
+│  │  │kproxy │  │     │  │kproxy │  │     │  │kproxy │  │       │
+│  │  └───────┘  │     │  └───────┘  │     │  └───────┘  │       │
+│  │  ┌───────┐  │     │  ┌───────┐  │     │  ┌───────┐  │       │
+│  │  │ Pods  │  │     │  │ Pods  │  │     │  │ Pods  │  │       │
+│  │  └───────┘  │     │  └───────┘  │     │  └───────┘  │       │
+│  └─────────────┘     └─────────────┘     └─────────────┘       │
+└──────────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+
+    <h3>Control Plane Components</h3>
+
+    <h4>1. kube-apiserver</h4>
+    <p>The API server is the <em>central hub</em> of Kubernetes. Every interaction — whether from <span class="inline-code">kubectl</span>, the scheduler, controllers, or kubelet — goes through the API server. It validates requests, persists state to etcd, and serves as the single source of truth for the cluster state.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">🔑</div>
+      <div class="callout-content">
+        <div class="callout-title">REST API at the Core</div>
+        <p>The API server exposes a RESTful HTTP API. When you run <code>kubectl get pods</code>, kubectl is simply making a GET request to <code>/api/v1/namespaces/default/pods</code>. You can make the same calls with <code>curl</code>.</p>
+      </div>
+    </div>
+
+    <h4>2. etcd</h4>
+    <p>etcd is a distributed, consistent key-value store that acts as Kubernetes' "database." It stores all cluster state: the spec of every resource, current status, secrets, and configuration. If etcd goes down, the cluster becomes read-only. This is why HA clusters run etcd in a 3 or 5 node quorum.</p>
+
+    <h4>3. kube-scheduler</h4>
+    <p>When a new Pod is created without an assigned node, the scheduler watches for these "unbound" pods and selects the best node for them based on resource requirements, affinity rules, taints/tolerations, and hardware constraints.</p>
+
+    <h4>4. kube-controller-manager</h4>
+    <p>This is a collection of individual controllers running in a single process. Each controller implements a control loop watching specific resource types. Key controllers include:</p>
+    <ul>
+      <li><strong>Node Controller</strong> — Responds when nodes go down</li>
+      <li><strong>ReplicaSet Controller</strong> — Ensures the correct number of pod replicas</li>
+      <li><strong>Deployment Controller</strong> — Manages rolling updates</li>
+      <li><strong>Service Account Controller</strong> — Creates default service accounts</li>
+    </ul>
+
+    <h3>Worker Node Components</h3>
+
+    <h4>kubelet</h4>
+    <p>The kubelet is the primary "node agent" running on every worker node. It takes a set of PodSpecs and ensures the described containers are running and healthy. It communicates with the container runtime (Docker, containerd, CRI-O) to start/stop containers.</p>
+
+    <h4>kube-proxy</h4>
+    <p>kube-proxy runs on every node and maintains network rules for Services. When traffic arrives for a Service's ClusterIP, kube-proxy handles forwarding it to the correct backend Pod. It uses either iptables or IPVS for this.</p>
+
+    <h4>Container Runtime</h4>
+    <p>The software responsible for running containers. Kubernetes uses the <strong>Container Runtime Interface (CRI)</strong>, supporting containerd, CRI-O, and historically Docker (via dockershim, deprecated in K8s 1.24).</p>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 3: INSTALLATION -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-3">
+    <div class="module-header">
+      <span class="module-num">Module 03</span>
+      <h2 class="module-title">Installation & Setup</h2>
+    </div>
+
+    <p>There are several ways to get a Kubernetes cluster running. We'll cover the most common options, from local development to managed cloud clusters.</p>
+
+    <h3>Option 1: Minikube (Local Development)</h3>
+    <p>Minikube is the easiest way to run Kubernetes locally. It creates a single-node cluster inside a VM or Docker container.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — macOS</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Install minikube</span>
+<span class="bash-cmd">brew</span> install minikube
+
+<span class="bash-com"># Start a cluster with 4 CPUs and 4GB RAM</span>
+<span class="bash-cmd">minikube</span> <span class="bash-arg">start</span> <span class="bash-flag">--cpus=4 --memory=4096</span>
+
+<span class="bash-com"># Verify the cluster is running</span>
+<span class="bash-cmd">kubectl</span> <span class="bash-arg">cluster-info</span>
+
+<span class="bash-com"># Enable the ingress addon</span>
+<span class="bash-cmd">minikube</span> <span class="bash-arg">addons enable ingress</span>
+
+<span class="bash-com"># Open the Kubernetes dashboard</span>
+<span class="bash-cmd">minikube</span> <span class="bash-arg">dashboard</span></pre>
+    </div>
+
+    <h3>Option 2: kind (Kubernetes in Docker)</h3>
+    <p><span class="inline-code">kind</span> runs K8s cluster nodes as Docker containers. It's faster than Minikube and ideal for CI pipelines and multi-node testing.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Install kind</span>
+<span class="bash-cmd">brew</span> install kind
+
+<span class="bash-com"># Create a multi-node cluster with a config file</span>
+<span class="bash-cmd">cat</span> > kind-config.yaml <span class="str">&lt;&lt;EOF
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
+EOF</span>
+
+<span class="bash-cmd">kind</span> create cluster <span class="bash-flag">--config</span> kind-config.yaml <span class="bash-flag">--name</span> my-cluster
+
+<span class="bash-com"># Check nodes</span>
+<span class="bash-cmd">kubectl</span> get nodes</pre>
+    </div>
+
+    <h3>Option 3: Managed Kubernetes (Cloud)</h3>
+    <p>For production, managed Kubernetes services handle the control plane for you:</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">☁️</div>
+        <h5>Amazon EKS</h5>
+        <p>AWS managed Kubernetes. Integrates with IAM, VPC, ALB, and other AWS services natively.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔵</div>
+        <h5>Google GKE</h5>
+        <p>The most mature managed K8s. Autopilot mode manages nodes entirely for you.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔷</div>
+        <h5>Azure AKS</h5>
+        <p>Deep integration with Azure AD, Monitor, and Container Registry.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🌊</div>
+        <h5>DigitalOcean DOKS</h5>
+        <p>Simple, affordable managed Kubernetes ideal for smaller teams.</p>
+      </div>
+    </div>
+
+    <h3>Mastering kubectl</h3>
+    <p><span class="inline-code">kubectl</span> is the command-line tool for interacting with Kubernetes clusters. Learning it deeply will save you hours of debugging.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — kubectl essentials</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># --- Cluster Info ---</span>
+<span class="bash-cmd">kubectl</span> cluster-info
+<span class="bash-cmd">kubectl</span> get nodes <span class="bash-flag">-o wide</span>
+<span class="bash-cmd">kubectl</span> config get-contexts    <span class="bash-com"># list clusters you can connect to</span>
+<span class="bash-cmd">kubectl</span> config use-context my-cluster
+
+<span class="bash-com"># --- Viewing Resources ---</span>
+<span class="bash-cmd">kubectl</span> get pods
+<span class="bash-cmd">kubectl</span> get pods <span class="bash-flag">-n</span> kube-system   <span class="bash-com"># in a specific namespace</span>
+<span class="bash-cmd">kubectl</span> get all                    <span class="bash-com"># pods, services, deployments</span>
+<span class="bash-cmd">kubectl</span> describe pod my-pod        <span class="bash-com"># detailed info + events</span>
+<span class="bash-cmd">kubectl</span> get pod my-pod <span class="bash-flag">-o yaml</span>    <span class="bash-com"># raw YAML output</span>
+
+<span class="bash-com"># --- Creating Resources ---</span>
+<span class="bash-cmd">kubectl</span> apply <span class="bash-flag">-f</span> manifest.yaml     <span class="bash-com"># declarative (preferred)</span>
+<span class="bash-cmd">kubectl</span> create deployment nginx <span class="bash-flag">--image=nginx</span>  <span class="bash-com"># imperative</span>
+
+<span class="bash-com"># --- Debugging ---</span>
+<span class="bash-cmd">kubectl</span> logs my-pod                <span class="bash-com"># container logs</span>
+<span class="bash-cmd">kubectl</span> logs <span class="bash-flag">-f</span> my-pod            <span class="bash-com"># follow (stream) logs</span>
+<span class="bash-cmd">kubectl</span> exec <span class="bash-flag">-it</span> my-pod <span class="bash-flag">--</span> /bin/sh <span class="bash-com"># shell into a pod</span>
+<span class="bash-cmd">kubectl</span> port-forward my-pod <span class="bash-arg">8080:80</span> <span class="bash-com"># forward local port to pod</span>
+
+<span class="bash-com"># --- Managing Resources ---</span>
+<span class="bash-cmd">kubectl</span> scale deployment nginx <span class="bash-flag">--replicas=5</span>
+<span class="bash-cmd">kubectl</span> delete pod my-pod
+<span class="bash-cmd">kubectl</span> delete <span class="bash-flag">-f</span> manifest.yaml</pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 4: PODS -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-4">
+    <div class="module-header">
+      <span class="module-num">Module 04</span>
+      <h2 class="module-title">Pods</h2>
+    </div>
+
+    <p>A <strong>Pod</strong> is the smallest deployable unit in Kubernetes. It represents one or more containers that share the same network namespace (IP address and ports) and storage volumes, and are always co-located on the same node.</p>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-content">
+        <div class="callout-title">Pods are Ephemeral</div>
+        <p>Pods are designed to be disposable. They are created, killed, and replaced regularly. Never depend on a Pod's IP address or assume it will persist. Use higher-level resources like Deployments.</p>
+      </div>
+    </div>
+
+    <h3>Your First Pod</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — simple-pod.yaml</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Pod</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">my-nginx</span>
+  <span class="yaml-key">labels</span>:
+    <span class="yaml-key">app</span>: <span class="yaml-val">nginx</span>
+    <span class="yaml-key">environment</span>: <span class="yaml-val">dev</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">containers</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">nginx</span>
+    <span class="yaml-key">image</span>: <span class="yaml-val">nginx:1.25</span>
+    <span class="yaml-key">ports</span>:
+    - <span class="yaml-key">containerPort</span>: <span class="yaml-num">80</span>
+    <span class="yaml-key">resources</span>:
+      <span class="yaml-key">requests</span>:
+        <span class="yaml-key">cpu</span>: <span class="yaml-str">"100m"</span>
+        <span class="yaml-key">memory</span>: <span class="yaml-str">"128Mi"</span>
+      <span class="yaml-key">limits</span>:
+        <span class="yaml-key">cpu</span>: <span class="yaml-str">"500m"</span>
+        <span class="yaml-key">memory</span>: <span class="yaml-str">"256Mi"</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-cmd">kubectl</span> apply <span class="bash-flag">-f</span> simple-pod.yaml
+<span class="bash-cmd">kubectl</span> get pod my-nginx
+<span class="bash-cmd">kubectl</span> describe pod my-nginx
+<span class="bash-cmd">kubectl</span> logs my-nginx</pre>
+    </div>
+
+    <h3>Multi-Container Pods</h3>
+    <p>Multiple containers in one Pod share the same network and can communicate via <span class="inline-code">localhost</span>. They also share any mounted volumes. The most common patterns are:</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">🔌</div>
+        <h5>Sidecar Pattern</h5>
+        <p>A helper container augments the main app. Example: a log-shipper sidecar that reads logs written by the main app and forwards them to Elasticsearch.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🚪</div>
+        <h5>Ambassador Pattern</h5>
+        <p>A proxy container that handles communication to the outside world for the main container. Example: a local proxy that routes database connections.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — sidecar-pod.yaml</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Pod</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">app-with-sidecar</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">volumes</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">shared-logs</span>
+    <span class="yaml-key">emptyDir</span>: {}
+  <span class="yaml-key">containers</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">app</span>                    <span class="yaml-com"># main application</span>
+    <span class="yaml-key">image</span>: <span class="yaml-val">my-app:latest</span>
+    <span class="yaml-key">volumeMounts</span>:
+    - <span class="yaml-key">name</span>: <span class="yaml-val">shared-logs</span>
+      <span class="yaml-key">mountPath</span>: <span class="yaml-val">/var/log/app</span>
+  - <span class="yaml-key">name</span>: <span class="yaml-val">log-shipper</span>             <span class="yaml-com"># sidecar container</span>
+    <span class="yaml-key">image</span>: <span class="yaml-val">fluent/fluent-bit:latest</span>
+    <span class="yaml-key">volumeMounts</span>:
+    - <span class="yaml-key">name</span>: <span class="yaml-val">shared-logs</span>
+      <span class="yaml-key">mountPath</span>: <span class="yaml-val">/var/log/app</span>
+      <span class="yaml-key">readOnly</span>: <span class="yaml-val">true</span></pre>
+    </div>
+
+    <h3>Init Containers</h3>
+    <p>Init containers run to completion <em>before</em> app containers start. They're perfect for setup tasks like waiting for dependencies, running database migrations, or downloading assets.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — init-container.yaml</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">spec</span>:
+  <span class="yaml-key">initContainers</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">wait-for-db</span>
+    <span class="yaml-key">image</span>: <span class="yaml-val">busybox</span>
+    <span class="yaml-key">command</span>: [<span class="yaml-str">'sh'</span>, <span class="yaml-str">'-c'</span>]
+    <span class="yaml-key">args</span>: [<span class="yaml-str">'until nc -z postgres-service 5432; do echo waiting; sleep 2; done'</span>]
+  <span class="yaml-key">containers</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">app</span>
+    <span class="yaml-key">image</span>: <span class="yaml-val">my-app:latest</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 5: DEPLOYMENTS -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-5">
+    <div class="module-header">
+      <span class="module-num">Module 05</span>
+      <h2 class="module-title">ReplicaSets &amp; Deployments</h2>
+    </div>
+
+    <p>In practice, you almost never create Pods directly. Instead, you use higher-level abstractions that manage Pods for you.</p>
+
+    <h3>ReplicaSet</h3>
+    <p>A ReplicaSet ensures that a specified number of pod replicas are running at all times. If a Pod fails, the ReplicaSet creates a new one. If there are too many, it deletes the excess.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">📝</div>
+      <div class="callout-content">
+        <div class="callout-title">ReplicaSet vs Deployment</div>
+        <p>You rarely use ReplicaSets directly. <strong>Deployments</strong> create and manage ReplicaSets for you, adding rolling updates and rollback capabilities on top.</p>
+      </div>
+    </div>
+
+    <h3>Deployments</h3>
+    <p>A Deployment is the standard way to run stateless applications in Kubernetes. It provides:</p>
+    <ul>
+      <li>Desired number of replicas always running</li>
+      <li>Rolling updates with zero downtime</li>
+      <li>Easy rollback to previous versions</li>
+      <li>Pause and resume update capabilities</li>
+    </ul>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — deployment.yaml</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">apps/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Deployment</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">webapp</span>
+  <span class="yaml-key">labels</span>:
+    <span class="yaml-key">app</span>: <span class="yaml-val">webapp</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">replicas</span>: <span class="yaml-num">3</span>
+  <span class="yaml-key">selector</span>:
+    <span class="yaml-key">matchLabels</span>:
+      <span class="yaml-key">app</span>: <span class="yaml-val">webapp</span>           <span class="yaml-com"># must match template labels</span>
+  <span class="yaml-key">strategy</span>:
+    <span class="yaml-key">type</span>: <span class="yaml-val">RollingUpdate</span>
+    <span class="yaml-key">rollingUpdate</span>:
+      <span class="yaml-key">maxSurge</span>: <span class="yaml-num">1</span>          <span class="yaml-com"># max extra pods during update</span>
+      <span class="yaml-key">maxUnavailable</span>: <span class="yaml-num">0</span>   <span class="yaml-com"># zero downtime</span>
+  <span class="yaml-key">template</span>:
+    <span class="yaml-key">metadata</span>:
+      <span class="yaml-key">labels</span>:
+        <span class="yaml-key">app</span>: <span class="yaml-val">webapp</span>
+    <span class="yaml-key">spec</span>:
+      <span class="yaml-key">containers</span>:
+      - <span class="yaml-key">name</span>: <span class="yaml-val">webapp</span>
+        <span class="yaml-key">image</span>: <span class="yaml-val">my-webapp:1.0.0</span>
+        <span class="yaml-key">ports</span>:
+        - <span class="yaml-key">containerPort</span>: <span class="yaml-num">8080</span>
+        <span class="yaml-key">resources</span>:
+          <span class="yaml-key">requests</span>:
+            <span class="yaml-key">cpu</span>: <span class="yaml-str">"250m"</span>
+            <span class="yaml-key">memory</span>: <span class="yaml-str">"256Mi"</span>
+          <span class="yaml-key">limits</span>:
+            <span class="yaml-key">cpu</span>: <span class="yaml-str">"1"</span>
+            <span class="yaml-key">memory</span>: <span class="yaml-str">"512Mi"</span></pre>
+    </div>
+
+    <h3>Rolling Updates &amp; Rollbacks</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — update workflow</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Update the image (triggers a rolling update)</span>
+<span class="bash-cmd">kubectl</span> set image deployment/webapp webapp=my-webapp:<span class="bash-arg">2.0.0</span>
+
+<span class="bash-com"># Watch the rollout in real time</span>
+<span class="bash-cmd">kubectl</span> rollout status deployment/webapp
+
+<span class="bash-com"># View rollout history</span>
+<span class="bash-cmd">kubectl</span> rollout history deployment/webapp
+
+<span class="bash-com"># Rollback to previous version</span>
+<span class="bash-cmd">kubectl</span> rollout undo deployment/webapp
+
+<span class="bash-com"># Rollback to a specific revision</span>
+<span class="bash-cmd">kubectl</span> rollout undo deployment/webapp <span class="bash-flag">--to-revision=2</span>
+
+<span class="bash-com"># Pause a rollout (to test canary)</span>
+<span class="bash-cmd">kubectl</span> rollout pause deployment/webapp
+
+<span class="bash-com"># Resume the rollout</span>
+<span class="bash-cmd">kubectl</span> rollout resume deployment/webapp</pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 6: SERVICES -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-6">
+    <div class="module-header">
+      <span class="module-num">Module 06</span>
+      <h2 class="module-title">Services &amp; Networking</h2>
+    </div>
+
+    <p>Since Pods are ephemeral and their IP addresses change, Services provide a stable endpoint to access a set of Pods. A Service uses a <strong>label selector</strong> to identify which Pods it targets and provides load balancing across them.</p>
+
+    <h3>Service Types</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Type</th><th>Description</th><th>Use Case</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>ClusterIP</code></td><td>Stable IP within the cluster. Default type.</td><td>Internal communication between services</td></tr>
+          <tr><td><code>NodePort</code></td><td>Exposes service on each node's IP at a static port (30000–32767)</td><td>Development access, on-prem clusters</td></tr>
+          <tr><td><code>LoadBalancer</code></td><td>Provisions a cloud load balancer</td><td>Production HTTP/HTTPS traffic on cloud</td></tr>
+          <tr><td><code>ExternalName</code></td><td>Maps service to a DNS name</td><td>Accessing external services by DNS alias</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — service examples</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-com"># ClusterIP (default) — internal only</span>
+<span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Service</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">webapp-svc</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">selector</span>:
+    <span class="yaml-key">app</span>: <span class="yaml-val">webapp</span>    <span class="yaml-com"># targets pods with this label</span>
+  <span class="yaml-key">ports</span>:
+  - <span class="yaml-key">port</span>: <span class="yaml-num">80</span>        <span class="yaml-com"># port the service exposes</span>
+    <span class="yaml-key">targetPort</span>: <span class="yaml-num">8080</span> <span class="yaml-com"># port on the pod</span>
+  <span class="yaml-key">type</span>: <span class="yaml-val">ClusterIP</span>
+---
+<span class="yaml-com"># LoadBalancer — gets a cloud LB with external IP</span>
+<span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Service</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">webapp-lb</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">selector</span>:
+    <span class="yaml-key">app</span>: <span class="yaml-val">webapp</span>
+  <span class="yaml-key">ports</span>:
+  - <span class="yaml-key">port</span>: <span class="yaml-num">80</span>
+    <span class="yaml-key">targetPort</span>: <span class="yaml-num">8080</span>
+  <span class="yaml-key">type</span>: <span class="yaml-val">LoadBalancer</span></pre>
+    </div>
+
+    <h3>DNS Within the Cluster</h3>
+    <p>Kubernetes includes a built-in DNS server (CoreDNS). Every Service gets a DNS entry following the pattern:</p>
+
+    <div class="highlight">
+      <code>&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local</code>
+    </div>
+
+    <p>Within the same namespace, you can simply use <span class="inline-code">webapp-svc</span> as the hostname. Across namespaces, use <span class="inline-code">webapp-svc.production.svc.cluster.local</span>.</p>
+
+    <h3>Network Policies</h3>
+    <p>By default, all pods can talk to all other pods. Network Policies act as firewalls at the pod level.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — deny all ingress, allow from specific namespace</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">NetworkPolicy</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">allow-from-monitoring</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">production</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">podSelector</span>:
+    <span class="yaml-key">matchLabels</span>:
+      <span class="yaml-key">app</span>: <span class="yaml-val">webapp</span>        <span class="yaml-com"># applies to webapp pods</span>
+  <span class="yaml-key">policyTypes</span>:
+  - <span class="yaml-val">Ingress</span>
+  <span class="yaml-key">ingress</span>:
+  - <span class="yaml-key">from</span>:
+    - <span class="yaml-key">namespaceSelector</span>:
+        <span class="yaml-key">matchLabels</span>:
+          <span class="yaml-key">name</span>: <span class="yaml-val">monitoring</span>  <span class="yaml-com"># only from monitoring ns</span>
+    <span class="yaml-key">ports</span>:
+    - <span class="yaml-key">port</span>: <span class="yaml-num">8080</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 7: CONFIGMAPS & SECRETS -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-7">
+    <div class="module-header">
+      <span class="module-num">Module 07</span>
+      <h2 class="module-title">ConfigMaps &amp; Secrets</h2>
+    </div>
+
+    <p>Hardcoding configuration and secrets in container images is an antipattern. Kubernetes provides two dedicated objects to decouple configuration from code.</p>
+
+    <h3>ConfigMaps</h3>
+    <p>ConfigMaps store non-sensitive configuration data as key-value pairs. They can be consumed as environment variables, command-line arguments, or mounted as files.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — configmap.yaml</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">ConfigMap</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">app-config</span>
+<span class="yaml-key">data</span>:
+  <span class="yaml-key">DATABASE_HOST</span>: <span class="yaml-str">"postgres.production.svc.cluster.local"</span>
+  <span class="yaml-key">DATABASE_PORT</span>: <span class="yaml-str">"5432"</span>
+  <span class="yaml-key">LOG_LEVEL</span>: <span class="yaml-str">"info"</span>
+  <span class="yaml-key">app.properties</span>: |          <span class="yaml-com"># multi-line file content</span>
+    <span class="yaml-val">max.connections=100</span>
+    <span class="yaml-val">timeout=30s</span>
+    <span class="yaml-val">feature.dark-mode=true</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — using a configmap in a pod</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">spec</span>:
+  <span class="yaml-key">containers</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">app</span>
+    <span class="yaml-key">image</span>: <span class="yaml-val">my-app:1.0</span>
+    <span class="yaml-key">envFrom</span>:
+    - <span class="yaml-key">configMapRef</span>:
+        <span class="yaml-key">name</span>: <span class="yaml-val">app-config</span>     <span class="yaml-com"># inject all keys as env vars</span>
+    <span class="yaml-key">volumeMounts</span>:
+    - <span class="yaml-key">name</span>: <span class="yaml-val">config-volume</span>
+      <span class="yaml-key">mountPath</span>: <span class="yaml-val">/etc/config</span>  <span class="yaml-com"># mount as files</span>
+  <span class="yaml-key">volumes</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">config-volume</span>
+    <span class="yaml-key">configMap</span>:
+      <span class="yaml-key">name</span>: <span class="yaml-val">app-config</span></pre>
+    </div>
+
+    <h3>Secrets</h3>
+    <p>Secrets store sensitive data like passwords, tokens, and TLS certificates. They are base64-encoded (not encrypted by default!) and stored in etcd. For production, enable etcd encryption at rest and consider external secret managers like Vault or AWS Secrets Manager.</p>
+
+    <div class="callout danger">
+      <div class="callout-icon">🔒</div>
+      <div class="callout-content">
+        <div class="callout-title">Security Warning</div>
+        <p>Base64 is encoding, NOT encryption. Anyone with access to etcd or the namespace can decode Secrets trivially. Always enable encryption at rest in production and use RBAC to restrict secret access.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — creating secrets</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Create from literal values (values auto-encoded)</span>
+<span class="bash-cmd">kubectl</span> create secret generic db-credentials \
+  <span class="bash-flag">--from-literal=username=admin</span> \
+  <span class="bash-flag">--from-literal=password=SuperSecret123</span>
+
+<span class="bash-com"># Create a TLS secret from cert files</span>
+<span class="bash-cmd">kubectl</span> create secret tls my-tls-secret \
+  <span class="bash-flag">--cert=tls.crt</span> \
+  <span class="bash-flag">--key=tls.key</span>
+
+<span class="bash-com"># View a secret (base64 decoded)</span>
+<span class="bash-cmd">kubectl</span> get secret db-credentials <span class="bash-flag">-o jsonpath='{.data.password}'</span> | base64 <span class="bash-flag">-d</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — secret manifest</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Secret</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">db-credentials</span>
+<span class="yaml-key">type</span>: <span class="yaml-val">Opaque</span>
+<span class="yaml-key">data</span>:
+  <span class="yaml-key">username</span>: <span class="yaml-val">YWRtaW4=</span>         <span class="yaml-com"># base64("admin")</span>
+  <span class="yaml-key">password</span>: <span class="yaml-val">U3VwZXJTZWNyZXQxMjM=</span> <span class="yaml-com"># base64("SuperSecret123")</span>
+<span class="yaml-com">---</span>
+<span class="yaml-com"># Using in a pod</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">containers</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">app</span>
+    <span class="yaml-key">env</span>:
+    - <span class="yaml-key">name</span>: <span class="yaml-val">DB_USERNAME</span>
+      <span class="yaml-key">valueFrom</span>:
+        <span class="yaml-key">secretKeyRef</span>:
+          <span class="yaml-key">name</span>: <span class="yaml-val">db-credentials</span>
+          <span class="yaml-key">key</span>: <span class="yaml-val">username</span>
+    - <span class="yaml-key">name</span>: <span class="yaml-val">DB_PASSWORD</span>
+      <span class="yaml-key">valueFrom</span>:
+        <span class="yaml-key">secretKeyRef</span>:
+          <span class="yaml-key">name</span>: <span class="yaml-val">db-credentials</span>
+          <span class="yaml-key">key</span>: <span class="yaml-val">password</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 8: VOLUMES & STORAGE -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-8">
+    <div class="module-header">
+      <span class="module-num">Module 08</span>
+      <h2 class="module-title">Volumes &amp; Persistent Storage</h2>
+    </div>
+
+    <p>Container filesystems are ephemeral — when a container restarts, any data written to it is lost. Kubernetes volumes solve this with a rich set of storage abstractions.</p>
+
+    <h3>Volume Types</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Volume Type</th><th>Persistence</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><code>emptyDir</code></td><td>Pod lifetime</td><td>Scratch space, inter-container sharing</td></tr>
+          <tr><td><code>hostPath</code></td><td>Node lifetime</td><td>Access node filesystem (dev/logging)</td></tr>
+          <tr><td><code>PersistentVolumeClaim</code></td><td>Independent</td><td>Databases, stateful applications</td></tr>
+          <tr><td><code>configMap</code></td><td>ConfigMap object</td><td>Configuration files</td></tr>
+          <tr><td><code>secret</code></td><td>Secret object</td><td>Sensitive files (certs, keys)</td></tr>
+          <tr><td><code>nfs</code></td><td>External NFS</td><td>Shared storage across pods</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>PersistentVolumes &amp; PersistentVolumeClaims</h3>
+    <p>The PV/PVC abstraction decouples storage provisioning from storage consumption. Admins provision PersistentVolumes; developers claim storage via PersistentVolumeClaims without needing to know the underlying storage details.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — PV and PVC</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-com"># Admin creates a PersistentVolume</span>
+<span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">PersistentVolume</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">postgres-pv</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">capacity</span>:
+    <span class="yaml-key">storage</span>: <span class="yaml-val">10Gi</span>
+  <span class="yaml-key">accessModes</span>:
+  - <span class="yaml-val">ReadWriteOnce</span>        <span class="yaml-com"># RWO: single node read/write</span>
+  <span class="yaml-key">persistentVolumeReclaimPolicy</span>: <span class="yaml-val">Retain</span>
+  <span class="yaml-key">storageClassName</span>: <span class="yaml-val">standard</span>
+  <span class="yaml-key">hostPath</span>:              <span class="yaml-com"># for local dev; use cloud volumes in prod</span>
+    <span class="yaml-key">path</span>: <span class="yaml-val">/data/postgres</span>
+---
+<span class="yaml-com"># Developer creates a PersistentVolumeClaim</span>
+<span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">PersistentVolumeClaim</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">postgres-pvc</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">accessModes</span>:
+  - <span class="yaml-val">ReadWriteOnce</span>
+  <span class="yaml-key">resources</span>:
+    <span class="yaml-key">requests</span>:
+      <span class="yaml-key">storage</span>: <span class="yaml-val">5Gi</span>       <span class="yaml-com"># request 5Gi from available PVs</span>
+  <span class="yaml-key">storageClassName</span>: <span class="yaml-val">standard</span>
+---
+<span class="yaml-com"># Pod uses the PVC</span>
+<span class="yaml-key">volumes</span>:
+- <span class="yaml-key">name</span>: <span class="yaml-val">postgres-data</span>
+  <span class="yaml-key">persistentVolumeClaim</span>:
+    <span class="yaml-key">claimName</span>: <span class="yaml-val">postgres-pvc</span></pre>
+    </div>
+
+    <h3>StorageClasses &amp; Dynamic Provisioning</h3>
+    <p>With StorageClasses, PVs are created automatically when a PVC is submitted. This is how production cloud clusters work — you don't pre-provision PVs.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — StorageClass (AWS EBS)</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">storage.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">StorageClass</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">fast-ssd</span>
+<span class="yaml-key">provisioner</span>: <span class="yaml-val">ebs.csi.aws.com</span>
+<span class="yaml-key">parameters</span>:
+  <span class="yaml-key">type</span>: <span class="yaml-val">gp3</span>
+  <span class="yaml-key">iops</span>: <span class="yaml-str">"3000"</span>
+  <span class="yaml-key">throughput</span>: <span class="yaml-str">"125"</span>
+<span class="yaml-key">reclaimPolicy</span>: <span class="yaml-val">Delete</span>      <span class="yaml-com"># delete EBS when PVC deleted</span>
+<span class="yaml-key">allowVolumeExpansion</span>: <span class="yaml-val">true</span>  <span class="yaml-com"># allow resizing</span>
+<span class="yaml-key">volumeBindingMode</span>: <span class="yaml-val">WaitForFirstConsumer</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 9: NAMESPACES & RBAC -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-9">
+    <div class="module-header">
+      <span class="module-num">Module 09</span>
+      <h2 class="module-title">Namespaces &amp; RBAC</h2>
+    </div>
+
+    <h3>Namespaces</h3>
+    <p>Namespaces provide a mechanism to divide cluster resources among multiple users or teams. They create isolated virtual clusters within one physical cluster. Resources within a namespace share a name scope (two deployments with the same name can exist in different namespaces).</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — namespace management</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Default namespaces in a fresh cluster</span>
+<span class="bash-cmd">kubectl</span> get namespaces
+<span class="bash-com"># default        — your resources if no namespace specified</span>
+<span class="bash-com"># kube-system    — K8s system components</span>
+<span class="bash-com"># kube-public    — publicly readable</span>
+<span class="bash-com"># kube-node-lease — node heartbeats</span>
+
+<span class="bash-com"># Create namespaces for environments</span>
+<span class="bash-cmd">kubectl</span> create namespace development
+<span class="bash-cmd">kubectl</span> create namespace staging
+<span class="bash-cmd">kubectl</span> create namespace production
+
+<span class="bash-com"># Deploy to a specific namespace</span>
+<span class="bash-cmd">kubectl</span> apply <span class="bash-flag">-f</span> deployment.yaml <span class="bash-flag">-n</span> production
+
+<span class="bash-com"># Set a default namespace for your context</span>
+<span class="bash-cmd">kubectl</span> config set-context --current <span class="bash-flag">--namespace=production</span></pre>
+    </div>
+
+    <h3>Role-Based Access Control (RBAC)</h3>
+    <p>RBAC regulates access to Kubernetes resources based on the roles of users. It follows four key objects:</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">👤</div>
+        <h5>Role / ClusterRole</h5>
+        <p>Defines a set of permissions. <strong>Role</strong> is namespace-scoped. <strong>ClusterRole</strong> applies cluster-wide.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔗</div>
+        <h5>RoleBinding / ClusterRoleBinding</h5>
+        <p>Grants a Role to a user, group, or ServiceAccount within a namespace or cluster-wide.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — RBAC: read-only developer access</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-com"># Create a Role that allows reading pods and deployments</span>
+<span class="yaml-key">apiVersion</span>: <span class="yaml-val">rbac.authorization.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Role</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">developer-viewer</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">production</span>
+<span class="yaml-key">rules</span>:
+- <span class="yaml-key">apiGroups</span>: [<span class="yaml-str">""</span>]          <span class="yaml-com"># "" = core API group</span>
+  <span class="yaml-key">resources</span>: [<span class="yaml-str">"pods"</span>, <span class="yaml-str">"pods/log"</span>]
+  <span class="yaml-key">verbs</span>: [<span class="yaml-str">"get"</span>, <span class="yaml-str">"list"</span>, <span class="yaml-str">"watch"</span>]
+- <span class="yaml-key">apiGroups</span>: [<span class="yaml-str">"apps"</span>]
+  <span class="yaml-key">resources</span>: [<span class="yaml-str">"deployments"</span>]
+  <span class="yaml-key">verbs</span>: [<span class="yaml-str">"get"</span>, <span class="yaml-str">"list"</span>]
+---
+<span class="yaml-com"># Bind the role to a user</span>
+<span class="yaml-key">apiVersion</span>: <span class="yaml-val">rbac.authorization.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">RoleBinding</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">jane-developer</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">production</span>
+<span class="yaml-key">subjects</span>:
+- <span class="yaml-key">kind</span>: <span class="yaml-val">User</span>
+  <span class="yaml-key">name</span>: <span class="yaml-val">jane@company.com</span>
+  <span class="yaml-key">apiGroup</span>: <span class="yaml-val">rbac.authorization.k8s.io</span>
+<span class="yaml-key">roleRef</span>:
+  <span class="yaml-key">kind</span>: <span class="yaml-val">Role</span>
+  <span class="yaml-key">name</span>: <span class="yaml-val">developer-viewer</span>
+  <span class="yaml-key">apiGroup</span>: <span class="yaml-val">rbac.authorization.k8s.io</span></pre>
+    </div>
+
+    <h3>Service Accounts</h3>
+    <p>ServiceAccounts provide an identity for processes running in Pods. If your application needs to call the Kubernetes API (e.g., a CI system), it should use a dedicated ServiceAccount with minimal permissions.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — ServiceAccount with permissions</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">ServiceAccount</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">app-service-account</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">production</span>
+---
+<span class="yaml-com"># Use in a pod spec</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">serviceAccountName</span>: <span class="yaml-val">app-service-account</span>
+  <span class="yaml-key">containers</span>: [...]</pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 10: STATEFULSETS -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-10">
+    <div class="module-header">
+      <span class="module-num">Module 10</span>
+      <h2 class="module-title">StatefulSets</h2>
+    </div>
+
+    <p>Deployments are perfect for stateless applications. But databases, message queues, and distributed systems require <em>stable, persistent identity</em>. That's what <strong>StatefulSets</strong> provide.</p>
+
+    <h3>StatefulSet vs Deployment</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Feature</th><th>Deployment</th><th>StatefulSet</th></tr></thead>
+        <tbody>
+          <tr><td>Pod identity</td><td>Random (pod-xyz-abc)</td><td>Ordered, stable (pod-0, pod-1)</td></tr>
+          <tr><td>Storage</td><td>Shared or recreated</td><td>Individual PVC per pod</td></tr>
+          <tr><td>Scaling order</td><td>Parallel</td><td>Sequential (0→1→2)</td></tr>
+          <tr><td>DNS name</td><td>Via service selector</td><td>Unique per-pod DNS names</td></tr>
+          <tr><td>Use cases</td><td>Web servers, APIs</td><td>Databases, Kafka, ZooKeeper</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — PostgreSQL StatefulSet</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">apps/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">StatefulSet</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">postgres</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">serviceName</span>: <span class="yaml-str">"postgres-headless"</span>  <span class="yaml-com"># headless service required</span>
+  <span class="yaml-key">replicas</span>: <span class="yaml-num">3</span>
+  <span class="yaml-key">selector</span>:
+    <span class="yaml-key">matchLabels</span>:
+      <span class="yaml-key">app</span>: <span class="yaml-val">postgres</span>
+  <span class="yaml-key">template</span>:
+    <span class="yaml-key">metadata</span>:
+      <span class="yaml-key">labels</span>:
+        <span class="yaml-key">app</span>: <span class="yaml-val">postgres</span>
+    <span class="yaml-key">spec</span>:
+      <span class="yaml-key">containers</span>:
+      - <span class="yaml-key">name</span>: <span class="yaml-val">postgres</span>
+        <span class="yaml-key">image</span>: <span class="yaml-val">postgres:16</span>
+        <span class="yaml-key">env</span>:
+        - <span class="yaml-key">name</span>: <span class="yaml-val">POSTGRES_PASSWORD</span>
+          <span class="yaml-key">valueFrom</span>:
+            <span class="yaml-key">secretKeyRef</span>:
+              <span class="yaml-key">name</span>: <span class="yaml-val">postgres-secret</span>
+              <span class="yaml-key">key</span>: <span class="yaml-val">password</span>
+        <span class="yaml-key">volumeMounts</span>:
+        - <span class="yaml-key">name</span>: <span class="yaml-val">data</span>
+          <span class="yaml-key">mountPath</span>: <span class="yaml-val">/var/lib/postgresql/data</span>
+  <span class="yaml-key">volumeClaimTemplates</span>:      <span class="yaml-com"># creates a unique PVC per pod!</span>
+  - <span class="yaml-key">metadata</span>:
+      <span class="yaml-key">name</span>: <span class="yaml-val">data</span>
+    <span class="yaml-key">spec</span>:
+      <span class="yaml-key">accessModes</span>: [<span class="yaml-str">"ReadWriteOnce"</span>]
+      <span class="yaml-key">resources</span>:
+        <span class="yaml-key">requests</span>:
+          <span class="yaml-key">storage</span>: <span class="yaml-val">20Gi</span>
+      <span class="yaml-key">storageClassName</span>: <span class="yaml-val">fast-ssd</span></pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <div class="callout-title">Per-Pod DNS</div>
+        <p>Each pod in a StatefulSet gets a DNS entry: <code>postgres-0.postgres-headless.default.svc.cluster.local</code>. This lets pods address each other directly, which is essential for primary/replica database setups.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 11: DAEMONSETS & JOBS -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-11">
+    <div class="module-header">
+      <span class="module-num">Module 11</span>
+      <h2 class="module-title">DaemonSets &amp; Jobs</h2>
+    </div>
+
+    <h3>DaemonSets</h3>
+    <p>A DaemonSet ensures that a copy of a Pod runs on every (or some) node in the cluster. As new nodes are added, pods are automatically added to them. As nodes are removed, pods are garbage collected. Classic use cases:</p>
+    <ul>
+      <li>Log collectors (Fluentd, Filebeat)</li>
+      <li>Metrics exporters (node_exporter)</li>
+      <li>Storage daemons (Ceph, GlusterFS)</li>
+      <li>Network plugins (Calico, Cilium, Weave)</li>
+    </ul>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — log collector DaemonSet</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">apps/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">DaemonSet</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">fluentd</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">selector</span>:
+    <span class="yaml-key">matchLabels</span>:
+      <span class="yaml-key">name</span>: <span class="yaml-val">fluentd</span>
+  <span class="yaml-key">template</span>:
+    <span class="yaml-key">metadata</span>:
+      <span class="yaml-key">labels</span>:
+        <span class="yaml-key">name</span>: <span class="yaml-val">fluentd</span>
+    <span class="yaml-key">spec</span>:
+      <span class="yaml-key">tolerations</span>:             <span class="yaml-com"># run on control plane nodes too</span>
+      - <span class="yaml-key">key</span>: <span class="yaml-val">node-role.kubernetes.io/control-plane</span>
+        <span class="yaml-key">effect</span>: <span class="yaml-val">NoSchedule</span>
+      <span class="yaml-key">containers</span>:
+      - <span class="yaml-key">name</span>: <span class="yaml-val">fluentd</span>
+        <span class="yaml-key">image</span>: <span class="yaml-val">fluent/fluentd:v1.16</span>
+        <span class="yaml-key">volumeMounts</span>:
+        - <span class="yaml-key">name</span>: <span class="yaml-val">varlog</span>
+          <span class="yaml-key">mountPath</span>: <span class="yaml-val">/var/log</span>
+      <span class="yaml-key">volumes</span>:
+      - <span class="yaml-key">name</span>: <span class="yaml-val">varlog</span>
+        <span class="yaml-key">hostPath</span>:
+          <span class="yaml-key">path</span>: <span class="yaml-val">/var/log</span></pre>
+    </div>
+
+    <h3>Jobs</h3>
+    <p>A Job creates one or more Pods and ensures a specified number of them successfully terminate. Perfect for batch processing, database migrations, or one-off tasks.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — batch job</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">batch/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Job</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">db-migration</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">completions</span>: <span class="yaml-num">1</span>         <span class="yaml-com"># number of successful completions needed</span>
+  <span class="yaml-key">parallelism</span>: <span class="yaml-num">1</span>         <span class="yaml-com"># pods running in parallel</span>
+  <span class="yaml-key">backoffLimit</span>: <span class="yaml-num">3</span>       <span class="yaml-com"># retry up to 3 times on failure</span>
+  <span class="yaml-key">template</span>:
+    <span class="yaml-key">spec</span>:
+      <span class="yaml-key">restartPolicy</span>: <span class="yaml-val">OnFailure</span>
+      <span class="yaml-key">containers</span>:
+      - <span class="yaml-key">name</span>: <span class="yaml-val">migration</span>
+        <span class="yaml-key">image</span>: <span class="yaml-val">my-app:latest</span>
+        <span class="yaml-key">command</span>: [<span class="yaml-str">"python"</span>, <span class="yaml-str">"manage.py"</span>, <span class="yaml-str">"migrate"</span>]</pre>
+    </div>
+
+    <h3>CronJobs</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — scheduled CronJob</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">batch/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">CronJob</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">db-backup</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">schedule</span>: <span class="yaml-str">"0 2 * * *"</span>      <span class="yaml-com"># every day at 2am UTC</span>
+  <span class="yaml-key">concurrencyPolicy</span>: <span class="yaml-val">Forbid</span>   <span class="yaml-com"># don't run if previous still running</span>
+  <span class="yaml-key">successfulJobsHistoryLimit</span>: <span class="yaml-num">3</span>
+  <span class="yaml-key">failedJobsHistoryLimit</span>: <span class="yaml-num">1</span>
+  <span class="yaml-key">jobTemplate</span>:
+    <span class="yaml-key">spec</span>:
+      <span class="yaml-key">template</span>:
+        <span class="yaml-key">spec</span>:
+          <span class="yaml-key">restartPolicy</span>: <span class="yaml-val">OnFailure</span>
+          <span class="yaml-key">containers</span>:
+          - <span class="yaml-key">name</span>: <span class="yaml-val">backup</span>
+            <span class="yaml-key">image</span>: <span class="yaml-val">postgres:16</span>
+            <span class="yaml-key">command</span>: [<span class="yaml-str">"pg_dumpall"</span>, <span class="yaml-str">"-h"</span>, <span class="yaml-str">"postgres"</span>]</pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 12: INGRESS -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-12">
+    <div class="module-header">
+      <span class="module-num">Module 12</span>
+      <h2 class="module-title">Ingress Controllers</h2>
+    </div>
+
+    <p>An Ingress exposes HTTP/HTTPS routes from outside the cluster to services within the cluster. Unlike NodePort or LoadBalancer services, a single Ingress can route traffic to multiple services based on the request's hostname or path — saving you from needing a cloud load balancer per service.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-content">
+        <div class="callout-title">Ingress vs Ingress Controller</div>
+        <p>An <strong>Ingress resource</strong> is the K8s API object (YAML). An <strong>Ingress Controller</strong> is the actual software (nginx, Traefik, HAProxy, AWS ALB) that reads Ingress resources and configures the reverse proxy accordingly. You need both.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — install nginx ingress controller</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-cmd">helm</span> upgrade <span class="bash-flag">--install</span> ingress-nginx ingress-nginx \
+  <span class="bash-flag">--repo</span> https://kubernetes.github.io/ingress-nginx \
+  <span class="bash-flag">--namespace</span> ingress-nginx <span class="bash-flag">--create-namespace</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — ingress with path & host routing</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Ingress</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">app-ingress</span>
+  <span class="yaml-key">annotations</span>:
+    <span class="yaml-key">nginx.ingress.kubernetes.io/rewrite-target</span>: <span class="yaml-val">/</span>
+    <span class="yaml-key">cert-manager.io/cluster-issuer</span>: <span class="yaml-str">"letsencrypt-prod"</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">ingressClassName</span>: <span class="yaml-val">nginx</span>
+  <span class="yaml-key">tls</span>:
+  - <span class="yaml-key">hosts</span>:
+    - <span class="yaml-val">myapp.example.com</span>
+    <span class="yaml-key">secretName</span>: <span class="yaml-val">myapp-tls</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">host</span>: <span class="yaml-val">myapp.example.com</span>
+    <span class="yaml-key">http</span>:
+      <span class="yaml-key">paths</span>:
+      - <span class="yaml-key">path</span>: <span class="yaml-val">/</span>
+        <span class="yaml-key">pathType</span>: <span class="yaml-val">Prefix</span>
+        <span class="yaml-key">backend</span>:
+          <span class="yaml-key">service</span>:
+            <span class="yaml-key">name</span>: <span class="yaml-val">frontend-svc</span>
+            <span class="yaml-key">port</span>:
+              <span class="yaml-key">number</span>: <span class="yaml-num">80</span>
+      - <span class="yaml-key">path</span>: <span class="yaml-val">/api</span>
+        <span class="yaml-key">pathType</span>: <span class="yaml-val">Prefix</span>
+        <span class="yaml-key">backend</span>:
+          <span class="yaml-key">service</span>:
+            <span class="yaml-key">name</span>: <span class="yaml-val">api-svc</span>
+            <span class="yaml-key">port</span>:
+              <span class="yaml-key">number</span>: <span class="yaml-num">8080</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 13: HELM -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-13">
+    <div class="module-header">
+      <span class="module-num">Module 13</span>
+      <h2 class="module-title">Helm Package Manager</h2>
+    </div>
+
+    <p>Helm is the package manager for Kubernetes — often called the "apt-get of Kubernetes." It bundles related Kubernetes manifests into <strong>Charts</strong> that can be versioned, shared, and deployed with a single command. It also provides powerful templating to parameterize deployments.</p>
+
+    <h3>Core Concepts</h3>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">📦</div>
+        <h5>Chart</h5>
+        <p>A package of pre-configured Kubernetes resources. Like a Dockerfile but for entire applications.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🚀</div>
+        <h5>Release</h5>
+        <p>An instance of a Chart deployed into a cluster. You can install the same chart multiple times creating multiple releases.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🗃️</div>
+        <h5>Repository</h5>
+        <p>A place where Charts are stored. ArtifactHub.io is the central repository of public Helm Charts.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">⚙️</div>
+        <h5>Values</h5>
+        <p>YAML configuration overrides that customize a Chart during installation or upgrade.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — helm essentials</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Add a chart repository</span>
+<span class="bash-cmd">helm</span> repo add bitnami https://charts.bitnami.com/bitnami
+<span class="bash-cmd">helm</span> repo update
+
+<span class="bash-com"># Search for charts</span>
+<span class="bash-cmd">helm</span> search repo bitnami/postgresql
+
+<span class="bash-com"># Install a chart (creates a release named "my-db")</span>
+<span class="bash-cmd">helm</span> install my-db bitnami/postgresql \
+  <span class="bash-flag">--set</span> auth.postgresPassword=secret \
+  <span class="bash-flag">--namespace</span> production
+
+<span class="bash-com"># Install with a custom values file</span>
+<span class="bash-cmd">helm</span> install my-db bitnami/postgresql <span class="bash-flag">-f</span> my-values.yaml
+
+<span class="bash-com"># List releases</span>
+<span class="bash-cmd">helm</span> list <span class="bash-flag">-n</span> production
+
+<span class="bash-com"># Upgrade a release</span>
+<span class="bash-cmd">helm</span> upgrade my-db bitnami/postgresql <span class="bash-flag">--set</span> auth.postgresPassword=newsecret
+
+<span class="bash-com"># Rollback to previous release version</span>
+<span class="bash-cmd">helm</span> rollback my-db <span class="bash-arg">1</span>
+
+<span class="bash-com"># Uninstall</span>
+<span class="bash-cmd">helm</span> uninstall my-db</pre>
+    </div>
+
+    <h3>Creating Your Own Chart</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — scaffold a new chart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-cmd">helm</span> create my-webapp
+<span class="bash-com"># Creates this structure:</span>
+<span class="bash-com"># my-webapp/</span>
+<span class="bash-com">#   Chart.yaml         — chart metadata (name, version, description)</span>
+<span class="bash-com">#   values.yaml        — default values</span>
+<span class="bash-com">#   charts/            — chart dependencies</span>
+<span class="bash-com">#   templates/</span>
+<span class="bash-com">#     deployment.yaml  — template files</span>
+<span class="bash-com">#     service.yaml</span>
+<span class="bash-com">#     ingress.yaml</span>
+<span class="bash-com">#     _helpers.tpl     — reusable template snippets</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — templates/deployment.yaml (with Go templating)</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">apps/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Deployment</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: {{ .Release.Name }}-webapp
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">replicas</span>: {{ .Values.replicaCount }}
+  <span class="yaml-key">template</span>:
+    <span class="yaml-key">spec</span>:
+      <span class="yaml-key">containers</span>:
+      - <span class="yaml-key">name</span>: <span class="yaml-val">webapp</span>
+        <span class="yaml-key">image</span>: <span class="yaml-str">"{{ .Values.image.repository }}:{{ .Values.image.tag }}"</span>
+        <span class="yaml-key">resources</span>:
+          {{- toYaml .Values.resources | nindent 10 }}</pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 14: AUTOSCALING -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-14">
+    <div class="module-header">
+      <span class="module-num">Module 14</span>
+      <h2 class="module-title">Auto-scaling</h2>
+    </div>
+
+    <p>Kubernetes provides three complementary auto-scaling mechanisms that work at different levels of the stack.</p>
+
+    <h3>Horizontal Pod Autoscaler (HPA)</h3>
+    <p>HPA automatically scales the number of Pod replicas based on observed CPU utilization, memory usage, or custom metrics. It polls the metrics API every 15 seconds by default.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — HPA with CPU and memory targets</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">autoscaling/v2</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">HorizontalPodAutoscaler</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">webapp-hpa</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">scaleTargetRef</span>:
+    <span class="yaml-key">apiVersion</span>: <span class="yaml-val">apps/v1</span>
+    <span class="yaml-key">kind</span>: <span class="yaml-val">Deployment</span>
+    <span class="yaml-key">name</span>: <span class="yaml-val">webapp</span>
+  <span class="yaml-key">minReplicas</span>: <span class="yaml-num">2</span>
+  <span class="yaml-key">maxReplicas</span>: <span class="yaml-num">20</span>
+  <span class="yaml-key">metrics</span>:
+  - <span class="yaml-key">type</span>: <span class="yaml-val">Resource</span>
+    <span class="yaml-key">resource</span>:
+      <span class="yaml-key">name</span>: <span class="yaml-val">cpu</span>
+      <span class="yaml-key">target</span>:
+        <span class="yaml-key">type</span>: <span class="yaml-val">Utilization</span>
+        <span class="yaml-key">averageUtilization</span>: <span class="yaml-num">60</span>    <span class="yaml-com"># scale when avg CPU > 60%</span>
+  - <span class="yaml-key">type</span>: <span class="yaml-val">Resource</span>
+    <span class="yaml-key">resource</span>:
+      <span class="yaml-key">name</span>: <span class="yaml-val">memory</span>
+      <span class="yaml-key">target</span>:
+        <span class="yaml-key">type</span>: <span class="yaml-val">AverageValue</span>
+        <span class="yaml-key">averageValue</span>: <span class="yaml-val">400Mi</span></pre>
+    </div>
+
+    <h3>Vertical Pod Autoscaler (VPA)</h3>
+    <p>VPA automatically adjusts the CPU and memory <em>requests</em> for containers, right-sizing pods based on actual usage. This is particularly useful for workloads with unpredictable resource needs. VPA requires installing the VPA admission controller.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — VPA in recommendation mode</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">autoscaling.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">VerticalPodAutoscaler</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">webapp-vpa</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">targetRef</span>:
+    <span class="yaml-key">apiVersion</span>: <span class="yaml-str">"apps/v1"</span>
+    <span class="yaml-key">kind</span>: <span class="yaml-val">Deployment</span>
+    <span class="yaml-key">name</span>: <span class="yaml-val">webapp</span>
+  <span class="yaml-key">updatePolicy</span>:
+    <span class="yaml-key">updateMode</span>: <span class="yaml-str">"Off"</span>   <span class="yaml-com"># "Off" = recommendations only (no auto-apply)</span>
+                          <span class="yaml-com"># "Auto" = auto-apply (restarts pods)</span></pre>
+    </div>
+
+    <h3>Cluster Autoscaler</h3>
+    <p>The Cluster Autoscaler automatically adjusts the <em>number of nodes</em> in a cluster. When pods can't be scheduled due to insufficient resources, it provisions new nodes. When nodes are underutilized, it drains and removes them to save costs.</p>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <div class="callout-title">Scaling Strategy</div>
+        <p>Use HPA + Cluster Autoscaler together: HPA scales pods, and when HPA exhausts available nodes, Cluster Autoscaler adds more nodes. Set proper resource requests so the scheduler can make informed decisions.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 15: RESOURCE MANAGEMENT -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-15">
+    <div class="module-header">
+      <span class="module-num">Module 15</span>
+      <h2 class="module-title">Resource Management</h2>
+    </div>
+
+    <h3>Requests &amp; Limits</h3>
+    <p><strong>Requests</strong> tell the scheduler how much CPU/memory to reserve for a pod. <strong>Limits</strong> cap the maximum a container can use. If a container exceeds its memory limit, it's OOMKilled. If it exceeds CPU limits, it's throttled (not killed).</p>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-content">
+        <div class="callout-title">Always Set Requests and Limits</div>
+        <p>Pods without resource requests get scheduled to nodes that may be overloaded, causing evictions. Pods without limits can starve neighboring pods. Both lead to unpredictable production outages.</p>
+      </div>
+    </div>
+
+    <h3>LimitRanges</h3>
+    <p>LimitRanges enforce default requests/limits and constrain resource allocation per pod or container in a namespace — protecting you from teams forgetting to set them.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — LimitRange</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">LimitRange</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">default-limits</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">development</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">limits</span>:
+  - <span class="yaml-key">type</span>: <span class="yaml-val">Container</span>
+    <span class="yaml-key">default</span>:                <span class="yaml-com"># applied when no limit specified</span>
+      <span class="yaml-key">cpu</span>: <span class="yaml-val">500m</span>
+      <span class="yaml-key">memory</span>: <span class="yaml-val">512Mi</span>
+    <span class="yaml-key">defaultRequest</span>:       <span class="yaml-com"># applied when no request specified</span>
+      <span class="yaml-key">cpu</span>: <span class="yaml-val">100m</span>
+      <span class="yaml-key">memory</span>: <span class="yaml-val">128Mi</span>
+    <span class="yaml-key">max</span>:                   <span class="yaml-com"># hard maximum per container</span>
+      <span class="yaml-key">cpu</span>: <span class="yaml-val">2</span>
+      <span class="yaml-key">memory</span>: <span class="yaml-val">2Gi</span></pre>
+    </div>
+
+    <h3>ResourceQuotas</h3>
+    <p>ResourceQuotas limit the total resource consumption in a namespace. Useful for multi-tenant clusters where teams share a cluster.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — ResourceQuota for a team namespace</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">ResourceQuota</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">team-quota</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">team-alpha</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">hard</span>:
+    <span class="yaml-key">requests.cpu</span>: <span class="yaml-str">"20"</span>
+    <span class="yaml-key">requests.memory</span>: <span class="yaml-val">40Gi</span>
+    <span class="yaml-key">limits.cpu</span>: <span class="yaml-str">"40"</span>
+    <span class="yaml-key">limits.memory</span>: <span class="yaml-val">80Gi</span>
+    <span class="yaml-key">pods</span>: <span class="yaml-str">"50"</span>
+    <span class="yaml-key">services</span>: <span class="yaml-str">"20"</span>
+    <span class="yaml-key">persistentvolumeclaims</span>: <span class="yaml-str">"10"</span></pre>
+    </div>
+
+    <h3>Quality of Service (QoS) Classes</h3>
+    <p>Kubernetes assigns a QoS class to each Pod, which determines eviction priority when a node is under memory pressure:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>QoS Class</th><th>Condition</th><th>Eviction Priority</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Guaranteed</strong></td><td>requests == limits for all containers</td><td>Last to be evicted</td></tr>
+          <tr><td><strong>Burstable</strong></td><td>requests &lt; limits</td><td>Middle priority</td></tr>
+          <tr><td><strong>BestEffort</strong></td><td>No requests or limits set</td><td>First to be evicted</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 16: HEALTH PROBES -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-16">
+    <div class="module-header">
+      <span class="module-num">Module 16</span>
+      <h2 class="module-title">Health Probes</h2>
+    </div>
+
+    <p>Health probes tell Kubernetes when a container is ready to serve traffic and when it needs to be restarted. Properly configured probes are essential for zero-downtime deployments.</p>
+
+    <h3>The Three Probe Types</h3>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">💓</div>
+        <h5>Liveness Probe</h5>
+        <p>Detects if the container is in a broken state. If it fails, Kubernetes kills and restarts the container. Use for detecting deadlocks.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">✅</div>
+        <h5>Readiness Probe</h5>
+        <p>Detects when a container is ready to receive traffic. If it fails, the pod is removed from service endpoints — no traffic is sent to it.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🚀</div>
+        <h5>Startup Probe</h5>
+        <p>Protects slow-starting containers. Disables liveness and readiness checks until the startup probe succeeds. Prevents premature killing.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — all three probes</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">containers</span>:
+- <span class="yaml-key">name</span>: <span class="yaml-val">app</span>
+  <span class="yaml-key">image</span>: <span class="yaml-val">my-app:1.0</span>
+
+  <span class="yaml-key">startupProbe</span>:               <span class="yaml-com"># waits for app to boot</span>
+    <span class="yaml-key">httpGet</span>:
+      <span class="yaml-key">path</span>: <span class="yaml-val">/health/startup</span>
+      <span class="yaml-key">port</span>: <span class="yaml-num">8080</span>
+    <span class="yaml-key">failureThreshold</span>: <span class="yaml-num">30</span>    <span class="yaml-com"># 30 × 10s = 5min to start</span>
+    <span class="yaml-key">periodSeconds</span>: <span class="yaml-num">10</span>
+
+  <span class="yaml-key">livenessProbe</span>:
+    <span class="yaml-key">httpGet</span>:
+      <span class="yaml-key">path</span>: <span class="yaml-val">/health/live</span>
+      <span class="yaml-key">port</span>: <span class="yaml-num">8080</span>
+    <span class="yaml-key">initialDelaySeconds</span>: <span class="yaml-num">0</span>   <span class="yaml-com"># 0 since startup probe handles it</span>
+    <span class="yaml-key">periodSeconds</span>: <span class="yaml-num">15</span>
+    <span class="yaml-key">failureThreshold</span>: <span class="yaml-num">3</span>
+    <span class="yaml-key">timeoutSeconds</span>: <span class="yaml-num">5</span>
+
+  <span class="yaml-key">readinessProbe</span>:
+    <span class="yaml-key">httpGet</span>:
+      <span class="yaml-key">path</span>: <span class="yaml-val">/health/ready</span>
+      <span class="yaml-key">port</span>: <span class="yaml-num">8080</span>
+    <span class="yaml-key">periodSeconds</span>: <span class="yaml-num">5</span>
+    <span class="yaml-key">failureThreshold</span>: <span class="yaml-num">3</span></pre>
+    </div>
+
+    <h3>Probe Mechanisms</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — probe types: HTTP, TCP, exec, gRPC</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-com"># HTTP GET probe (most common)</span>
+<span class="yaml-key">livenessProbe</span>:
+  <span class="yaml-key">httpGet</span>:
+    <span class="yaml-key">path</span>: <span class="yaml-val">/healthz</span>
+    <span class="yaml-key">port</span>: <span class="yaml-num">8080</span>
+    <span class="yaml-key">httpHeaders</span>:
+    - <span class="yaml-key">name</span>: <span class="yaml-val">X-Custom-Header</span>
+      <span class="yaml-key">value</span>: <span class="yaml-val">health-check</span>
+
+<span class="yaml-com"># TCP socket probe (for non-HTTP services like DB)</span>
+<span class="yaml-key">livenessProbe</span>:
+  <span class="yaml-key">tcpSocket</span>:
+    <span class="yaml-key">port</span>: <span class="yaml-num">5432</span>
+
+<span class="yaml-com"># Exec probe (runs a command)</span>
+<span class="yaml-key">livenessProbe</span>:
+  <span class="yaml-key">exec</span>:
+    <span class="yaml-key">command</span>: [<span class="yaml-str">"redis-cli"</span>, <span class="yaml-str">"ping"</span>]
+
+<span class="yaml-com"># gRPC probe (Kubernetes 1.24+)</span>
+<span class="yaml-key">livenessProbe</span>:
+  <span class="yaml-key">grpc</span>:
+    <span class="yaml-key">port</span>: <span class="yaml-num">50051</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 17: MONITORING & LOGGING -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-17">
+    <div class="module-header">
+      <span class="module-num">Module 17</span>
+      <h2 class="module-title">Monitoring &amp; Logging</h2>
+    </div>
+
+    <p>Observability is the ability to understand the internal state of a system from its external outputs. The three pillars are <strong>metrics</strong>, <strong>logs</strong>, and <strong>traces</strong>.</p>
+
+    <h3>Prometheus &amp; Grafana Stack</h3>
+    <p>The Prometheus + Grafana stack is the de facto standard for Kubernetes monitoring. Prometheus scrapes metrics from your workloads; Grafana visualizes them with dashboards.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — install kube-prometheus-stack via Helm</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-cmd">helm</span> repo add prometheus-community \
+  https://prometheus-community.github.io/helm-charts
+<span class="bash-cmd">helm</span> repo update
+
+<span class="bash-cmd">helm</span> install monitoring prometheus-community/kube-prometheus-stack \
+  <span class="bash-flag">--namespace</span> monitoring <span class="bash-flag">--create-namespace</span> \
+  <span class="bash-flag">--set</span> grafana.adminPassword=mysecretpassword
+
+<span class="bash-com"># Access Grafana dashboard</span>
+<span class="bash-cmd">kubectl</span> port-forward <span class="bash-flag">-n</span> monitoring svc/monitoring-grafana <span class="bash-arg">3000:80</span></pre>
+    </div>
+
+    <h3>Exposing Application Metrics</h3>
+    <p>Annotate your service so Prometheus knows to scrape it:</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — ServiceMonitor for Prometheus</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">monitoring.coreos.com/v1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">ServiceMonitor</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">webapp-monitor</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">monitoring</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">selector</span>:
+    <span class="yaml-key">matchLabels</span>:
+      <span class="yaml-key">app</span>: <span class="yaml-val">webapp</span>
+  <span class="yaml-key">namespaceSelector</span>:
+    <span class="yaml-key">matchNames</span>: [<span class="yaml-str">production</span>]
+  <span class="yaml-key">endpoints</span>:
+  - <span class="yaml-key">port</span>: <span class="yaml-val">metrics</span>       <span class="yaml-com"># the named port on the Service</span>
+    <span class="yaml-key">interval</span>: <span class="yaml-val">30s</span>
+    <span class="yaml-key">path</span>: <span class="yaml-val">/metrics</span></pre>
+    </div>
+
+    <h3>Centralized Logging with Loki</h3>
+    <p>Loki (by Grafana Labs) is a horizontally scalable log aggregation system designed specifically for Kubernetes. It uses the same label-based query language as Prometheus but for logs.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — install Loki stack</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-cmd">helm</span> install loki-stack grafana/loki-stack \
+  <span class="bash-flag">--namespace</span> monitoring \
+  <span class="bash-flag">--set</span> grafana.enabled=false \  <span class="bash-com"># already installed</span>
+  <span class="bash-flag">--set</span> promtail.enabled=true   <span class="bash-com"># log collector as DaemonSet</span></pre>
+    </div>
+
+    <h3>Useful kubectl Logging Commands</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Follow logs from a pod</span>
+<span class="bash-cmd">kubectl</span> logs <span class="bash-flag">-f</span> my-pod
+
+<span class="bash-com"># Logs from a specific container in a multi-container pod</span>
+<span class="bash-cmd">kubectl</span> logs my-pod <span class="bash-flag">-c</span> sidecar
+
+<span class="bash-com"># Previous container instance (after a crash)</span>
+<span class="bash-cmd">kubectl</span> logs my-pod <span class="bash-flag">--previous</span>
+
+<span class="bash-com"># Logs from all pods with a label</span>
+<span class="bash-cmd">kubectl</span> logs <span class="bash-flag">-l</span> app=webapp <span class="bash-flag">--all-containers</span>
+
+<span class="bash-com"># Last 100 lines since 1 hour ago</span>
+<span class="bash-cmd">kubectl</span> logs my-pod <span class="bash-flag">--tail=100 --since=1h</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 18: CI/CD -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-18">
+    <div class="module-header">
+      <span class="module-num">Module 18</span>
+      <h2 class="module-title">CI/CD Pipelines</h2>
+    </div>
+
+    <p>A robust CI/CD pipeline for Kubernetes typically involves: building a Docker image, pushing to a registry, updating the Kubernetes manifests, and letting GitOps tooling deploy the changes.</p>
+
+    <h3>GitHub Actions Pipeline</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — .github/workflows/deploy.yml</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">name</span>: <span class="yaml-val">Build and Deploy</span>
+<span class="yaml-key">on</span>:
+  <span class="yaml-key">push</span>:
+    <span class="yaml-key">branches</span>: [<span class="yaml-str">main</span>]
+
+<span class="yaml-key">jobs</span>:
+  <span class="yaml-key">build-and-deploy</span>:
+    <span class="yaml-key">runs-on</span>: <span class="yaml-val">ubuntu-latest</span>
+    <span class="yaml-key">steps</span>:
+    - <span class="yaml-key">uses</span>: <span class="yaml-val">actions/checkout@v4</span>
+
+    - <span class="yaml-key">name</span>: <span class="yaml-val">Build Docker image</span>
+      <span class="yaml-key">run</span>: |
+        <span class="yaml-val">IMAGE="ghcr.io/${{ github.repository }}:${{ github.sha }}"</span>
+        <span class="yaml-val">docker build -t $IMAGE .</span>
+        <span class="yaml-val">echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u $ --password-stdin</span>
+        <span class="yaml-val">docker push $IMAGE</span>
+
+    - <span class="yaml-key">name</span>: <span class="yaml-val">Update image in deployment</span>
+      <span class="yaml-key">run</span>: |
+        <span class="yaml-val">kubectl set image deployment/webapp \</span>
+          <span class="yaml-val">webapp=ghcr.io/${{ github.repository }}:${{ github.sha }}</span>
+      <span class="yaml-key">env</span>:
+        <span class="yaml-key">KUBECONFIG</span>: <span class="yaml-val">${{ secrets.KUBECONFIG }}</span>
+
+    - <span class="yaml-key">name</span>: <span class="yaml-val">Verify rollout</span>
+      <span class="yaml-key">run</span>: <span class="yaml-val">kubectl rollout status deployment/webapp --timeout=300s</span></pre>
+    </div>
+
+    <h3>GitOps with ArgoCD</h3>
+    <p>GitOps is a pattern where the Git repository is the single source of truth for infrastructure. <strong>ArgoCD</strong> continuously watches your Git repo and syncs the cluster state to match what's in the repo.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — install ArgoCD</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-cmd">kubectl</span> create namespace argocd
+<span class="bash-cmd">kubectl</span> apply <span class="bash-flag">-n</span> argocd <span class="bash-flag">-f</span> \
+  https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+<span class="bash-com"># Get initial admin password</span>
+<span class="bash-cmd">kubectl</span> <span class="bash-flag">-n</span> argocd get secret argocd-initial-admin-secret \
+  <span class="bash-flag">-o jsonpath="{.data.password}"</span> | base64 <span class="bash-flag">-d</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — ArgoCD Application manifest</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">argoproj.io/v1alpha1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">Application</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">webapp</span>
+  <span class="yaml-key">namespace</span>: <span class="yaml-val">argocd</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">project</span>: <span class="yaml-val">default</span>
+  <span class="yaml-key">source</span>:
+    <span class="yaml-key">repoURL</span>: <span class="yaml-str">"https://github.com/myorg/my-webapp"</span>
+    <span class="yaml-key">targetRevision</span>: <span class="yaml-val">HEAD</span>
+    <span class="yaml-key">path</span>: <span class="yaml-val">k8s/production</span>
+  <span class="yaml-key">destination</span>:
+    <span class="yaml-key">server</span>: <span class="yaml-str">"https://kubernetes.default.svc"</span>
+    <span class="yaml-key">namespace</span>: <span class="yaml-val">production</span>
+  <span class="yaml-key">syncPolicy</span>:
+    <span class="yaml-key">automated</span>:
+      <span class="yaml-key">prune</span>: <span class="yaml-val">true</span>       <span class="yaml-com"># delete resources removed from git</span>
+      <span class="yaml-key">selfHeal</span>: <span class="yaml-val">true</span>   <span class="yaml-com"># revert manual changes</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 19: SECURITY -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-19">
+    <div class="module-header">
+      <span class="module-num">Module 19</span>
+      <h2 class="module-title">Security Hardening</h2>
+    </div>
+
+    <h3>Pod Security Standards</h3>
+    <p>Kubernetes 1.25+ replaced PodSecurityPolicy with built-in Pod Security Standards (PSS) enforced via namespace labels. Three profiles exist: <strong>Privileged</strong>, <strong>Baseline</strong>, and <strong>Restricted</strong>.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — enforce restricted security for a namespace</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-cmd">kubectl</span> label namespace production \
+  pod-security.kubernetes.io/enforce=restricted \
+  pod-security.kubernetes.io/enforce-version=latest</pre>
+    </div>
+
+    <h3>SecurityContext</h3>
+    <p>Set security constraints at the Pod or container level to reduce the attack surface:</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — hardened security context</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">spec</span>:
+  <span class="yaml-key">securityContext</span>:               <span class="yaml-com"># pod-level</span>
+    <span class="yaml-key">runAsNonRoot</span>: <span class="yaml-val">true</span>           <span class="yaml-com"># never run as root</span>
+    <span class="yaml-key">runAsUser</span>: <span class="yaml-num">1000</span>
+    <span class="yaml-key">fsGroup</span>: <span class="yaml-num">2000</span>
+    <span class="yaml-key">seccompProfile</span>:
+      <span class="yaml-key">type</span>: <span class="yaml-val">RuntimeDefault</span>       <span class="yaml-com"># default seccomp profile</span>
+  <span class="yaml-key">containers</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">app</span>
+    <span class="yaml-key">securityContext</span>:             <span class="yaml-com"># container-level</span>
+      <span class="yaml-key">allowPrivilegeEscalation</span>: <span class="yaml-val">false</span>
+      <span class="yaml-key">readOnlyRootFilesystem</span>: <span class="yaml-val">true</span>  <span class="yaml-com"># immutable container FS</span>
+      <span class="yaml-key">capabilities</span>:
+        <span class="yaml-key">drop</span>: [<span class="yaml-str">"ALL"</span>]          <span class="yaml-com"># drop all Linux capabilities</span>
+        <span class="yaml-key">add</span>: [<span class="yaml-str">"NET_BIND_SERVICE"</span>] <span class="yaml-com"># only if port < 1024</span></pre>
+    </div>
+
+    <h3>Image Security Best Practices</h3>
+
+    <ul>
+      <li>Use specific image tags (never <span class="inline-code">:latest</span> in production)</li>
+      <li>Use minimal base images (distroless, Alpine)</li>
+      <li>Scan images with tools like Trivy, Snyk, or Grype</li>
+      <li>Use an admission controller (OPA Gatekeeper, Kyverno) to enforce policies</li>
+      <li>Enable image pull secrets and use private registries</li>
+    </ul>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — scan an image with Trivy</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-cmd">trivy</span> image my-webapp:1.0.0
+<span class="bash-cmd">trivy</span> k8s <span class="bash-flag">--report summary</span> cluster</pre>
+    </div>
+
+    <h3>Admission Controllers: OPA Gatekeeper</h3>
+    <p>OPA Gatekeeper lets you write custom policy rules (in Rego) enforced as admission webhooks. Common policies: require labels on all resources, prohibit privileged containers, enforce resource limits.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — Gatekeeper constraint: require resource limits</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">constraints.gatekeeper.sh/v1beta1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">K8sRequiredLimits</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">require-resource-limits</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">match</span>:
+    <span class="yaml-key">kinds</span>:
+    - <span class="yaml-key">apiGroups</span>: [<span class="yaml-str">"*"</span>]
+      <span class="yaml-key">kinds</span>: [<span class="yaml-str">"Pod"</span>]
+    <span class="yaml-key">namespaces</span>: [<span class="yaml-str">"production"</span>]
+  <span class="yaml-key">parameters</span>:
+    <span class="yaml-key">cpu</span>: <span class="yaml-str">"2"</span>
+    <span class="yaml-key">memory</span>: <span class="yaml-str">"2Gi"</span></pre>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 20: SERVICE MESH -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-20">
+    <div class="module-header">
+      <span class="module-num">Module 20</span>
+      <h2 class="module-title">Multi-cluster &amp; Service Mesh</h2>
+    </div>
+
+    <h3>Why a Service Mesh?</h3>
+    <p>As microservices grow, cross-cutting concerns like mutual TLS, traffic management, retries, circuit breaking, and distributed tracing become complex to implement in each service. A service mesh handles these at the infrastructure layer via sidecar proxies — no code changes required.</p>
+
+    <h3>Istio Architecture</h3>
+    <p>Istio injects an Envoy sidecar proxy into every pod. All traffic flows through these proxies, giving you control plane visibility over every service-to-service call.</p>
+
+    <div class="arch-diagram">
+<pre style="background:none;padding:0;border:none;font-size:12px;color:var(--text-muted)">
+Service A Pod                      Service B Pod
+┌──────────────────┐               ┌──────────────────┐
+│  ┌────────────┐  │               │  ┌────────────┐  │
+│  │ app-a      │  │               │  │ app-b      │  │
+│  └──────┬─────┘  │               │  └──────┬─────┘  │
+│         │        │               │         │        │
+│  ┌──────┴─────┐  │  mTLS + RBAC  │  ┌──────┴─────┐  │
+│  │envoy-proxy │──┼───────────────┼──│envoy-proxy │  │
+│  └────────────┘  │               │  └────────────┘  │
+└──────────────────┘               └──────────────────┘
+         │                                  │
+         └──────── Istiod (Control Plane) ──┘
+                  (Pilot, Citadel, Galley)
+</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">yaml — Istio VirtualService: traffic splitting</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="yaml-key">apiVersion</span>: <span class="yaml-val">networking.istio.io/v1beta1</span>
+<span class="yaml-key">kind</span>: <span class="yaml-val">VirtualService</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="yaml-val">webapp-vs</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">hosts</span>: [<span class="yaml-str">"webapp"</span>]
+  <span class="yaml-key">http</span>:
+  - <span class="yaml-key">route</span>:
+    - <span class="yaml-key">destination</span>:
+        <span class="yaml-key">host</span>: <span class="yaml-val">webapp</span>
+        <span class="yaml-key">subset</span>: <span class="yaml-val">v1</span>
+      <span class="yaml-key">weight</span>: <span class="yaml-num">90</span>             <span class="yaml-com"># 90% to stable version</span>
+    - <span class="yaml-key">destination</span>:
+        <span class="yaml-key">host</span>: <span class="yaml-val">webapp</span>
+        <span class="yaml-key">subset</span>: <span class="yaml-val">v2</span>
+      <span class="yaml-key">weight</span>: <span class="yaml-num">10</span>             <span class="yaml-com"># 10% canary traffic</span></pre>
+    </div>
+
+    <h3>Multi-cluster Considerations</h3>
+
+    <ul>
+      <li><strong>Cluster Federation</strong>: Kubefed or ArgoCD's ApplicationSets for deploying across multiple clusters</li>
+      <li><strong>Cross-cluster networking</strong>: Cilium Cluster Mesh, Submariner, or Istio multi-cluster</li>
+      <li><strong>Global load balancing</strong>: Use cloud DNS + health checks to route to healthy clusters</li>
+      <li><strong>Shared registries</strong>: Use a central container registry accessible from all clusters</li>
+    </ul>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 21: TROUBLESHOOTING -->
+  <!-- ============================================================ -->
+  <section class="module" id="module-21">
+    <div class="module-header">
+      <span class="module-num">Module 21</span>
+      <h2 class="module-title">Troubleshooting Guide</h2>
+    </div>
+
+    <p>Debugging Kubernetes issues is a learnable skill. Following a systematic approach saves you hours. This is the module you'll return to most in production.</p>
+
+    <h3>Pod Debugging Workflow</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — systematic debugging</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Step 1: Check pod status and events</span>
+<span class="bash-cmd">kubectl</span> get pods <span class="bash-flag">-o wide</span>
+<span class="bash-cmd">kubectl</span> describe pod &lt;pod-name&gt;    <span class="bash-com"># look at "Events" section!</span>
+
+<span class="bash-com"># Step 2: Read the logs</span>
+<span class="bash-cmd">kubectl</span> logs &lt;pod-name&gt; <span class="bash-flag">--previous</span>  <span class="bash-com"># if pod keeps crashing</span>
+
+<span class="bash-com"># Step 3: Shell into a running pod</span>
+<span class="bash-cmd">kubectl</span> exec <span class="bash-flag">-it</span> &lt;pod-name&gt; <span class="bash-flag">--</span> /bin/sh
+
+<span class="bash-com"># Step 4: Deploy a debug container on a node</span>
+<span class="bash-cmd">kubectl</span> debug node/&lt;node-name&gt; <span class="bash-flag">-it --image=ubuntu</span>
+
+<span class="bash-com"># Step 5: Check resource usage</span>
+<span class="bash-cmd">kubectl</span> top pods
+<span class="bash-cmd">kubectl</span> top nodes</pre>
+    </div>
+
+    <h3>Common Pod Status Issues</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Status</th><th>Likely Cause</th><th>How to Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>Pending</code></td><td>No schedulable node (insufficient resources, taints, affinity)</td><td>Check node capacity, describe pod events</td></tr>
+          <tr><td><code>CrashLoopBackOff</code></td><td>Container exits immediately after starting</td><td>Check logs with <code>--previous</code> flag</td></tr>
+          <tr><td><code>ImagePullBackOff</code></td><td>Cannot pull container image</td><td>Check image name, tag, and imagePullSecrets</td></tr>
+          <tr><td><code>OOMKilled</code></td><td>Container exceeded memory limit</td><td>Increase memory limit or fix memory leak</td></tr>
+          <tr><td><code>Error</code></td><td>Container exited with non-zero code</td><td>Read logs to find application error</td></tr>
+          <tr><td><code>Terminating</code> (stuck)</td><td>Finalizers preventing deletion</td><td>Patch to remove finalizers: <code>kubectl patch pod ... -p '{"metadata":{"finalizers":[]}}'</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Networking Debugging</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — networking troubleshooting</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Check if service endpoints are populated</span>
+<span class="bash-cmd">kubectl</span> get endpoints my-service    <span class="bash-com"># should have pod IPs listed</span>
+
+<span class="bash-com"># DNS resolution from inside a pod</span>
+<span class="bash-cmd">kubectl</span> run dnstest <span class="bash-flag">--image=busybox --rm -it --restart=Never</span> <span class="bash-flag">--</span> \
+  nslookup my-service.default.svc.cluster.local
+
+<span class="bash-com"># Check if service routes traffic correctly</span>
+<span class="bash-cmd">kubectl</span> run curltest <span class="bash-flag">--image=curlimages/curl --rm -it --restart=Never</span> <span class="bash-flag">--</span> \
+  curl http://my-service:80
+
+<span class="bash-com"># View network policies affecting a pod</span>
+<span class="bash-cmd">kubectl</span> get networkpolicies <span class="bash-flag">-n</span> production
+
+<span class="bash-com"># Check CoreDNS is running</span>
+<span class="bash-cmd">kubectl</span> get pods <span class="bash-flag">-n</span> kube-system <span class="bash-flag">-l</span> k8s-app=kube-dns</pre>
+    </div>
+
+    <h3>Useful Troubleshooting Commands</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — advanced debugging toolkit</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+      <pre><span class="bash-com"># Get all events in a namespace sorted by time</span>
+<span class="bash-cmd">kubectl</span> get events <span class="bash-flag">--sort-by='.lastTimestamp'</span>
+
+<span class="bash-com"># Check RBAC permissions</span>
+<span class="bash-cmd">kubectl</span> auth can-i get pods <span class="bash-flag">--as=jane@company.com</span>
+<span class="bash-cmd">kubectl</span> auth can-i <span class="bash-flag">--list --as=system:serviceaccount:default:my-sa</span>
+
+<span class="bash-com"># View API resources available</span>
+<span class="bash-cmd">kubectl</span> api-resources
+
+<span class="bash-com"># View API versions</span>
+<span class="bash-cmd">kubectl</span> api-versions
+
+<span class="bash-com"># Explain any resource field</span>
+<span class="bash-cmd">kubectl</span> explain pod.spec.containers.securityContext
+
+<span class="bash-com"># Force delete a stuck pod</span>
+<span class="bash-cmd">kubectl</span> delete pod &lt;name&gt; <span class="bash-flag">--grace-period=0 --force</span>
+
+<span class="bash-com"># Cordon a node (stop scheduling new pods)</span>
+<span class="bash-cmd">kubectl</span> cordon &lt;node-name&gt;
+
+<span class="bash-com"># Drain a node (evict all pods safely)</span>
+<span class="bash-cmd">kubectl</span> drain &lt;node-name&gt; <span class="bash-flag">--ignore-daemonsets --delete-emptydir-data</span></pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">🛠️</div>
+      <div class="callout-content">
+        <div class="callout-title">k9s — The Kubernetes TUI</div>
+        <p>Install <code>k9s</code> for a terminal UI that dramatically speeds up cluster navigation. Press <code>?</code> for shortcuts, <code>:</code> to change resource view, and <code>l</code> to stream logs from any pod.</p>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="highlight">
+      <p><strong>Congratulations!</strong> You've completed the Kubernetes Zero to Production course. You now have a solid foundation covering everything from the core architecture through advanced production patterns. The next step is to build real projects: deploy a multi-tier application, set up monitoring, configure autoscaling, and practice on a live cluster. Good luck!</p>
+    </div>
+
+  </section>
+
+  </div><!-- end content-wrap -->
+
+  <footer class="content-footer">
+    ⎈ Kubernetes Complete Course &nbsp;·&nbsp; Zero to Production &nbsp;·&nbsp; 21 Modules
+  </footer>
+
+</div><!-- end main -->
+
+<script>
+  // Reading progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrollTop = doc.scrollTop || document.body.scrollTop;
+    const scrollHeight = doc.scrollHeight - doc.clientHeight;
+    const progress = (scrollTop / scrollHeight) * 100;
+    document.getElementById('progress').style.width = progress + '%';
+  });
+
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('.module');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Mastery — Complete Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0f;
+    --surface: #13131a;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #61dafb;
+    --accent2: #f7941d;
+    --accent3: #a78bfa;
+    --text: #e8e8f0;
+    --text-muted: #8888aa;
+    --text-dim: #5555770;
+    --code-bg: #0d1117;
+    --code-border: #21262d;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lora', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* ── LAYOUT ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    padding-bottom: 40px;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: var(--surface);
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-logo svg { width: 22px; height: 22px; }
+
+  .sidebar-subtitle {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sidebar-section { padding: 16px 0 8px 24px; }
+
+  .sidebar-section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 24px 6px 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    line-height: 1.4;
+  }
+
+  .sidebar-item:hover { color: var(--text); }
+  .sidebar-item.active { color: var(--accent); }
+
+  .sidebar-item .num {
+    font-size: 10px;
+    color: var(--border);
+    min-width: 20px;
+    padding-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .sidebar-item.active .num { color: var(--accent); opacity: 0.5; }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-left: 300px;
+    flex: 1;
+    min-height: 100vh;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 80px 80px 60px;
+    border-bottom: 1px solid var(--border);
+    background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(97,218,251,0.08) 0%, transparent 70%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: 'REACT';
+    position: absolute;
+    right: -20px; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Syne', sans-serif;
+    font-size: 180px;
+    font-weight: 800;
+    color: rgba(97,218,251,0.03);
+    line-height: 1;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 30px; height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-desc {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 560px;
+    line-height: 1.7;
+    font-style: italic;
+    margin-bottom: 36px;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .hero-meta-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .hero-meta-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ── CONTENT AREA ── */
+  .content {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 80px 100px;
+  }
+
+  /* ── CHAPTER ── */
+  .chapter {
+    margin-bottom: 80px;
+    scroll-margin-top: 30px;
+  }
+
+  .chapter-header {
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chapter-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .chapter h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+
+  .chapter-desc {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 48px;
+    scroll-margin-top: 30px;
+  }
+
+  .section h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section h3::before {
+    content: '';
+    display: block;
+    width: 4px; height: 20px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .section h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent2);
+    margin: 24px 0 10px;
+    letter-spacing: 0.01em;
+  }
+
+  p { margin-bottom: 16px; color: var(--text); }
+
+  /* ── CODE ── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 20px 0 24px;
+    position: relative;
+  }
+
+  pre::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 10px; right: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  pre code {
+    display: block;
+    padding: 20px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #e6edf3;
+    tab-size: 2;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: rgba(97,218,251,0.08);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid rgba(97,218,251,0.15);
+  }
+
+  pre code { background: none; border: none; padding: 0; color: inherit; }
+
+  /* ── SYNTAX HIGHLIGHTING ── */
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .cmt { color: #8b949e; font-style: italic; }
+  .num { color: #79c0ff; }
+  .tag { color: #7ee787; }
+  .attr { color: #ff7b72; }
+  .jsx { color: #ffa657; }
+  .op { color: #ff7b72; }
+  .var { color: #e6edf3; }
+  .prop { color: #79c0ff; }
+  .hook { color: #d2a8ff; }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-left: 3px solid;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .callout.info {
+    background: rgba(97,218,251,0.06);
+    border-color: var(--accent);
+    color: #b8eaf8;
+  }
+
+  .callout.warn {
+    background: rgba(247,148,29,0.07);
+    border-color: var(--accent2);
+    color: #f5d0a0;
+  }
+
+  .callout.tip {
+    background: rgba(63,185,80,0.07);
+    border-color: var(--green);
+    color: #9fddaa;
+  }
+
+  .callout.danger {
+    background: rgba(248,81,73,0.07);
+    border-color: var(--red);
+    color: #f8b4b0;
+  }
+
+  .callout-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.8;
+  }
+
+  /* ── LISTS ── */
+  ul, ol {
+    padding-left: 24px;
+    margin-bottom: 16px;
+  }
+
+  li { margin-bottom: 6px; color: var(--text); }
+
+  /* ── COMPARISON TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+
+  th {
+    background: var(--surface2);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .badge-new { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+  .badge-advanced { background: rgba(248,81,73,0.12); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+  .badge-important { background: rgba(247,148,29,0.12); color: var(--accent2); border: 1px solid rgba(247,148,29,0.3); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  /* ── TOC PROGRESS ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 300px; right: 0;
+    height: 2px;
+    background: var(--border);
+    z-index: 200;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    width: 0%;
+    transition: width 0.1s;
+  }
+
+  /* ── SCROLLBAR ── */
+  .main::-webkit-scrollbar { width: 0; }
+
+  /* ── CONCEPT GRID ── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+
+  .concept-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+
+  .concept-card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .concept-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    .sidebar, .progress-bar { display: none; }
+    .main { margin-left: 0; }
+    .hero, .content { padding: 20px; }
+    body { background: white; color: black; }
+    pre { border: 1px solid #ccc; }
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .progress-bar { left: 0; }
+    .hero, .content { padding: 30px 24px; }
+    .concept-grid { grid-template-columns: 1fr; }
+    .hero::before { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.5" fill="#61dafb"/><ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61dafb" stroke-width="1.2" fill="none"/><ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61dafb" stroke-width="1.2" fill="none" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61dafb" stroke-width="1.2" fill="none" transform="rotate(120 12 12)"/></svg>
+      React Mastery
+    </div>
+    <div class="sidebar-subtitle">Complete Course · Zero to Expert</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Foundations</div>
+    <a class="sidebar-item" href="#ch1"><span class="num">01</span>Introduction to React</a>
+    <a class="sidebar-item" href="#ch2"><span class="num">02</span>JSX & Rendering</a>
+    <a class="sidebar-item" href="#ch3"><span class="num">03</span>Components</a>
+    <a class="sidebar-item" href="#ch4"><span class="num">04</span>Props & Data Flow</a>
+    <a class="sidebar-item" href="#ch5"><span class="num">05</span>State & Events</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Core Hooks</div>
+    <a class="sidebar-item" href="#ch6"><span class="num">06</span>useState & useReducer</a>
+    <a class="sidebar-item" href="#ch7"><span class="num">07</span>useEffect & Lifecycle</a>
+    <a class="sidebar-item" href="#ch8"><span class="num">08</span>useRef & useMemo</a>
+    <a class="sidebar-item" href="#ch9"><span class="num">09</span>useContext & Global State</a>
+    <a class="sidebar-item" href="#ch10"><span class="num">10</span>Custom Hooks</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Intermediate</div>
+    <a class="sidebar-item" href="#ch11"><span class="num">11</span>Forms & Controlled Inputs</a>
+    <a class="sidebar-item" href="#ch12"><span class="num">12</span>Lists, Keys & Reconciliation</a>
+    <a class="sidebar-item" href="#ch13"><span class="num">13</span>Conditional Rendering</a>
+    <a class="sidebar-item" href="#ch14"><span class="num">14</span>Component Composition</a>
+    <a class="sidebar-item" href="#ch15"><span class="num">15</span>React Router</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Advanced</div>
+    <a class="sidebar-item" href="#ch16"><span class="num">16</span>Performance Optimization</a>
+    <a class="sidebar-item" href="#ch17"><span class="num">17</span>Error Boundaries</a>
+    <a class="sidebar-item" href="#ch18"><span class="num">18</span>Portals & Refs</a>
+    <a class="sidebar-item" href="#ch19"><span class="num">19</span>State Management</a>
+    <a class="sidebar-item" href="#ch20"><span class="num">20</span>Data Fetching Patterns</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Expert</div>
+    <a class="sidebar-item" href="#ch21"><span class="num">21</span>React 18 & Concurrent</a>
+    <a class="sidebar-item" href="#ch22"><span class="num">22</span>Testing</a>
+    <a class="sidebar-item" href="#ch23"><span class="num">23</span>TypeScript with React</a>
+    <a class="sidebar-item" href="#ch24"><span class="num">24</span>Patterns & Best Practices</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Project Setup</div>
+    <a class="sidebar-item" href="#ch25"><span class="num">25</span>Folder Structure</a>
+    <a class="sidebar-item" href="#ch26"><span class="num">26</span>Vite In-Depth</a>
+    <a class="sidebar-item" href="#ch27"><span class="num">27</span>Monorepo with pnpm</a>
+    <a class="sidebar-item" href="#ch28"><span class="num">28</span>Aliases & Path Setup</a>
+    <a class="sidebar-item" href="#ch29"><span class="num">29</span>Env, Lint & Git Hooks</a>
+    <a class="sidebar-item" href="#ch30"><span class="num">30</span>CI/CD & Deployment</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main" id="main">
+
+<div class="hero">
+  <div class="hero-eyebrow">Complete Curriculum</div>
+  <h1>React <span>Mastery</span><br>Course</h1>
+  <p class="hero-desc">A comprehensive journey from first component to production-grade architecture — written for engineers who want depth, not just syntax.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <div class="hero-meta-value">30</div>
+      <div class="hero-meta-label">Chapters</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-value">100+</div>
+      <div class="hero-meta-label">Code Examples</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-value">React 18</div>
+      <div class="hero-meta-label">Coverage</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-value">Basic → Expert</div>
+      <div class="hero-meta-label">Skill Range</div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 1 — INTRODUCTION
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch1">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 01 / Foundations</div>
+    <h2>Introduction to React</h2>
+    <p class="chapter-desc">Understanding what React is, why it exists, and how to get your environment ready.</p>
+  </div>
+
+  <div class="section">
+    <h3>What is React?</h3>
+    <p>React is an open-source JavaScript library created by Facebook (Meta) in 2013 for building user interfaces. It is <em>not</em> a full framework — it is focused solely on the view layer of your application. React lets you build complex UIs by composing small, independent, reusable pieces called <strong>components</strong>.</p>
+    <p>React operates on a simple but powerful philosophy: describe <em>what</em> you want the UI to look like given some data, and React figures out <em>how</em> to update the browser efficiently.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="concept-card-title">Declarative</div>
+        <p>You describe the desired UI state, not the steps to get there. React handles the DOM updates.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">Component-Based</div>
+        <p>Everything is a component. Build encapsulated pieces that manage their own state, then compose them.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">Unidirectional Data Flow</div>
+        <p>Data flows one way: parent to child through props. This makes bugs easier to trace.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">Virtual DOM</div>
+        <p>React maintains a lightweight copy of the DOM. Changes are diffed and batched before hitting the real DOM.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>The Virtual DOM Explained</h3>
+    <p>Directly manipulating the browser's DOM is slow. Every change can trigger reflow and repaint operations across the entire page. React solves this with the <strong>Virtual DOM</strong> — an in-memory JavaScript representation of the real DOM tree.</p>
+    <p>When your component's state changes, React:</p>
+    <ol>
+      <li>Creates a new Virtual DOM tree reflecting the new state</li>
+      <li><strong>Diffs</strong> it against the previous Virtual DOM (the "reconciliation" algorithm)</li>
+      <li>Calculates the minimum set of changes needed</li>
+      <li>Batches and applies only those changes to the real DOM</li>
+    </ol>
+    <div class="callout info">
+      <div class="callout-title">💡 Key Insight</div>
+      This diffing process (called <strong>Fiber reconciliation</strong> since React 16) is what makes React fast — not that the Virtual DOM itself is faster than the real DOM, but that it enables intelligent, batched updates.
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Setting Up Your Environment</h3>
+    <p>The recommended way to start a new React project in 2024+ is using <strong>Vite</strong>, which provides instant server start and lightning-fast HMR (Hot Module Replacement).</p>
+
+    <pre data-lang="bash"><code><span class="cmt"># Create a new Vite + React project</span>
+npm create vite@latest my-app -- --template react
+cd my-app
+npm install
+npm run dev</code></pre>
+
+    <p>Alternatively, for a batteries-included setup with file-system routing and SSR support, use <strong>Next.js</strong>:</p>
+
+    <pre data-lang="bash"><code><span class="cmt"># Create a new Next.js project</span>
+npx create-next-app@latest my-app
+cd my-app
+npm run dev</code></pre>
+
+    <h4>Project Structure (Vite)</h4>
+    <pre data-lang="text"><code>my-app/
+├── public/           <span class="cmt"># Static assets</span>
+├── src/
+│   ├── assets/       <span class="cmt"># Images, fonts, etc.</span>
+│   ├── components/   <span class="cmt"># Reusable components</span>
+│   ├── App.jsx       <span class="cmt"># Root component</span>
+│   └── main.jsx      <span class="cmt"># Entry point</span>
+├── index.html        <span class="cmt"># HTML shell</span>
+└── vite.config.js    <span class="cmt"># Vite configuration</span></code></pre>
+
+    <h4>Your First React App</h4>
+    <pre data-lang="jsx"><code><span class="cmt">// src/main.jsx — Entry point</span>
+<span class="kw">import</span> React <span class="kw">from</span> <span class="str">'react'</span>
+<span class="kw">import</span> ReactDOM <span class="kw">from</span> <span class="str">'react-dom/client'</span>
+<span class="kw">import</span> App <span class="kw">from</span> <span class="str">'./App.jsx'</span>
+
+<span class="cmt">// Mount React into the #root div in index.html</span>
+ReactDOM.createRoot(document.getElementById(<span class="str">'root'</span>)).render(
+  <span class="tag">&lt;React.StrictMode&gt;</span>
+    <span class="tag">&lt;App /&gt;</span>
+  <span class="tag">&lt;/React.StrictMode&gt;</span>
+)
+
+<span class="cmt">// src/App.jsx — Root component</span>
+<span class="kw">export default function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;h1&gt;</span>Hello, React!<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">✅ React StrictMode</div>
+      <code>React.StrictMode</code> wraps your app during development only. It intentionally double-invokes certain lifecycle methods and hooks to help you find side effects. It has <strong>zero impact on production</strong>.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 2 — JSX
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch2">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 02 / Foundations</div>
+    <h2>JSX & Rendering</h2>
+    <p class="chapter-desc">Understanding JSX syntax, how it compiles, and how React renders to the DOM.</p>
+  </div>
+
+  <div class="section">
+    <h3>What is JSX?</h3>
+    <p>JSX (JavaScript XML) is a syntax extension that lets you write HTML-like markup inside JavaScript. It is <em>not</em> HTML — it is syntactic sugar that compiles to <code>React.createElement()</code> calls.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// What you write (JSX)</span>
+<span class="kw">const</span> element <span class="op">=</span> <span class="tag">&lt;h1</span> <span class="attr">className</span>=<span class="str">"title"</span><span class="tag">&gt;</span>Hello World<span class="tag">&lt;/h1&gt;</span>
+
+<span class="cmt">// What Babel compiles it to</span>
+<span class="kw">const</span> element <span class="op">=</span> React.<span class="fn">createElement</span>(
+  <span class="str">'h1'</span>,
+  { className: <span class="str">'title'</span> },
+  <span class="str">'Hello World'</span>
+)</code></pre>
+
+    <p>Since React 17+, you no longer need to import React in every file for JSX to work — the new JSX transform handles this automatically via the build tool.</p>
+  </div>
+
+  <div class="section">
+    <h3>JSX Rules</h3>
+
+    <h4>1. Return a Single Root Element</h4>
+    <pre data-lang="jsx"><code><span class="cmt">// ❌ Wrong — multiple root elements</span>
+<span class="kw">return</span> (
+  <span class="tag">&lt;h1&gt;</span>Title<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Paragraph<span class="tag">&lt;/p&gt;</span>
+)
+
+<span class="cmt">// ✅ Wrap in a div</span>
+<span class="kw">return</span> (
+  <span class="tag">&lt;div&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>Title<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;p&gt;</span>Paragraph<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+)
+
+<span class="cmt">// ✅ Use a Fragment (no extra DOM node)</span>
+<span class="kw">return</span> (
+  <span class="tag">&lt;&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>Title<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;p&gt;</span>Paragraph<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/&gt;</span>
+)</code></pre>
+
+    <h4>2. Use className, Not class</h4>
+    <pre data-lang="jsx"><code><span class="cmt">// HTML attributes use camelCase in JSX</span>
+<span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"container"</span>         <span class="cmt">// class → className</span>
+     <span class="attr">htmlFor</span>=<span class="str">"email"</span>            <span class="cmt">// for → htmlFor (on labels)</span>
+     <span class="attr">onClick</span>={<span class="fn">handleClick</span>}     <span class="cmt">// onclick → onClick</span>
+     <span class="attr">tabIndex</span>={<span class="num">0</span>}<span class="tag">&gt;</span>             <span class="cmt">// tabindex → tabIndex</span>
+<span class="tag">&lt;/div&gt;</span></code></pre>
+
+    <h4>3. Close All Tags</h4>
+    <pre data-lang="jsx"><code><span class="cmt">// Self-closing tags must end with /&gt;</span>
+<span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="str">"photo.jpg"</span> <span class="attr">alt</span>=<span class="str">"Photo"</span> <span class="tag">/&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="tag">/&gt;</span>
+<span class="tag">&lt;br</span> <span class="tag">/&gt;</span></code></pre>
+
+    <h4>4. JavaScript Expressions with Curly Braces</h4>
+    <pre data-lang="jsx"><code><span class="kw">const</span> name <span class="op">=</span> <span class="str">'Shankar'</span>
+<span class="kw">const</span> score <span class="op">=</span> <span class="num">95</span>
+
+<span class="kw">return</span> (
+  <span class="tag">&lt;div&gt;</span>
+    <span class="tag">&lt;p&gt;</span>Hello, {name}!<span class="tag">&lt;/p&gt;</span>                    <span class="cmt">// Variable</span>
+    <span class="tag">&lt;p&gt;</span>Score: {score <span class="op">*</span> <span class="num">2</span>}<span class="tag">&lt;/p&gt;</span>               <span class="cmt">// Expression</span>
+    <span class="tag">&lt;p&gt;</span>{score <span class="op">&gt;</span> <span class="num">90</span> <span class="op">?</span> <span class="str">'Pass'</span> <span class="op">:</span> <span class="str">'Fail'</span>}<span class="tag">&lt;/p&gt;</span>   <span class="cmt">// Ternary</span>
+    <span class="tag">&lt;p&gt;</span>{[<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>].<span class="fn">join</span>(<span class="str">', '</span>)}<span class="tag">&lt;/p&gt;</span>            <span class="cmt">// Method call</span>
+  <span class="tag">&lt;/div&gt;</span>
+)</code></pre>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ What You Cannot Do in JSX</div>
+      You cannot use <code>if</code> statements, <code>for</code> loops, or <code>switch</code> statements directly inside JSX curly braces. These are <em>statements</em>, not <em>expressions</em>. Use ternary operators, logical &&, or extract logic above the return statement.
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Rendering Elements</h3>
+    <p>React elements are the smallest building blocks of a React app. An element describes what you want to see on the screen.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// Elements are immutable plain objects</span>
+<span class="kw">const</span> element <span class="op">=</span> <span class="tag">&lt;h1&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>
+<span class="cmt">// React.createElement returns: { type: 'h1', props: { children: 'Hello' } }</span>
+
+<span class="cmt">// Rendering into the DOM</span>
+<span class="kw">const</span> root <span class="op">=</span> ReactDOM.<span class="fn">createRoot</span>(document.<span class="fn">getElementById</span>(<span class="str">'root'</span>))
+root.<span class="fn">render</span>(element)
+
+<span class="cmt">// React only updates what changed</span>
+<span class="kw">function</span> <span class="fn">tick</span>() {
+  <span class="kw">const</span> element <span class="op">=</span> (
+    <span class="tag">&lt;p&gt;</span>Time: {<span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toLocaleTimeString</span>()}<span class="tag">&lt;/p&gt;</span>
+  )
+  root.<span class="fn">render</span>(element) <span class="cmt">// Only the time text node updates</span>
+}
+<span class="fn">setInterval</span>(tick, <span class="num">1000</span>)</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 3 — COMPONENTS
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch3">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 03 / Foundations</div>
+    <h2>Components</h2>
+    <p class="chapter-desc">The core building blocks of every React application.</p>
+  </div>
+
+  <div class="section">
+    <h3>Function Components</h3>
+    <p>Modern React uses <strong>function components</strong> exclusively. A component is simply a JavaScript function that accepts a <code>props</code> object and returns JSX. The function name must start with a capital letter to distinguish it from HTML elements.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// Simplest possible component</span>
+<span class="kw">function</span> <span class="fn">Greeting</span>() {
+  <span class="kw">return</span> <span class="tag">&lt;h1&gt;</span>Hello, World!<span class="tag">&lt;/h1&gt;</span>
+}
+
+<span class="cmt">// Arrow function syntax (also valid)</span>
+<span class="kw">const</span> <span class="fn">Greeting</span> <span class="op">=</span> () <span class="op">=&gt;</span> <span class="tag">&lt;h1&gt;</span>Hello, World!<span class="tag">&lt;/h1&gt;</span>
+
+<span class="cmt">// A more realistic component</span>
+<span class="kw">function</span> <span class="fn">UserCard</span>({ name, role, avatar }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"user-card"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;img</span> <span class="attr">src</span>={avatar} <span class="attr">alt</span>={name} <span class="tag">/&gt;</span>
+      <span class="tag">&lt;h3&gt;</span>{name}<span class="tag">&lt;/h3&gt;</span>
+      <span class="tag">&lt;span&gt;</span>{role}<span class="tag">&lt;/span&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="cmt">// Using the component</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;UserCard</span> 
+        <span class="attr">name</span>=<span class="str">"Shankar"</span>
+        <span class="attr">role</span>=<span class="str">"Full-Stack Engineer"</span>
+        <span class="attr">avatar</span>=<span class="str">"/avatar.jpg"</span>
+      <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Component Composition</h3>
+    <p>Components can render other components. This nesting is how you build complex UIs from simple pieces. React's component tree is a hierarchy where the topmost component (usually <code>App</code>) renders children, which render their own children, and so on.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">function</span> <span class="fn">Avatar</span>({ src, name }) {
+  <span class="kw">return</span> <span class="tag">&lt;img</span> <span class="attr">src</span>={src} <span class="attr">alt</span>={name} <span class="attr">className</span>=<span class="str">"avatar"</span> <span class="tag">/&gt;</span>
+}
+
+<span class="kw">function</span> <span class="fn">UserInfo</span>({ user }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"user-info"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;Avatar</span> <span class="attr">src</span>={user.avatarUrl} <span class="attr">name</span>={user.name} <span class="tag">/&gt;</span>
+      <span class="tag">&lt;p&gt;</span>{user.name}<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="kw">function</span> <span class="fn">Comment</span>({ author, text, date }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"comment"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;UserInfo</span> <span class="attr">user</span>={author} <span class="tag">/&gt;</span>   <span class="cmt">// Composed!</span>
+      <span class="tag">&lt;p&gt;</span>{text}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;time&gt;</span>{date}<span class="tag">&lt;/time&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Class Components (Legacy)</h3>
+    <p>Before hooks (React 16.8, 2019), components that needed state or lifecycle methods had to be written as classes. You may encounter these in older codebases.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { Component } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">class</span> <span class="fn">Counter</span> <span class="kw">extends</span> <span class="fn">Component</span> {
+  <span class="fn">constructor</span>(props) {
+    <span class="kw">super</span>(props)
+    <span class="kw">this</span>.state <span class="op">=</span> { count: <span class="num">0</span> }
+  }
+
+  <span class="fn">render</span>() {
+    <span class="kw">return</span> (
+      <span class="tag">&lt;div&gt;</span>
+        <span class="tag">&lt;p&gt;</span>Count: {<span class="kw">this</span>.state.count}<span class="tag">&lt;/p&gt;</span>
+        <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="kw">this</span>.<span class="fn">setState</span>({ count: <span class="kw">this</span>.state.count <span class="op">+</span> <span class="num">1</span> })}<span class="tag">&gt;</span>
+          Increment
+        <span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    )
+  }
+}</code></pre>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ Class Components Are Legacy</div>
+      The React team recommends writing all new code as function components with hooks. Class components will continue to work but won't receive new features.
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Keeping Components Pure</h3>
+    <p>React expects components to be <strong>pure functions</strong> with respect to their inputs. Given the same props and state, a component must always return the same JSX. It should not have side effects during rendering.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// ❌ Impure — mutates external state during render</span>
+<span class="kw">let</span> count <span class="op">=</span> <span class="num">0</span>
+<span class="kw">function</span> <span class="fn">BadComponent</span>() {
+  count<span class="op">++</span>  <span class="cmt">// Side effect during render!</span>
+  <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Count: {count}<span class="tag">&lt;/p&gt;</span>
+}
+
+<span class="cmt">// ✅ Pure — same input always produces same output</span>
+<span class="kw">function</span> <span class="fn">PureComponent</span>({ count }) {
+  <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Count: {count}<span class="tag">&lt;/p&gt;</span>
+}
+
+<span class="cmt">// Side effects belong in event handlers or useEffect</span></code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 4 — PROPS
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch4">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 04 / Foundations</div>
+    <h2>Props & Data Flow</h2>
+    <p class="chapter-desc">How data flows through the component tree.</p>
+  </div>
+
+  <div class="section">
+    <h3>Understanding Props</h3>
+    <p><strong>Props</strong> (short for properties) are how you pass data from a parent component to a child component. Props are read-only — a child must never modify its own props. This enforces the principle of <em>unidirectional data flow</em>.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// Defining and using props</span>
+<span class="kw">function</span> <span class="fn">Button</span>(props) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;button</span>
+      <span class="attr">onClick</span>={props.onClick}
+      <span class="attr">disabled</span>={props.disabled}
+      <span class="attr">className</span>={<span class="str">`btn btn-${props.variant}`</span>}
+    <span class="tag">&gt;</span>
+      {props.children}
+    <span class="tag">&lt;/button&gt;</span>
+  )
+}
+
+<span class="cmt">// Destructuring props (preferred)</span>
+<span class="kw">function</span> <span class="fn">Button</span>({ onClick, disabled <span class="op">=</span> <span class="kw">false</span>, variant <span class="op">=</span> <span class="str">'primary'</span>, children }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;button</span>
+      <span class="attr">onClick</span>={onClick}
+      <span class="attr">disabled</span>={disabled}
+      <span class="attr">className</span>={<span class="str">`btn btn-${variant}`</span>}
+    <span class="tag">&gt;</span>
+      {children}
+    <span class="tag">&lt;/button&gt;</span>
+  )
+}
+
+<span class="cmt">// Using the Button</span>
+<span class="tag">&lt;Button</span> <span class="attr">variant</span>=<span class="str">"danger"</span> <span class="attr">onClick</span>={<span class="fn">handleDelete</span>}<span class="tag">&gt;</span>
+  Delete Account
+<span class="tag">&lt;/Button&gt;</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>The children Prop</h3>
+    <p>Everything between a component's opening and closing tags is passed as <code>props.children</code>. This is powerful for building layout and wrapper components.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">function</span> <span class="fn">Card</span>({ title, children }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"card"</span><span class="tag">&gt;</span>
+      {title <span class="op">&amp;&amp;</span> <span class="tag">&lt;h2</span> <span class="attr">className</span>=<span class="str">"card-title"</span><span class="tag">&gt;</span>{title}<span class="tag">&lt;/h2&gt;</span>}
+      <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"card-body"</span><span class="tag">&gt;</span>
+        {children}  <span class="cmt">// Anything passed between &lt;Card&gt; tags</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="cmt">// Usage</span>
+<span class="tag">&lt;Card</span> <span class="attr">title</span>=<span class="str">"User Profile"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Name: Shankar<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Role: Full-Stack Engineer<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;Button&gt;</span>Edit<span class="tag">&lt;/Button&gt;</span>
+<span class="tag">&lt;/Card&gt;</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Prop Spreading & Forwarding</h3>
+    <pre data-lang="jsx"><code><span class="cmt">// Spread operator to pass all props</span>
+<span class="kw">function</span> <span class="fn">Input</span>({ label, id, ...rest }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;label</span> <span class="attr">htmlFor</span>={id}<span class="tag">&gt;</span>{label}<span class="tag">&lt;/label&gt;</span>
+      <span class="tag">&lt;input</span> <span class="attr">id</span>={id} {<span class="op">...</span>rest} <span class="tag">/&gt;</span>  <span class="cmt">// Forward type, value, onChange, etc.</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="tag">&lt;Input</span>
+  <span class="attr">label</span>=<span class="str">"Email"</span>
+  <span class="attr">id</span>=<span class="str">"email"</span>
+  <span class="attr">type</span>=<span class="str">"email"</span>
+  <span class="attr">value</span>={email}
+  <span class="attr">onChange</span>={handleChange}
+  <span class="attr">placeholder</span>=<span class="str">"you@example.com"</span>
+<span class="tag">/&gt;</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Lifting State Up</h3>
+    <p>When two sibling components need to share state, you "lift" that state up to their closest common parent. The parent holds the state and passes it down as props.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// Parent controls the shared state</span>
+<span class="kw">function</span> <span class="fn">TemperatureConverter</span>() {
+  <span class="kw">const</span> [celsius, <span class="fn">setCelsius</span>] <span class="op">=</span> <span class="fn">useState</span>(<span class="num">0</span>)
+
+  <span class="kw">const</span> fahrenheit <span class="op">=</span> (celsius <span class="op">*</span> <span class="num">9</span>/<span class="num">5</span>) <span class="op">+</span> <span class="num">32</span>
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;TempInput</span>
+        <span class="attr">unit</span>=<span class="str">"Celsius"</span>
+        <span class="attr">value</span>={celsius}
+        <span class="attr">onChange</span>={<span class="fn">setCelsius</span>}   <span class="cmt">// Pass setter down</span>
+      <span class="tag">/&gt;</span>
+      <span class="tag">&lt;TempInput</span>
+        <span class="attr">unit</span>=<span class="str">"Fahrenheit"</span>
+        <span class="attr">value</span>={fahrenheit}
+        <span class="attr">onChange</span>={val <span class="op">=&gt;</span> <span class="fn">setCelsius</span>((val <span class="op">-</span> <span class="num">32</span>) <span class="op">*</span> <span class="num">5</span>/<span class="num">9</span>)}
+      <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="kw">function</span> <span class="fn">TempInput</span>({ unit, value, onChange }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;label&gt;</span>
+      {unit}: 
+      <span class="tag">&lt;input</span>
+        <span class="attr">type</span>=<span class="str">"number"</span>
+        <span class="attr">value</span>={value}
+        <span class="attr">onChange</span>={e <span class="op">=&gt;</span> <span class="fn">onChange</span>(Number(e.target.value))}
+      <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/label&gt;</span>
+  )
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 5 — STATE & EVENTS
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch5">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 05 / Foundations</div>
+    <h2>State & Events</h2>
+    <p class="chapter-desc">Making components interactive with state and event handling.</p>
+  </div>
+
+  <div class="section">
+    <h3>What is State?</h3>
+    <p>State is data that changes over time in a component. Unlike props (which come from the parent), state is internal and owned by the component. When state changes, React re-renders the component and its children.</p>
+
+    <div class="callout info">
+      <div class="callout-title">💡 State vs Props vs Variables</div>
+      Regular variables reset on every render. <strong>Props</strong> are external, read-only data. <strong>State</strong> is internal, mutable data that persists across renders and triggers re-renders when changed.
+    </div>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { <span class="hook">useState</span> } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="cmt">// useState returns [currentValue, setterFunction]</span>
+  <span class="kw">const</span> [count, <span class="fn">setCount</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="num">0</span>)  <span class="cmt">// 0 is the initial value</span>
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;p&gt;</span>Count: {count}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)}<span class="tag">&gt;</span>+<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">setCount</span>(count <span class="op">-</span> <span class="num">1</span>)}<span class="tag">&gt;</span>-<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">setCount</span>(<span class="num">0</span>)}<span class="tag">&gt;</span>Reset<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>State Updates are Asynchronous</h3>
+    <p>React batches state updates for performance. This means calling <code>setCount(count + 1)</code> multiple times in a row will <strong>not</strong> increment three times — it reads the same stale <code>count</code> value each time. Use the functional updater form instead:</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// ❌ Problem — reads stale state</span>
+<span class="kw">function</span> <span class="fn">handleTripleIncrement</span>() {
+  <span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)  <span class="cmt">// count is still 0</span>
+  <span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)  <span class="cmt">// count is still 0</span>
+  <span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)  <span class="cmt">// count is still 0 → result: 1</span>
+}
+
+<span class="cmt">// ✅ Functional updater — receives the latest state</span>
+<span class="kw">function</span> <span class="fn">handleTripleIncrement</span>() {
+  <span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)  <span class="cmt">// 0 → 1</span>
+  <span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)  <span class="cmt">// 1 → 2</span>
+  <span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)  <span class="cmt">// 2 → 3 → result: 3</span>
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Object & Array State</h3>
+    <p>State must be treated as <strong>immutable</strong>. Never mutate state directly — always create a new object or array:</p>
+
+    <pre data-lang="jsx"><code><span class="kw">const</span> [user, <span class="fn">setUser</span>] <span class="op">=</span> <span class="hook">useState</span>({ name: <span class="str">'Shankar'</span>, age: <span class="num">25</span> })
+<span class="kw">const</span> [items, <span class="fn">setItems</span>] <span class="op">=</span> <span class="hook">useState</span>([<span class="str">'React'</span>, <span class="str">'Node.js'</span>])
+
+<span class="cmt">// ❌ Wrong — mutating state directly</span>
+user.name <span class="op">=</span> <span class="str">'New Name'</span>       <span class="cmt">// React won't re-render!</span>
+items.<span class="fn">push</span>(<span class="str">'Swift'</span>)          <span class="cmt">// React won't re-render!</span>
+
+<span class="cmt">// ✅ Correct — create new object/array</span>
+<span class="fn">setUser</span>({ ...user, name: <span class="str">'New Name'</span> })         <span class="cmt">// Spread + override</span>
+<span class="fn">setItems</span>([...items, <span class="str">'Swift'</span>])                   <span class="cmt">// Append</span>
+<span class="fn">setItems</span>(items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i <span class="op">!==</span> <span class="str">'React'</span>))     <span class="cmt">// Remove</span>
+<span class="fn">setItems</span>(items.<span class="fn">map</span>(i <span class="op">=&gt;</span> i <span class="op">===</span> <span class="str">'Node.js'</span> <span class="op">?</span> <span class="str">'Bun'</span> : i)) <span class="cmt">// Update</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Event Handling</h3>
+    <pre data-lang="jsx"><code><span class="kw">function</span> <span class="fn">Form</span>() {
+  <span class="kw">const</span> [value, <span class="fn">setValue</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="str">''</span>)
+
+  <span class="cmt">// Event handlers receive a SyntheticEvent object</span>
+  <span class="kw">const</span> <span class="fn">handleChange</span> <span class="op">=</span> (e) <span class="op">=&gt;</span> {
+    <span class="fn">setValue</span>(e.target.value)     <span class="cmt">// e.target is the DOM element</span>
+  }
+
+  <span class="kw">const</span> <span class="fn">handleSubmit</span> <span class="op">=</span> (e) <span class="op">=&gt;</span> {
+    e.<span class="fn">preventDefault</span>()           <span class="cmt">// Prevent page reload</span>
+    console.<span class="fn">log</span>(<span class="str">'Submitted:'</span>, value)
+  }
+
+  <span class="kw">const</span> <span class="fn">handleKeyDown</span> <span class="op">=</span> (e) <span class="op">=&gt;</span> {
+    <span class="kw">if</span> (e.key <span class="op">===</span> <span class="str">'Enter'</span>) <span class="fn">handleSubmit</span>(e)
+    <span class="kw">if</span> (e.key <span class="op">===</span> <span class="str">'Escape'</span>) <span class="fn">setValue</span>(<span class="str">''</span>)
+  }
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;form</span> <span class="attr">onSubmit</span>={handleSubmit}<span class="tag">&gt;</span>
+      <span class="tag">&lt;input</span>
+        <span class="attr">value</span>={value}
+        <span class="attr">onChange</span>={handleChange}
+        <span class="attr">onKeyDown</span>={handleKeyDown}
+      <span class="tag">/&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="str">"submit"</span><span class="tag">&gt;</span>Submit<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/form&gt;</span>
+  )
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 6 — useState & useReducer
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch6">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 06 / Core Hooks</div>
+    <h2>useState & useReducer</h2>
+    <p class="chapter-desc">Deep dive into React's two fundamental state management hooks.</p>
+  </div>
+
+  <div class="section">
+    <h3>useState in Depth</h3>
+    <p><code>useState</code> is the primary hook for local component state. Here are patterns you'll encounter in real applications:</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// Lazy initialization — expensive computation runs once</span>
+<span class="kw">const</span> [state, <span class="fn">setState</span>] <span class="op">=</span> <span class="hook">useState</span>(() <span class="op">=&gt;</span> {
+  <span class="kw">const</span> saved <span class="op">=</span> localStorage.<span class="fn">getItem</span>(<span class="str">'key'</span>)
+  <span class="kw">return</span> saved <span class="op">?</span> <span class="fn">JSON</span>.<span class="fn">parse</span>(saved) : defaultValue
+})
+
+<span class="cmt">// Multiple state values — prefer separate for unrelated state</span>
+<span class="kw">const</span> [name, <span class="fn">setName</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="str">''</span>)
+<span class="kw">const</span> [email, <span class="fn">setEmail</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="str">''</span>)
+<span class="kw">const</span> [loading, <span class="fn">setLoading</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="kw">false</span>)
+
+<span class="cmt">// Related state can be grouped as object</span>
+<span class="kw">const</span> [form, <span class="fn">setForm</span>] <span class="op">=</span> <span class="hook">useState</span>({
+  name: <span class="str">''</span>, email: <span class="str">''</span>, password: <span class="str">''</span>
+})
+
+<span class="kw">const</span> <span class="fn">updateField</span> <span class="op">=</span> (field, value) <span class="op">=&gt;</span>
+  <span class="fn">setForm</span>(prev <span class="op">=&gt;</span> ({ ...prev, [field]: value }))</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>useReducer</h3>
+    <p><code>useReducer</code> is preferred over <code>useState</code> when state logic is complex, when the next state depends on the previous state in non-trivial ways, or when you have multiple related state updates that should happen together.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { <span class="hook">useReducer</span> } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="cmt">// Define the shape of all possible state changes</span>
+<span class="kw">const</span> <span class="fn">cartReducer</span> <span class="op">=</span> (state, action) <span class="op">=&gt;</span> {
+  <span class="kw">switch</span> (action.type) {
+    <span class="kw">case</span> <span class="str">'ADD_ITEM'</span>:
+      <span class="kw">const</span> existing <span class="op">=</span> state.items.<span class="fn">find</span>(i <span class="op">=&gt;</span> i.id <span class="op">===</span> action.item.id)
+      <span class="kw">if</span> (existing) {
+        <span class="kw">return</span> {
+          ...state,
+          items: state.items.<span class="fn">map</span>(i <span class="op">=&gt;</span>
+            i.id <span class="op">===</span> action.item.id
+              <span class="op">?</span> { ...i, qty: i.qty <span class="op">+</span> <span class="num">1</span> }
+              : i
+          )
+        }
+      }
+      <span class="kw">return</span> { ...state, items: [...state.items, { ...action.item, qty: <span class="num">1</span> }] }
+
+    <span class="kw">case</span> <span class="str">'REMOVE_ITEM'</span>:
+      <span class="kw">return</span> {
+        ...state,
+        items: state.items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i.id <span class="op">!==</span> action.id)
+      }
+
+    <span class="kw">case</span> <span class="str">'CLEAR_CART'</span>:
+      <span class="kw">return</span> { ...state, items: [] }
+
+    <span class="kw">default</span>:
+      <span class="kw">return</span> state
+  }
+}
+
+<span class="kw">function</span> <span class="fn">Cart</span>() {
+  <span class="kw">const</span> [state, dispatch] <span class="op">=</span> <span class="hook">useReducer</span>(cartReducer, { items: [] })
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      {state.items.<span class="fn">map</span>(item <span class="op">=&gt;</span> (
+        <span class="tag">&lt;div</span> <span class="attr">key</span>={item.id}<span class="tag">&gt;</span>
+          {item.name} × {item.qty}
+          <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">dispatch</span>({ type: <span class="str">'REMOVE_ITEM'</span>, id: item.id })}<span class="tag">&gt;</span>
+            Remove
+          <span class="tag">&lt;/button&gt;</span>
+        <span class="tag">&lt;/div&gt;</span>
+      ))}
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">dispatch</span>({ type: <span class="str">'CLEAR_CART'</span> })}<span class="tag">&gt;</span>Clear<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">✅ When to Use useReducer vs useState</div>
+      Use <strong>useReducer</strong> when: (1) state has 3+ sub-values, (2) state transitions are complex or interdependent, (3) you want to extract and test state logic separately, or (4) you want clear action names for debugging.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 7 — useEffect
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch7">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 07 / Core Hooks</div>
+    <h2>useEffect & Lifecycle</h2>
+    <p class="chapter-desc">Synchronizing components with external systems: APIs, timers, subscriptions.</p>
+  </div>
+
+  <div class="section">
+    <h3>Understanding Effects</h3>
+    <p><code>useEffect</code> lets you run side effects — code that reaches outside of React (API calls, DOM manipulation, subscriptions, timers). Effects run after the render is committed to the screen.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { <span class="hook">useState</span>, <span class="hook">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">function</span> <span class="fn">UserProfile</span>({ userId }) {
+  <span class="kw">const</span> [user, <span class="fn">setUser</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="kw">null</span>)
+  <span class="kw">const</span> [loading, <span class="fn">setLoading</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="kw">true</span>)
+
+  <span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+    <span class="cmt">// Effect runs after every render where userId changed</span>
+    <span class="kw">let</span> cancelled <span class="op">=</span> <span class="kw">false</span>   <span class="cmt">// Prevent stale state update</span>
+
+    <span class="fn">setLoading</span>(<span class="kw">true</span>)
+    <span class="fn">fetch</span>(<span class="str">`/api/users/${userId}`</span>)
+      .<span class="fn">then</span>(r <span class="op">=&gt;</span> r.<span class="fn">json</span>())
+      .<span class="fn">then</span>(data <span class="op">=&gt;</span> {
+        <span class="kw">if</span> (!cancelled) {
+          <span class="fn">setUser</span>(data)
+          <span class="fn">setLoading</span>(<span class="kw">false</span>)
+        }
+      })
+
+    <span class="cmt">// Cleanup function — runs before next effect or on unmount</span>
+    <span class="kw">return</span> () <span class="op">=&gt;</span> { cancelled <span class="op">=</span> <span class="kw">true</span> }
+  }, [userId])   <span class="cmt">// Dependency array — only re-run when userId changes</span>
+
+  <span class="kw">if</span> (loading) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Loading...<span class="tag">&lt;/p&gt;</span>
+  <span class="kw">return</span> <span class="tag">&lt;h1&gt;</span>{user?.name}<span class="tag">&lt;/h1&gt;</span>
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>The Dependency Array</h3>
+    <table>
+      <thead>
+        <tr><th>Dependency Array</th><th>When Effect Runs</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Not provided</td><td>After every single render</td></tr>
+        <tr><td><code>[]</code> (empty)</td><td>Once, after the first render (mount)</td></tr>
+        <tr><td><code>[a, b]</code></td><td>After mount, and whenever <code>a</code> or <code>b</code> changes</td></tr>
+      </tbody>
+    </table>
+
+    <pre data-lang="jsx"><code><span class="cmt">// Run once on mount (like componentDidMount)</span>
+<span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+  document.title <span class="op">=</span> <span class="str">'My App'</span>
+  <span class="fn">fetchInitialData</span>()
+}, [])
+
+<span class="cmt">// Run on every render (rare, usually a mistake)</span>
+<span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+  console.<span class="fn">log</span>(<span class="str">'Rendered'</span>)
+})
+
+<span class="cmt">// Update document title when count changes</span>
+<span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+  document.title <span class="op">=</span> <span class="str">`Count: ${count}`</span>
+}, [count])
+
+<span class="cmt">// Cleanup — e.g. event listeners, timers, subscriptions</span>
+<span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+  <span class="kw">const</span> id <span class="op">=</span> <span class="fn">setInterval</span>(() <span class="op">=&gt;</span> <span class="fn">setTime</span>(<span class="kw">new</span> <span class="fn">Date</span>()), <span class="num">1000</span>)
+  <span class="kw">return</span> () <span class="op">=&gt;</span> <span class="fn">clearInterval</span>(id)   <span class="cmt">// ← cleanup</span>
+}, [])</code></pre>
+
+    <div class="callout danger">
+      <div class="callout-title">🚫 Common Mistake: Missing Dependencies</div>
+      If you use a variable inside <code>useEffect</code> without listing it in the dependency array, you'll get stale closures. Always include everything your effect uses. Use the <code>eslint-plugin-react-hooks</code> rule <code>exhaustive-deps</code> to catch this automatically.
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Fetching Data with AbortController</h3>
+    <pre data-lang="jsx"><code><span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+  <span class="kw">const</span> controller <span class="op">=</span> <span class="kw">new</span> <span class="fn">AbortController</span>()
+
+  <span class="kw">async function</span> <span class="fn">load</span>() {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`/api/data/${id}`</span>, {
+        signal: controller.signal    <span class="cmt">// Link to controller</span>
+      })
+      <span class="kw">const</span> data <span class="op">=</span> <span class="kw">await</span> res.<span class="fn">json</span>()
+      <span class="fn">setData</span>(data)
+    } <span class="kw">catch</span> (err) {
+      <span class="kw">if</span> (err.name <span class="op">!==</span> <span class="str">'AbortError'</span>) <span class="fn">setError</span>(err)
+    }
+  }
+
+  <span class="fn">load</span>()
+  <span class="kw">return</span> () <span class="op">=&gt;</span> controller.<span class="fn">abort</span>()  <span class="cmt">// Cancel on unmount/dep change</span>
+}, [id])</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 8 — useRef & useMemo
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch8">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 08 / Core Hooks</div>
+    <h2>useRef, useMemo & useCallback</h2>
+    <p class="chapter-desc">Refs for DOM access and memoization hooks for performance.</p>
+  </div>
+
+  <div class="section">
+    <h3>useRef</h3>
+    <p><code>useRef</code> returns a mutable ref object whose <code>.current</code> property persists across renders without causing re-renders. It has two main use cases:</p>
+
+    <h4>1. Accessing DOM Elements</h4>
+    <pre data-lang="jsx"><code><span class="kw">import</span> { <span class="hook">useRef</span>, <span class="hook">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">function</span> <span class="fn">SearchInput</span>() {
+  <span class="kw">const</span> inputRef <span class="op">=</span> <span class="hook">useRef</span>(<span class="kw">null</span>)
+
+  <span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+    inputRef.current.<span class="fn">focus</span>()   <span class="cmt">// Auto-focus on mount</span>
+  }, [])
+
+  <span class="kw">const</span> <span class="fn">handleClear</span> <span class="op">=</span> () <span class="op">=&gt;</span> {
+    inputRef.current.value <span class="op">=</span> <span class="str">''</span>
+    inputRef.current.<span class="fn">focus</span>()
+  }
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;input</span> <span class="attr">ref</span>={inputRef} <span class="attr">type</span>=<span class="str">"search"</span> <span class="tag">/&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={handleClear}<span class="tag">&gt;</span>Clear<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+
+    <h4>2. Storing Mutable Values Without Re-renders</h4>
+    <pre data-lang="jsx"><code><span class="kw">function</span> <span class="fn">Stopwatch</span>() {
+  <span class="kw">const</span> [time, <span class="fn">setTime</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="num">0</span>)
+  <span class="kw">const</span> intervalRef <span class="op">=</span> <span class="hook">useRef</span>(<span class="kw">null</span>)   <span class="cmt">// Persists, doesn't cause re-render</span>
+
+  <span class="kw">const</span> <span class="fn">start</span> <span class="op">=</span> () <span class="op">=&gt;</span> {
+    intervalRef.current <span class="op">=</span> <span class="fn">setInterval</span>(
+      () <span class="op">=&gt;</span> <span class="fn">setTime</span>(t <span class="op">=&gt;</span> t <span class="op">+</span> <span class="num">1</span>), <span class="num">1000</span>
+    )
+  }
+
+  <span class="kw">const</span> <span class="fn">stop</span> <span class="op">=</span> () <span class="op">=&gt;</span> <span class="fn">clearInterval</span>(intervalRef.current)
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;p&gt;</span>{time}s<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={start}<span class="tag">&gt;</span>Start<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={stop}<span class="tag">&gt;</span>Stop<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>useMemo</h3>
+    <p><code>useMemo</code> memoizes a computed value. The computation only re-runs when its dependencies change. Use it for expensive calculations that don't need to run on every render.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { <span class="hook">useMemo</span> } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">function</span> <span class="fn">DataTable</span>({ data, filterText, sortField }) {
+  <span class="cmt">// Only recomputes when data, filterText, or sortField change</span>
+  <span class="kw">const</span> processed <span class="op">=</span> <span class="hook">useMemo</span>(() <span class="op">=&gt;</span> {
+    <span class="kw">return</span> data
+      .<span class="fn">filter</span>(item <span class="op">=&gt;</span> item.name.<span class="fn">toLowerCase</span>().<span class="fn">includes</span>(filterText))
+      .<span class="fn">sort</span>((a, b) <span class="op">=&gt;</span> a[sortField] <span class="op">&gt;</span> b[sortField] <span class="op">?</span> <span class="num">1</span> <span class="op">:</span> <span class="op">-</span><span class="num">1</span>)
+  }, [data, filterText, sortField])  <span class="cmt">// dependencies</span>
+
+  <span class="kw">return</span> <span class="tag">&lt;Table</span> <span class="attr">rows</span>={processed} <span class="tag">/&gt;</span>
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>useCallback</h3>
+    <p><code>useCallback</code> memoizes a <em>function</em> — it returns the same function reference across renders unless its dependencies change. Useful when passing callbacks to memoized child components.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { <span class="hook">useCallback</span>, memo } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">const</span> <span class="fn">ExpensiveList</span> <span class="op">=</span> <span class="fn">memo</span>(({ items, onDelete }) <span class="op">=&gt;</span> {
+  <span class="cmt">// Only re-renders when items or onDelete reference changes</span>
+  <span class="kw">return</span> (
+    <span class="tag">&lt;ul&gt;</span>
+      {items.<span class="fn">map</span>(item <span class="op">=&gt;</span> (
+        <span class="tag">&lt;li</span> <span class="attr">key</span>={item.id}<span class="tag">&gt;</span>
+          {item.text}
+          <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">onDelete</span>(item.id)}<span class="tag">&gt;</span>×<span class="tag">&lt;/button&gt;</span>
+        <span class="tag">&lt;/li&gt;</span>
+      ))}
+    <span class="tag">&lt;/ul&gt;</span>
+  )
+})
+
+<span class="kw">function</span> <span class="fn">Parent</span>() {
+  <span class="kw">const</span> [items, <span class="fn">setItems</span>] <span class="op">=</span> <span class="hook">useState</span>(initialItems)
+
+  <span class="cmt">// Stable reference — won't cause ExpensiveList to re-render</span>
+  <span class="kw">const</span> <span class="fn">handleDelete</span> <span class="op">=</span> <span class="hook">useCallback</span>((id) <span class="op">=&gt;</span> {
+    <span class="fn">setItems</span>(prev <span class="op">=&gt;</span> prev.<span class="fn">filter</span>(item <span class="op">=&gt;</span> item.id <span class="op">!==</span> id))
+  }, [])  <span class="cmt">// No deps needed — setItems is stable</span>
+
+  <span class="kw">return</span> <span class="tag">&lt;ExpensiveList</span> <span class="attr">items</span>={items} <span class="attr">onDelete</span>={handleDelete} <span class="tag">/&gt;</span>
+}</code></pre>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ Don't Over-Optimize</div>
+      <code>useMemo</code> and <code>useCallback</code> have their own overhead. Only use them when you have a measured performance problem. Premature optimization is a common React anti-pattern.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 9 — CONTEXT
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch9">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 09 / Core Hooks</div>
+    <h2>useContext & Global State</h2>
+    <p class="chapter-desc">Sharing state across the component tree without prop drilling.</p>
+  </div>
+
+  <div class="section">
+    <h3>The Prop Drilling Problem</h3>
+    <p>When deeply nested components need data from a high-level ancestor, passing props through every intermediate component is called <strong>prop drilling</strong>. It makes code verbose and hard to maintain. Context solves this.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// ❌ Prop drilling — every level passes theme down</span>
+<span class="tag">&lt;App</span> <span class="attr">theme</span>={theme} <span class="tag">/&gt;</span>
+  <span class="tag">&lt;Layout</span> <span class="attr">theme</span>={theme} <span class="tag">/&gt;</span>
+    <span class="tag">&lt;Sidebar</span> <span class="attr">theme</span>={theme} <span class="tag">/&gt;</span>
+      <span class="tag">&lt;ThemeButton</span> <span class="attr">theme</span>={theme} <span class="tag">/&gt;</span>  <span class="cmt">// Finally used here</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Creating and Using Context</h3>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { createContext, useContext, useState } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="cmt">// 1. Create the context</span>
+<span class="kw">const</span> ThemeContext <span class="op">=</span> <span class="fn">createContext</span>({
+  theme: <span class="str">'light'</span>,
+  toggleTheme: () <span class="op">=&gt;</span> {}
+})
+
+<span class="cmt">// 2. Create a Provider component</span>
+<span class="kw">export function</span> <span class="fn">ThemeProvider</span>({ children }) {
+  <span class="kw">const</span> [theme, <span class="fn">setTheme</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="str">'light'</span>)
+
+  <span class="kw">const</span> <span class="fn">toggleTheme</span> <span class="op">=</span> () <span class="op">=&gt;</span>
+    <span class="fn">setTheme</span>(t <span class="op">=&gt;</span> t <span class="op">===</span> <span class="str">'light'</span> <span class="op">?</span> <span class="str">'dark'</span> : <span class="str">'light'</span>)
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;ThemeContext.Provider</span> <span class="attr">value</span>={{ theme, toggleTheme }}<span class="tag">&gt;</span>
+      {children}
+    <span class="tag">&lt;/ThemeContext.Provider&gt;</span>
+  )
+}
+
+<span class="cmt">// 3. Custom hook for consuming (best practice)</span>
+<span class="kw">export function</span> <span class="fn">useTheme</span>() {
+  <span class="kw">const</span> context <span class="op">=</span> <span class="hook">useContext</span>(ThemeContext)
+  <span class="kw">if</span> (!context) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'useTheme must be inside ThemeProvider'</span>)
+  <span class="kw">return</span> context
+}
+
+<span class="cmt">// 4. Wrap your app with the Provider</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;ThemeProvider&gt;</span>
+      <span class="tag">&lt;Layout /&gt;</span>   <span class="cmt">// No theme prop needed!</span>
+    <span class="tag">&lt;/ThemeProvider&gt;</span>
+  )
+}
+
+<span class="cmt">// 5. Consume anywhere in the tree</span>
+<span class="kw">function</span> <span class="fn">ThemeButton</span>() {
+  <span class="kw">const</span> { theme, toggleTheme } <span class="op">=</span> <span class="fn">useTheme</span>()
+  <span class="kw">return</span> (
+    <span class="tag">&lt;button</span> <span class="attr">onClick</span>={toggleTheme}<span class="tag">&gt;</span>
+      Switch to {theme <span class="op">===</span> <span class="str">'light'</span> <span class="op">?</span> <span class="str">'Dark'</span> : <span class="str">'Light'</span>}
+    <span class="tag">&lt;/button&gt;</span>
+  )
+}</code></pre>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ Context Performance</div>
+      Every component that consumes a context will re-render when the context value changes. For high-frequency updates, split your contexts (e.g., separate AuthContext for user data from UIContext for theme), or use a dedicated state management library like Zustand.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 10 — CUSTOM HOOKS
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch10">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 10 / Core Hooks</div>
+    <h2>Custom Hooks</h2>
+    <p class="chapter-desc">Extracting and reusing stateful logic across components.</p>
+  </div>
+
+  <div class="section">
+    <h3>Creating Custom Hooks</h3>
+    <p>A custom hook is a JavaScript function whose name starts with <code>use</code> and that calls other hooks. They let you extract component logic into reusable functions.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// useLocalStorage — persists state to localStorage</span>
+<span class="kw">function</span> <span class="fn">useLocalStorage</span>(key, initialValue) {
+  <span class="kw">const</span> [value, <span class="fn">setValue</span>] <span class="op">=</span> <span class="hook">useState</span>(() <span class="op">=&gt;</span> {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> item <span class="op">=</span> localStorage.<span class="fn">getItem</span>(key)
+      <span class="kw">return</span> item <span class="op">?</span> JSON.<span class="fn">parse</span>(item) : initialValue
+    } <span class="kw">catch</span> { <span class="kw">return</span> initialValue }
+  })
+
+  <span class="kw">const</span> <span class="fn">setStoredValue</span> <span class="op">=</span> (newValue) <span class="op">=&gt;</span> {
+    <span class="kw">const</span> valueToStore <span class="op">=</span> newValue <span class="kw">instanceof</span> Function
+      <span class="op">?</span> <span class="fn">newValue</span>(value)
+      : newValue
+    <span class="fn">setValue</span>(valueToStore)
+    localStorage.<span class="fn">setItem</span>(key, JSON.<span class="fn">stringify</span>(valueToStore))
+  }
+
+  <span class="kw">return</span> [value, setStoredValue]
+}
+
+<span class="cmt">// Usage — exactly like useState!</span>
+<span class="kw">const</span> [theme, setTheme] <span class="op">=</span> <span class="fn">useLocalStorage</span>(<span class="str">'theme'</span>, <span class="str">'dark'</span>)</code></pre>
+
+    <pre data-lang="jsx"><code><span class="cmt">// useFetch — generic data fetching hook</span>
+<span class="kw">function</span> <span class="fn">useFetch</span>(url) {
+  <span class="kw">const</span> [data, <span class="fn">setData</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="kw">null</span>)
+  <span class="kw">const</span> [loading, <span class="fn">setLoading</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="kw">true</span>)
+  <span class="kw">const</span> [error, <span class="fn">setError</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="kw">null</span>)
+
+  <span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+    <span class="kw">const</span> controller <span class="op">=</span> <span class="kw">new</span> <span class="fn">AbortController</span>()
+    <span class="fn">setLoading</span>(<span class="kw">true</span>)
+    <span class="fn">setError</span>(<span class="kw">null</span>)
+
+    <span class="fn">fetch</span>(url, { signal: controller.signal })
+      .<span class="fn">then</span>(r <span class="op">=&gt;</span> { <span class="kw">if</span> (!r.ok) <span class="kw">throw new</span> <span class="fn">Error</span>(r.statusText); <span class="kw">return</span> r.<span class="fn">json</span>() })
+      .<span class="fn">then</span>(<span class="fn">setData</span>)
+      .<span class="fn">catch</span>(err <span class="op">=&gt;</span> { <span class="kw">if</span> (err.name <span class="op">!==</span> <span class="str">'AbortError'</span>) <span class="fn">setError</span>(err) })
+      .<span class="fn">finally</span>(() <span class="op">=&gt;</span> <span class="fn">setLoading</span>(<span class="kw">false</span>))
+
+    <span class="kw">return</span> () <span class="op">=&gt;</span> controller.<span class="fn">abort</span>()
+  }, [url])
+
+  <span class="kw">return</span> { data, loading, error }
+}
+
+<span class="cmt">// Usage</span>
+<span class="kw">function</span> <span class="fn">Posts</span>() {
+  <span class="kw">const</span> { data, loading, error } <span class="op">=</span> <span class="fn">useFetch</span>(<span class="str">'/api/posts'</span>)
+  <span class="kw">if</span> (loading) <span class="kw">return</span> <span class="tag">&lt;Spinner /&gt;</span>
+  <span class="kw">if</span> (error) <span class="kw">return</span> <span class="tag">&lt;Error</span> <span class="attr">message</span>={error.message} <span class="tag">/&gt;</span>
+  <span class="kw">return</span> <span class="tag">&lt;PostList</span> <span class="attr">posts</span>={data} <span class="tag">/&gt;</span>
+}</code></pre>
+
+    <pre data-lang="jsx"><code><span class="cmt">// useDebounce — delay updating a value</span>
+<span class="kw">function</span> <span class="fn">useDebounce</span>(value, delay <span class="op">=</span> <span class="num">300</span>) {
+  <span class="kw">const</span> [debounced, <span class="fn">setDebounced</span>] <span class="op">=</span> <span class="hook">useState</span>(value)
+
+  <span class="hook">useEffect</span>(() <span class="op">=&gt;</span> {
+    <span class="kw">const</span> id <span class="op">=</span> <span class="fn">setTimeout</span>(() <span class="op">=&gt;</span> <span class="fn">setDebounced</span>(value), delay)
+    <span class="kw">return</span> () <span class="op">=&gt;</span> <span class="fn">clearTimeout</span>(id)
+  }, [value, delay])
+
+  <span class="kw">return</span> debounced
+}
+
+<span class="cmt">// Search that only fires API after user stops typing</span>
+<span class="kw">function</span> <span class="fn">Search</span>() {
+  <span class="kw">const</span> [query, <span class="fn">setQuery</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="str">''</span>)
+  <span class="kw">const</span> debouncedQuery <span class="op">=</span> <span class="fn">useDebounce</span>(query, <span class="num">400</span>)
+  <span class="kw">const</span> { data } <span class="op">=</span> <span class="fn">useFetch</span>(<span class="str">`/api/search?q=${debouncedQuery}`</span>)
+  <span class="cmt">// ...</span>
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 11 — FORMS
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch11">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 11 / Intermediate</div>
+    <h2>Forms & Controlled Inputs</h2>
+    <p class="chapter-desc">Building robust, validated forms in React.</p>
+  </div>
+
+  <div class="section">
+    <h3>Controlled vs Uncontrolled Inputs</h3>
+    <table>
+      <thead><tr><th>Controlled</th><th>Uncontrolled</th></tr></thead>
+      <tbody>
+        <tr><td>React state is the single source of truth</td><td>DOM is the source of truth</td></tr>
+        <tr><td>Use <code>value</code> + <code>onChange</code></td><td>Use <code>ref</code> + <code>defaultValue</code></td></tr>
+        <tr><td>Easier to validate and transform</td><td>Less code, good for simple cases</td></tr>
+        <tr><td>Can conditionally disable submit</td><td>Use <code>ref.current.value</code> on submit</td></tr>
+      </tbody>
+    </table>
+
+    <pre data-lang="jsx"><code><span class="cmt">// Controlled input — React owns the value</span>
+<span class="kw">function</span> <span class="fn">ControlledForm</span>() {
+  <span class="kw">const</span> [name, <span class="fn">setName</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="str">''</span>)
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;input</span>
+      <span class="attr">value</span>={name}                           <span class="cmt">// Tied to state</span>
+      <span class="attr">onChange</span>={e <span class="op">=&gt;</span> <span class="fn">setName</span>(e.target.value)} <span class="cmt">// Update state on change</span>
+    <span class="tag">/&gt;</span>
+  )
+}
+
+<span class="cmt">// Uncontrolled input — DOM owns the value</span>
+<span class="kw">function</span> <span class="fn">UncontrolledForm</span>() {
+  <span class="kw">const</span> nameRef <span class="op">=</span> <span class="hook">useRef</span>(<span class="kw">null</span>)
+
+  <span class="kw">const</span> <span class="fn">handleSubmit</span> <span class="op">=</span> () <span class="op">=&gt;</span> console.<span class="fn">log</span>(nameRef.current.value)
+
+  <span class="kw">return</span> <span class="tag">&lt;input</span> <span class="attr">ref</span>={nameRef} <span class="attr">defaultValue</span>=<span class="str">""</span> <span class="tag">/&gt;</span>
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Building a Complete Form</h3>
+    <pre data-lang="jsx"><code><span class="kw">function</span> <span class="fn">SignupForm</span>() {
+  <span class="kw">const</span> [form, <span class="fn">setForm</span>] <span class="op">=</span> <span class="hook">useState</span>({
+    email: <span class="str">''</span>, password: <span class="str">''</span>, confirmPassword: <span class="str">''</span>
+  })
+  <span class="kw">const</span> [errors, <span class="fn">setErrors</span>] <span class="op">=</span> <span class="hook">useState</span>({})
+  <span class="kw">const</span> [submitting, <span class="fn">setSubmitting</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="kw">false</span>)
+
+  <span class="kw">const</span> <span class="fn">handleChange</span> <span class="op">=</span> (e) <span class="op">=&gt;</span> {
+    <span class="kw">const</span> { name, value } <span class="op">=</span> e.target
+    <span class="fn">setForm</span>(f <span class="op">=&gt;</span> ({ ...f, [name]: value }))
+    <span class="fn">setErrors</span>(e <span class="op">=&gt;</span> ({ ...e, [name]: <span class="kw">undefined</span> }))
+  }
+
+  <span class="kw">const</span> <span class="fn">validate</span> <span class="op">=</span> () <span class="op">=&gt;</span> {
+    <span class="kw">const</span> e <span class="op">=</span> {}
+    <span class="kw">if</span> (!form.email.<span class="fn">includes</span>(<span class="str">'@'</span>)) e.email <span class="op">=</span> <span class="str">'Invalid email'</span>
+    <span class="kw">if</span> (form.password.length <span class="op">&lt;</span> <span class="num">8</span>) e.password <span class="op">=</span> <span class="str">'Min 8 characters'</span>
+    <span class="kw">if</span> (form.password <span class="op">!==</span> form.confirmPassword) 
+      e.confirmPassword <span class="op">=</span> <span class="str">'Passwords do not match'</span>
+    <span class="kw">return</span> e
+  }
+
+  <span class="kw">const</span> <span class="fn">handleSubmit</span> <span class="op">=</span> <span class="kw">async</span> (e) <span class="op">=&gt;</span> {
+    e.<span class="fn">preventDefault</span>()
+    <span class="kw">const</span> validationErrors <span class="op">=</span> <span class="fn">validate</span>()
+    <span class="kw">if</span> (Object.<span class="fn">keys</span>(validationErrors).length) {
+      <span class="fn">setErrors</span>(validationErrors)
+      <span class="kw">return</span>
+    }
+    <span class="fn">setSubmitting</span>(<span class="kw">true</span>)
+    <span class="kw">await</span> <span class="fn">registerUser</span>(form)
+    <span class="fn">setSubmitting</span>(<span class="kw">false</span>)
+  }
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;form</span> <span class="attr">onSubmit</span>={handleSubmit}<span class="tag">&gt;</span>
+      <span class="tag">&lt;Field</span>
+        <span class="attr">label</span>=<span class="str">"Email"</span> <span class="attr">name</span>=<span class="str">"email"</span> <span class="attr">type</span>=<span class="str">"email"</span>
+        <span class="attr">value</span>={form.email} <span class="attr">onChange</span>={handleChange}
+        <span class="attr">error</span>={errors.email}
+      <span class="tag">/&gt;</span>
+      <span class="tag">&lt;Field</span>
+        <span class="attr">label</span>=<span class="str">"Password"</span> <span class="attr">name</span>=<span class="str">"password"</span> <span class="attr">type</span>=<span class="str">"password"</span>
+        <span class="attr">value</span>={form.password} <span class="attr">onChange</span>={handleChange}
+        <span class="attr">error</span>={errors.password}
+      <span class="tag">/&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">disabled</span>={submitting}<span class="tag">&gt;</span>
+        {submitting ? <span class="str">'Signing up...'</span> : <span class="str">'Sign Up'</span>}
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/form&gt;</span>
+  )
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 12 — LISTS & KEYS
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch12">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 12 / Intermediate</div>
+    <h2>Lists, Keys & Reconciliation</h2>
+    <p class="chapter-desc">Rendering arrays efficiently and understanding React's diffing algorithm.</p>
+  </div>
+
+  <div class="section">
+    <h3>Rendering Lists</h3>
+    <pre data-lang="jsx"><code><span class="kw">const</span> todos <span class="op">=</span> [
+  { id: <span class="num">1</span>, text: <span class="str">'Learn React'</span>, done: <span class="kw">true</span> },
+  { id: <span class="num">2</span>, text: <span class="str">'Build an App'</span>, done: <span class="kw">false</span> },
+  { id: <span class="num">3</span>, text: <span class="str">'Deploy to Production'</span>, done: <span class="kw">false</span> },
+]
+
+<span class="kw">function</span> <span class="fn">TodoList</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;ul&gt;</span>
+      {todos.<span class="fn">map</span>(todo <span class="op">=&gt;</span> (
+        <span class="tag">&lt;li</span> <span class="attr">key</span>={todo.id}<span class="tag">&gt;</span>  {<span class="cmt">/* key is required! */</span>}
+          <span class="tag">&lt;span</span> <span class="attr">style</span>={{ textDecoration: todo.done <span class="op">?</span> <span class="str">'line-through'</span> : <span class="str">'none'</span> }}<span class="tag">&gt;</span>
+            {todo.text}
+          <span class="tag">&lt;/span&gt;</span>
+        <span class="tag">&lt;/li&gt;</span>
+      ))}
+    <span class="tag">&lt;/ul&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Why Keys Matter</h3>
+    <p>Keys help React identify which items in a list have changed, been added, or removed. Without keys, React re-renders the entire list. With good keys, only changed items re-render.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// ❌ Using index as key — causes bugs on reorder/delete</span>
+{items.<span class="fn">map</span>((item, index) <span class="op">=&gt;</span> <span class="tag">&lt;Item</span> <span class="attr">key</span>={index} <span class="attr">item</span>={item} <span class="tag">/&gt;</span>)}
+
+<span class="cmt">// ❌ No key — React will warn and behave incorrectly</span>
+{items.<span class="fn">map</span>(item <span class="op">=&gt;</span> <span class="tag">&lt;Item</span> <span class="attr">item</span>={item} <span class="tag">/&gt;</span>)}
+
+<span class="cmt">// ✅ Stable, unique ID from the data</span>
+{items.<span class="fn">map</span>(item <span class="op">=&gt;</span> <span class="tag">&lt;Item</span> <span class="attr">key</span>={item.id} <span class="attr">item</span>={item} <span class="tag">/&gt;</span>)}
+
+<span class="cmt">// ✅ Index is ok ONLY if list never reorders/filters</span>
+{staticLabels.<span class="fn">map</span>((label, i) <span class="op">=&gt;</span> <span class="tag">&lt;span</span> <span class="attr">key</span>={i}<span class="tag">&gt;</span>{label}<span class="tag">&lt;/span&gt;</span>)}</code></pre>
+
+    <div class="callout info">
+      <div class="callout-title">💡 Keys Are Not Props</div>
+      Keys are not passed to the component as a prop. If you need the ID inside the component, pass it explicitly: <code>&lt;Item key={item.id} id={item.id} /&gt;</code>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 13 — CONDITIONAL RENDERING
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch13">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 13 / Intermediate</div>
+    <h2>Conditional Rendering</h2>
+    <p class="chapter-desc">Patterns for showing and hiding UI based on state.</p>
+  </div>
+
+  <div class="section">
+    <h3>All Conditional Patterns</h3>
+    <pre data-lang="jsx"><code><span class="kw">function</span> <span class="fn">Dashboard</span>({ user, loading, error, notifications }) {
+  <span class="cmt">// Pattern 1: Early return</span>
+  <span class="kw">if</span> (loading) <span class="kw">return</span> <span class="tag">&lt;Spinner /&gt;</span>
+  <span class="kw">if</span> (error) <span class="kw">return</span> <span class="tag">&lt;ErrorPage</span> <span class="attr">error</span>={error} <span class="tag">/&gt;</span>
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      {<span class="cmt">/* Pattern 2: Ternary */</span>}
+      {user.isAdmin
+        <span class="op">?</span> <span class="tag">&lt;AdminPanel /&gt;</span>
+        : <span class="tag">&lt;UserPanel /&gt;</span>
+      }
+
+      {<span class="cmt">/* Pattern 3: Logical AND (short-circuit) */</span>}
+      {notifications.length <span class="op">&gt;</span> <span class="num">0</span> <span class="op">&amp;&amp;</span> (
+        <span class="tag">&lt;NotificationBadge</span> <span class="attr">count</span>={notifications.length} <span class="tag">/&gt;</span>
+      )}
+
+      {<span class="cmt">/* ⚠️ Pitfall: 0 renders as text! Use !! or > 0 check */</span>}
+      {<span class="num">0</span> <span class="op">&amp;&amp;</span> <span class="tag">&lt;Badge /&gt;</span>}    <span class="cmt">// Renders "0" — bug!</span>
+      {!!<span class="num">0</span> <span class="op">&amp;&amp;</span> <span class="tag">&lt;Badge /&gt;</span>}  <span class="cmt">// Renders nothing — correct</span>
+
+      {<span class="cmt">/* Pattern 4: Nullish coalescing / optional */</span>}
+      {user.bio <span class="op">??</span> <span class="tag">&lt;span&gt;</span>No bio yet<span class="tag">&lt;/span&gt;</span>}
+
+      {<span class="cmt">/* Pattern 5: IIFE for complex logic */</span>}
+      {(() <span class="op">=&gt;</span> {
+        <span class="kw">switch</span> (user.role) {
+          <span class="kw">case</span> <span class="str">'admin'</span>: <span class="kw">return</span> <span class="tag">&lt;AdminBadge /&gt;</span>
+          <span class="kw">case</span> <span class="str">'mod'</span>: <span class="kw">return</span> <span class="tag">&lt;ModBadge /&gt;</span>
+          <span class="kw">default</span>: <span class="kw">return</span> <span class="tag">&lt;UserBadge /&gt;</span>
+        }
+      })()}
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 14 — COMPONENT COMPOSITION
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch14">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 14 / Intermediate</div>
+    <h2>Component Composition Patterns</h2>
+    <p class="chapter-desc">Advanced techniques for flexible, reusable component design.</p>
+  </div>
+
+  <div class="section">
+    <h3>Compound Components</h3>
+    <p>Compound components share state implicitly through context while exposing a declarative, expressive API. Think of how <code>&lt;select&gt;</code> and <code>&lt;option&gt;</code> work together.</p>
+
+    <pre data-lang="jsx"><code><span class="cmt">// Accordion compound component</span>
+<span class="kw">const</span> AccordionContext <span class="op">=</span> <span class="fn">createContext</span>(<span class="kw">null</span>)
+
+<span class="kw">function</span> <span class="fn">Accordion</span>({ children }) {
+  <span class="kw">const</span> [open, <span class="fn">setOpen</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="kw">null</span>)
+  <span class="kw">return</span> (
+    <span class="tag">&lt;AccordionContext.Provider</span> <span class="attr">value</span>={{ open, setOpen }}<span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"accordion"</span><span class="tag">&gt;</span>{children}<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/AccordionContext.Provider&gt;</span>
+  )
+}
+
+<span class="kw">function</span> <span class="fn">Item</span>({ id, children }) {
+  <span class="kw">const</span> { open, setOpen } <span class="op">=</span> <span class="hook">useContext</span>(AccordionContext)
+  <span class="kw">const</span> isOpen <span class="op">=</span> open <span class="op">===</span> id
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">setOpen</span>(isOpen <span class="op">?</span> <span class="kw">null</span> : id)}<span class="tag">&gt;</span>
+        {isOpen <span class="op">?</span> <span class="str">'▲'</span> : <span class="str">'▼'</span>}
+      <span class="tag">&lt;/button&gt;</span>
+      {isOpen <span class="op">&amp;&amp;</span> children}
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+Accordion.Item <span class="op">=</span> Item  <span class="cmt">// Attach as static property</span>
+
+<span class="cmt">// Clean, readable usage</span>
+<span class="tag">&lt;Accordion&gt;</span>
+  <span class="tag">&lt;Accordion.Item</span> <span class="attr">id</span>=<span class="str">"faq-1"</span><span class="tag">&gt;</span>Answer to question 1<span class="tag">&lt;/Accordion.Item&gt;</span>
+  <span class="tag">&lt;Accordion.Item</span> <span class="attr">id</span>=<span class="str">"faq-2"</span><span class="tag">&gt;</span>Answer to question 2<span class="tag">&lt;/Accordion.Item&gt;</span>
+<span class="tag">&lt;/Accordion&gt;</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Render Props</h3>
+    <pre data-lang="jsx"><code><span class="cmt">// A component that shares mouse position via render prop</span>
+<span class="kw">function</span> <span class="fn">MouseTracker</span>({ render }) {
+  <span class="kw">const</span> [pos, <span class="fn">setPos</span>] <span class="op">=</span> <span class="hook">useState</span>({ x: <span class="num">0</span>, y: <span class="num">0</span> })
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div</span>
+      <span class="attr">onMouseMove</span>={e <span class="op">=&gt;</span> <span class="fn">setPos</span>({ x: e.clientX, y: e.clientY })}
+      <span class="attr">style</span>={{ height: <span class="str">'100vh'</span> }}
+    <span class="tag">&gt;</span>
+      {<span class="fn">render</span>(pos)}  <span class="cmt">// Call the render prop with current pos</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="cmt">// Usage</span>
+<span class="tag">&lt;MouseTracker</span>
+  <span class="attr">render</span>={({ x, y }) <span class="op">=&gt;</span> (
+    <span class="tag">&lt;p&gt;</span>Mouse at: {x}, {y}<span class="tag">&lt;/p&gt;</span>
+  )}
+<span class="tag">/&gt;</span>
+
+<span class="cmt">// Note: Custom hooks have mostly replaced render props</span>
+<span class="kw">const</span> { x, y } <span class="op">=</span> <span class="fn">useMousePosition</span>()  <span class="cmt">// Cleaner!</span></code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 15 — REACT ROUTER
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch15">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 15 / Intermediate</div>
+    <h2>React Router</h2>
+    <p class="chapter-desc">Client-side navigation and routing in single-page applications.</p>
+  </div>
+
+  <div class="section">
+    <h3>Setup & Basic Routing</h3>
+    <pre data-lang="bash"><code>npm install react-router-dom</code></pre>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { BrowserRouter, Routes, Route, Link, NavLink } <span class="kw">from</span> <span class="str">'react-router-dom'</span>
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;BrowserRouter&gt;</span>
+      <span class="tag">&lt;nav&gt;</span>
+        <span class="tag">&lt;NavLink</span> <span class="attr">to</span>=<span class="str">"/"</span><span class="tag">&gt;</span>Home<span class="tag">&lt;/NavLink&gt;</span>
+        <span class="tag">&lt;NavLink</span> <span class="attr">to</span>=<span class="str">"/about"</span><span class="tag">&gt;</span>About<span class="tag">&lt;/NavLink&gt;</span>
+        <span class="tag">&lt;NavLink</span> <span class="attr">to</span>=<span class="str">"/blog"</span><span class="tag">&gt;</span>Blog<span class="tag">&lt;/NavLink&gt;</span>
+      <span class="tag">&lt;/nav&gt;</span>
+
+      <span class="tag">&lt;Routes&gt;</span>
+        <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"/"</span> <span class="attr">element</span>={<span class="tag">&lt;Home /&gt;</span>} <span class="tag">/&gt;</span>
+        <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"/about"</span> <span class="attr">element</span>={<span class="tag">&lt;About /&gt;</span>} <span class="tag">/&gt;</span>
+        <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"/blog"</span> <span class="attr">element</span>={<span class="tag">&lt;Blog /&gt;</span>} <span class="tag">/&gt;</span>
+        <span class="cmt">/* Dynamic route segment */</span>
+        <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"/blog/:postId"</span> <span class="attr">element</span>={<span class="tag">&lt;Post /&gt;</span>} <span class="tag">/&gt;</span>
+        <span class="cmt">/* Nested routes */</span>
+        <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"/dashboard"</span> <span class="attr">element</span>={<span class="tag">&lt;DashboardLayout /&gt;</span>}<span class="tag">&gt;</span>
+          <span class="tag">&lt;Route</span> <span class="attr">index</span> <span class="attr">element</span>={<span class="tag">&lt;DashboardHome /&gt;</span>} <span class="tag">/&gt;</span>
+          <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"settings"</span> <span class="attr">element</span>={<span class="tag">&lt;Settings /&gt;</span>} <span class="tag">/&gt;</span>
+        <span class="tag">&lt;/Route&gt;</span>
+        <span class="cmt">/* 404 */</span>
+        <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"*"</span> <span class="attr">element</span>={<span class="tag">&lt;NotFound /&gt;</span>} <span class="tag">/&gt;</span>
+      <span class="tag">&lt;/Routes&gt;</span>
+    <span class="tag">&lt;/BrowserRouter&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Router Hooks</h3>
+    <pre data-lang="jsx"><code><span class="kw">import</span> { useParams, useNavigate, useLocation, useSearchParams } <span class="kw">from</span> <span class="str">'react-router-dom'</span>
+
+<span class="kw">function</span> <span class="fn">Post</span>() {
+  <span class="kw">const</span> { postId } <span class="op">=</span> <span class="fn">useParams</span>()         <span class="cmt">// /blog/:postId</span>
+  <span class="kw">const</span> navigate <span class="op">=</span> <span class="fn">useNavigate</span>()         <span class="cmt">// Programmatic navigation</span>
+  <span class="kw">const</span> location <span class="op">=</span> <span class="fn">useLocation</span>()         <span class="cmt">// Current URL info</span>
+  <span class="kw">const</span> [searchParams] <span class="op">=</span> <span class="fn">useSearchParams</span>() <span class="cmt">// ?key=value query params</span>
+
+  <span class="kw">const</span> page <span class="op">=</span> searchParams.<span class="fn">get</span>(<span class="str">'page'</span>) <span class="op">??</span> <span class="str">'1'</span>
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;h1&gt;</span>Post #{postId} — Page {page}<span class="tag">&lt;/h1&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">navigate</span>(-<span class="num">1</span>)}<span class="tag">&gt;</span>Back<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">navigate</span>(<span class="str">'/dashboard'</span>, { replace: <span class="kw">true</span> })}<span class="tag">&gt;</span>
+        Go to Dashboard
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="cmt">// Protected route pattern</span>
+<span class="kw">function</span> <span class="fn">ProtectedRoute</span>({ children }) {
+  <span class="kw">const</span> { user } <span class="op">=</span> <span class="fn">useAuth</span>()
+  <span class="kw">const</span> location <span class="op">=</span> <span class="fn">useLocation</span>()
+
+  <span class="kw">if</span> (!user) {
+    <span class="kw">return</span> <span class="tag">&lt;Navigate</span> <span class="attr">to</span>=<span class="str">"/login"</span> <span class="attr">state</span>={{ from: location }} <span class="attr">replace</span> <span class="tag">/&gt;</span>
+  }
+  <span class="kw">return</span> children
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 16 — PERFORMANCE
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch16">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 16 / Advanced</div>
+    <h2>Performance Optimization</h2>
+    <p class="chapter-desc">Profiling, memoization, code splitting, and virtualization.</p>
+  </div>
+
+  <div class="section">
+    <h3>React.memo</h3>
+    <p><code>React.memo</code> is a higher-order component that prevents a component from re-rendering if its props haven't changed. It does a <em>shallow comparison</em> of props by default.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { memo } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="cmt">// Without memo: re-renders whenever parent renders</span>
+<span class="kw">function</span> <span class="fn">ExpensiveChart</span>({ data, title }) {
+  <span class="cmt">// Complex rendering logic...</span>
+  <span class="kw">return</span> <span class="tag">&lt;canvas /&gt;</span>
+}
+
+<span class="cmt">// With memo: skips re-render if data and title are unchanged</span>
+<span class="kw">const</span> <span class="fn">ExpensiveChart</span> <span class="op">=</span> <span class="fn">memo</span>(<span class="kw">function</span> <span class="fn">ExpensiveChart</span>({ data, title }) {
+  <span class="kw">return</span> <span class="tag">&lt;canvas /&gt;</span>
+})
+
+<span class="cmt">// Custom comparison function for deep equality</span>
+<span class="kw">const</span> <span class="fn">MyComponent</span> <span class="op">=</span> <span class="fn">memo</span>(Component, (prevProps, nextProps) <span class="op">=&gt;</span> {
+  <span class="cmt">// Return true to SKIP re-render (props are equal)</span>
+  <span class="kw">return</span> prevProps.data.id <span class="op">===</span> nextProps.data.id
+})</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Code Splitting & Lazy Loading</h3>
+    <pre data-lang="jsx"><code><span class="kw">import</span> { lazy, Suspense } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="cmt">// Lazy load heavy pages — only downloaded when needed</span>
+<span class="kw">const</span> AdminDashboard <span class="op">=</span> <span class="fn">lazy</span>(() <span class="op">=&gt;</span> <span class="kw">import</span>(<span class="str">'./pages/AdminDashboard'</span>))
+<span class="kw">const</span> ReportGenerator <span class="op">=</span> <span class="fn">lazy</span>(() <span class="op">=&gt;</span> <span class="kw">import</span>(<span class="str">'./pages/ReportGenerator'</span>))
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;Suspense</span> <span class="attr">fallback</span>={<span class="tag">&lt;PageLoader /&gt;</span>}<span class="tag">&gt;</span>
+      <span class="tag">&lt;Routes&gt;</span>
+        <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"/admin"</span> <span class="attr">element</span>={<span class="tag">&lt;AdminDashboard /&gt;</span>} <span class="tag">/&gt;</span>
+        <span class="tag">&lt;Route</span> <span class="attr">path</span>=<span class="str">"/report"</span> <span class="attr">element</span>={<span class="tag">&lt;ReportGenerator /&gt;</span>} <span class="tag">/&gt;</span>
+      <span class="tag">&lt;/Routes&gt;</span>
+    <span class="tag">&lt;/Suspense&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>List Virtualization</h3>
+    <p>For lists with thousands of items, render only the visible items using virtualization:</p>
+
+    <pre data-lang="bash"><code>npm install @tanstack/react-virtual</code></pre>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { useVirtualizer } <span class="kw">from</span> <span class="str">'@tanstack/react-virtual'</span>
+
+<span class="kw">function</span> <span class="fn">VirtualList</span>({ items }) {
+  <span class="kw">const</span> parentRef <span class="op">=</span> <span class="hook">useRef</span>(<span class="kw">null</span>)
+
+  <span class="kw">const</span> virtualizer <span class="op">=</span> <span class="fn">useVirtualizer</span>({
+    count: items.length,
+    getScrollElement: () <span class="op">=&gt;</span> parentRef.current,
+    estimateSize: () <span class="op">=&gt;</span> <span class="num">60</span>,   <span class="cmt">// Row height estimate</  </span>
+  })
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div</span> <span class="attr">ref</span>={parentRef} <span class="attr">style</span>={{ height: <span class="str">'500px'</span>, overflow: <span class="str">'auto'</span> }}<span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">style</span>={{ height: virtualizer.<span class="fn">getTotalSize</span>() }}<span class="tag">&gt;</span>
+        {virtualizer.<span class="fn">getVirtualItems</span>().<span class="fn">map</span>(vItem <span class="op">=&gt;</span> (
+          <span class="tag">&lt;div</span>
+            <span class="attr">key</span>={vItem.key}
+            <span class="attr">style</span>={{ position: <span class="str">'absolute'</span>, top: vItem.start }}
+          <span class="tag">&gt;</span>
+            {items[vItem.index].name}
+          <span class="tag">&lt;/div&gt;</span>
+        ))}
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 17 — ERROR BOUNDARIES
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch17">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 17 / Advanced</div>
+    <h2>Error Boundaries</h2>
+    <p class="chapter-desc">Gracefully handling runtime errors in the component tree.</p>
+  </div>
+
+  <div class="section">
+    <h3>What are Error Boundaries?</h3>
+    <p>An Error Boundary is a React component that catches JavaScript errors in its child component tree, logs those errors, and displays a fallback UI. They are <em>still</em> written as class components (no hook equivalent yet).</p>
+
+    <pre data-lang="jsx"><code><span class="kw">class</span> <span class="fn">ErrorBoundary</span> <span class="kw">extends</span> <span class="fn">Component</span> {
+  <span class="fn">constructor</span>(props) {
+    <span class="kw">super</span>(props)
+    <span class="kw">this</span>.state <span class="op">=</span> { hasError: <span class="kw">false</span>, error: <span class="kw">null</span> }
+  }
+
+  <span class="cmt">// Called when a descendant throws</span>
+  <span class="kw">static</span> <span class="fn">getDerivedStateFromError</span>(error) {
+    <span class="kw">return</span> { hasError: <span class="kw">true</span>, error }
+  }
+
+  <span class="cmt">// For logging errors to a service</span>
+  <span class="fn">componentDidCatch</span>(error, info) {
+    <span class="fn">logErrorToService</span>(error, info.componentStack)
+  }
+
+  <span class="fn">render</span>() {
+    <span class="kw">if</span> (<span class="kw">this</span>.state.hasError) {
+      <span class="kw">return</span> <span class="kw">this</span>.props.fallback <span class="op">||</span> (
+        <span class="tag">&lt;div&gt;</span>
+          <span class="tag">&lt;h2&gt;</span>Something went wrong<span class="tag">&lt;/h2&gt;</span>
+          <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="kw">this</span>.<span class="fn">setState</span>({ hasError: <span class="kw">false</span> })}<span class="tag">&gt;</span>
+            Try again
+          <span class="tag">&lt;/button&gt;</span>
+        <span class="tag">&lt;/div&gt;</span>
+      )
+    }
+    <span class="kw">return</span> <span class="kw">this</span>.props.children
+  }
+}
+
+<span class="cmt">// Usage — wrap sections independently</span>
+<span class="tag">&lt;ErrorBoundary</span> <span class="attr">fallback</span>={<span class="tag">&lt;p&gt;</span>Chart failed to load<span class="tag">&lt;/p&gt;</span>}<span class="tag">&gt;</span>
+  <span class="tag">&lt;ComplexChart /&gt;</span>
+<span class="tag">&lt;/ErrorBoundary&gt;</span></code></pre>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ What Error Boundaries Don't Catch</div>
+      Event handlers (use try/catch inside them), async code (<code>setTimeout</code>, <code>fetch</code>), server-side rendering errors, and errors thrown in the error boundary itself.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 18 — PORTALS & ADVANCED REFS
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch18">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 18 / Advanced</div>
+    <h2>Portals & Advanced Refs</h2>
+    <p class="chapter-desc">Rendering outside the component hierarchy and exposing component APIs.</p>
+  </div>
+
+  <div class="section">
+    <h3>Portals</h3>
+    <p>Portals let you render children into a DOM node that exists outside the parent component's DOM hierarchy. Perfect for modals, tooltips, and popovers that need to escape CSS <code>overflow: hidden</code> or <code>z-index</code> stacking contexts.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { createPortal } <span class="kw">from</span> <span class="str">'react-dom'</span>
+
+<span class="kw">function</span> <span class="fn">Modal</span>({ isOpen, onClose, children }) {
+  <span class="kw">if</span> (!isOpen) <span class="kw">return</span> <span class="kw">null</span>
+
+  <span class="cmt">// Renders into document.body, not the component's parent</span>
+  <span class="kw">return</span> <span class="fn">createPortal</span>(
+    <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"modal-overlay"</span> <span class="attr">onClick</span>={onClose}<span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"modal-content"</span> <span class="attr">onClick</span>={e <span class="op">=&gt;</span> e.<span class="fn">stopPropagation</span>()}<span class="tag">&gt;</span>
+        {children}
+        <span class="tag">&lt;button</span> <span class="attr">onClick</span>={onClose}<span class="tag">&gt;</span>×<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>,
+    document.body  <span class="cmt">// Target DOM node</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>forwardRef & useImperativeHandle</h3>
+    <pre data-lang="jsx"><code><span class="kw">import</span> { forwardRef, useImperativeHandle, useRef } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="cmt">// forwardRef — pass ref through to a child's DOM element</span>
+<span class="kw">const</span> <span class="fn">FancyInput</span> <span class="op">=</span> <span class="fn">forwardRef</span>(<span class="kw">function</span> <span class="fn">FancyInput</span>(props, ref) {
+  <span class="kw">return</span> <span class="tag">&lt;input</span> <span class="attr">ref</span>={ref} <span class="attr">className</span>=<span class="str">"fancy"</span> {<span class="op">...</span>props} <span class="tag">/&gt;</span>
+})
+
+<span class="cmt">// useImperativeHandle — expose custom methods via ref</span>
+<span class="kw">const</span> <span class="fn">VideoPlayer</span> <span class="op">=</span> <span class="fn">forwardRef</span>(<span class="kw">function</span> <span class="fn">VideoPlayer</span>(props, ref) {
+  <span class="kw">const</span> videoRef <span class="op">=</span> <span class="hook">useRef</span>(<span class="kw">null</span>)
+
+  <span class="fn">useImperativeHandle</span>(ref, () <span class="op">=&gt;</span> ({
+    play: () <span class="op">=&gt;</span> videoRef.current.<span class="fn">play</span>(),
+    pause: () <span class="op">=&gt;</span> videoRef.current.<span class="fn">pause</span>(),
+    seek: (time) <span class="op">=&gt;</span> { videoRef.current.currentTime <span class="op">=</span> time }
+  }))
+
+  <span class="kw">return</span> <span class="tag">&lt;video</span> <span class="attr">ref</span>={videoRef} <span class="attr">src</span>={props.src} <span class="tag">/&gt;</span>
+})
+
+<span class="cmt">// Parent uses the custom API</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> playerRef <span class="op">=</span> <span class="hook">useRef</span>(<span class="kw">null</span>)
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;VideoPlayer</span> <span class="attr">ref</span>={playerRef} <span class="attr">src</span>=<span class="str">"/video.mp4"</span> <span class="tag">/&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> playerRef.current.<span class="fn">play</span>()}<span class="tag">&gt;</span>Play<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> playerRef.current.<span class="fn">seek</span>(<span class="num">30</span>)}<span class="tag">&gt;</span>Skip 30s<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 19 — STATE MANAGEMENT
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch19">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 19 / Advanced</div>
+    <h2>State Management</h2>
+    <p class="chapter-desc">Zustand, Redux Toolkit, and choosing the right tool.</p>
+  </div>
+
+  <div class="section">
+    <h3>Zustand (Recommended for Most Apps)</h3>
+    <p>Zustand is a small, fast state management library that doesn't require providers or boilerplate:</p>
+
+    <pre data-lang="bash"><code>npm install zustand</code></pre>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { create } <span class="kw">from</span> <span class="str">'zustand'</span>
+
+<span class="cmt">// Define your store</span>
+<span class="kw">const</span> <span class="fn">useCartStore</span> <span class="op">=</span> <span class="fn">create</span>((set, get) <span class="op">=&gt;</span> ({
+  items: [],
+  total: <span class="num">0</span>,
+
+  <span class="fn">addItem</span>(item) {
+    set(state <span class="op">=&gt;</span> ({
+      items: [...state.items, item],
+      total: state.total <span class="op">+</span> item.price
+    }))
+  },
+
+  <span class="fn">removeItem</span>(id) {
+    <span class="kw">const</span> item <span class="op">=</span> <span class="fn">get</span>().items.<span class="fn">find</span>(i <span class="op">=&gt;</span> i.id <span class="op">===</span> id)
+    set(state <span class="op">=&gt;</span> ({
+      items: state.items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i.id <span class="op">!==</span> id),
+      total: state.total <span class="op">-</span> (item?.price <span class="op">??</span> <span class="num">0</span>)
+    }))
+  },
+
+  <span class="fn">clearCart</span>() {
+    set({ items: [], total: <span class="num">0</span> })
+  }
+}))
+
+<span class="cmt">// Use in any component — no Provider needed!</span>
+<span class="kw">function</span> <span class="fn">CartButton</span>() {
+  <span class="kw">const</span> { items, total, addItem } <span class="op">=</span> <span class="fn">useCartStore</span>()
+  <span class="kw">return</span> <span class="tag">&lt;button&gt;</span>Cart ({items.length}) — ₹{total}<span class="tag">&lt;/button&gt;</span>
+}
+
+<span class="cmt">// Subscribe to a slice — prevents unnecessary re-renders</span>
+<span class="kw">const</span> total <span class="op">=</span> <span class="fn">useCartStore</span>(state <span class="op">=&gt;</span> state.total)</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Redux Toolkit (for Complex Apps)</h3>
+    <pre data-lang="bash"><code>npm install @reduxjs/toolkit react-redux</code></pre>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { createSlice, configureStore } <span class="kw">from</span> <span class="str">'@reduxjs/toolkit'</span>
+<span class="kw">import</span> { Provider, useDispatch, useSelector } <span class="kw">from</span> <span class="str">'react-redux'</span>
+
+<span class="cmt">// Slice = actions + reducer in one</span>
+<span class="kw">const</span> counterSlice <span class="op">=</span> <span class="fn">createSlice</span>({
+  name: <span class="str">'counter'</span>,
+  initialState: { value: <span class="num">0</span> },
+  reducers: {
+    increment: state <span class="op">=&gt;</span> { state.value <span class="op">+=</span> <span class="num">1</span> },  <span class="cmt">// Immer handles immutability</span>
+    decrement: state <span class="op">=&gt;</span> { state.value <span class="op">-=</span> <span class="num">1</span> },
+    add: (state, action) <span class="op">=&gt;</span> { state.value <span class="op">+=</span> action.payload }
+  }
+})
+
+<span class="kw">const</span> { increment, decrement, add } <span class="op">=</span> counterSlice.actions
+
+<span class="kw">const</span> store <span class="op">=</span> <span class="fn">configureStore</span>({
+  reducer: { counter: counterSlice.reducer }
+})
+
+<span class="cmt">// Wrap app in Provider</span>
+<span class="tag">&lt;Provider</span> <span class="attr">store</span>={store}<span class="tag">&gt;&lt;App /&gt;&lt;/Provider&gt;</span>
+
+<span class="cmt">// Access in component</span>
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="kw">const</span> value <span class="op">=</span> <span class="fn">useSelector</span>(state <span class="op">=&gt;</span> state.counter.value)
+  <span class="kw">const</span> dispatch <span class="op">=</span> <span class="fn">useDispatch</span>()
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;p&gt;</span>{value}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=&gt;</span> <span class="fn">dispatch</span>(<span class="fn">increment</span>())}<span class="tag">&gt;</span>+<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 20 — DATA FETCHING
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch20">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 20 / Advanced</div>
+    <h2>Data Fetching Patterns</h2>
+    <p class="chapter-desc">TanStack Query, SWR, and modern async data management.</p>
+  </div>
+
+  <div class="section">
+    <h3>TanStack Query (React Query)</h3>
+    <p>Managing async state (loading, error, caching, refetching) manually with <code>useEffect</code> is tedious. TanStack Query handles all of this for you:</p>
+
+    <pre data-lang="bash"><code>npm install @tanstack/react-query</code></pre>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { QueryClient, QueryClientProvider, useQuery, useMutation } <span class="kw">from</span> <span class="str">'@tanstack/react-query'</span>
+
+<span class="kw">const</span> queryClient <span class="op">=</span> <span class="kw">new</span> <span class="fn">QueryClient</span>()
+
+<span class="tag">&lt;QueryClientProvider</span> <span class="attr">client</span>={queryClient}<span class="tag">&gt;</span><span class="tag">&lt;App /&gt;</span><span class="tag">&lt;/QueryClientProvider&gt;</span>
+
+<span class="cmt">// useQuery — declarative data fetching with caching</span>
+<span class="kw">function</span> <span class="fn">Posts</span>() {
+  <span class="kw">const</span> { data, isLoading, isError, error, refetch } <span class="op">=</span> <span class="fn">useQuery</span>({
+    queryKey: [<span class="str">'posts'</span>],                    <span class="cmt">// Unique cache key</span>
+    queryFn: () <span class="op">=&gt;</span> <span class="fn">fetch</span>(<span class="str">'/api/posts'</span>).<span class="fn">then</span>(r <span class="op">=&gt;</span> r.<span class="fn">json</span>()),
+    staleTime: <span class="num">5</span> <span class="op">*</span> <span class="num">60</span> <span class="op">*</span> <span class="num">1000</span>,               <span class="cmt">// Cache for 5 minutes</span>
+  })
+
+  <span class="kw">if</span> (isLoading) <span class="kw">return</span> <span class="tag">&lt;Spinner /&gt;</span>
+  <span class="kw">if</span> (isError) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Error: {error.message}<span class="tag">&lt;/p&gt;</span>
+  <span class="kw">return</span> <span class="tag">&lt;PostList</span> <span class="attr">posts</span>={data} <span class="tag">/&gt;</span>
+}
+
+<span class="cmt">// useMutation — for writes (POST, PUT, DELETE)</span>
+<span class="kw">function</span> <span class="fn">CreatePost</span>() {
+  <span class="kw">const</span> queryClient <span class="op">=</span> <span class="fn">useQueryClient</span>()
+
+  <span class="kw">const</span> mutation <span class="op">=</span> <span class="fn">useMutation</span>({
+    mutationFn: (newPost) <span class="op">=&gt;</span>
+      <span class="fn">fetch</span>(<span class="str">'/api/posts'</span>, {
+        method: <span class="str">'POST'</span>,
+        body: JSON.<span class="fn">stringify</span>(newPost)
+      }).<span class="fn">then</span>(r <span class="op">=&gt;</span> r.<span class="fn">json</span>()),
+    <span class="fn">onSuccess</span>() {
+      <span class="cmt">// Invalidate cache so posts list refreshes</span>
+      queryClient.<span class="fn">invalidateQueries</span>({ queryKey: [<span class="str">'posts'</span>] })
+    }
+  })
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;button</span>
+      <span class="attr">onClick</span>={() <span class="op">=&gt;</span> mutation.<span class="fn">mutate</span>({ title: <span class="str">'New Post'</span> })}
+      <span class="attr">disabled</span>={mutation.isPending}
+    <span class="tag">&gt;</span>
+      {mutation.isPending ? <span class="str">'Saving...'</span> : <span class="str">'Create Post'</span>}
+    <span class="tag">&lt;/button&gt;</span>
+  )
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 21 — REACT 18 & CONCURRENT
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch21">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 21 / Expert</div>
+    <h2>React 18 & Concurrent Features</h2>
+    <p class="chapter-desc">useTransition, useDeferredValue, Suspense, and the concurrent renderer.</p>
+  </div>
+
+  <div class="section">
+    <h3>useTransition</h3>
+    <p>Marks state updates as non-urgent, allowing React to interrupt them to handle more urgent updates (like key presses). Prevents the UI from feeling frozen during slow renders.</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { <span class="hook">useState</span>, <span class="hook">useTransition</span> } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">function</span> <span class="fn">SearchPage</span>() {
+  <span class="kw">const</span> [query, <span class="fn">setQuery</span>] <span class="op">=</span> <span class="hook">useState</span>(<span class="str">''</span>)
+  <span class="kw">const</span> [results, <span class="fn">setResults</span>] <span class="op">=</span> <span class="hook">useState</span>([])
+  <span class="kw">const</span> [isPending, <span class="fn">startTransition</span>] <span class="op">=</span> <span class="hook">useTransition</span>()
+
+  <span class="kw">const</span> <span class="fn">handleSearch</span> <span class="op">=</span> (e) <span class="op">=&gt;</span> {
+    <span class="kw">const</span> value <span class="op">=</span> e.target.value
+    <span class="fn">setQuery</span>(value)                    <span class="cmt">// Urgent — update input immediately</span>
+
+    <span class="fn">startTransition</span>(() <span class="op">=&gt;</span> {           <span class="cmt">// Non-urgent — can be interrupted</span>
+      <span class="fn">setResults</span>(<span class="fn">expensiveSearch</span>(value))
+    })
+  }
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;input</span> <span class="attr">value</span>={query} <span class="attr">onChange</span>={handleSearch} <span class="tag">/&gt;</span>
+      {isPending <span class="op">&amp;&amp;</span> <span class="tag">&lt;p&gt;</span>Searching...<span class="tag">&lt;/p&gt;</span>}
+      <span class="tag">&lt;ResultsList</span> <span class="attr">results</span>={results} <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>useDeferredValue</h3>
+    <p>Defers updating a value until higher-priority renders complete — similar to <code>useTransition</code> but works when you don't control the state update (e.g., received via props).</p>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { <span class="hook">useDeferredValue</span>, memo } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">function</span> <span class="fn">SearchResults</span>({ query }) {
+  <span class="kw">const</span> deferredQuery <span class="op">=</span> <span class="hook">useDeferredValue</span>(query)
+  <span class="kw">const</span> isStale <span class="op">=</span> deferredQuery <span class="op">!==</span> query   <span class="cmt">// Show stale indicator</span>
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div</span> <span class="attr">style</span>={{ opacity: isStale <span class="op">?</span> <span class="num">0.6</span> : <span class="num">1</span> }}<span class="tag">&gt;</span>
+      <span class="tag">&lt;SlowList</span> <span class="attr">query</span>={deferredQuery} <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Suspense for Data Fetching</h3>
+    <pre data-lang="jsx"><code><span class="cmt">// Suspense-compatible data fetching (with React Query or similar)</span>
+<span class="kw">function</span> <span class="fn">UserProfile</span>({ userId }) {
+  <span class="cmt">// With React Query's suspense mode</span>
+  <span class="kw">const</span> { data: user } <span class="op">=</span> <span class="fn">useSuspenseQuery</span>({
+    queryKey: [<span class="str">'user'</span>, userId],
+    queryFn: () <span class="op">=&gt;</span> <span class="fn">fetchUser</span>(userId),
+  })
+  <span class="cmt">// No loading check needed — Suspense handles it</span>
+  <span class="kw">return</span> <span class="tag">&lt;h1&gt;</span>{user.name}<span class="tag">&lt;/h1&gt;</span>
+}
+
+<span class="cmt">// Wrap with Suspense boundaries</span>
+<span class="tag">&lt;Suspense</span> <span class="attr">fallback</span>={<span class="tag">&lt;Skeleton /&gt;</span>}<span class="tag">&gt;</span>
+  <span class="tag">&lt;UserProfile</span> <span class="attr">userId</span>={<span class="num">123</span>} <span class="tag">/&gt;</span>
+<span class="tag">&lt;/Suspense&gt;</span></code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 22 — TESTING
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch22">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 22 / Expert</div>
+    <h2>Testing React Applications</h2>
+    <p class="chapter-desc">Unit tests with React Testing Library and E2E tests with Playwright.</p>
+  </div>
+
+  <div class="section">
+    <h3>React Testing Library</h3>
+    <pre data-lang="bash"><code>npm install --save-dev @testing-library/react @testing-library/user-event vitest</code></pre>
+
+    <pre data-lang="jsx"><code><span class="kw">import</span> { render, screen, waitFor } <span class="kw">from</span> <span class="str">'@testing-library/react'</span>
+<span class="kw">import</span> userEvent <span class="kw">from</span> <span class="str">'@testing-library/user-event'</span>
+<span class="kw">import</span> { describe, it, expect, vi } <span class="kw">from</span> <span class="str">'vitest'</span>
+<span class="kw">import</span> Counter <span class="kw">from</span> <span class="str">'./Counter'</span>
+
+describe(<span class="str">'Counter'</span>, () <span class="op">=&gt;</span> {
+  it(<span class="str">'renders with initial count of 0'</span>, () <span class="op">=&gt;</span> {
+    <span class="fn">render</span>(<span class="tag">&lt;Counter /&gt;</span>)
+    expect(screen.<span class="fn">getByText</span>(<span class="str">'Count: 0'</span>)).<span class="fn">toBeInTheDocument</span>()
+  })
+
+  it(<span class="str">'increments when + button is clicked'</span>, <span class="kw">async</span> () <span class="op">=&gt;</span> {
+    <span class="kw">const</span> user <span class="op">=</span> userEvent.<span class="fn">setup</span>()
+    <span class="fn">render</span>(<span class="tag">&lt;Counter /&gt;</span>)
+
+    <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'+'</span> }))
+    expect(screen.<span class="fn">getByText</span>(<span class="str">'Count: 1'</span>)).<span class="fn">toBeInTheDocument</span>()
+  })
+
+  it(<span class="str">'fetches and displays user data'</span>, <span class="kw">async</span> () <span class="op">=&gt;</span> {
+    vi.<span class="fn">spyOn</span>(global, <span class="str">'fetch'</span>).<span class="fn">mockResolvedValueOnce</span>({
+      ok: <span class="kw">true</span>,
+      <span class="fn">json</span>: () <span class="op">=&gt;</span> Promise.<span class="fn">resolve</span>({ name: <span class="str">'Shankar'</span> })
+    })
+
+    <span class="fn">render</span>(<span class="tag">&lt;UserProfile</span> <span class="attr">userId</span>={<span class="num">1</span>} <span class="tag">/&gt;</span>)
+
+    <span class="kw">await</span> <span class="fn">waitFor</span>(() <span class="op">=&gt;</span> {
+      expect(screen.<span class="fn">getByText</span>(<span class="str">'Shankar'</span>)).<span class="fn">toBeInTheDocument</span>()
+    })
+  })
+})</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">✅ Testing Philosophy</div>
+      Test behavior, not implementation. Query elements the way users find them: by role, label, or text — not by CSS class or component internals. This makes tests resilient to refactors.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 23 — TYPESCRIPT
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch23">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 23 / Expert</div>
+    <h2>TypeScript with React</h2>
+    <p class="chapter-desc">Type-safe React components, hooks, and patterns.</p>
+  </div>
+
+  <div class="section">
+    <h3>Typing Components & Props</h3>
+    <pre data-lang="tsx"><code><span class="kw">import</span> { ReactNode, FC, MouseEvent } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="cmt">// Define prop types with interface</span>
+<span class="kw">interface</span> ButtonProps {
+  children: ReactNode
+  variant?: <span class="str">'primary'</span> | <span class="str">'secondary'</span> | <span class="str">'danger'</span>
+  disabled?: boolean
+  onClick?: (e: MouseEvent&lt;HTMLButtonElement&gt;) <span class="op">=&gt;</span> <span class="kw">void</span>
+  className?: string
+}
+
+<span class="cmt">// Option 1: Inline type annotation</span>
+<span class="kw">function</span> <span class="fn">Button</span>({ children, variant <span class="op">=</span> <span class="str">'primary'</span>, ...rest }: ButtonProps) {
+  <span class="kw">return</span> <span class="tag">&lt;button</span> <span class="attr">className</span>={<span class="str">`btn btn-${variant}`</span>} {<span class="op">...</span>rest}<span class="tag">&gt;</span>{children}<span class="tag">&lt;/button&gt;</span>
+}
+
+<span class="cmt">// Option 2: FC (FunctionComponent) generic</span>
+<span class="kw">const</span> Button: FC&lt;ButtonProps&gt; <span class="op">=</span> ({ children, variant }) <span class="op">=&gt;</span> (
+  <span class="tag">&lt;button&gt;</span>{children}<span class="tag">&lt;/button&gt;</span>
+)</code></pre>
+
+    <h4>Typing useState and useRef</h4>
+    <pre data-lang="tsx"><code><span class="cmt">// useState — infer type or annotate explicitly</span>
+<span class="kw">const</span> [count, setCount] <span class="op">=</span> <span class="hook">useState</span>&lt;number&gt;(<span class="num">0</span>)
+<span class="kw">const</span> [user, setUser] <span class="op">=</span> <span class="hook">useState</span>&lt;User | <span class="kw">null</span>&gt;(<span class="kw">null</span>)
+
+<span class="cmt">// useRef — DOM element</span>
+<span class="kw">const</span> inputRef <span class="op">=</span> <span class="hook">useRef</span>&lt;HTMLInputElement&gt;(<span class="kw">null</span>)
+inputRef.current?.<span class="fn">focus</span>()   <span class="cmt">// Optional chaining handles null</span>
+
+<span class="cmt">// useRef — mutable value (no null)</span>
+<span class="kw">const</span> timerRef <span class="op">=</span> <span class="hook">useRef</span>&lt;ReturnType&lt;<span class="kw">typeof</span> setInterval&gt;&gt;()
+
+<span class="cmt">// Custom hook with typed return</span>
+<span class="kw">interface</span> FetchResult&lt;T&gt; {
+  data: T | <span class="kw">null</span>
+  loading: boolean
+  error: Error | <span class="kw">null</span>
+}
+
+<span class="kw">function</span> <span class="fn">useFetch</span>&lt;T&gt;(url: string): FetchResult&lt;T&gt; {
+  <span class="kw">const</span> [data, setData] <span class="op">=</span> <span class="hook">useState</span>&lt;T | <span class="kw">null</span>&gt;(<span class="kw">null</span>)
+  <span class="cmt">// ...</span>
+  <span class="kw">return</span> { data, loading, error }
+}
+
+<span class="cmt">// Usage — TypeScript knows data is User | null</span>
+<span class="kw">const</span> { data } <span class="op">=</span> <span class="fn">useFetch</span>&lt;User&gt;(<span class="str">'/api/user'</span>)</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 24 — PATTERNS & BEST PRACTICES
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch24">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 24 / Expert</div>
+    <h2>Patterns & Best Practices</h2>
+    <p class="chapter-desc">Architectural principles, folder structure, and anti-patterns to avoid.</p>
+  </div>
+
+  <div class="section">
+    <h3>Folder Structure</h3>
+    <pre data-lang="text"><code>src/
+├── components/
+│   ├── ui/            <span class="cmt"># Primitive, reusable UI (Button, Input, Modal)</span>
+│   └── features/      <span class="cmt"># Feature-specific components (ProductCard, AuthForm)</span>
+├── hooks/             <span class="cmt"># Custom hooks (useFetch, useLocalStorage)</span>
+├── pages/             <span class="cmt"># Route-level page components</span>
+├── store/             <span class="cmt"># Zustand or Redux store definitions</span>
+├── services/          <span class="cmt"># API calls and external service wrappers</span>
+├── utils/             <span class="cmt"># Pure utility functions</span>
+├── types/             <span class="cmt"># Shared TypeScript types/interfaces</span>
+└── lib/               <span class="cmt"># Third-party library config (queryClient, i18n)</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Key Best Practices</h3>
+
+    <h4>1. One Component Per File</h4>
+    <p>Each file exports one primary component. This improves discoverability and tree-shaking.</p>
+
+    <h4>2. Colocate Related Code</h4>
+    <p>Keep styles, tests, and types close to the component they belong to. A <code>ProductCard</code> folder might contain <code>ProductCard.jsx</code>, <code>ProductCard.test.jsx</code>, and <code>ProductCard.module.css</code>.</p>
+
+    <h4>3. Avoid Anonymous Default Exports</h4>
+    <pre data-lang="jsx"><code><span class="cmt">// ❌ Hard to search, poor DevTools display</span>
+<span class="kw">export default</span> () <span class="op">=&gt;</span> <span class="tag">&lt;div&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="cmt">// ✅ Named function — better debugging, easier refactoring</span>
+<span class="kw">export default function</span> <span class="fn">ProductCard</span>() {
+  <span class="kw">return</span> <span class="tag">&lt;div&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+}</code></pre>
+
+    <h4>4. Never Put Logic in JSX</h4>
+    <pre data-lang="jsx"><code><span class="cmt">// ❌ Business logic mixed into JSX</span>
+<span class="kw">return</span> <span class="tag">&lt;p&gt;</span>{data.items.filter(i <span class="op">=&gt;</span> i.active).map(i <span class="op">=&gt;</span> i.price).<span class="fn">reduce</span>((a,b) <span class="op">=&gt;</span> a<span class="op">+</span>b, <span class="num">0</span>)}<span class="tag">&lt;/p&gt;</span>
+
+<span class="cmt">// ✅ Compute above, render below</span>
+<span class="kw">const</span> total <span class="op">=</span> data.items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i.active).<span class="fn">reduce</span>((sum, i) <span class="op">=&gt;</span> sum <span class="op">+</span> i.price, <span class="num">0</span>)
+<span class="kw">return</span> <span class="tag">&lt;p&gt;</span>{total}<span class="tag">&lt;/p&gt;</span></code></pre>
+
+    <h4>5. Common Anti-Patterns to Avoid</h4>
+    <ul>
+      <li><strong>Derived state in useState</strong> — compute it from existing state instead</li>
+      <li><strong>useEffect for derived state</strong> — calculate during render, not in an effect</li>
+      <li><strong>Overusing Context</strong> — use for truly global data; Zustand for shared state</li>
+      <li><strong>Premature optimization</strong> — profile before adding <code>useMemo</code>/<code>useCallback</code></li>
+      <li><strong>Mutating state directly</strong> — always return a new object/array</li>
+      <li><strong>Index as key in dynamic lists</strong> — use stable, unique IDs</li>
+      <li><strong>Nested component definitions</strong> — define components at the top level, not inside other components</li>
+    </ul>
+
+    <pre data-lang="jsx"><code><span class="cmt">// ❌ Component defined inside render — recreated every render</span>
+<span class="kw">function</span> <span class="fn">Parent</span>() {
+  <span class="kw">function</span> <span class="fn">Child</span>() { <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>...<span class="tag">&lt;/p&gt;</span> }  <span class="cmt">// Bad!</span>
+  <span class="kw">return</span> <span class="tag">&lt;Child /&gt;</span>
+}
+
+<span class="cmt">// ✅ Defined at module level</span>
+<span class="kw">function</span> <span class="fn">Child</span>() { <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>...<span class="tag">&lt;/p&gt;</span> }
+<span class="kw">function</span> <span class="fn">Parent</span>() { <span class="kw">return</span> <span class="tag">&lt;Child /&gt;</span> }</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Thinking in React — A Mental Model</h3>
+    <p>When building a React feature, follow this mental process:</p>
+    <ol>
+      <li><strong>Break UI into a component hierarchy</strong> — draw boxes around each UI piece</li>
+      <li><strong>Build a static version first</strong> — no state, just props and hardcoded data</li>
+      <li><strong>Identify the minimal state</strong> — what's the least state to make it interactive?</li>
+      <li><strong>Decide where state lives</strong> — what's the common ancestor of all components that need it?</li>
+      <li><strong>Add inverse data flow</strong> — pass setters down so children can update ancestor state</li>
+    </ol>
+
+    <div class="callout tip">
+      <div class="callout-title">🎯 The Golden Rule</div>
+      If you can compute it from existing state or props — <strong>don't store it in state</strong>. Derived values should be computed during render, not synchronized with effects.
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Recommended Ecosystem</h3>
+    <table>
+      <thead><tr><th>Category</th><th>Recommended Tool</th><th>Alternative</th></tr></thead>
+      <tbody>
+        <tr><td>Build Tool</td><td>Vite</td><td>Next.js (SSR), CRA (legacy)</td></tr>
+        <tr><td>Routing</td><td>React Router v6</td><td>TanStack Router</td></tr>
+        <tr><td>Data Fetching</td><td>TanStack Query</td><td>SWR, RTK Query</td></tr>
+        <tr><td>Global State</td><td>Zustand</td><td>Redux Toolkit, Jotai</td></tr>
+        <tr><td>Forms</td><td>React Hook Form</td><td>Formik</td></tr>
+        <tr><td>Styling</td><td>Tailwind CSS</td><td>CSS Modules, Emotion</td></tr>
+        <tr><td>UI Components</td><td>Radix UI + shadcn/ui</td><td>Material UI, Chakra</td></tr>
+        <tr><td>Testing</td><td>Vitest + RTL</td><td>Jest + RTL</td></tr>
+        <tr><td>Types</td><td>TypeScript</td><td>JSDoc</td></tr>
+        <tr><td>Linting</td><td>ESLint + eslint-plugin-react-hooks</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section" style="text-align:center; padding: 20px 0 40px;">
+    <div style="font-family:'Syne',sans-serif; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px;">
+      You've completed the course
+    </div>
+    <div style="font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--accent); margin-bottom:12px;">
+      React Mastery ✓
+    </div>
+    <p style="color:var(--text-muted); max-width:500px; margin:0 auto; font-style:italic;">
+      From JSX to Concurrent Mode — you now have the foundations, patterns, and instincts of a React engineer. Build something meaningful with it.
+    </p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 25 — FOLDER STRUCTURE
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch25">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 25 / Project Setup</div>
+    <h2>Folder Structure</h2>
+    <p class="chapter-desc">How to organise a React codebase so it scales without becoming a maze.</p>
+  </div>
+
+  <div class="section">
+    <h3>The Core Philosophy</h3>
+    <p>There is no single "correct" folder structure, but there is a wrong one: one you can't navigate six months later. The best structures follow two rules — <strong>colocation</strong> (keep related things together) and <strong>feature isolation</strong> (features don't reach into each other's guts).</p>
+    <div class="callout info">
+      <div class="callout-title">💡 Golden Rule</div>
+      Things that change together should live together. Don't split a feature across 6 folders just because they have different file types.
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Small App Structure (1–5 devs)</h3>
+    <p>Simple, flat, easy to navigate. Everything lives under <code>src/</code> with a handful of top-level folders.</p>
+    <pre data-lang="text"><code>my-app/
+├── public/
+│   └── favicon.svg
+├── src/
+│   ├── assets/            <span class="cmt"># Images, fonts, icons</span>
+│   ├── components/        <span class="cmt"># Shared/generic UI components</span>
+│   │   ├── Button/
+│   │   │   ├── Button.jsx
+│   │   │   ├── Button.module.css
+│   │   │   └── Button.test.jsx
+│   │   ├── Input/
+│   │   └── Modal/
+│   ├── hooks/             <span class="cmt"># Custom hooks: useFetch, useDebounce…</span>
+│   ├── pages/             <span class="cmt"># Route-level page components</span>
+│   │   ├── Home.jsx
+│   │   ├── Login.jsx
+│   │   └── Dashboard.jsx
+│   ├── services/          <span class="cmt"># API calls, axios instances</span>
+│   │   └── api.js
+│   ├── store/             <span class="cmt"># Zustand / Redux store</span>
+│   ├── utils/             <span class="cmt"># Pure helper functions</span>
+│   ├── App.jsx
+│   └── main.jsx
+├── .env
+├── .gitignore
+├── index.html
+├── package.json
+└── vite.config.js</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Medium App — Feature-Based Structure</h3>
+    <p>Once you have more than ~10 pages or multiple domains (auth, billing, dashboard…), group by <strong>feature</strong>, not by file type. This is the structure most production React apps use.</p>
+    <pre data-lang="text"><code>src/
+├── app/                   <span class="cmt"># App-wide setup: router, providers, store</span>
+│   ├── App.jsx
+│   ├── router.jsx
+│   └── providers.jsx
+│
+├── features/              <span class="cmt"># One folder per domain feature</span>
+│   ├── auth/
+│   │   ├── components/    <span class="cmt"># LoginForm, SignupForm, OtpInput</span>
+│   │   ├── hooks/         <span class="cmt"># useAuth, useOtp</span>
+│   │   ├── services/      <span class="cmt"># authApi.js</span>
+│   │   ├── store/         <span class="cmt"># authSlice.js or authStore.js</span>
+│   │   └── index.js       <span class="cmt"># Public API — export only what others need</span>
+│   ├── dashboard/
+│   ├── billing/
+│   └── profile/
+│
+├── components/            <span class="cmt"># Truly shared primitives (Button, Card, Table)</span>
+├── hooks/                 <span class="cmt"># Truly shared hooks (useLocalStorage, useMediaQuery)</span>
+├── services/              <span class="cmt"># Shared API config (axios instance, interceptors)</span>
+├── utils/                 <span class="cmt"># Pure helpers (formatDate, cn, validators)</span>
+├── types/                 <span class="cmt"># Shared TypeScript types</span>
+└── main.jsx</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">✅ The Index Barrel Rule</div>
+      Each feature folder has an <code>index.js</code> that acts as its public API. Other features import from <code>'features/auth'</code>, never from <code>'features/auth/store/authSlice'</code>. This lets you refactor internals without breaking importers.
+    </div>
+
+    <pre data-lang="js"><code><span class="cmt">// features/auth/index.js — the public API</span>
+<span class="kw">export</span> { <span class="fn">LoginForm</span> } <span class="kw">from</span> <span class="str">'./components/LoginForm'</span>
+<span class="kw">export</span> { <span class="fn">useAuth</span> } <span class="kw">from</span> <span class="str">'./hooks/useAuth'</span>
+<span class="kw">export</span> { authStore } <span class="kw">from</span> <span class="str">'./store/authStore'</span>
+<span class="cmt">// Do NOT export internal implementation details</span>
+
+<span class="cmt">// Importing in another feature</span>
+<span class="kw">import</span> { useAuth } <span class="kw">from</span> <span class="str">'@/features/auth'</span>  <span class="cmt">// Clean ✅</span>
+<span class="kw">import</span> { useAuth } <span class="kw">from</span> <span class="str">'../../features/auth/hooks/useAuth'</span>  <span class="cmt">// Messy ❌</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Component Folder Pattern</h3>
+    <p>Each component gets its own folder with co-located test, styles, and types. The folder name is the component name:</p>
+    <pre data-lang="text"><code>components/
+└── ProductCard/
+    ├── ProductCard.jsx       <span class="cmt"># Component</span>
+    ├── ProductCard.test.jsx  <span class="cmt"># Tests right next to it</span>
+    ├── ProductCard.module.css <span class="cmt"># Scoped styles</span>
+    ├── ProductCard.stories.jsx <span class="cmt"># Storybook story (optional)</span>
+    └── index.js              <span class="cmt"># Re-export for clean imports</span></code></pre>
+
+    <pre data-lang="js"><code><span class="cmt">// ProductCard/index.js</span>
+<span class="kw">export</span> { ProductCard } <span class="kw">from</span> <span class="str">'./ProductCard'</span>
+<span class="kw">export type</span> { ProductCardProps } <span class="kw">from</span> <span class="str">'./ProductCard'</span>
+
+<span class="cmt">// Now import anywhere cleanly</span>
+<span class="kw">import</span> { ProductCard } <span class="kw">from</span> <span class="str">'@/components/ProductCard'</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>What Goes Where — Cheat Sheet</h3>
+    <table>
+      <thead><tr><th>File type</th><th>Where it lives</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Page-level component</td><td><code>pages/</code> or <code>app/routes/</code></td><td><code>DashboardPage.jsx</code></td></tr>
+        <tr><td>Feature-specific component</td><td><code>features/[name]/components/</code></td><td><code>InvoiceTable.jsx</code></td></tr>
+        <tr><td>Shared primitive UI</td><td><code>components/</code></td><td><code>Button, Modal, Badge</code></td></tr>
+        <tr><td>Feature-specific hook</td><td><code>features/[name]/hooks/</code></td><td><code>useInvoices.js</code></td></tr>
+        <tr><td>Shared hook</td><td><code>hooks/</code></td><td><code>useDebounce.js</code></td></tr>
+        <tr><td>API call</td><td><code>features/[name]/services/</code></td><td><code>invoicesApi.js</code></td></tr>
+        <tr><td>Axios/fetch setup</td><td><code>services/</code></td><td><code>apiClient.js</code></td></tr>
+        <tr><td>Pure util function</td><td><code>utils/</code></td><td><code>formatCurrency.js</code></td></tr>
+        <tr><td>Shared TypeScript type</td><td><code>types/</code></td><td><code>User.ts, Invoice.ts</code></td></tr>
+        <tr><td>Global state store</td><td><code>store/</code> or colocated in feature</td><td><code>useCartStore.js</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 26 — VITE IN-DEPTH
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch26">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 26 / Project Setup</div>
+    <h2>Vite In-Depth</h2>
+    <p class="chapter-desc">Everything Vite can do — from zero config to advanced customisation.</p>
+  </div>
+
+  <div class="section">
+    <h3>Why Vite?</h3>
+    <p>Vite (French for "fast") replaces webpack/CRA with two key innovations: during development it serves files as <strong>native ES Modules</strong> — no bundling, instant server start. For production it uses <strong>Rollup</strong> to produce optimised bundles. The result: dev server starts in ~300ms regardless of project size.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="concept-card-title">Native ESM Dev Server</div>
+        <p>Browser fetches modules on demand. Only the file you changed is re-processed — not the whole bundle.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">Pre-bundled Dependencies</div>
+        <p>node_modules are pre-bundled with esbuild once. 10–100× faster than webpack's JS-based processing.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">True HMR</div>
+        <p>Module-level hot replacement. React Fast Refresh is built in — state survives file edits.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">Rollup Production Build</div>
+        <p>Mature, tree-shaking optimised production bundles with automatic code splitting.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Creating a Vite Project</h3>
+    <pre data-lang="bash"><code><span class="cmt"># React + JavaScript</span>
+npm create vite@latest my-app -- --template react
+
+<span class="cmt"># React + TypeScript (recommended)</span>
+npm create vite@latest my-app -- --template react-ts
+
+<span class="cmt"># With pnpm (faster)</span>
+pnpm create vite my-app --template react-ts
+
+cd my-app
+pnpm install
+pnpm dev      <span class="cmt"># http://localhost:5173</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>vite.config.ts — Complete Reference</h3>
+    <pre data-lang="ts"><code><span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="str">'vite'</span>
+<span class="kw">import</span> react <span class="kw">from</span> <span class="str">'@vitejs/plugin-react'</span>
+<span class="kw">import</span> path <span class="kw">from</span> <span class="str">'path'</span>
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  plugins: [
+    <span class="fn">react</span>(),    <span class="cmt">// React Fast Refresh + JSX transform</span>
+  ],
+
+  <span class="cmt">// ── Path aliases ────────────────────────────</span>
+  resolve: {
+    alias: {
+      <span class="str">'@'</span>: path.<span class="fn">resolve</span>(__dirname, <span class="str">'./src'</span>),
+      <span class="str">'@components'</span>: path.<span class="fn">resolve</span>(__dirname, <span class="str">'./src/components'</span>),
+      <span class="str">'@features'</span>: path.<span class="fn">resolve</span>(__dirname, <span class="str">'./src/features'</span>),
+      <span class="str">'@hooks'</span>: path.<span class="fn">resolve</span>(__dirname, <span class="str">'./src/hooks'</span>),
+      <span class="str">'@utils'</span>: path.<span class="fn">resolve</span>(__dirname, <span class="str">'./src/utils'</span>),
+    }
+  },
+
+  <span class="cmt">// ── Dev server ──────────────────────────────</span>
+  server: {
+    port: <span class="num">3000</span>,
+    open: <span class="kw">true</span>,         <span class="cmt">// Auto-open browser</span>
+    proxy: {
+      <span class="cmt">// Forward /api requests to backend (avoid CORS in dev)</span>
+      <span class="str">'/api'</span>: {
+        target: <span class="str">'http://localhost:8080'</span>,
+        changeOrigin: <span class="kw">true</span>,
+        rewrite: path <span class="op">=&gt;</span> path.<span class="fn">replace</span>(<span class="str">/^\/api/</span>, <span class="str">''</span>)
+      }
+    }
+  },
+
+  <span class="cmt">// ── Build options ───────────────────────────</span>
+  build: {
+    outDir: <span class="str">'dist'</span>,
+    sourcemap: <span class="kw">true</span>,           <span class="cmt">// Enable for production debugging</span>
+    chunkSizeWarningLimit: <span class="num">1000</span>, <span class="cmt">// Warn if chunk > 1MB</span>
+    rollupOptions: {
+      output: {
+        <span class="cmt">// Manual chunk splitting — keeps vendor libs separate</span>
+        <span class="fn">manualChunks</span>(id) {
+          <span class="kw">if</span> (id.<span class="fn">includes</span>(<span class="str">'node_modules'</span>)) {
+            <span class="kw">if</span> (id.<span class="fn">includes</span>(<span class="str">'react'</span>)) <span class="kw">return</span> <span class="str">'react-vendor'</span>
+            <span class="kw">if</span> (id.<span class="fn">includes</span>(<span class="str">'@tanstack'</span>)) <span class="kw">return</span> <span class="str">'query-vendor'</span>
+            <span class="kw">return</span> <span class="str">'vendor'</span>
+          }
+        }
+      }
+    }
+  },
+
+  <span class="cmt">// ── CSS ─────────────────────────────────────</span>
+  css: {
+    modules: {
+      localsConvention: <span class="str">'camelCase'</span>  <span class="cmt">// .my-class → styles.myClass</span>
+    }
+  },
+
+  <span class="cmt">// ── Environment variables ────────────────────</span>
+  <span class="cmt">// Vite exposes VITE_* vars to client via import.meta.env</span>
+  envPrefix: <span class="str">'VITE_'</span>,
+
+  <span class="cmt">// ── Preview server (production preview) ─────</span>
+  preview: {
+    port: <span class="num">4173</span>
+  }
+})</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Environment Variables</h3>
+    <pre data-lang="text"><code><span class="cmt"># .env                 — all environments</span>
+VITE_APP_NAME=MyApp
+
+<span class="cmt"># .env.development     — dev only (pnpm dev)</span>
+VITE_API_URL=http://localhost:8080
+
+<span class="cmt"># .env.production      — production only (pnpm build)</span>
+VITE_API_URL=https://api.myapp.com
+
+<span class="cmt"># .env.local           — local override, gitignored</span>
+VITE_SECRET_KEY=dev-only-key</code></pre>
+
+    <pre data-lang="ts"><code><span class="cmt">// Access in code</span>
+<span class="kw">const</span> apiUrl <span class="op">=</span> import.meta.env.<span class="prop">VITE_API_URL</span>
+<span class="kw">const</span> isDev <span class="op">=</span> import.meta.env.<span class="prop">DEV</span>      <span class="cmt">// boolean</span>
+<span class="kw">const</span> isProd <span class="op">=</span> import.meta.env.<span class="prop">PROD</span>     <span class="cmt">// boolean</span>
+<span class="kw">const</span> mode <span class="op">=</span> import.meta.env.<span class="prop">MODE</span>       <span class="cmt">// 'development' | 'production'</span>
+
+<span class="cmt">// TypeScript: add to vite-env.d.ts for autocomplete</span>
+<span class="kw">interface</span> ImportMetaEnv {
+  <span class="kw">readonly</span> VITE_API_URL: <span class="fn">string</span>
+  <span class="kw">readonly</span> VITE_APP_NAME: <span class="fn">string</span>
+}
+<span class="kw">interface</span> ImportMeta {
+  <span class="kw">readonly</span> env: ImportMetaEnv
+}</code></pre>
+
+    <div class="callout danger">
+      <div class="callout-title">🚫 Never Expose Secrets</div>
+      Any <code>VITE_*</code> variable is embedded in the client bundle — visible to anyone who opens DevTools. Never put API secret keys, database passwords, or private tokens in <code>VITE_*</code> vars. Those belong on your server only.
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Useful Vite Plugins</h3>
+    <pre data-lang="bash"><code><span class="cmt"># Official React plugin (Fast Refresh)</span>
+pnpm add -D @vitejs/plugin-react
+
+<span class="cmt"># Auto-import components (no manual import statements)</span>
+pnpm add -D unplugin-auto-import vite-plugin-components
+
+<span class="cmt"># SVG as React components</span>
+pnpm add -D vite-plugin-svgr
+
+<span class="cmt"># Bundle analyser — see what's big</span>
+pnpm add -D rollup-plugin-visualizer</code></pre>
+
+    <pre data-lang="ts"><code><span class="kw">import</span> { visualizer } <span class="kw">from</span> <span class="str">'rollup-plugin-visualizer'</span>
+<span class="kw">import</span> svgr <span class="kw">from</span> <span class="str">'vite-plugin-svgr'</span>
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  plugins: [
+    <span class="fn">react</span>(),
+    <span class="fn">svgr</span>(),   <span class="cmt">// import ReactLogo from './logo.svg?react'</span>
+    <span class="fn">visualizer</span>({ open: <span class="kw">true</span>, gzipSize: <span class="kw">true</span> }),
+  ]
+})</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Key npm Scripts</h3>
+    <pre data-lang="json"><code>{
+  <span class="str">"scripts"</span>: {
+    <span class="str">"dev"</span>: <span class="str">"vite"</span>,                        <span class="cmt">// Start dev server</span>
+    <span class="str">"build"</span>: <span class="str">"tsc && vite build"</span>,         <span class="cmt">// Type-check then build</span>
+    <span class="str">"preview"</span>: <span class="str">"vite preview"</span>,            <span class="cmt">// Preview production build locally</span>
+    <span class="str">"lint"</span>: <span class="str">"eslint src --ext .ts,.tsx"</span>,
+    <span class="str">"test"</span>: <span class="str">"vitest"</span>,
+    <span class="str">"test:ui"</span>: <span class="str">"vitest --ui"</span>,
+    <span class="str">"coverage"</span>: <span class="str">"vitest run --coverage"</span>,
+    <span class="str">"analyze"</span>: <span class="str">"vite build --mode analyze"</span>
+  }
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 27 — MONOREPO WITH PNPM
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch27">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 27 / Project Setup</div>
+    <h2>Monorepo with pnpm Workspaces</h2>
+    <p class="chapter-desc">Managing multiple apps and shared packages in one repository.</p>
+  </div>
+
+  <div class="section">
+    <h3>Why Monorepo?</h3>
+    <p>A monorepo stores multiple projects (apps + shared libraries) in one git repository. You share code, run one lint/test command across everything, and ship atomic changes that touch both frontend and backend in a single PR.</p>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="concept-card-title">Shared Code</div>
+        <p>One <code>packages/ui</code> library used by web, mobile, and docs — no publish/versioning needed.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">Atomic Changes</div>
+        <p>A breaking API change + all consuming apps fixed in one commit. No inter-repo coordination.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">Unified Tooling</div>
+        <p>One ESLint config, one TypeScript base config, one CI pipeline for everything.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title">pnpm Efficiency</div>
+        <p>pnpm uses a content-addressable store — each package installed once globally, symlinked into projects.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Setting Up the Monorepo</h3>
+    <pre data-lang="bash"><code><span class="cmt"># Install pnpm globally</span>
+npm install -g pnpm
+
+<span class="cmt"># Create monorepo root</span>
+mkdir my-monorepo && cd my-monorepo
+pnpm init</code></pre>
+
+    <pre data-lang="text"><code>my-monorepo/
+├── apps/
+│   ├── web/               <span class="cmt"># Main React app (Vite)</span>
+│   ├── admin/             <span class="cmt"># Admin panel (Vite)</span>
+│   └── docs/              <span class="cmt"># Documentation site</span>
+├── packages/
+│   ├── ui/                <span class="cmt"># Shared component library</span>
+│   ├── utils/             <span class="cmt"># Shared utility functions</span>
+│   ├── types/             <span class="cmt"># Shared TypeScript types</span>
+│   └── config/            <span class="cmt"># Shared ESLint, TS, Tailwind config</span>
+├── pnpm-workspace.yaml    <span class="cmt"># ← Tells pnpm about workspaces</span>
+├── package.json           <span class="cmt"># Root package.json</span>
+└── turbo.json             <span class="cmt"># Turborepo task runner (optional)</span></code></pre>
+
+    <h4>pnpm-workspace.yaml</h4>
+    <pre data-lang="yaml"><code>packages:
+  - 'apps/*'
+  - 'packages/*'</code></pre>
+
+    <h4>Root package.json</h4>
+    <pre data-lang="json"><code>{
+  <span class="str">"name"</span>: <span class="str">"my-monorepo"</span>,
+  <span class="str">"private"</span>: <span class="kw">true</span>,
+  <span class="str">"scripts"</span>: {
+    <span class="str">"dev"</span>: <span class="str">"turbo run dev"</span>,
+    <span class="str">"build"</span>: <span class="str">"turbo run build"</span>,
+    <span class="str">"lint"</span>: <span class="str">"turbo run lint"</span>,
+    <span class="str">"test"</span>: <span class="str">"turbo run test"</span>
+  },
+  <span class="str">"devDependencies"</span>: {
+    <span class="str">"turbo"</span>: <span class="str">"latest"</span>
+  }
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Creating a Shared Package</h3>
+    <pre data-lang="bash"><code><span class="cmt"># packages/ui/package.json</span>
+mkdir -p packages/ui/src && cd packages/ui
+pnpm init</code></pre>
+
+    <pre data-lang="json"><code><span class="cmt">// packages/ui/package.json</span>
+{
+  <span class="str">"name"</span>: <span class="str">"@myapp/ui"</span>,
+  <span class="str">"version"</span>: <span class="str">"0.0.1"</span>,
+  <span class="str">"main"</span>: <span class="str">"./src/index.ts"</span>,
+  <span class="str">"types"</span>: <span class="str">"./src/index.ts"</span>,
+  <span class="str">"exports"</span>: {
+    <span class="str">"."</span>: <span class="str">"./src/index.ts"</span>
+  },
+  <span class="str">"peerDependencies"</span>: {
+    <span class="str">"react"</span>: <span class="str">"^18"</span>
+  }
+}</code></pre>
+
+    <pre data-lang="ts"><code><span class="cmt">// packages/ui/src/index.ts</span>
+<span class="kw">export</span> { Button } <span class="kw">from</span> <span class="str">'./Button'</span>
+<span class="kw">export</span> { Modal } <span class="kw">from</span> <span class="str">'./Modal'</span>
+<span class="kw">export</span> { Input } <span class="kw">from</span> <span class="str">'./Input'</span></code></pre>
+
+    <h4>Use the package in an app</h4>
+    <pre data-lang="bash"><code><span class="cmt"># From the apps/web directory</span>
+pnpm add @myapp/ui --workspace</code></pre>
+
+    <pre data-lang="json"><code><span class="cmt">// apps/web/package.json</span>
+{
+  <span class="str">"dependencies"</span>: {
+    <span class="str">"@myapp/ui"</span>: <span class="str">"workspace:*"</span>  <span class="cmt">// Links local package</span>
+  }
+}</code></pre>
+
+    <pre data-lang="tsx"><code><span class="cmt">// apps/web/src/App.tsx</span>
+<span class="kw">import</span> { Button, Modal } <span class="kw">from</span> <span class="str">'@myapp/ui'</span>
+
+<span class="kw">export function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> <span class="tag">&lt;Button</span> <span class="attr">variant</span>=<span class="str">"primary"</span><span class="tag">&gt;</span>Hello from shared UI!<span class="tag">&lt;/Button&gt;</span>
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Turborepo — Running Tasks Efficiently</h3>
+    <p>Turborepo is a build system for monorepos. It caches task outputs and runs tasks in parallel, only re-running what changed.</p>
+    <pre data-lang="json"><code><span class="cmt">// turbo.json</span>
+{
+  <span class="str">"$schema"</span>: <span class="str">"https://turbo.build/schema.json"</span>,
+  <span class="str">"pipeline"</span>: {
+    <span class="str">"build"</span>: {
+      <span class="str">"dependsOn"</span>: [<span class="str">"^build"</span>],  <span class="cmt">// Build dependencies first</span>
+      <span class="str">"outputs"</span>: [<span class="str">"dist/**"</span>]     <span class="cmt">// Cache these outputs</span>
+    },
+    <span class="str">"dev"</span>: {
+      <span class="str">"cache"</span>: <span class="kw">false</span>,            <span class="cmt">// Never cache dev</span>
+      <span class="str">"persistent"</span>: <span class="kw">true</span>        <span class="cmt">// Long-running task</span>
+    },
+    <span class="str">"lint"</span>: {},
+    <span class="str">"test"</span>: { <span class="str">"outputs"</span>: [<span class="str">"coverage/**"</span>] }
+  }
+}</code></pre>
+
+    <pre data-lang="bash"><code><span class="cmt"># Run dev for ALL apps in parallel</span>
+turbo dev
+
+<span class="cmt"># Build only the web app and its dependencies</span>
+turbo build --filter=web
+
+<span class="cmt"># Run commands in a specific package</span>
+pnpm --filter @myapp/ui add lodash
+
+<span class="cmt"># Install all deps from root</span>
+pnpm install</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 28 — ALIASES & PATH SETUP
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch28">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 28 / Project Setup</div>
+    <h2>Aliases & Path Setup</h2>
+    <p class="chapter-desc">Clean imports with no ../../ hell — and making TypeScript & Vite agree.</p>
+  </div>
+
+  <div class="section">
+    <h3>The Problem: Relative Path Hell</h3>
+    <pre data-lang="ts"><code><span class="cmt">// ❌ Fragile — breaks when you move a file</span>
+<span class="kw">import</span> { Button } <span class="kw">from</span> <span class="str">'../../../../components/Button'</span>
+<span class="kw">import</span> { useAuth } <span class="kw">from</span> <span class="str">'../../../hooks/useAuth'</span>
+<span class="kw">import</span> { formatDate } <span class="kw">from</span> <span class="str">'../../utils/formatDate'</span>
+
+<span class="cmt">// ✅ Clean, refactor-proof</span>
+<span class="kw">import</span> { Button } <span class="kw">from</span> <span class="str">'@/components/Button'</span>
+<span class="kw">import</span> { useAuth } <span class="kw">from</span> <span class="str">'@/hooks/useAuth'</span>
+<span class="kw">import</span> { formatDate } <span class="kw">from</span> <span class="str">'@/utils/formatDate'</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Step 1: Configure Vite</h3>
+    <pre data-lang="ts"><code><span class="cmt">// vite.config.ts</span>
+<span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="str">'vite'</span>
+<span class="kw">import</span> react <span class="kw">from</span> <span class="str">'@vitejs/plugin-react'</span>
+<span class="kw">import</span> path <span class="kw">from</span> <span class="str">'path'</span>
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  plugins: [<span class="fn">react</span>()],
+  resolve: {
+    alias: {
+      <span class="str">'@'</span>: path.<span class="fn">resolve</span>(__dirname, <span class="str">'src'</span>),
+    }
+  }
+})</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Step 2: Configure TypeScript</h3>
+    <p>Vite handles runtime resolution but TypeScript needs its own config to understand the alias for type-checking and IDE autocomplete.</p>
+    <pre data-lang="json"><code><span class="cmt">// tsconfig.json</span>
+{
+  <span class="str">"compilerOptions"</span>: {
+    <span class="str">"baseUrl"</span>: <span class="str">"."</span>,
+    <span class="str">"paths"</span>: {
+      <span class="str">"@/*"</span>: [<span class="str">"src/*"</span>],
+      <span class="str">"@components/*"</span>: [<span class="str">"src/components/*"</span>],
+      <span class="str">"@features/*"</span>: [<span class="str">"src/features/*"</span>],
+      <span class="str">"@hooks/*"</span>: [<span class="str">"src/hooks/*"</span>],
+      <span class="str">"@utils/*"</span>: [<span class="str">"src/utils/*"</span>],
+      <span class="str">"@types/*"</span>: [<span class="str">"src/types/*"</span>]
+    }
+  }
+}</code></pre>
+    <div class="callout tip">
+      <div class="callout-title">✅ vite-tsconfig-paths Plugin</div>
+      Instead of duplicating alias config in both files, use the <code>vite-tsconfig-paths</code> plugin — it reads your <code>tsconfig.json</code> paths and applies them to Vite automatically.
+    </div>
+    <pre data-lang="bash"><code>pnpm add -D vite-tsconfig-paths</code></pre>
+    <pre data-lang="ts"><code><span class="kw">import</span> tsconfigPaths <span class="kw">from</span> <span class="str">'vite-tsconfig-paths'</span>
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  plugins: [<span class="fn">react</span>(), <span class="fn">tsconfigPaths</span>()]  <span class="cmt">// Reads tsconfig paths automatically</span>
+  <span class="cmt">// No need for resolve.alias!</span>
+})</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Absolute Imports for Test Files</h3>
+    <pre data-lang="ts"><code><span class="cmt">// vitest.config.ts</span>
+<span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="str">'vitest/config'</span>
+<span class="kw">import</span> tsconfigPaths <span class="kw">from</span> <span class="str">'vite-tsconfig-paths'</span>
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  plugins: [<span class="fn">tsconfigPaths</span>()],   <span class="cmt">// Same plugin works in tests</span>
+  test: {
+    environment: <span class="str">'jsdom'</span>,
+    globals: <span class="kw">true</span>,
+    setupFiles: [<span class="str">'./src/test/setup.ts'</span>]
+  }
+})</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 29 — ENV, LINT & GIT HOOKS
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch29">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 29 / Project Setup</div>
+    <h2>ESLint, Prettier & Git Hooks</h2>
+    <p class="chapter-desc">Enforcing code quality automatically so reviews focus on logic, not style.</p>
+  </div>
+
+  <div class="section">
+    <h3>ESLint Setup (Flat Config — 2024)</h3>
+    <pre data-lang="bash"><code>pnpm add -D eslint @eslint/js eslint-plugin-react eslint-plugin-react-hooks \
+  eslint-plugin-react-refresh @typescript-eslint/eslint-plugin \
+  @typescript-eslint/parser eslint-plugin-import</code></pre>
+
+    <pre data-lang="js"><code><span class="cmt">// eslint.config.js (new flat config format)</span>
+<span class="kw">import</span> js <span class="kw">from</span> <span class="str">'@eslint/js'</span>
+<span class="kw">import</span> reactHooks <span class="kw">from</span> <span class="str">'eslint-plugin-react-hooks'</span>
+<span class="kw">import</span> reactRefresh <span class="kw">from</span> <span class="str">'eslint-plugin-react-refresh'</span>
+<span class="kw">import</span> tseslint <span class="kw">from</span> <span class="str">'typescript-eslint'</span>
+
+<span class="kw">export default</span> tseslint.<span class="fn">config</span>(
+  { ignores: [<span class="str">'dist'</span>, <span class="str">'node_modules'</span>] },
+  {
+    <span class="kw">extends</span>: [...tseslint.configs.recommended],
+    files: [<span class="str">'**/*.{ts,tsx}'</span>],
+    plugins: {
+      <span class="str">'react-hooks'</span>: reactHooks,
+      <span class="str">'react-refresh'</span>: reactRefresh,
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      <span class="str">'react-refresh/only-export-components'</span>: <span class="str">'warn'</span>,
+      <span class="str">'@typescript-eslint/no-unused-vars'</span>: [<span class="str">'error'</span>, { argsIgnorePattern: <span class="str">'^_'</span> }],
+      <span class="str">'@typescript-eslint/no-explicit-any'</span>: <span class="str">'warn'</span>,
+      <span class="str">'no-console'</span>: [<span class="str">'warn'</span>, { allow: [<span class="str">'warn'</span>, <span class="str">'error'</span>] }],
+    }
+  }
+)</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Prettier Setup</h3>
+    <pre data-lang="bash"><code>pnpm add -D prettier eslint-config-prettier</code></pre>
+
+    <pre data-lang="json"><code><span class="cmt">// .prettierrc</span>
+{
+  <span class="str">"semi"</span>: <span class="kw">false</span>,
+  <span class="str">"singleQuote"</span>: <span class="kw">true</span>,
+  <span class="str">"tabWidth"</span>: <span class="num">2</span>,
+  <span class="str">"trailingComma"</span>: <span class="str">"es5"</span>,
+  <span class="str">"printWidth"</span>: <span class="num">100</span>,
+  <span class="str">"jsxSingleQuote"</span>: <span class="kw">false</span>,
+  <span class="str">"plugins"</span>: [<span class="str">"prettier-plugin-tailwindcss"</span>]  <span class="cmt">// Auto-sort Tailwind classes</span>
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Husky + lint-staged (Git Hooks)</h3>
+    <p>Run linting and formatting automatically before every commit, so bad code never enters the repo.</p>
+    <pre data-lang="bash"><code><span class="cmt"># Install</span>
+pnpm add -D husky lint-staged
+npx husky init
+
+<span class="cmt"># This creates .husky/pre-commit</span></code></pre>
+
+    <pre data-lang="bash"><code><span class="cmt"># .husky/pre-commit</span>
+npx lint-staged</code></pre>
+
+    <pre data-lang="json"><code><span class="cmt">// package.json</span>
+{
+  <span class="str">"lint-staged"</span>: {
+    <span class="str">"*.{ts,tsx}"</span>: [
+      <span class="str">"eslint --fix"</span>,
+      <span class="str">"prettier --write"</span>
+    ],
+    <span class="str">"*.{json,md,css,html}"</span>: [
+      <span class="str">"prettier --write"</span>
+    ]
+  }
+}</code></pre>
+
+    <h4>Commit Message Linting (Optional but Great)</h4>
+    <pre data-lang="bash"><code>pnpm add -D @commitlint/cli @commitlint/config-conventional
+echo "export default { extends: ['@commitlint/config-conventional'] }" > commitlint.config.js
+npx husky add .husky/commit-msg 'npx --no -- commitlint --edit "$1"'</code></pre>
+
+    <pre data-lang="bash"><code><span class="cmt"># Enforces Conventional Commits format:</span>
+git commit -m "feat: add user authentication"    <span class="cmt"># ✅</span>
+git commit -m "fix: resolve memory leak in hook" <span class="cmt"># ✅</span>
+git commit -m "some changes"                      <span class="cmt"># ❌ Rejected</span></code></pre>
+  </div>
+
+  <div class="section">
+    <h3>TypeScript Strict Mode</h3>
+    <p>Always enable strict mode — it catches the bugs that silently blow up in production:</p>
+    <pre data-lang="json"><code><span class="cmt">// tsconfig.json — recommended for React + Vite</span>
+{
+  <span class="str">"compilerOptions"</span>: {
+    <span class="str">"target"</span>: <span class="str">"ES2020"</span>,
+    <span class="str">"useDefineForClassFields"</span>: <span class="kw">true</span>,
+    <span class="str">"lib"</span>: [<span class="str">"ES2020"</span>, <span class="str">"DOM"</span>, <span class="str">"DOM.Iterable"</span>],
+    <span class="str">"module"</span>: <span class="str">"ESNext"</span>,
+    <span class="str">"moduleResolution"</span>: <span class="str">"bundler"</span>,
+    <span class="str">"allowImportingTsExtensions"</span>: <span class="kw">true</span>,
+    <span class="str">"resolveJsonModule"</span>: <span class="kw">true</span>,
+    <span class="str">"isolatedModules"</span>: <span class="kw">true</span>,
+    <span class="str">"noEmit"</span>: <span class="kw">true</span>,
+    <span class="str">"jsx"</span>: <span class="str">"react-jsx"</span>,
+    <span class="str">"strict"</span>: <span class="kw">true</span>,               <span class="cmt">// ← Always on</span>
+    <span class="str">"noUnusedLocals"</span>: <span class="kw">true</span>,       <span class="cmt">// Error on unused vars</span>
+    <span class="str">"noUnusedParameters"</span>: <span class="kw">true</span>,   <span class="cmt">// Error on unused params</span>
+    <span class="str">"noFallthroughCasesInSwitch"</span>: <span class="kw">true</span>,
+    <span class="str">"baseUrl"</span>: <span class="str">"."</span>,
+    <span class="str">"paths"</span>: { <span class="str">"@/*"</span>: [<span class="str">"src/*"</span>] }
+  },
+  <span class="str">"include"</span>: [<span class="str">"src"</span>],
+  <span class="str">"references"</span>: [{ <span class="str">"path"</span>: <span class="str">"./tsconfig.node.json"</span> }]
+}</code></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 30 — CI/CD & DEPLOYMENT
+═══════════════════════════════════════════ -->
+<div class="chapter" id="ch30">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 30 / Project Setup</div>
+    <h2>CI/CD & Deployment</h2>
+    <p class="chapter-desc">GitHub Actions, preview deployments, and shipping to production.</p>
+  </div>
+
+  <div class="section">
+    <h3>GitHub Actions CI Pipeline</h3>
+    <p>Run type-check, lint, and tests on every push and pull request:</p>
+    <pre data-lang="yaml"><code><span class="cmt"># .github/workflows/ci.yml</span>
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm tsc --noEmit
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test --run
+
+      - name: Build
+        run: pnpm build</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Deployment Options</h3>
+
+    <table>
+      <thead><tr><th>Platform</th><th>Best For</th><th>Free Tier</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Vercel</strong></td><td>React SPA, Next.js — zero config deploy</td><td>Yes</td></tr>
+        <tr><td><strong>Netlify</strong></td><td>Static sites, SPA with edge functions</td><td>Yes</td></tr>
+        <tr><td><strong>Cloudflare Pages</strong></td><td>Fastest global CDN, edge workers</td><td>Yes</td></tr>
+        <tr><td><strong>AWS S3 + CloudFront</strong></td><td>High-traffic, custom infra</td><td>Pay-per-use</td></tr>
+        <tr><td><strong>Railway / Render</strong></td><td>Full-stack with Node.js backend</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Deploy to Vercel (Simplest)</h4>
+    <pre data-lang="bash"><code><span class="cmt"># Install Vercel CLI</span>
+pnpm add -g vercel
+
+<span class="cmt"># Deploy from project root</span>
+vercel
+
+<span class="cmt"># Production deploy</span>
+vercel --prod</code></pre>
+
+    <h4>Deploy to Netlify via GitHub Actions</h4>
+    <pre data-lang="yaml"><code><span class="cmt"># Add to ci.yml after build step</span>
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: './dist'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Recommended Starter Checklist</h3>
+    <p>When bootstrapping a new React project, run through this list:</p>
+    <table>
+      <thead><tr><th>Task</th><th>Tool</th></tr></thead>
+      <tbody>
+        <tr><td>✅ Create project</td><td><code>pnpm create vite my-app --template react-ts</code></td></tr>
+        <tr><td>✅ Path aliases</td><td><code>vite-tsconfig-paths</code> + tsconfig paths</td></tr>
+        <tr><td>✅ Strict TypeScript</td><td><code>"strict": true</code> in tsconfig</td></tr>
+        <tr><td>✅ Linting</td><td>ESLint + typescript-eslint + react-hooks plugin</td></tr>
+        <tr><td>✅ Formatting</td><td>Prettier + prettier-plugin-tailwindcss</td></tr>
+        <tr><td>✅ Git hooks</td><td>Husky + lint-staged</td></tr>
+        <tr><td>✅ Testing</td><td>Vitest + React Testing Library</td></tr>
+        <tr><td>✅ Routing</td><td>React Router v6 or TanStack Router</td></tr>
+        <tr><td>✅ State</td><td>Zustand for global, TanStack Query for server state</td></tr>
+        <tr><td>✅ Styling</td><td>Tailwind CSS + shadcn/ui or Radix primitives</td></tr>
+        <tr><td>✅ CI</td><td>GitHub Actions: type-check → lint → test → build</td></tr>
+        <tr><td>✅ Deployment</td><td>Vercel / Netlify with preview deploys on PRs</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">🚀 Start Fast with a Template</div>
+      Rather than setting all this up from scratch, use a community starter: <code>create-t3-app</code> (Next.js + TypeScript + tRPC + Tailwind + Prisma) or <code>vite-react-ts-starter</code> repos on GitHub already have most of this configured.
+    </div>
+  </div>
+
+  <div class="section" style="text-align:center; padding: 20px 0 40px;">
+    <div style="font-family:'Syne',sans-serif; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px;">
+      Course Complete
+    </div>
+    <div style="font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--accent); margin-bottom:12px;">
+      All 30 Chapters ✓
+    </div>
+    <p style="color:var(--text-muted); max-width:500px; margin:0 auto; font-style:italic;">
+      You now have everything: React fundamentals, all hooks, routing, state management, performance, testing, TypeScript — and the real-world project setup knowledge to ship production apps with confidence.
+    </p>
+  </div>
+</div>
+
+
+</div>
+</main>
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+// Progress bar
+const main = document.getElementById('main')
+const progress = document.getElementById('progress')
+
+document.addEventListener('scroll', () => {
+  const scrollTop = document.documentElement.scrollTop
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
+  progress.style.width = pct + '%'
+}, { passive: true })
+
+// Sidebar active state
+const chapters = document.querySelectorAll('.chapter')
+const links = document.querySelectorAll('.sidebar-item')
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id
+      links.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id)
+      })
+    }
+  })
+}, { rootMargin: '-20% 0px -70% 0px' })
+
+chapters.forEach(ch => observer.observe(ch))
+
+// Make sidebar links work for new anchor links too
+document.querySelectorAll('.sidebar-item[href]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault()
+    const target = document.querySelector(link.getAttribute('href'))
+    if (target) target.scrollIntoView({ behavior: 'smooth' })
+  })
+})
+</script>
+</body>
+</html>

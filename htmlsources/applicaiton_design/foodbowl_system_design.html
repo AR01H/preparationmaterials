@@ -1,0 +1,2489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FreshBowl — Complete System Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#08090a;--surface:#0f1012;--surface2:#161719;--surface3:#1e2023;
+  --border:#242628;--border2:#2e3135;
+  --accent:#4ade80;--accent-dim:rgba(74,222,128,.12);
+  --yellow:#fbbf24;--yellow-dim:rgba(251,191,36,.1);
+  --orange:#fb923c;--orange-dim:rgba(251,146,60,.1);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,.1);
+  --purple:#c084fc;--purple-dim:rgba(192,132,252,.1);
+  --red:#f87171;--red-dim:rgba(248,113,113,.1);
+  --text:#f0f2f5;--text2:#a0a8b4;--text3:#626a78;
+  --sidebar:260px;
+  --mono:'IBM Plex Mono',monospace;
+  --body:'Inter',sans-serif;
+  --display:'Syne',sans-serif;
+  --radius:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+
+body{
+  background:var(--bg);color:var(--text);font-family:var(--body);
+  font-size:14px;line-height:1.7;
+  display:flex;height:100%;overflow:hidden;
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR — fixed left, independently scrollable
+   ═══════════════════════════════════════════ */
+#sidebar{
+  width:var(--sidebar);
+  height:100vh;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  flex-shrink:0;
+  overflow:hidden; /* children handle scroll */
+  position:fixed;top:0;left:0;z-index:200;
+}
+.sb-logo{
+  flex-shrink:0;
+  padding:22px 20px 16px;
+  border-bottom:1px solid var(--border);
+}
+.sb-logo .brand{font-family:var(--display);font-size:19px;font-weight:800;color:var(--accent);}
+.sb-logo .tagline{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:.5px;}
+
+.sb-scroll{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-bottom:16px;
+}
+/* make sidebar scrollbar thin and styled */
+.sb-scroll::-webkit-scrollbar{width:4px}
+.sb-scroll::-webkit-scrollbar-track{background:transparent}
+.sb-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.sb-group{
+  padding:12px 20px 4px;
+  font-family:var(--mono);font-size:9px;letter-spacing:1.8px;
+  color:var(--text3);text-transform:uppercase;
+  border-top:1px solid var(--border);margin-top:4px;
+}
+.sb-group:first-child{border-top:none;margin-top:0;}
+
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 20px;
+  font-size:12.5px;color:var(--text2);
+  cursor:pointer;border-left:2px solid transparent;
+  transition:all .12s;user-select:none;
+}
+.nav-item:hover{color:var(--text);background:var(--surface2);}
+.nav-item.active{
+  color:var(--accent);border-left-color:var(--accent);
+  background:var(--accent-dim);font-weight:500;
+}
+.nav-item .ni{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.nav-item .nt{line-height:1.3;}
+.nav-item .ns{display:block;font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+.sb-footer{
+  flex-shrink:0;padding:12px 20px;
+  border-top:1px solid var(--border);
+  font-family:var(--mono);font-size:10px;color:var(--text3);
+}
+
+/* ═══════════════════════════════════════════
+   MAIN — scrollable content area
+   ═══════════════════════════════════════════ */
+#main{
+  margin-left:var(--sidebar);
+  flex:1;height:100vh;
+  overflow-y:auto;overflow-x:hidden;
+}
+#main::-webkit-scrollbar{width:6px}
+#main::-webkit-scrollbar-track{background:var(--bg)}
+#main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── STICKY TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,9,10,.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:16px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar .tb-eye{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;}
+.topbar h1{font-family:var(--display);font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.5px;}
+.topbar .tb-meta{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.version-pill{background:var(--accent-dim);border:1px solid var(--accent);border-radius:20px;padding:2px 10px;font-family:var(--mono);font-size:10px;color:var(--accent);}
+
+/* ── SECTIONS ── */
+.sec{display:none;padding:0 48px 80px;}
+.sec.active{display:block;}
+.sec-head{padding:40px 0 32px;border-bottom:1px solid var(--border);margin-bottom:36px;}
+.sec-head .sh-label{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.sec-head h2{font-family:var(--display);font-size:30px;font-weight:800;color:var(--text);letter-spacing:-.8px;margin-bottom:6px;}
+.sec-head p{font-size:13.5px;color:var(--text2);max-width:680px;}
+
+/* ── TYPOGRAPHY ── */
+h3{font-family:var(--display);font-size:18px;font-weight:700;color:var(--text);margin:36px 0 12px;letter-spacing:-.3px;}
+h3:first-child{margin-top:0;}
+h4{font-family:var(--display);font-size:15px;font-weight:600;color:var(--text);margin:24px 0 8px;}
+p{font-size:13.5px;color:var(--text2);margin-bottom:12px;line-height:1.75;}
+ul,ol{color:var(--text2);font-size:13.5px;padding-left:20px;margin-bottom:14px;}
+li{margin-bottom:5px;line-height:1.65;}
+strong{color:var(--text);font-weight:500;}
+code{font-family:var(--mono);font-size:11.5px;background:var(--surface3);border:1px solid var(--border2);padding:1px 6px;border-radius:4px;color:var(--accent);}
+
+/* ── CARDS ── */
+.grid{display:grid;gap:14px;margin:16px 0;}
+.g2{grid-template-columns:repeat(2,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g1{grid-template-columns:1fr;}
+
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px 22px;
+  transition:border-color .15s;
+}
+.card:hover{border-color:var(--border2);}
+.card .ci{font-size:22px;margin-bottom:10px;}
+.card .ct{font-family:var(--display);font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.card .cb{font-size:12.5px;color:var(--text2);line-height:1.6;}
+.card .ctag{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;}
+
+.card.g{border-left:2px solid var(--accent);}
+.card.y{border-left:2px solid var(--yellow);}
+.card.o{border-left:2px solid var(--orange);}
+.card.b{border-left:2px solid var(--blue);}
+.card.p{border-left:2px solid var(--purple);}
+.card.r{border-left:2px solid var(--red);}
+
+/* ── LAYER STACK ── */
+.layers{display:flex;flex-direction:column;gap:3px;margin:20px 0;}
+.layer{
+  display:flex;align-items:center;gap:16px;
+  padding:12px 18px;border-radius:6px;
+  font-size:12.5px;
+}
+.layer .ln{font-family:var(--mono);font-size:10px;font-weight:500;min-width:110px;letter-spacing:.5px;}
+.layer .ld{color:var(--text);flex:1;}
+.layer .ltags{display:flex;gap:5px;flex-wrap:wrap;}
+.layer.lg{background:var(--accent-dim);border:1px solid rgba(74,222,128,.2);} .layer.lg .ln{color:var(--accent);}
+.layer.ly{background:var(--yellow-dim);border:1px solid rgba(251,191,36,.2);} .layer.ly .ln{color:var(--yellow);}
+.layer.lo{background:var(--orange-dim);border:1px solid rgba(251,146,60,.2);} .layer.lo .ln{color:var(--orange);}
+.layer.lb{background:var(--blue-dim);border:1px solid rgba(96,165,250,.2);} .layer.lb .ln{color:var(--blue);}
+.layer.lp{background:var(--purple-dim);border:1px solid rgba(192,132,252,.2);} .layer.lp .ln{color:var(--purple);}
+.layer.lr{background:var(--red-dim);border:1px solid rgba(248,113,113,.2);} .layer.lr .ln{color:var(--red);}
+
+/* ── TAGS ── */
+.tag{
+  font-size:9.5px;font-family:var(--mono);
+  padding:2px 7px;border-radius:3px;
+  background:var(--surface3);border:1px solid var(--border2);color:var(--text3);
+  white-space:nowrap;
+}
+.tag.tg{background:var(--accent-dim);border-color:rgba(74,222,128,.3);color:var(--accent);}
+.tag.ty{background:var(--yellow-dim);border-color:rgba(251,191,36,.3);color:var(--yellow);}
+.tag.to{background:var(--orange-dim);border-color:rgba(251,146,60,.3);color:var(--orange);}
+.tag.tb{background:var(--blue-dim);border-color:rgba(96,165,250,.3);color:var(--blue);}
+.tag.tp{background:var(--purple-dim);border-color:rgba(192,132,252,.3);color:var(--purple);}
+
+/* ── FLOW ── */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:14px 0;}
+.fs{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:5px;padding:6px 14px;
+  font-family:var(--mono);font-size:11px;color:var(--text);
+}
+.fs.fh{background:var(--accent-dim);border-color:rgba(74,222,128,.3);color:var(--accent);}
+.fs.fy{background:var(--yellow-dim);border-color:rgba(251,191,36,.3);color:var(--yellow);}
+.fs.fo{background:var(--orange-dim);border-color:rgba(251,146,60,.3);color:var(--orange);}
+.fa{color:var(--text3);font-size:14px;}
+
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12.5px;}
+thead tr{background:var(--surface2);}
+th{padding:9px 14px;text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.8px;color:var(--text3);border-bottom:1px solid var(--border2);text-transform:uppercase;font-weight:400;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;line-height:1.5;}
+tr:hover td{background:var(--surface);}
+.tm{font-family:var(--mono);font-size:11px;color:var(--accent);}
+.tg{color:var(--accent);}
+.ty{color:var(--yellow);}
+.to{color:var(--orange);}
+
+/* ── CODE BLOCK ── */
+.codeblock{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:20px 22px;
+  font-family:var(--mono);font-size:11.5px;
+  color:var(--text2);overflow-x:auto;margin:14px 0;
+  line-height:1.9;white-space:pre;
+}
+.codeblock .cm{color:var(--text3);font-style:italic;}
+.codeblock .ck{color:var(--blue);}
+.codeblock .cs{color:var(--accent);}
+.codeblock .cn{color:var(--yellow);}
+.codeblock .ca{color:var(--orange);}
+.codeblock .ct{color:var(--purple);}
+
+/* ── HIGHLIGHT BOXES ── */
+.hbox{border-radius:var(--radius);padding:14px 18px;margin:14px 0;font-size:12.5px;line-height:1.65;}
+.hbox.hg{background:var(--accent-dim);border:1px solid rgba(74,222,128,.2);}
+.hbox.hy{background:var(--yellow-dim);border:1px solid rgba(251,191,36,.2);}
+.hbox.ho{background:var(--orange-dim);border:1px solid rgba(251,146,60,.2);}
+.hbox.hb{background:var(--blue-dim);border:1px solid rgba(96,165,250,.2);}
+.hbox.hp{background:var(--purple-dim);border:1px solid rgba(192,132,252,.2);}
+.hbox strong{display:block;margin-bottom:4px;}
+.hbox.hg strong{color:var(--accent);}
+.hbox.hy strong{color:var(--yellow);}
+.hbox.ho strong{color:var(--orange);}
+.hbox.hb strong{color:var(--blue);}
+.hbox.hp strong{color:var(--purple);}
+
+/* ── PHASE TIMELINE ── */
+.phase-list{display:flex;flex-direction:column;margin:16px 0;}
+.phase-item{display:flex;gap:20px;padding:22px 0;border-bottom:1px solid var(--border);}
+.phase-item:last-child{border-bottom:none;}
+.pnum{
+  flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--accent);
+  background:var(--accent-dim);border:1px solid rgba(74,222,128,.3);
+  border-radius:5px;padding:5px 10px;height:fit-content;min-width:80px;text-align:center;
+}
+.ptitle{font-family:var(--display);font-size:16px;font-weight:700;margin-bottom:5px;}
+.pdesc{font-size:13px;color:var(--text2);margin-bottom:10px;}
+.ptasks{display:flex;flex-wrap:wrap;gap:6px;}
+.ptask{font-size:10.5px;font-family:var(--mono);padding:3px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text2);}
+
+/* ── DIVIDER ── */
+.div{height:1px;background:var(--border);margin:28px 0;}
+
+/* ── SCHEMA BOX ── */
+.schema-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius);overflow:hidden;margin:14px 0;
+}
+.sb-head{
+  background:var(--surface2);padding:8px 16px;
+  font-family:var(--mono);font-size:11px;color:var(--text2);
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;gap:8px;
+}
+.sb-head .tname{color:var(--accent);font-weight:500;}
+.sb-body{padding:0;}
+.sf{
+  display:grid;grid-template-columns:160px 120px 1fr auto;
+  gap:0;padding:7px 16px;border-bottom:1px solid var(--border);
+  font-size:11.5px;align-items:center;
+}
+.sf:last-child{border-bottom:none;}
+.sf:hover{background:var(--surface2);}
+.sf .fn{font-family:var(--mono);color:var(--text);}
+.sf .ft{font-family:var(--mono);color:var(--blue);font-size:10.5px;}
+.sf .fd{color:var(--text3);font-size:11.5px;}
+.sf .fk{font-family:var(--mono);font-size:9.5px;}
+
+/* ── ENDPOINT ROW ── */
+.endpoint{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+  font-size:12.5px;
+}
+.endpoint:last-child{border-bottom:none;}
+.method{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;min-width:52px;text-align:center;flex-shrink:0;}
+.m-get{background:var(--blue-dim);border:1px solid rgba(96,165,250,.3);color:var(--blue);}
+.m-post{background:var(--accent-dim);border:1px solid rgba(74,222,128,.3);color:var(--accent);}
+.m-patch{background:var(--yellow-dim);border:1px solid rgba(251,191,36,.3);color:var(--yellow);}
+.m-delete{background:var(--red-dim);border:1px solid rgba(248,113,113,.3);color:var(--red);}
+.ep-path{font-family:var(--mono);font-size:11.5px;color:var(--text);min-width:260px;}
+.ep-desc{color:var(--text2);flex:1;}
+.ep-auth{font-family:var(--mono);font-size:9.5px;padding:2px 7px;border-radius:3px;background:var(--surface3);color:var(--text3);flex-shrink:0;}
+
+/* ── ARCH DIAGRAM ── */
+.arch-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:24px 28px;margin:16px 0;
+  font-family:var(--mono);font-size:11.5px;color:var(--text2);
+  line-height:2;white-space:pre;overflow-x:auto;
+}
+
+/* ── METRIC CARDS ── */
+.metric{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 18px;
+}
+.metric .mv{font-family:var(--display);font-size:26px;font-weight:800;color:var(--accent);}
+.metric .ml{font-size:11.5px;color:var(--text2);margin-top:3px;}
+.metric .md{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;}
+
+/* scrollbar global */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<nav id="sidebar">
+  <div class="sb-logo">
+    <div class="brand">🥗 FreshBowl</div>
+    <div class="tagline">SYSTEM DESIGN DOCUMENT v2.0</div>
+  </div>
+
+  <!-- scrollable nav -->
+  <div class="sb-scroll">
+
+    <div class="sb-group">Introduction</div>
+    <div class="nav-item active" onclick="show('overview')"><span class="ni">🏠</span><span class="nt">Overview<span class="ns">product vision & goals</span></span></div>
+    <div class="nav-item" onclick="show('requirements')"><span class="ni">📋</span><span class="nt">Requirements<span class="ns">functional & non-functional</span></span></div>
+
+    <div class="sb-group">Architecture</div>
+    <div class="nav-item" onclick="show('arch-high')"><span class="ni">🏗️</span><span class="nt">High-Level Design<span class="ns">system topology</span></span></div>
+    <div class="nav-item" onclick="show('arch-modules')"><span class="ni">🧩</span><span class="nt">Module Architecture<span class="ns">backend modules deep dive</span></span></div>
+    <div class="nav-item" onclick="show('arch-frontend')"><span class="ni">💻</span><span class="nt">Frontend Architecture<span class="ns">Next.js app structure</span></span></div>
+    <div class="nav-item" onclick="show('arch-mobile')"><span class="ni">📱</span><span class="nt">Mobile App Architecture<span class="ns">React Native deep dive</span></span></div>
+    <div class="nav-item" onclick="show('arch-background')"><span class="ni">⚙️</span><span class="nt">Background Jobs<span class="ns">queues, cron, workers</span></span></div>
+
+    <div class="sb-group">Data Layer</div>
+    <div class="nav-item" onclick="show('db-schema')"><span class="ni">🗄️</span><span class="nt">Database Schema<span class="ns">all tables & relations</span></span></div>
+    <div class="nav-item" onclick="show('db-patterns')"><span class="ni">🔁</span><span class="nt">Data Patterns<span class="ns">caching, indexing, queries</span></span></div>
+
+    <div class="sb-group">API Design</div>
+    <div class="nav-item" onclick="show('api-overview')"><span class="ni">🔌</span><span class="nt">API Structure<span class="ns">REST conventions & auth</span></span></div>
+    <div class="nav-item" onclick="show('api-endpoints')"><span class="ni">📡</span><span class="nt">All Endpoints<span class="ns">complete API reference</span></span></div>
+
+    <div class="sb-group">Feature Deep Dives</div>
+    <div class="nav-item" onclick="show('feat-auth')"><span class="ni">🔐</span><span class="nt">Auth & RBAC<span class="ns">JWT, OAuth, OTP, roles</span></span></div>
+    <div class="nav-item" onclick="show('feat-subscription')"><span class="ni">📦</span><span class="nt">Subscription Engine<span class="ns">plans, billing cycles, state</span></span></div>
+    <div class="nav-item" onclick="show('feat-catalog')"><span class="ni">🍱</span><span class="nt">Menu & Catalog<span class="ns">items, bowl builder, nutrition</span></span></div>
+    <div class="nav-item" onclick="show('feat-orders')"><span class="ni">📋</span><span class="nt">Order Management<span class="ns">daily orders, lifecycle</span></span></div>
+    <div class="nav-item" onclick="show('feat-delivery')"><span class="ni">🚴</span><span class="nt">Delivery System<span class="ns">zones, agents, routing</span></span></div>
+    <div class="nav-item" onclick="show('feat-payments')"><span class="ni">💳</span><span class="nt">Payments & Billing<span class="ns">Razorpay, auto-renewal</span></span></div>
+    <div class="nav-item" onclick="show('feat-notifications')"><span class="ni">🔔</span><span class="nt">Notification System<span class="ns">WhatsApp, email, push</span></span></div>
+    <div class="nav-item" onclick="show('feat-admin')"><span class="ni">🛠️</span><span class="nt">Admin Dashboard<span class="ns">ops panel, analytics</span></span></div>
+
+    <div class="sb-group">Infrastructure</div>
+    <div class="nav-item" onclick="show('infra-devops')"><span class="ni">☁️</span><span class="nt">DevOps & Cloud<span class="ns">AWS, Docker, CI/CD</span></span></div>
+    <div class="nav-item" onclick="show('infra-security')"><span class="ni">🛡️</span><span class="nt">Security<span class="ns">encryption, compliance</span></span></div>
+    <div class="nav-item" onclick="show('infra-scaling')"><span class="ni">📈</span><span class="nt">Scalability<span class="ns">load, growth strategy</span></span></div>
+    <div class="nav-item" onclick="show('infra-monitoring')"><span class="ni">📊</span><span class="nt">Monitoring & Observability<span class="ns">metrics, alerts, logs</span></span></div>
+
+    <div class="sb-group">Delivery</div>
+    <div class="nav-item" onclick="show('techstack')"><span class="ni">⚡</span><span class="nt">Tech Stack Summary<span class="ns">every tool with reasoning</span></span></div>
+    <div class="nav-item" onclick="show('roadmap')"><span class="ni">🗺️</span><span class="nt">Build Roadmap<span class="ns">18-week phased plan</span></span></div>
+    <div class="nav-item" onclick="show('cost')"><span class="ni">💰</span><span class="nt">Cost Estimation<span class="ns">infra & operational costs</span></span></div>
+
+  </div>
+
+  <div class="sb-footer">FreshBowl © 2025 · Confidential</div>
+</nav>
+
+<!-- ══════════ MAIN ══════════ -->
+<div id="main">
+
+<!-- ════════════════════════════════════ OVERVIEW ════════════════════════════════════ -->
+<div class="sec active" id="sec-overview">
+<div class="topbar"><div><div class="tb-eye">SYSTEM DESIGN</div><h1>Overview & Vision</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">01 — INTRODUCTION</div>
+  <h2>FreshBowl Subscription Platform</h2>
+  <p>A full-stack, subscription-based food delivery web & mobile application delivering daily fruit bowls, healthy snack bowls, and nutrition items to customers on Daily, Weekly, and Monthly plans.</p>
+</div>
+
+<h3>What We Are Building</h3>
+<p>FreshBowl is not just a food ordering app — it's a <strong>recurring delivery subscription engine</strong>. The key insight is that once a customer subscribes, every delivery should happen <em>automatically</em> without the customer doing anything. The system generates daily orders, assigns delivery agents, routes deliveries, processes payments, and sends notifications — all without manual intervention.</p>
+
+<div class="hbox hg">
+  <strong>Core Value Proposition</strong>
+  "Subscribe once, eat healthy every day." Customers pick a plan, customize their bowl, set a delivery time — and fresh nutrition arrives at their door daily without re-ordering.
+</div>
+
+<h3>Product Scope</h3>
+<div class="grid g3">
+  <div class="card g"><div class="ci">🌐</div><div class="ct">Customer Web App</div><div class="cb">Full-featured Next.js web portal for subscription management, bowl customization, order tracking, billing, and nutrition insights.</div></div>
+  <div class="card y"><div class="ci">📱</div><div class="ct">Customer Mobile App</div><div class="cb">React Native app for iOS & Android. Same features as web with push notifications, offline support, and live delivery tracking.</div></div>
+  <div class="card o"><div class="ci">🚴</div><div class="ct">Delivery Agent App</div><div class="cb">Lightweight React Native or PWA for agents: today's route, one-tap delivery confirmation, photo proof, customer call.</div></div>
+  <div class="card b"><div class="ci">🛠️</div><div class="ct">Admin Dashboard</div><div class="cb">Internal React web app for business operations: analytics, menu management, packing lists, agent assignment, payment ops.</div></div>
+  <div class="card p"><div class="ci">👨‍🍳</div><div class="ct">Kitchen Display</div><div class="cb">Read-only tablet view for kitchen staff: daily packing list sorted by agent & zone, item quantities, dietary labels.</div></div>
+  <div class="card"><div class="ci">🔧</div><div class="ct">Backend API</div><div class="cb">NestJS REST API serving all clients. Modular, typed, documented via Swagger. Background jobs for order generation and billing.</div></div>
+</div>
+
+<h3>User Personas</h3>
+<table>
+  <thead><tr><th>Persona</th><th>Primary Needs</th><th>Key Flows</th><th>Platform</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Health-Conscious Professional</strong></td><td>Reliable daily nutrition without effort</td><td>Subscribe → Customize bowl → Forget it</td><td>Mobile App</td></tr>
+    <tr><td><strong>Busy Parent</strong></td><td>Healthy snacks for family, flexible pausing</td><td>Monthly plan, pause when on vacation</td><td>Web + Mobile</td></tr>
+    <tr><td><strong>Fitness Enthusiast</strong></td><td>Macro tracking, specific nutrition items</td><td>Custom bowl with protein tracking</td><td>Mobile App</td></tr>
+    <tr><td><strong>Corporate Office Manager</strong></td><td>Bulk plan for team, invoice for accounting</td><td>Corporate plan → GST invoices</td><td>Web</td></tr>
+    <tr><td><strong>Delivery Agent</strong></td><td>Route list, quick delivery confirmation</td><td>View route → Deliver → Mark done</td><td>Agent App</td></tr>
+    <tr><td><strong>Admin/Operations</strong></td><td>Revenue visibility, issue resolution</td><td>Dashboard → Reports → Customer support</td><td>Admin Web</td></tr>
+  </tbody>
+</table>
+
+<h3>Business Model</h3>
+<div class="grid g3">
+  <div class="card"><div class="ct">💰 Daily Plan</div><div class="cb">₹99–149/day. No commitment. Good for trial. Charged daily. Full price, no discount.</div><div class="ctag">CHURN RISK: HIGH</div></div>
+  <div class="card y"><div class="ct">📅 Weekly Plan</div><div class="cb">₹599–899/week (~₹85–128/day). 7 days committed. 5–8% discount. Billed weekly.</div><div class="ctag">CHURN RISK: MEDIUM</div></div>
+  <div class="card g"><div class="ct">📆 Monthly Plan</div><div class="cb">₹1999–2999/month (~₹66–99/day). 30 days committed. 15–20% discount. Billed monthly, best LTV.</div><div class="ctag">CHURN RISK: LOW</div></div>
+</div>
+</div>
+</div>
+
+<!-- ════════ REQUIREMENTS ════════ -->
+<div class="sec" id="sec-requirements">
+<div class="topbar"><div><div class="tb-eye">SYSTEM DESIGN</div><h1>Requirements</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">02 — REQUIREMENTS</div>
+  <h2>Functional & Non-Functional Requirements</h2>
+  <p>Complete specification of what the system must do and how it must perform.</p>
+</div>
+
+<h3>Functional Requirements</h3>
+<h4>Customer-Facing</h4>
+<ul>
+  <li>Register & login via email/phone + OTP, or Google OAuth</li>
+  <li>Browse menu catalog with filters: vegan, keto, diabetic-friendly, allergen-free</li>
+  <li>Build a custom bowl from available items with portion control</li>
+  <li>Select a subscription plan (Daily / Weekly / Monthly)</li>
+  <li>Set delivery address with Google Maps autocomplete</li>
+  <li>Choose preferred delivery time window (e.g., 8–9 AM, 9–10 AM)</li>
+  <li>Pay via UPI, credit/debit card, or wallets through Razorpay</li>
+  <li>Set up UPI AutoPay / card mandate for auto-renewal</li>
+  <li>Skip a single delivery (before 10 PM the previous night)</li>
+  <li>Pause subscription for 1–14 days</li>
+  <li>Customize tomorrow's bowl differently from default</li>
+  <li>Track live delivery on a map with ETA</li>
+  <li>View delivery history, nutrition summary, calorie trends</li>
+  <li>Download invoices as PDF</li>
+  <li>Manage multiple delivery addresses</li>
+  <li>Rate each delivery and leave feedback</li>
+  <li>Upgrade or downgrade subscription plan with proration</li>
+  <li>Cancel subscription (effective end of billing cycle)</li>
+</ul>
+
+<h4>Admin / Operations</h4>
+<ul>
+  <li>Manage full menu: add/edit/disable items, upload images, set availability by day</li>
+  <li>Configure subscription plans and pricing</li>
+  <li>View and manage all customers and their subscriptions</li>
+  <li>Manually pause, cancel, or issue credits to any customer</li>
+  <li>Generate daily packing list for kitchen team</li>
+  <li>Add/assign/manage delivery agents and zones</li>
+  <li>View revenue analytics: MRR, ARR, churn, LTV</li>
+  <li>Process refunds through payment gateway</li>
+  <li>Send broadcast notifications to customer segments</li>
+  <li>Export data to CSV for external analysis</li>
+</ul>
+
+<h4>Delivery Agent</h4>
+<ul>
+  <li>View today's assigned deliveries with optimized route</li>
+  <li>See customer contact, address, and special instructions</li>
+  <li>Mark delivery as Delivered or Failed with reason</li>
+  <li>Upload photo proof of delivery</li>
+  <li>Call customer with one tap</li>
+  <li>Works offline; syncs when connectivity returns</li>
+</ul>
+
+<h3>Non-Functional Requirements</h3>
+<table>
+  <thead><tr><th>Category</th><th>Requirement</th><th>Target</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Availability</strong></td><td>System uptime</td><td class="tg">99.9% (< 8.7 hrs downtime/yr)</td></tr>
+    <tr><td><strong>Performance</strong></td><td>API response time (p95)</td><td class="tg">< 200ms</td></tr>
+    <tr><td><strong>Performance</strong></td><td>Page load time (LCP)</td><td class="tg">< 2.5 seconds</td></tr>
+    <tr><td><strong>Scalability</strong></td><td>Concurrent users at launch</td><td>500 concurrent, 5000/day</td></tr>
+    <tr><td><strong>Scalability</strong></td><td>Daily order generation job</td><td class="tg">< 5 minutes for 10,000 orders</td></tr>
+    <tr><td><strong>Reliability</strong></td><td>Payment processing failure rate</td><td class="tg">< 0.1%</td></tr>
+    <tr><td><strong>Security</strong></td><td>Data encryption</td><td>TLS 1.3 in transit, AES-256 at rest</td></tr>
+    <tr><td><strong>Security</strong></td><td>PCI compliance</td><td>No raw card data stored</td></tr>
+    <tr><td><strong>Compliance</strong></td><td>DPDP Act (India)</td><td>User data export & deletion on request</td></tr>
+    <tr><td><strong>Notifications</strong></td><td>Delivery alert sent before dispatch</td><td class="tg">< 30 seconds latency</td></tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+<!-- ════════ HIGH LEVEL ARCHITECTURE ════════ -->
+<div class="sec" id="sec-arch-high">
+<div class="topbar"><div><div class="tb-eye">ARCHITECTURE</div><h1>High-Level System Design</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">03 — ARCHITECTURE</div>
+  <h2>System Topology</h2>
+  <p>End-to-end view of all system components, how they interact, and where they live.</p>
+</div>
+
+<h3>Architecture Decision: Modular Monolith First</h3>
+<p>We choose a <strong>Modular Monolith</strong> for Phase 1. This means all backend code lives in one deployable unit, but is structured as strict independent modules with no cross-module imports except through well-defined interfaces. This gives startup speed now, and a clear microservices migration path later.</p>
+
+<div class="hbox hb">
+  <strong>Why Not Microservices from Day 1?</strong>
+  Microservices add massive operational complexity (service discovery, inter-service auth, distributed tracing, network latency). For a startup, this slows development by 2–3x. A well-structured modular monolith is easy to split when you actually need to scale a specific module.
+</div>
+
+<h3>Complete System Architecture</h3>
+<div class="arch-box"><span style="color:var(--text3)">┌──────────────────────────────────────────────────────────────────────────────────┐
+│                           CLIENT APPLICATIONS                                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐        │
+│  │ Customer Web │  │Customer App  │  │ Delivery App │  │Admin Dashboard│        │
+│  │ (Next.js 14) │  │(React Native)│  │  (RN / PWA)  │  │  (React SPA) │        │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘        │
+└─────────┼────────────────┼─────────────────┼────────────────┼───────────────────┘
+          │                │                  │                │
+          └────────────────┴──────────────────┴────────────────┘
+                                      │
+                            ┌─────────▼─────────┐
+                            │   CDN / CloudFront │  ← Static assets, image delivery
+                            └─────────┬──────────┘
+                                      │
+                            ┌─────────▼──────────┐
+                            │  AWS ALB (Load Bal) │  ← HTTPS termination, routing
+                            └─────────┬──────────┘
+                                      │
+                   ┌──────────────────▼──────────────────┐
+                   │           API GATEWAY (Nginx)         │
+                   │  Rate limiting · Auth check · CORS   │
+                   └──────────────────┬──────────────────┘
+                                      │
+                   ┌──────────────────▼──────────────────┐
+                   │         NestJS Backend API           │
+                   │  ┌─────────┐  ┌──────────────────┐  │
+                   │  │  Auth   │  │   Subscription   │  │
+                   │  │ Module  │  │     Module       │  │
+                   │  ├─────────┤  ├──────────────────┤  │
+                   │  │  User   │  │     Order        │  │
+                   │  │ Module  │  │     Module       │  │
+                   │  ├─────────┤  ├──────────────────┤  │
+                   │  │ Catalog │  │    Delivery      │  │
+                   │  │ Module  │  │     Module       │  │
+                   │  ├─────────┤  ├──────────────────┤  │
+                   │  │Payment  │  │  Notification    │  │
+                   │  │ Module  │  │     Module       │  │
+                   │  └─────────┘  └──────────────────┘  │
+                   └──────────────────┬──────────────────┘
+              ┌───────────────────────┼───────────────────────┐
+              │                       │                       │
+   ┌──────────▼──────┐    ┌──────────▼──────┐    ┌──────────▼──────┐
+   │   PostgreSQL     │    │  Redis Cache    │    │  BullMQ Queue   │
+   │ (Primary DB)     │    │  + Sessions     │    │  + Cron Jobs    │
+   │  AWS RDS Multi-AZ│    │  ElastiCache    │    │  Worker Process │
+   └──────────────────┘    └─────────────────┘    └─────────────────┘
+              │
+   ┌──────────▼──────────────────────────────────────────────────┐
+   │                   EXTERNAL SERVICES                          │
+   │  Razorpay · Twilio/Wati · SendGrid · Firebase · Google Maps  │
+   │  AWS S3 · Sentry · Datadog                                   │
+   └──────────────────────────────────────────────────────────────┘</span></div>
+
+<h3>System Layers Explained</h3>
+<div class="layers">
+  <div class="layer lg"><div class="ln">PRESENTATION</div><div class="ld">Next.js 14 (Web), React Native (Mobile), React SPA (Admin). All communicate via REST API over HTTPS.</div><div class="ltags"><span class="tag tg">SSR/CSR</span><span class="tag tg">PWA</span><span class="tag tg">Native</span></div></div>
+  <div class="layer lb"><div class="ln">CDN/GATEWAY</div><div class="ld">CloudFront CDN serves static assets globally. AWS ALB routes traffic. Nginx handles rate limiting, CORS, SSL termination.</div><div class="ltags"><span class="tag tb">TLS 1.3</span><span class="tag tb">Rate Limit</span><span class="tag tb">WAF</span></div></div>
+  <div class="layer ly"><div class="ln">API LAYER</div><div class="ld">NestJS modular monolith. REST API with JWT auth. Each module is independently testable with clear boundaries.</div><div class="ltags"><span class="tag ty">REST</span><span class="tag ty">Swagger</span><span class="tag ty">Zod</span></div></div>
+  <div class="layer lo"><div class="ln">BUSINESS LOGIC</div><div class="ld">Services within each module. Subscription state machine, order generation engine, billing calculator, route optimizer.</div><div class="ltags"><span class="tag to">Services</span><span class="tag to">CQRS-lite</span></div></div>
+  <div class="layer lp"><div class="ln">DATA LAYER</div><div class="ld">PostgreSQL via Prisma ORM. Redis for sessions and cache. S3 for media. All queries go through repository pattern.</div><div class="ltags"><span class="tag tp">ACID</span><span class="tag tp">Cache</span><span class="tag tp">CDN</span></div></div>
+  <div class="layer lr"><div class="ln">JOBS LAYER</div><div class="ld">BullMQ workers for async processing. Cron jobs for daily order generation, billing renewal, notification dispatch.</div><div class="ltags"><span class="tag">Queue</span><span class="tag">Cron</span><span class="tag">Retry</span></div></div>
+</div>
+
+<h3>Key Request Flows</h3>
+<h4>Customer Creates Subscription</h4>
+<div class="flow">
+  <div class="fs fh">Browser/App</div><div class="fa">→</div>
+  <div class="fs">CloudFront CDN</div><div class="fa">→</div>
+  <div class="fs">ALB</div><div class="fa">→</div>
+  <div class="fs fh">Nginx (rate check)</div><div class="fa">→</div>
+  <div class="fs">JWT Middleware</div><div class="fa">→</div>
+  <div class="fs fh">POST /subscriptions</div><div class="fa">→</div>
+  <div class="fs">SubscriptionService</div><div class="fa">→</div>
+  <div class="fs fy">Razorpay API</div><div class="fa">→</div>
+  <div class="fs fh">DB: Create Subscription</div><div class="fa">→</div>
+  <div class="fs">Emit: sub.created event</div>
+</div>
+
+<h4>Daily Order Generation (12:00 AM Cron)</h4>
+<div class="flow">
+  <div class="fs fh">BullMQ Cron fires</div><div class="fa">→</div>
+  <div class="fs">Fetch active subs</div><div class="fa">→</div>
+  <div class="fs">Filter: not paused, not skipped</div><div class="fa">→</div>
+  <div class="fs fh">Create Order records</div><div class="fa">→</div>
+  <div class="fs">Assign agents by zone</div><div class="fa">→</div>
+  <div class="fs fy">Queue: Notifications</div><div class="fa">→</div>
+  <div class="fs">Kitchen: Packing list ready</div>
+</div>
+</div>
+</div>
+
+<!-- ════════ MODULE ARCHITECTURE ════════ -->
+<div class="sec" id="sec-arch-modules">
+<div class="topbar"><div><div class="tb-eye">ARCHITECTURE</div><h1>Backend Module Architecture</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">04 — BACKEND MODULES</div>
+  <h2>NestJS Modular Architecture</h2>
+  <p>Every module is self-contained with its own controller, service, repository, DTOs, and tests. Modules communicate only via events or injected services — never direct DB calls across module boundaries.</p>
+</div>
+
+<h3>Project Folder Structure</h3>
+<div class="codeblock"><span class="cm">freshbowl-api/
+├── src/
+│   ├── main.ts                     <span class="cm">← Bootstrap NestJS app</span>
+│   ├── app.module.ts               <span class="cm">← Root module, imports all</span>
+│   ├── config/
+│   │   ├── database.config.ts
+│   │   ├── redis.config.ts
+│   │   └── jwt.config.ts
+│   │
+│   ├── common/
+│   │   ├── decorators/             <span class="cm">← @CurrentUser(), @Roles()</span>
+│   │   ├── guards/                 <span class="cm">← JwtAuthGuard, RolesGuard</span>
+│   │   ├── interceptors/           <span class="cm">← ResponseInterceptor, LoggingInterceptor</span>
+│   │   ├── filters/                <span class="cm">← GlobalExceptionFilter</span>
+│   │   └── pipes/                  <span class="cm">← ZodValidationPipe</span>
+│   │
+│   ├── modules/
+│   │   ├── auth/
+│   │   │   ├── auth.module.ts
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── strategies/         <span class="cm">← jwt.strategy.ts, google.strategy.ts</span>
+│   │   │   └── dto/
+│   │   │
+│   │   ├── users/
+│   │   ├── catalog/
+│   │   ├── subscriptions/
+│   │   ├── orders/
+│   │   ├── payments/
+│   │   ├── delivery/
+│   │   └── notifications/
+│   │
+│   ├── database/
+│   │   ├── prisma.service.ts
+│   │   └── migrations/
+│   │
+│   └── jobs/
+│       ├── daily-orders.job.ts     <span class="cm">← midnight cron</span>
+│       ├── billing-renewal.job.ts  <span class="cm">← 3 days before expiry</span>
+│       └── notification.worker.ts  <span class="cm">← async notification sender</span>
+│
+├── prisma/
+│   └── schema.prisma
+├── test/
+├── Dockerfile
+└── docker-compose.yml</span></div>
+
+<h3>Module Pattern (Example: Subscription Module)</h3>
+<div class="codeblock"><span class="cm">// modules/subscriptions/</span>
+<span class="ck">│</span>
+<span class="ck">├── subscriptions.module.ts</span>     <span class="cm">← imports: PrismaModule, PaymentModule</span>
+<span class="ck">├── subscriptions.controller.ts</span> <span class="cm">← HTTP routes, validation, auth guards</span>
+<span class="ck">├── subscriptions.service.ts</span>    <span class="cm">← business logic: create, pause, cancel</span>
+<span class="ck">├── subscriptions.repository.ts</span> <span class="cm">← all Prisma DB queries for subscriptions</span>
+<span class="ck">├── schedule.service.ts</span>         <span class="cm">← generates delivery schedule for a sub</span>
+<span class="ck">├── proration.service.ts</span>        <span class="cm">← calculates plan upgrade/downgrade credits</span>
+<span class="ck">├── dto/</span>
+<span class="ck">│   ├── create-subscription.dto.ts</span>
+<span class="ck">│   ├── pause-subscription.dto.ts</span>
+<span class="ck">│   └── upgrade-plan.dto.ts</span>
+<span class="ck">├── events/</span>
+<span class="ck">│   ├── subscription-created.event.ts</span>
+<span class="ck">│   └── subscription-cancelled.event.ts</span>
+<span class="ck">└── __tests__/</span>
+<span class="ck">    ├── subscriptions.service.spec.ts</span>
+<span class="ck">    └── proration.service.spec.ts</span></div>
+
+<h3>Inter-Module Communication</h3>
+<p>Modules never import each other's repositories. They communicate via:</p>
+<div class="grid g2">
+  <div class="card g">
+    <div class="ct">📢 EventEmitter2 (In-process Events)</div>
+    <div class="cb">When SubscriptionService creates a subscription, it emits <code>subscription.created</code>. The NotificationModule listens and sends a welcome message. Zero coupling between modules.</div>
+  </div>
+  <div class="card b">
+    <div class="ct">🔌 Service Injection</div>
+    <div class="cb">When OrderModule needs to know if a subscription is active, it injects <code>SubscriptionService</code> and calls its public method. Never touches SubscriptionRepository directly.</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ════════ FRONTEND ARCHITECTURE ════════ -->
+<div class="sec" id="sec-arch-frontend">
+<div class="topbar"><div><div class="tb-eye">ARCHITECTURE</div><h1>Frontend Architecture</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">05 — FRONTEND</div>
+  <h2>Next.js 14 Web Application</h2>
+  <p>Customer web portal and Admin dashboard built with Next.js App Router, TailwindCSS, and React Query.</p>
+</div>
+
+<h3>Project Structure</h3>
+<div class="codeblock"><span class="cm">freshbowl-web/
+├── app/                            <span class="cm">← Next.js App Router</span>
+│   ├── (auth)/
+│   │   ├── login/page.tsx
+│   │   ├── register/page.tsx
+│   │   └── verify-otp/page.tsx
+│   │
+│   ├── (customer)/                 <span class="cm">← Protected customer routes</span>
+│   │   ├── layout.tsx              <span class="cm">← Customer shell with sidebar/nav</span>
+│   │   ├── dashboard/page.tsx
+│   │   ├── subscriptions/
+│   │   │   ├── page.tsx            <span class="cm">← List subscriptions</span>
+│   │   │   ├── new/page.tsx        <span class="cm">← Create subscription flow</span>
+│   │   │   └── [id]/page.tsx       <span class="cm">← Subscription detail</span>
+│   │   ├── orders/
+│   │   │   ├── page.tsx
+│   │   │   └── [id]/track/page.tsx <span class="cm">← Live tracking</span>
+│   │   ├── menu/page.tsx
+│   │   ├── billing/page.tsx
+│   │   ├── nutrition/page.tsx
+│   │   └── profile/page.tsx
+│   │
+│   ├── (admin)/                    <span class="cm">← Admin-only routes</span>
+│   │   ├── admin/dashboard/
+│   │   ├── admin/customers/
+│   │   ├── admin/menu/
+│   │   ├── admin/orders/
+│   │   └── admin/agents/
+│   │
+│   └── api/                        <span class="cm">← Next.js API routes (BFF layer)</span>
+│       └── auth/[...nextauth]/route.ts
+│
+├── components/
+│   ├── ui/                         <span class="cm">← shadcn/ui base components</span>
+│   ├── bowl-builder/               <span class="cm">← Custom bowl selection UI</span>
+│   ├── subscription/               <span class="cm">← Plan cards, status badges</span>
+│   ├── tracking/                   <span class="cm">← Live map component</span>
+│   ├── charts/                     <span class="cm">← Nutrition charts (Recharts)</span>
+│   └── admin/                      <span class="cm">← Admin-specific components</span>
+│
+├── lib/
+│   ├── api-client.ts               <span class="cm">← Axios instance + interceptors</span>
+│   ├── query-client.ts             <span class="cm">← React Query client setup</span>
+│   └── utils.ts
+│
+├── hooks/                          <span class="cm">← useSubscription(), useOrders()</span>
+├── stores/                         <span class="cm">← Zustand: cart, UI state</span>
+└── types/                          <span class="cm">← TypeScript interfaces</span></div>
+
+<h3>Rendering Strategy</h3>
+<table>
+  <thead><tr><th>Page</th><th>Strategy</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Marketing / Landing</td><td><span class="tag tg">SSG</span></td><td>Static, fast, SEO-optimized. Regenerated when menu changes.</td></tr>
+    <tr><td>Menu / Catalog</td><td><span class="tag ty">ISR</span> (1 hr)</td><td>Changes infrequently. Cache aggressively, revalidate hourly.</td></tr>
+    <tr><td>Dashboard / Orders</td><td><span class="tag tb">CSR</span></td><td>Personalized data. Server can't pre-render. React Query fetches client-side.</td></tr>
+    <tr><td>Order Tracking</td><td><span class="tag tb">CSR + WebSocket</span></td><td>Real-time location. Must be client-side with live updates.</td></tr>
+    <tr><td>Admin Dashboard</td><td><span class="tag tb">CSR</span></td><td>Auth-protected, real-time data, no SEO needed.</td></tr>
+    <tr><td>Checkout / Payments</td><td><span class="tag tb">CSR</span></td><td>Dynamic, user-specific. Razorpay loads client-side.</td></tr>
+  </tbody>
+</table>
+
+<h3>State Management Architecture</h3>
+<div class="grid g2">
+  <div class="card b">
+    <div class="ct">⚡ React Query — Server State</div>
+    <div class="cb">All API data: subscriptions, orders, catalog, billing. Handles caching, background refetching, optimistic updates, and error states automatically. No manual loading state management.</div>
+  </div>
+  <div class="card p">
+    <div class="ct">🏪 Zustand — Client State</div>
+    <div class="cb">Bowl builder selections (before checkout), UI state (sidebar open/closed), notification preferences. Lightweight, no boilerplate. Persisted to localStorage for draft bowl.</div>
+  </div>
+</div>
+
+<h3>Performance Optimizations</h3>
+<ul>
+  <li><strong>Image Optimization:</strong> All menu images served via <code>next/image</code> — automatic WebP, lazy loading, blur placeholder</li>
+  <li><strong>Code Splitting:</strong> Each route is automatically code-split. Heavy components (maps, charts) use <code>dynamic()</code> with SSR disabled</li>
+  <li><strong>Bundle Size:</strong> Tree-shaking, no lodash, date-fns instead of moment.js. Target: < 150KB First Load JS</li>
+  <li><strong>Prefetching:</strong> React Query prefetches next page data on hover. Next.js prefetches linked routes automatically</li>
+  <li><strong>PWA:</strong> Service Worker for offline shell, push notification support, installable on Android/iOS</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════ MOBILE APP ARCHITECTURE ════════ -->
+<div class="sec" id="sec-arch-mobile">
+<div class="topbar"><div><div class="tb-eye">ARCHITECTURE</div><h1>Mobile App Architecture</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">06 — MOBILE</div>
+  <h2>React Native App (iOS & Android)</h2>
+  <p>Cross-platform mobile app for customers and delivery agents. Built with React Native + Expo, sharing business logic with the web app where possible.</p>
+</div>
+
+<h3>Two Mobile Apps in One Codebase</h3>
+<div class="hbox hb">
+  <strong>Strategy: Single Repo, Role-Based Entry Point</strong>
+  One React Native codebase. At login, if the user is a DELIVERY_AGENT, they land in the Agent flow. If CUSTOMER, they see the Customer app. This avoids maintaining two separate apps and codebases.
+</div>
+
+<div class="grid g2">
+  <div class="card g">
+    <div class="ci">👤</div>
+    <div class="ct">Customer App</div>
+    <div class="cb">Full subscription management, bowl customization, live delivery tracking with map, nutrition dashboard, payment management, push notifications for delivery updates.</div>
+    <div class="ctag">TARGET: iOS + Android</div>
+  </div>
+  <div class="card o">
+    <div class="ci">🚴</div>
+    <div class="ct">Delivery Agent App</div>
+    <div class="cb">Today's route list, optimized delivery order, one-tap status updates, photo proof capture, call customer, works offline with sync when reconnected.</div>
+    <div class="ctag">TARGET: Android (primary)</div>
+  </div>
+</div>
+
+<h3>Tech Stack — Mobile</h3>
+<table>
+  <thead><tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Framework</strong></td><td class="tm">React Native 0.74 + Expo SDK 51</td><td>Cross-platform foundation. Expo managed workflow for easy builds and OTA updates.</td></tr>
+    <tr><td><strong>Navigation</strong></td><td class="tm">React Navigation 6</td><td>Stack navigator (auth), Tab navigator (main), Drawer navigator (settings). Native transitions.</td></tr>
+    <tr><td><strong>State — Server</strong></td><td class="tm">TanStack Query (React Query)</td><td>Same library as web. Shared query keys and hooks where possible.</td></tr>
+    <tr><td><strong>State — Client</strong></td><td class="tm">Zustand</td><td>Bowl builder draft, offline queue, user preferences.</td></tr>
+    <tr><td><strong>UI Components</strong></td><td class="tm">React Native Paper + custom</td><td>Material 3 base. Custom components for bowl cards, subscription status badges.</td></tr>
+    <tr><td><strong>Maps</strong></td><td class="tm">react-native-maps + Google Maps</td><td>Live delivery tracking for customer, route view for agents.</td></tr>
+    <tr><td><strong>Payments</strong></td><td class="tm">Razorpay React Native SDK</td><td>Native checkout sheet for UPI, cards. Handles 3DS, OTP inside SDK.</td></tr>
+    <tr><td><strong>Push Notifications</strong></td><td class="tm">Expo Notifications + FCM/APNS</td><td>Delivery alerts, payment reminders. Background notification handling.</td></tr>
+    <tr><td><strong>Camera</strong></td><td class="tm">expo-camera + expo-image-picker</td><td>Agents: photo proof of delivery. Customer: profile photo.</td></tr>
+    <tr><td><strong>Offline</strong></td><td class="tm">MMKV + React Query persistence</td><td>MMKV for fast key-value storage. React Query offline queue to retry mutations.</td></tr>
+    <tr><td><strong>Location</strong></td><td class="tm">expo-location</td><td>Agent: background location tracking during delivery. Customer: address autofill.</td></tr>
+    <tr><td><strong>OTA Updates</strong></td><td class="tm">Expo Updates</td><td>Push JS bundle updates to users without App Store review. Critical for bug fixes.</td></tr>
+    <tr><td><strong>Analytics</strong></td><td class="tm">Amplitude / Mixpanel</td><td>User funnel tracking: signup → subscribe → first delivery. Retention cohorts.</td></tr>
+    <tr><td><strong>Crash Reporting</strong></td><td class="tm">Sentry React Native</td><td>Native crash reports with JS stack traces. Session replay for debugging.</td></tr>
+  </tbody>
+</table>
+
+<h3>Mobile App Folder Structure</h3>
+<div class="codeblock"><span class="cm">freshbowl-mobile/
+├── app/                            <span class="cm">← Expo Router (file-based routing)</span>
+│   ├── (auth)/
+│   │   ├── welcome.tsx
+│   │   ├── login.tsx
+│   │   ├── register.tsx
+│   │   └── verify-otp.tsx
+│   │
+│   ├── (customer)/                 <span class="cm">← Tab navigator</span>
+│   │   ├── _layout.tsx             <span class="cm">← Bottom tab bar</span>
+│   │   ├── index.tsx               <span class="cm">← Home / Today's delivery</span>
+│   │   ├── subscriptions/
+│   │   │   ├── index.tsx
+│   │   │   ├── new.tsx             <span class="cm">← Bowl builder flow (multi-step)</span>
+│   │   │   └── [id].tsx
+│   │   ├── track/[orderId].tsx     <span class="cm">← Live map tracking screen</span>
+│   │   ├── menu.tsx
+│   │   ├── nutrition.tsx
+│   │   ├── billing.tsx
+│   │   └── profile.tsx
+│   │
+│   └── (agent)/                    <span class="cm">← Agent stack navigator</span>
+│       ├── _layout.tsx
+│       ├── today.tsx               <span class="cm">← Today's deliveries list</span>
+│       ├── route.tsx               <span class="cm">← Optimized map route</span>
+│       └── delivery/[id].tsx       <span class="cm">← Single delivery detail + actions</span>
+│
+├── components/
+│   ├── BowlCard.tsx
+│   ├── SubscriptionBadge.tsx
+│   ├── DeliveryMap.tsx             <span class="cm">← Wraps react-native-maps</span>
+│   ├── NutritionRing.tsx           <span class="cm">← SVG donut chart</span>
+│   └── AgentDeliveryCard.tsx
+│
+├── hooks/
+│   ├── useSubscription.ts
+│   ├── useOrders.ts
+│   ├── useAgentDeliveries.ts
+│   └── useLocationTracking.ts      <span class="cm">← Background GPS for agents</span>
+│
+├── services/
+│   ├── api.ts                      <span class="cm">← Axios + token refresh interceptor</span>
+│   ├── notifications.ts            <span class="cm">← Register/handle push tokens</span>
+│   └── offline-queue.ts            <span class="cm">← Queue mutations when offline</span>
+│
+└── stores/
+    ├── auth.store.ts               <span class="cm">← User, tokens, role</span>
+    └── bowl-builder.store.ts       <span class="cm">← Draft bowl selections</span></div>
+
+<h3>Multi-Step Bowl Builder Flow (Mobile)</h3>
+<div class="flow">
+  <div class="fs fh">Step 1: Choose Plan</div><div class="fa">→</div>
+  <div class="fs fh">Step 2: Pick Bowl Type</div><div class="fa">→</div>
+  <div class="fs fh">Step 3: Select Items</div><div class="fa">→</div>
+  <div class="fs fh">Step 4: Set Address</div><div class="fa">→</div>
+  <div class="fs fh">Step 5: Choose Time Slot</div><div class="fa">→</div>
+  <div class="fs fy">Step 6: Review & Pay</div><div class="fa">→</div>
+  <div class="fs fh">Subscription Active 🎉</div>
+</div>
+<p>Each step is a separate screen in a Stack navigator. State lives in Zustand <code>bowl-builder.store</code>. User can go back at any step. Draft is persisted to MMKV so the app restart doesn't lose progress.</p>
+
+<h3>Offline Support Strategy</h3>
+<div class="grid g2">
+  <div class="card b">
+    <div class="ct">📶 Read Offline</div>
+    <div class="cb">React Query persists cache to MMKV. User can view their subscriptions, order history, and today's delivery info even without internet. Stale data shown with "Last synced X minutes ago" banner.</div>
+  </div>
+  <div class="card o">
+    <div class="ct">✏️ Write Offline (Agent)</div>
+    <div class="cb">Agent marks delivery as "Delivered" offline. This goes into an offline mutation queue. When connectivity returns, mutations auto-replay in order. Critical for agents in areas with poor signal.</div>
+  </div>
+</div>
+
+<h3>Agent Location Tracking</h3>
+<div class="codeblock"><span class="cm">// hooks/useLocationTracking.ts</span>
+<span class="cm">// Background location updates sent to server every 60 seconds</span>
+<span class="cm">// Only active when agent has orders in OUT_FOR_DELIVERY status</span>
+
+<span class="ck">const</span> startTracking = <span class="ck">async</span> (orderId: string) => {
+  <span class="ck">await</span> Location.requestBackgroundPermissionsAsync();
+
+  locationSubscription = <span class="ck">await</span> Location.watchPositionAsync(
+    { accuracy: Location.Accuracy.Balanced, timeInterval: <span class="cn">60000</span> },
+    <span class="ck">async</span> (loc) => {
+      <span class="cm">// Batch updates to avoid hammering server</span>
+      <span class="ck">await</span> api.patch(<span class="cs">`/orders/${orderId}/location`</span>, {
+        lat: loc.coords.latitude,
+        lng: loc.coords.longitude
+      });
+    }
+  );
+};</div>
+
+<h3>Push Notification Setup</h3>
+<ul>
+  <li>On app launch, request push permission and register FCM/APNS token via <code>expo-notifications</code></li>
+  <li>Token sent to backend and saved in <code>user_devices</code> table</li>
+  <li>Backend sends notification to token via Firebase Admin SDK</li>
+  <li>Foreground notifications shown as in-app banner (custom component)</li>
+  <li>Background notifications handled by Expo's notification handler — tapping opens relevant screen</li>
+</ul>
+
+<h3>App Store Deployment</h3>
+<div class="grid g2">
+  <div class="card">
+    <div class="ct">🍎 iOS (App Store)</div>
+    <div class="cb">Built via Expo EAS Build (cloud build). Requires Apple Developer account ($99/yr). TestFlight for beta testing. Review time: 1–3 days. Push updates via Expo OTA for JS changes.</div>
+  </div>
+  <div class="card">
+    <div class="ct">🤖 Android (Play Store)</div>
+    <div class="cb">AAB file built via Expo EAS. Google Play Developer account ($25 one-time). Internal testing track → Closed testing → Production. Review time: hours to 1 day.</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ════════ BACKGROUND JOBS ════════ -->
+<div class="sec" id="sec-arch-background">
+<div class="topbar"><div><div class="tb-eye">ARCHITECTURE</div><h1>Background Jobs & Queues</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">07 — BACKGROUND JOBS</div>
+  <h2>BullMQ Queues & Cron Workers</h2>
+  <p>All async and scheduled work runs through BullMQ backed by Redis. This decouples heavy processing from API request handling.</p>
+</div>
+
+<h3>Queue Architecture</h3>
+<div class="layers">
+  <div class="layer lg"><div class="ln">ORDER_GENERATION</div><div class="ld">Cron: 12:00 AM daily. Generates all orders for today's active subscriptions. Single most important job.</div><div class="ltags"><span class="tag">Cron</span><span class="tag">Critical</span></div></div>
+  <div class="layer ly"><div class="ln">BILLING_RENEWAL</div><div class="ld">Cron: 6:00 AM daily. Checks subscriptions expiring in 3 days. Triggers Razorpay charge. Retries 3x on failure.</div><div class="ltags"><span class="tag">Cron</span><span class="tag">Retry</span></div></div>
+  <div class="layer lb"><div class="ln">NOTIFICATION</div><div class="ld">Queue: async. All notifications (WhatsApp, email, SMS, push) go here. Rate-limited per channel.</div><div class="ltags"><span class="tag">Queue</span><span class="tag">Rate-limited</span></div></div>
+  <div class="layer lo"><div class="ln">DELIVERY_ASSIGN</div><div class="ld">Queue: triggered after order generation. Assigns agents to orders based on zone. Runs at 5:00 AM.</div><div class="ltags"><span class="tag">Queue</span></div></div>
+  <div class="layer lp"><div class="ln">INVOICE_GEN</div><div class="ld">Queue: triggered after every payment. Generates PDF invoice, uploads to S3, emails link to customer.</div><div class="ltags"><span class="tag">Queue</span><span class="tag">Low priority</span></div></div>
+  <div class="layer lr"><div class="ln">FAILED_PAYMENT</div><div class="ld">Delayed queue: retries failed auto-renewal charges at +24h, +48h, +72h with notifications between each.</div><div class="ltags"><span class="tag">Delayed</span><span class="tag">Critical</span></div></div>
+</div>
+
+<h3>Daily Order Generation — Full Code</h3>
+<div class="codeblock"><span class="cm">// jobs/daily-orders.job.ts</span>
+<span class="cm">// Runs at midnight via @Cron decorator</span>
+
+@<span class="ct">Processor</span>(<span class="cs">'daily-orders'</span>)
+<span class="ck">export class</span> DailyOrdersWorker {
+
+  @<span class="ct">Process</span>()
+  <span class="ck">async</span> generateOrders(job: Job) {
+    <span class="ck">const</span> today = startOfDay(<span class="ck">new</span> Date());
+    <span class="ck">const</span> tomorrow = addDays(today, <span class="cn">1</span>);
+
+    <span class="cm">// 1. Fetch all ACTIVE subscriptions for today</span>
+    <span class="ck">const</span> activeSubs = <span class="ck">await</span> this.subRepo.findActive({
+      deliveryDate: tomorrow,
+      statuses: [<span class="cs">'ACTIVE'</span>],
+    });
+
+    <span class="ck">let</span> created = <span class="cn">0</span>, skipped = <span class="cn">0</span>;
+
+    <span class="ck">for</span> (<span class="ck">const</span> sub <span class="ck">of</span> activeSubs) {
+      <span class="cm">// 2. Check if user requested a skip for this date</span>
+      <span class="ck">const</span> isSkipped = <span class="ck">await</span> this.skipRepo.isSkipped(sub.id, tomorrow);
+      <span class="ck">if</span> (isSkipped) { skipped++; <span class="ck">continue</span>; }
+
+      <span class="cm">// 3. Get custom bowl for tomorrow (if set), else use default</span>
+      <span class="ck">const</span> items = <span class="ck">await</span> this.customRepo.getForDate(sub.id, tomorrow)
+        ?? sub.defaultItems;
+
+      <span class="cm">// 4. Create the order record with price snapshots</span>
+      <span class="ck">await</span> this.orderRepo.create({
+        subscriptionId: sub.id,
+        userId: sub.userId,
+        deliveryDate: tomorrow,
+        addressId: sub.addressId,
+        deliverySlot: sub.deliverySlot,
+        status: <span class="cs">'PENDING'</span>,
+        items: items.map(i => ({
+          menuItemId: i.menuItemId,
+          quantity: i.quantity,
+          priceAtOrder: i.menuItem.price, <span class="cm">// ← snapshot, critical</span>
+        })),
+      });
+      created++;
+    }
+
+    <span class="cm">// 5. Trigger downstream jobs</span>
+    <span class="ck">await</span> this.notifQueue.add(<span class="cs">'batch-dispatch-alert'</span>, { date: tomorrow });
+    <span class="ck">await</span> this.deliveryQueue.add(<span class="cs">'assign-agents'</span>, { date: tomorrow });
+
+    <span class="ck">return</span> { created, skipped, total: activeSubs.length };
+  }
+}
+
+<span class="cm">// Scheduled in app.module.ts</span>
+BullModule.registerQueue({ name: <span class="cs">'daily-orders'</span> });
+<span class="cm">// Cron: every day at midnight IST (UTC+5:30 = 18:30 UTC previous day)</span>
+@<span class="ct">Cron</span>(<span class="cs">'30 18 * * *'</span>)</div>
+</div>
+</div>
+
+<!-- ════════ DATABASE SCHEMA ════════ -->
+<div class="sec" id="sec-db-schema">
+<div class="topbar"><div><div class="tb-eye">DATA LAYER</div><h1>Database Schema</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">08 — DATABASE</div>
+  <h2>PostgreSQL Schema — All Tables</h2>
+  <p>Complete relational schema with every field, type, constraint, and relationship documented.</p>
+</div>
+
+<h3>Core Tables</h3>
+
+<div class="schema-box">
+  <div class="sb-head"><span class="tname">users</span> <span class="tag tg">PRIMARY</span></div>
+  <div class="sb-body">
+    <div class="sf"><div class="fn">id</div><div class="ft">cuid()</div><div class="fd">Primary key, auto-generated</div><div class="fk"><span class="tag tg">PK</span></div></div>
+    <div class="sf"><div class="fn">email</div><div class="ft">String</div><div class="fd">Unique. Nullable (phone-only users)</div><div class="fk"><span class="tag ty">UNIQUE</span></div></div>
+    <div class="sf"><div class="fn">phone</div><div class="ft">String</div><div class="fd">+91XXXXXXXXXX format. Unique.</div><div class="fk"><span class="tag ty">UNIQUE</span></div></div>
+    <div class="sf"><div class="fn">name</div><div class="ft">String</div><div class="fd">Display name</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">password_hash</div><div class="ft">String?</div><div class="fd">Null for OAuth-only accounts</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">role</div><div class="ft">Role enum</div><div class="fd">CUSTOMER | ADMIN | AGENT | KITCHEN</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">is_phone_verified</div><div class="ft">Boolean</div><div class="fd">Must be true to subscribe</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">fcm_token</div><div class="ft">String?</div><div class="fd">Firebase push token (latest device)</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">created_at</div><div class="ft">DateTime</div><div class="fd">Account creation timestamp</div><div class="fk"></div></div>
+  </div>
+</div>
+
+<div class="schema-box">
+  <div class="sb-head"><span class="tname">plans</span> <span class="tag ty">REFERENCE</span></div>
+  <div class="sb-body">
+    <div class="sf"><div class="fn">id</div><div class="ft">cuid()</div><div class="fd">Primary key</div><div class="fk"><span class="tag tg">PK</span></div></div>
+    <div class="sf"><div class="fn">name</div><div class="ft">String</div><div class="fd">"Daily Trial", "Weekly Fresh", "Monthly Wellness"</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">type</div><div class="ft">PlanType</div><div class="fd">DAILY | WEEKLY | MONTHLY</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">price</div><div class="ft">Decimal</div><div class="fd">Base price in INR (₹)</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">duration_days</div><div class="ft">Int</div><div class="fd">1 | 7 | 30</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">discount_percent</div><div class="ft">Decimal</div><div class="fd">0 | 5 | 15</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">max_items</div><div class="ft">Int</div><div class="fd">Max items allowed in bowl</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">is_active</div><div class="ft">Boolean</div><div class="fd">Soft-disable plans without deleting</div><div class="fk"></div></div>
+  </div>
+</div>
+
+<div class="schema-box">
+  <div class="sb-head"><span class="tname">subscriptions</span> <span class="tag tg">CORE</span></div>
+  <div class="sb-body">
+    <div class="sf"><div class="fn">id</div><div class="ft">cuid()</div><div class="fd">Primary key</div><div class="fk"><span class="tag tg">PK</span></div></div>
+    <div class="sf"><div class="fn">user_id</div><div class="ft">String</div><div class="fd">→ users.id</div><div class="fk"><span class="tag tb">FK</span></div></div>
+    <div class="sf"><div class="fn">plan_id</div><div class="ft">String</div><div class="fd">→ plans.id</div><div class="fk"><span class="tag tb">FK</span></div></div>
+    <div class="sf"><div class="fn">address_id</div><div class="ft">String</div><div class="fd">→ addresses.id (delivery address)</div><div class="fk"><span class="tag tb">FK</span></div></div>
+    <div class="sf"><div class="fn">status</div><div class="ft">SubStatus</div><div class="fd">PENDING|ACTIVE|PAUSED|EXPIRED|CANCELLED</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">start_date</div><div class="ft">DateTime</div><div class="fd">First delivery date</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">end_date</div><div class="ft">DateTime</div><div class="fd">Last delivery date (extended on renewal)</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">delivery_slot</div><div class="ft">String</div><div class="fd">"08:00-09:00" preferred delivery window</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">auto_renew</div><div class="ft">Boolean</div><div class="fd">If true, charge on end_date - 3 days</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">razorpay_sub_id</div><div class="ft">String?</div><div class="fd">Razorpay subscription ID for auto-charge</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">pause_start</div><div class="ft">DateTime?</div><div class="fd">When pause begins (null if not paused)</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">pause_end</div><div class="ft">DateTime?</div><div class="fd">When pause ends (auto-resumes)</div><div class="fk"></div></div>
+  </div>
+</div>
+
+<div class="schema-box">
+  <div class="sb-head"><span class="tname">orders</span> <span class="tag tg">CORE</span></div>
+  <div class="sb-body">
+    <div class="sf"><div class="fn">id</div><div class="ft">cuid()</div><div class="fd">Primary key</div><div class="fk"><span class="tag tg">PK</span></div></div>
+    <div class="sf"><div class="fn">subscription_id</div><div class="ft">String</div><div class="fd">→ subscriptions.id</div><div class="fk"><span class="tag tb">FK</span></div></div>
+    <div class="sf"><div class="fn">user_id</div><div class="ft">String</div><div class="fd">Denormalized for query speed</div><div class="fk"><span class="tag tb">FK</span></div></div>
+    <div class="sf"><div class="fn">delivery_date</div><div class="ft">Date</div><div class="fd">The date this order is to be delivered</div><div class="fk"><span class="tag ty">INDEXED</span></div></div>
+    <div class="sf"><div class="fn">status</div><div class="ft">OrderStatus</div><div class="fd">PENDING|PREPARING|PACKED|OUT_FOR_DELIVERY|DELIVERED|FAILED|SKIPPED</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">agent_id</div><div class="ft">String?</div><div class="fd">→ delivery_agents.id (assigned after generation)</div><div class="fk"><span class="tag tb">FK</span></div></div>
+    <div class="sf"><div class="fn">delivered_at</div><div class="ft">DateTime?</div><div class="fd">Actual delivery timestamp</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">proof_photo_url</div><div class="ft">String?</div><div class="fd">S3 URL of delivery photo taken by agent</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">failure_reason</div><div class="ft">String?</div><div class="fd">"Customer absent", "Wrong address", etc.</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">rating</div><div class="ft">Int?</div><div class="fd">1-5 stars from customer after delivery</div><div class="fk"></div></div>
+  </div>
+</div>
+
+<div class="schema-box">
+  <div class="sb-head"><span class="tname">payments</span> <span class="tag tg">FINANCIAL</span></div>
+  <div class="sb-body">
+    <div class="sf"><div class="fn">id</div><div class="ft">cuid()</div><div class="fd">Internal payment record ID</div><div class="fk"><span class="tag tg">PK</span></div></div>
+    <div class="sf"><div class="fn">user_id</div><div class="ft">String</div><div class="fd">→ users.id</div><div class="fk"><span class="tag tb">FK</span></div></div>
+    <div class="sf"><div class="fn">subscription_id</div><div class="ft">String</div><div class="fd">→ subscriptions.id</div><div class="fk"><span class="tag tb">FK</span></div></div>
+    <div class="sf"><div class="fn">amount</div><div class="ft">Decimal</div><div class="fd">Amount in INR (including taxes)</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">gst_amount</div><div class="ft">Decimal</div><div class="fd">18% GST component (for B2B invoices)</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">status</div><div class="ft">PayStatus</div><div class="fd">PENDING|SUCCESS|FAILED|REFUNDED</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">gateway</div><div class="ft">String</div><div class="fd">"razorpay"</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">gateway_order_id</div><div class="ft">String</div><div class="fd">Razorpay order_id (for verification)</div><div class="fk"><span class="tag ty">UNIQUE</span></div></div>
+    <div class="sf"><div class="fn">gateway_payment_id</div><div class="ft">String?</div><div class="fd">Razorpay payment_id (after success)</div><div class="fk"></div></div>
+    <div class="sf"><div class="fn">invoice_url</div><div class="ft">String?</div><div class="fd">S3 signed URL to PDF invoice</div><div class="fk"></div></div>
+  </div>
+</div>
+
+<h3>Additional Tables</h3>
+<div class="grid g3">
+  <div class="card"><div class="ct">addresses</div><div class="cb">user_id, label ("Home"/"Office"), line1, line2, city, pincode, lat, lng, is_default</div></div>
+  <div class="card"><div class="ct">menu_items</div><div class="cb">name, type, description, price, calories, protein_g, carbs_g, fat_g, tags[], allergens[], image_url, is_available, available_days[]</div></div>
+  <div class="card"><div class="ct">subscription_items</div><div class="cb">subscription_id, menu_item_id, quantity — the default bowl for this subscription</div></div>
+  <div class="card"><div class="ct">order_items</div><div class="cb">order_id, menu_item_id, quantity, price_at_order — snapshot of what's packed (immutable)</div></div>
+  <div class="card"><div class="ct">delivery_skips</div><div class="cb">subscription_id, skip_date, requested_at — customer-requested skips before cutoff</div></div>
+  <div class="card"><div class="ct">delivery_customizations</div><div class="cb">subscription_id, delivery_date, items[] — one-off bowl customizations for a specific day</div></div>
+  <div class="card"><div class="ct">delivery_agents</div><div class="cb">user_id → users, zone_id, vehicle_type, is_active, total_deliveries</div></div>
+  <div class="card"><div class="ct">delivery_zones</div><div class="cb">name, pincodes[], city, primary_agent_id, backup_agent_id</div></div>
+  <div class="card"><div class="ct">notifications_log</div><div class="cb">user_id, type, channel (whatsapp/email/push/sms), template, status, sent_at, error</div></div>
+  <div class="card"><div class="ct">audit_log</div><div class="cb">actor_id, action, entity, entity_id, old_value, new_value, ip, timestamp — append-only</div></div>
+  <div class="card"><div class="ct">refresh_tokens</div><div class="cb">user_id, token_hash, expires_at, device_info, is_revoked — one per device session</div></div>
+  <div class="card"><div class="ct">otp_codes</div><div class="cb">Stored in Redis (not DB): phone → {code, attempts, expires_at} with 10 min TTL</div></div>
+</div>
+</div>
+</div>
+
+<!-- ════════ DATA PATTERNS ════════ -->
+<div class="sec" id="sec-db-patterns">
+<div class="topbar"><div><div class="tb-eye">DATA LAYER</div><h1>Caching & Data Patterns</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">09 — DATA PATTERNS</div>
+  <h2>Indexing, Caching & Query Optimization</h2>
+  <p>Critical database indexes, Redis caching strategy, and query patterns for performance.</p>
+</div>
+
+<h3>Critical PostgreSQL Indexes</h3>
+<div class="codeblock"><span class="cm">-- Orders: daily generation job queries by date + status</span>
+CREATE INDEX idx_orders_delivery_date_status ON orders(delivery_date, status);
+CREATE INDEX idx_orders_agent_date ON orders(agent_id, delivery_date);
+
+<span class="cm">-- Subscriptions: find active subs for cron job</span>
+CREATE INDEX idx_subs_status_end_date ON subscriptions(status, end_date);
+CREATE INDEX idx_subs_user_status ON subscriptions(user_id, status);
+
+<span class="cm">-- Payments: billing history fast lookup</span>
+CREATE INDEX idx_payments_user_created ON payments(user_id, created_at DESC);
+
+<span class="cm">-- Notifications: audit lookup by user</span>
+CREATE INDEX idx_notif_user_sent ON notifications_log(user_id, sent_at DESC);</div>
+
+<h3>Redis Caching Strategy</h3>
+<table>
+  <thead><tr><th>Key Pattern</th><th>TTL</th><th>What's Cached</th><th>Invalidated When</th></tr></thead>
+  <tbody>
+    <tr><td class="tm">menu:catalog</td><td>1 hour</td><td>Full menu catalog JSON</td><td>Admin updates any menu item</td></tr>
+    <tr><td class="tm">menu:item:{id}</td><td>30 min</td><td>Single menu item detail</td><td>Item is edited or disabled</td></tr>
+    <tr><td class="tm">user:{id}:profile</td><td>5 min</td><td>User profile + preferences</td><td>Profile is updated</td></tr>
+    <tr><td class="tm">sub:{id}:schedule</td><td>1 day</td><td>Generated delivery schedule for sub</td><td>Subscription is modified</td></tr>
+    <tr><td class="tm">packing:{date}</td><td>Until 11 PM</td><td>Kitchen packing list for a date</td><td>Order status changes</td></tr>
+    <tr><td class="tm">session:{token}</td><td>30 days</td><td>Refresh token validity</td><td>Token is revoked on logout</td></tr>
+    <tr><td class="tm">otp:{phone}</td><td>10 min</td><td>OTP code + attempt count</td><td>Verified or expired</td></tr>
+    <tr><td class="tm">rate:{ip}:auth</td><td>1 min</td><td>Auth endpoint request count</td><td>Rolling window expires</td></tr>
+  </tbody>
+</table>
+
+<h3>Database Transaction Patterns</h3>
+<div class="hbox hy">
+  <strong>⚠️ Always use transactions for multi-step operations</strong>
+  Any operation that touches multiple tables must be wrapped in a Prisma transaction. Payment verification + subscription activation is the most critical example.
+</div>
+<div class="codeblock"><span class="cm">// Payment verification — must be atomic</span>
+<span class="ck">await</span> prisma.$transaction(<span class="ck">async</span> (tx) => {
+  <span class="cm">// 1. Verify HMAC signature (outside tx)</span>
+  <span class="cm">// 2. Find the payment record</span>
+  <span class="ck">const</span> payment = <span class="ck">await</span> tx.payment.findUniqueOrThrow({
+    where: { gatewayOrderId: orderId }
+  });
+  <span class="cm">// 3. Update payment status</span>
+  <span class="ck">await</span> tx.payment.update({
+    where: { id: payment.id },
+    data: { status: <span class="cs">'SUCCESS'</span>, gatewayPaymentId: paymentId }
+  });
+  <span class="cm">// 4. Activate subscription</span>
+  <span class="ck">await</span> tx.subscription.update({
+    where: { id: payment.subscriptionId },
+    data: { status: <span class="cs">'ACTIVE'</span>, startDate: today }
+  });
+  <span class="cm">// If step 4 fails, step 3 is also rolled back. ✅</span>
+});</div>
+</div>
+</div>
+
+<!-- ════════ API OVERVIEW ════════ -->
+<div class="sec" id="sec-api-overview">
+<div class="topbar"><div><div class="tb-eye">API DESIGN</div><h1>API Structure & Conventions</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">10 — API</div>
+  <h2>REST API Design Standards</h2>
+  <p>Conventions, authentication, error handling, and versioning strategy for the FreshBowl API.</p>
+</div>
+
+<h3>Base URL</h3>
+<div class="codeblock">Production:   https://api.freshbowl.in/v1
+Staging:      https://api-staging.freshbowl.in/v1
+Development:  http://localhost:3001/v1</div>
+
+<h3>Authentication</h3>
+<div class="codeblock"><span class="cm">// All authenticated requests include:</span>
+Authorization: Bearer {access_token}
+
+<span class="cm">// Access token payload (JWT):</span>
+{
+  sub: <span class="cs">"user_id"</span>,
+  role: <span class="cs">"CUSTOMER"</span>,
+  email: <span class="cs">"user@example.com"</span>,
+  iat: 1716000000,
+  exp: 1716000900  <span class="cm">← 15 minutes</span>
+}
+
+<span class="cm">// Refresh tokens sent as HTTP-only cookie:</span>
+Set-Cookie: refresh_token={token}; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh</div>
+
+<h3>Standard Response Format</h3>
+<div class="codeblock"><span class="cm">// Success response:</span>
+{
+  <span class="cs">"success"</span>: true,
+  <span class="cs">"data"</span>: { ... },
+  <span class="cs">"meta"</span>: { <span class="cs">"page"</span>: 1, <span class="cs">"total"</span>: 42 }  <span class="cm">← for paginated responses</span>
+}
+
+<span class="cm">// Error response:</span>
+{
+  <span class="cs">"success"</span>: false,
+  <span class="cs">"error"</span>: {
+    <span class="cs">"code"</span>: <span class="cs">"SUBSCRIPTION_NOT_FOUND"</span>,
+    <span class="cs">"message"</span>: <span class="cs">"Subscription not found or access denied"</span>,
+    <span class="cs">"statusCode"</span>: <span class="cn">404</span>
+  }
+}</div>
+
+<h3>Pagination</h3>
+<div class="codeblock">GET /orders?page=2&limit=20&status=DELIVERED&from=2025-01-01&to=2025-01-31
+
+<span class="cm">Response includes cursor-based pagination for large datasets:</span>
+{
+  <span class="cs">"data"</span>: [...],
+  <span class="cs">"meta"</span>: {
+    <span class="cs">"page"</span>: 2, <span class="cs">"limit"</span>: 20,
+    <span class="cs">"total"</span>: 156, <span class="cs">"totalPages"</span>: 8,
+    <span class="cs">"hasNext"</span>: true, <span class="cs">"hasPrev"</span>: true
+  }
+}</div>
+
+<h3>Error Codes</h3>
+<table>
+  <thead><tr><th>HTTP Status</th><th>Error Code</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td>400</td><td class="tm">VALIDATION_ERROR</td><td>Request body fails Zod validation</td></tr>
+    <tr><td>401</td><td class="tm">UNAUTHORIZED</td><td>Missing or invalid access token</td></tr>
+    <tr><td>401</td><td class="tm">TOKEN_EXPIRED</td><td>Access token is expired, use refresh token</td></tr>
+    <tr><td>403</td><td class="tm">FORBIDDEN</td><td>Authenticated but insufficient role</td></tr>
+    <tr><td>404</td><td class="tm">NOT_FOUND</td><td>Resource doesn't exist or not accessible</td></tr>
+    <tr><td>409</td><td class="tm">ALREADY_EXISTS</td><td>Duplicate (email already registered)</td></tr>
+    <tr><td>422</td><td class="tm">BUSINESS_RULE_ERROR</td><td>E.g., can't skip — cutoff time passed</td></tr>
+    <tr><td>429</td><td class="tm">RATE_LIMITED</td><td>Too many requests</td></tr>
+    <tr><td>500</td><td class="tm">INTERNAL_ERROR</td><td>Something broke server-side (Sentry alerted)</td></tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+<!-- ════════ API ENDPOINTS ════════ -->
+<div class="sec" id="sec-api-endpoints">
+<div class="topbar"><div><div class="tb-eye">API DESIGN</div><h1>Complete API Reference</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">11 — ENDPOINTS</div>
+  <h2>All API Endpoints</h2>
+  <p>Every endpoint across all modules with method, path, description, and auth requirement.</p>
+</div>
+
+<h3>Auth Module — /auth</h3>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/auth/register</div><div class="ep-desc">Register with email + phone + password. Sends OTP to phone.</div><div class="ep-auth">PUBLIC</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/auth/login</div><div class="ep-desc">Login with email+password or phone+OTP. Returns access + refresh tokens.</div><div class="ep-auth">PUBLIC</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/auth/refresh</div><div class="ep-desc">Exchange refresh token (cookie) for new access token.</div><div class="ep-auth">COOKIE</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/auth/logout</div><div class="ep-desc">Revoke current refresh token. Optionally all devices.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/auth/otp/send</div><div class="ep-desc">Send 6-digit OTP to phone. Rate limited: 3/15min.</div><div class="ep-auth">PUBLIC</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/auth/otp/verify</div><div class="ep-desc">Verify OTP. Marks phone as verified.</div><div class="ep-auth">PUBLIC</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/auth/google</div><div class="ep-desc">Initiate Google OAuth flow. Redirects to Google consent page.</div><div class="ep-auth">PUBLIC</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/auth/google/callback</div><div class="ep-desc">Google OAuth callback. Creates or links account. Returns tokens.</div><div class="ep-auth">PUBLIC</div></div>
+
+<h3>Users Module — /users</h3>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/users/me</div><div class="ep-desc">Get current user profile with preferences and stats.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/users/me</div><div class="ep-desc">Update name, dietary preferences, notification settings.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/users/me/addresses</div><div class="ep-desc">List all saved delivery addresses.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/users/me/addresses</div><div class="ep-desc">Add new delivery address with Google Maps lat/lng.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/users/me/addresses/:id</div><div class="ep-desc">Update address label, instructions, or set as default.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-delete">DELETE</div><div class="ep-path">/users/me/addresses/:id</div><div class="ep-desc">Remove address. Fails if linked to active subscription.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/users/me/nutrition/summary</div><div class="ep-desc">Weekly/monthly nutrition summary: avg calories, macros, top items.</div><div class="ep-auth">USER</div></div>
+
+<h3>Catalog Module — /catalog</h3>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/catalog/items</div><div class="ep-desc">List menu items. Filters: type, tags[], isAvailable, search. Cached 1hr.</div><div class="ep-auth">PUBLIC</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/catalog/items/:id</div><div class="ep-desc">Single item detail with full nutrition breakdown.</div><div class="ep-auth">PUBLIC</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/catalog/plans</div><div class="ep-desc">List active subscription plans with pricing and features.</div><div class="ep-auth">PUBLIC</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/catalog/items</div><div class="ep-desc">Create new menu item. Requires image upload to S3 first.</div><div class="ep-auth">ADMIN</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/catalog/items/:id</div><div class="ep-desc">Update item. Set isAvailable=false to temporarily disable.</div><div class="ep-auth">ADMIN</div></div>
+
+<h3>Subscriptions Module — /subscriptions</h3>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/subscriptions</div><div class="ep-desc">Create subscription. Validates address zone. Returns Razorpay order for payment.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/subscriptions</div><div class="ep-desc">List current user's subscriptions. Filter by status.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/subscriptions/:id</div><div class="ep-desc">Subscription detail with upcoming schedule and bowl config.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/subscriptions/:id/bowl</div><div class="ep-desc">Update default bowl items and quantities.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/subscriptions/:id/pause</div><div class="ep-desc">Pause subscription. Body: {pauseStart, pauseEnd}. Max 14 days.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/subscriptions/:id/resume</div><div class="ep-desc">Early resume a paused subscription.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/subscriptions/:id/upgrade</div><div class="ep-desc">Change plan. Returns proration details and Razorpay charge if needed.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-delete">DELETE</div><div class="ep-path">/subscriptions/:id</div><div class="ep-desc">Cancel at end of billing cycle. Body: {reason}.</div><div class="ep-auth">USER</div></div>
+
+<h3>Orders Module — /orders</h3>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/orders</div><div class="ep-desc">Paginated order history. Filters: status, date range, subscriptionId.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/orders/today</div><div class="ep-desc">Today's pending/active delivery. Used on home screen.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/orders/:id</div><div class="ep-desc">Single order with items, agent info, and timeline.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/orders/:id/skip</div><div class="ep-desc">Skip delivery. Fails if past 10 PM previous night cutoff.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/orders/:id/customize</div><div class="ep-desc">One-time item customization for specific delivery. Must be PENDING.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/orders/:id/track</div><div class="ep-desc">Real-time: agent location, ETA, delivery status. Polling or SSE.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/orders/:id/rate</div><div class="ep-desc">Submit 1-5 star rating + optional feedback after delivery.</div><div class="ep-auth">USER</div></div>
+
+<h3>Delivery Module — /delivery</h3>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/delivery/agent/today</div><div class="ep-desc">Agent's assigned deliveries for today, sorted by route order.</div><div class="ep-auth">AGENT</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/delivery/agent/orders/:id/status</div><div class="ep-desc">Update: DELIVERED or FAILED. Body: {status, reason?, photoUrl?}.</div><div class="ep-auth">AGENT</div></div>
+<div class="endpoint"><div class="method m-patch">PATCH</div><div class="ep-path">/delivery/agent/orders/:id/location</div><div class="ep-desc">Send GPS location update. Called every 60s while OUT_FOR_DELIVERY.</div><div class="ep-auth">AGENT</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/delivery/admin/packing-list</div><div class="ep-desc">Kitchen packing list for a date. Query: {date}. Grouped by zone and agent.</div><div class="ep-auth">ADMIN/KITCHEN</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/delivery/upload/proof</div><div class="ep-desc">Upload delivery photo. Returns S3 URL. Used by agent before marking delivered.</div><div class="ep-auth">AGENT</div></div>
+
+<h3>Payments Module — /payments</h3>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/payments/create-order</div><div class="ep-desc">Create Razorpay payment order for given subscription. Returns order_id + key.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/payments/verify</div><div class="ep-desc">Verify payment signature. Activates subscription on success.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/payments/webhook</div><div class="ep-desc">Razorpay webhook. Handles auto-renewal events. HMAC signature verified.</div><div class="ep-auth">WEBHOOK_SECRET</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/payments/invoices</div><div class="ep-desc">Paginated payment + invoice history for current user.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-get">GET</div><div class="ep-path">/payments/invoices/:id/download</div><div class="ep-desc">Generate signed S3 URL for PDF invoice. URL expires in 1 hour.</div><div class="ep-auth">USER</div></div>
+<div class="endpoint"><div class="method m-post">POST</div><div class="ep-path">/payments/refund</div><div class="ep-desc">Admin only: trigger Razorpay refund for a payment. Body: {paymentId, amount, reason}.</div><div class="ep-auth">ADMIN</div></div>
+</div>
+</div>
+
+<!-- ════════ AUTH FEATURE ════════ -->
+<div class="sec" id="sec-feat-auth">
+<div class="topbar"><div><div class="tb-eye">FEATURES</div><h1>Auth & RBAC</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">12 — AUTH</div>
+  <h2>Authentication & Authorization Deep Dive</h2>
+  <p>JWT strategy, refresh token rotation, OTP flow, Google OAuth, and role-based access control.</p>
+</div>
+
+<h3>Token Strategy</h3>
+<div class="grid g2">
+  <div class="card g">
+    <div class="ct">⚡ Access Token (JWT)</div>
+    <div class="cb"><strong>Lifetime:</strong> 15 minutes<br/><strong>Storage:</strong> In-memory (React state) — never localStorage<br/><strong>Contents:</strong> userId, role, email<br/><strong>Verified:</strong> On every API request at NestJS guard layer<br/><strong>Rotation:</strong> New one fetched silently when expired via refresh token</div>
+  </div>
+  <div class="card b">
+    <div class="ct">🔄 Refresh Token</div>
+    <div class="cb"><strong>Lifetime:</strong> 30 days<br/><strong>Storage:</strong> HTTP-only cookie (XSS-proof)<br/><strong>Strategy:</strong> Rotation — each use issues a new refresh token, old one is immediately revoked<br/><strong>DB:</strong> Stored hashed in refresh_tokens table (one per session)</div>
+  </div>
+</div>
+
+<h3>Token Refresh Flow</h3>
+<div class="flow">
+  <div class="fs">API call with expired token</div><div class="fa">→</div>
+  <div class="fs fo">401 TOKEN_EXPIRED</div><div class="fa">→</div>
+  <div class="fs">Axios interceptor catches</div><div class="fa">→</div>
+  <div class="fs fh">POST /auth/refresh (cookie)</div><div class="fa">→</div>
+  <div class="fs">Server: verify old token, revoke, issue new</div><div class="fa">→</div>
+  <div class="fs fh">New access token</div><div class="fa">→</div>
+  <div class="fs">Retry original request</div>
+</div>
+
+<h3>Phone OTP Flow</h3>
+<div class="codeblock"><span class="cm">// Step 1: User enters phone → POST /auth/otp/send</span>
+<span class="cm">// Server:</span>
+<span class="ck">const</span> otp = generateSecureOTP();  <span class="cm">// crypto.randomInt(100000, 999999)</span>
+<span class="ck">await</span> redis.setEx(
+  <span class="cs">`otp:${phone}`</span>,
+  <span class="cn">600</span>,                              <span class="cm">// 10 minute TTL</span>
+  JSON.stringify({ otp: hash(otp), attempts: 0 })
+);
+<span class="ck">await</span> twilioClient.messages.create({
+  to: phone,
+  from: process.env.TWILIO_FROM,
+  body: <span class="cs">`Your FreshBowl OTP is: ${otp}. Valid for 10 minutes.`</span>
+});
+
+<span class="cm">// Step 2: User submits OTP → POST /auth/otp/verify</span>
+<span class="cm">// Server: get from Redis, compare hash, increment attempts</span>
+<span class="cm">// If attempts > 3: delete key (locked out, must re-request)</span>
+<span class="cm">// On success: delete key, mark user.isPhoneVerified = true</span></div>
+
+<h3>RBAC Implementation</h3>
+<div class="codeblock"><span class="cm">// common/decorators/roles.decorator.ts</span>
+<span class="ck">export const</span> Roles = (...roles: Role[]) => SetMetadata(<span class="cs">'roles'</span>, roles);
+
+<span class="cm">// common/guards/roles.guard.ts</span>
+@<span class="ct">Injectable</span>()
+<span class="ck">export class</span> RolesGuard <span class="ck">implements</span> CanActivate {
+  canActivate(ctx: ExecutionContext): boolean {
+    <span class="ck">const</span> required = this.reflector.get&lt;Role[]&gt;(<span class="cs">'roles'</span>, ctx.getHandler());
+    <span class="ck">const</span> user = ctx.switchToHttp().getRequest().user;
+    <span class="ck">return</span> required.includes(user.role);
+  }
+}
+
+<span class="cm">// Usage in controller:</span>
+@<span class="ct">Get</span>(<span class="cs">'packing-list'</span>)
+@<span class="ct">UseGuards</span>(JwtAuthGuard, RolesGuard)
+@<span class="ct">Roles</span>(Role.ADMIN, Role.KITCHEN)
+getPackingList() { ... }</div>
+
+<h3>Role Permissions Matrix</h3>
+<table>
+  <thead><tr><th>Permission</th><th>CUSTOMER</th><th>AGENT</th><th>KITCHEN</th><th>ADMIN</th></tr></thead>
+  <tbody>
+    <tr><td>Own subscription CRUD</td><td class="tg">✓</td><td>—</td><td>—</td><td class="tg">✓</td></tr>
+    <tr><td>Any subscription read</td><td>—</td><td>—</td><td>—</td><td class="tg">✓</td></tr>
+    <tr><td>View own orders</td><td class="tg">✓</td><td>—</td><td>—</td><td class="tg">✓</td></tr>
+    <tr><td>Update order status</td><td>—</td><td class="tg">✓ (own)</td><td>—</td><td class="tg">✓</td></tr>
+    <tr><td>View packing list</td><td>—</td><td>—</td><td class="tg">✓</td><td class="tg">✓</td></tr>
+    <tr><td>Menu management</td><td>—</td><td>—</td><td class="ty">Read only</td><td class="tg">✓ Full</td></tr>
+    <tr><td>Payment history</td><td class="tg">✓ (own)</td><td>—</td><td>—</td><td class="tg">✓</td></tr>
+    <tr><td>Issue refunds</td><td>—</td><td>—</td><td>—</td><td class="tg">✓</td></tr>
+    <tr><td>User management</td><td>—</td><td>—</td><td>—</td><td class="tg">✓</td></tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+<!-- ════════ SUBSCRIPTION FEATURE ════════ -->
+<div class="sec" id="sec-feat-subscription">
+<div class="topbar"><div><div class="tb-eye">FEATURES</div><h1>Subscription Engine</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">13 — SUBSCRIPTIONS</div>
+  <h2>Subscription Engine Deep Dive</h2>
+  <p>State machine, lifecycle management, pause/resume, plan upgrades, and auto-renewal.</p>
+</div>
+
+<h3>Complete State Machine</h3>
+<div class="codeblock">                    ┌─────────────────────────┐
+                    │     Subscription States     │
+                    └─────────────────────────────┘
+
+   [Payment initiated]──→ PENDING ──[Payment confirmed]──→ ACTIVE
+                                                              │
+                              ┌───────────────────────────────┤
+                              │                               │
+                              ▼                               ▼
+                           PAUSED                         EXPIRED
+                         [user requested]              [end_date reached,
+                              │                        no auto-renew]
+                              │
+                        [resume date]
+                              │
+                              ▼
+                           ACTIVE ←──── [renewal payment success]
+                              │
+                              │ [cancel requested]
+                              ▼
+                          CANCELLED
+                         [end of cycle]
+
+    PAYMENT_FAILED ──[3 retries fail]──→ SUSPENDED (grace 48h) ──→ CANCELLED</div>
+
+<h3>Plan Upgrade/Downgrade with Proration</h3>
+<div class="codeblock"><span class="cm">// Proration calculation for upgrade: Daily → Monthly</span>
+<span class="ck">function</span> calculateProration(sub: Subscription, newPlan: Plan) {
+  <span class="ck">const</span> daysRemaining = differenceInDays(sub.endDate, today());
+  <span class="ck">const</span> dailyRate = sub.plan.price / sub.plan.durationDays;
+  <span class="ck">const</span> creditForUnused = dailyRate * daysRemaining;
+
+  <span class="ck">const</span> newPlanTotal = newPlan.price;
+  <span class="ck">const</span> chargeNow = Math.max(<span class="cn">0</span>, newPlanTotal - creditForUnused);
+
+  <span class="ck">return</span> {
+    creditForUnused,   <span class="cm">// ₹ credit from old plan remaining days</span>
+    chargeNow,         <span class="cm">// ₹ to charge immediately for new plan</span>
+    newEndDate: addDays(today(), newPlan.durationDays),
+  };
+}</div>
+
+<h3>Skip Delivery Logic</h3>
+<div class="codeblock"><span class="cm">// POST /orders/:id/skip</span>
+<span class="ck">async</span> skipDelivery(orderId: string, userId: string) {
+  <span class="ck">const</span> order = <span class="ck">await</span> this.orderRepo.findByIdAndUser(orderId, userId);
+
+  <span class="cm">// Business rule: cutoff is 10 PM the night before delivery</span>
+  <span class="ck">const</span> cutoff = subHours(startOfDay(order.deliveryDate), <span class="cn">2</span>); <span class="cm">// 10 PM previous day</span>
+  <span class="ck">if</span> (isAfter(now(), cutoff)) {
+    throw <span class="ck">new</span> BusinessRuleError(
+      <span class="cs">'CUTOFF_PASSED'</span>,
+      <span class="cs">'Skip deadline has passed. Contact support if urgent.'</span>
+    );
+  }
+
+  <span class="ck">await</span> this.orderRepo.updateStatus(orderId, <span class="cs">'SKIPPED'</span>);
+  <span class="cm">// No refund for skips — but track for potential credits</span>
+  <span class="cm">// Notify agent: this order is no longer assigned</span>
+}</div>
+</div>
+</div>
+
+<!-- ════════ CATALOG ════════ -->
+<div class="sec" id="sec-feat-catalog">
+<div class="topbar"><div><div class="tb-eye">FEATURES</div><h1>Menu & Catalog</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">14 — CATALOG</div>
+  <h2>Menu, Bowl Builder & Nutrition</h2>
+  <p>How the food catalog works, how customers build bowls, and how nutrition is tracked.</p>
+</div>
+
+<h3>Menu Item Categories</h3>
+<div class="grid g3">
+  <div class="card g"><div class="ci">🍇</div><div class="ct">Fruit Bowls</div><div class="cb">Seasonal & tropical mixed fruit bowls. Fresh, pre-cut, ready-to-eat. Tagged with vitamins and natural sugar content.</div></div>
+  <div class="card y"><div class="ci">🥜</div><div class="ct">Healthy Snack Bowls</div><div class="cb">Granola, mixed nuts, yogurt parfaits, energy bites, trail mix. Protein and fiber forward.</div></div>
+  <div class="card o"><div class="ci">🌿</div><div class="ct">Nutrition Items</div><div class="cb">Superfoods, protein bars, chia puddings, overnight oats, supplements. Full macro tracking.</div></div>
+</div>
+
+<h3>Complete Menu Item Data Model</h3>
+<div class="codeblock">{
+  <span class="cs">"id"</span>: <span class="cs">"item_tropical_001"</span>,
+  <span class="cs">"name"</span>: <span class="cs">"Tropical Sunrise Bowl"</span>,
+  <span class="cs">"type"</span>: <span class="cs">"FRUIT_BOWL"</span>,
+  <span class="cs">"description"</span>: <span class="cs">"Fresh mango, pineapple, papaya & coconut flakes"</span>,
+  <span class="cs">"price"</span>: <span class="cn">149</span>,
+  <span class="cs">"isAvailable"</span>: <span class="ck">true</span>,
+  <span class="cs">"imageUrl"</span>: <span class="cs">"https://cdn.freshbowl.in/items/tropical.webp"</span>,
+  <span class="cs">"nutrition"</span>: {
+    <span class="cs">"calories"</span>: <span class="cn">180</span>, <span class="cs">"protein_g"</span>: <span class="cn">2.5</span>, <span class="cs">"carbs_g"</span>: <span class="cn">42</span>,
+    <span class="cs">"fat_g"</span>: <span class="cn">1.2</span>, <span class="cs">"fiber_g"</span>: <span class="cn">4.8</span>, <span class="cs">"sugar_g"</span>: <span class="cn">35</span>,
+    <span class="cs">"sodium_mg"</span>: <span class="cn">15</span>,
+    <span class="cs">"vitamins"</span>: [<span class="cs">"C"</span>, <span class="cs">"A"</span>, <span class="cs">"B6"</span>]
+  },
+  <span class="cs">"tags"</span>: [<span class="cs">"vegan"</span>, <span class="cs">"gluten-free"</span>, <span class="cs">"diabetic-friendly"</span>, <span class="cs">"no-added-sugar"</span>],
+  <span class="cs">"allergens"</span>: [<span class="cs">"tree-nuts"</span>],
+  <span class="cs">"portionSizes"</span>: [
+    { <span class="cs">"size"</span>: <span class="cs">"S"</span>, <span class="cs">"weight_g"</span>: <span class="cn">150</span>, <span class="cs">"priceMultiplier"</span>: <span class="cn">0.8</span> },
+    { <span class="cs">"size"</span>: <span class="cs">"M"</span>, <span class="cs">"weight_g"</span>: <span class="cn">250</span>, <span class="cs">"priceMultiplier"</span>: <span class="cn">1.0</span> },
+    { <span class="cs">"size"</span>: <span class="cs">"L"</span>, <span class="cs">"weight_g"</span>: <span class="cn">350</span>, <span class="cs">"priceMultiplier"</span>: <span class="cn">1.25</span> }
+  ],
+  <span class="cs">"availableDays"</span>: [<span class="cs">"MON"</span>, <span class="cs">"WED"</span>, <span class="cs">"FRI"</span>, <span class="cs">"SUN"</span>],
+  <span class="cs">"isSeasonalItem"</span>: <span class="ck">false</span>,
+  <span class="cs">"preparationMinutes"</span>: <span class="cn">5</span>
+}</div>
+
+<h3>Nutrition Dashboard (Customer)</h3>
+<ul>
+  <li><strong>Daily Summary:</strong> Total calories, protein, carbs, fat consumed per day</li>
+  <li><strong>Weekly Trends:</strong> Line chart of calorie intake across 7 days</li>
+  <li><strong>Vitamin Tracker:</strong> Which vitamins received this week (from all delivered bowls)</li>
+  <li><strong>Goal Progress:</strong> If user sets a calorie goal, shows progress bar daily</li>
+  <li><strong>Top Items:</strong> Most consumed items and their nutritional contribution</li>
+  <li><strong>Export:</strong> Download weekly/monthly nutrition report as PDF</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════ ORDERS ════════ -->
+<div class="sec" id="sec-feat-orders">
+<div class="topbar"><div><div class="tb-eye">FEATURES</div><h1>Order Management</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">15 — ORDERS</div>
+  <h2>Order Lifecycle & Management</h2>
+  <p>How orders are created, flow through statuses, and handled in edge cases.</p>
+</div>
+
+<h3>Order Status Flow</h3>
+<div class="flow">
+  <div class="fs fh">PENDING</div><div class="fa">→</div>
+  <div class="fs fy">PREPARING</div><div class="fa">→</div>
+  <div class="fs fy">PACKED</div><div class="fa">→</div>
+  <div class="fs fh">OUT_FOR_DELIVERY</div><div class="fa">→</div>
+  <div class="fs fh">DELIVERED ✓</div>
+</div>
+<p style="margin-top:8px;">Alternative paths: <code>SKIPPED</code> (by customer before cutoff) · <code>FAILED_DELIVERY</code> (agent couldn't deliver) · <code>RESCHEDULED</code> (failed then rescheduled)</p>
+
+<h3>Status Transition Ownership</h3>
+<table>
+  <thead><tr><th>Transition</th><th>Who Triggers</th><th>How</th></tr></thead>
+  <tbody>
+    <tr><td>PENDING → PREPARING</td><td>Kitchen admin</td><td>Clicks "Start Preparing" on packing list view</td></tr>
+    <tr><td>PREPARING → PACKED</td><td>Kitchen admin</td><td>Clicks "Mark Packed" on each order or batch</td></tr>
+    <tr><td>PACKED → OUT_FOR_DELIVERY</td><td>Agent</td><td>Taps "Pick Up" in agent app when leaving kitchen</td></tr>
+    <tr><td>OUT_FOR_DELIVERY → DELIVERED</td><td>Agent</td><td>Taps "Delivered" + optional photo in agent app</td></tr>
+    <tr><td>Any → SKIPPED</td><td>Customer</td><td>Taps "Skip Tomorrow's Delivery" before 10 PM</td></tr>
+    <tr><td>OUT_FOR_DELIVERY → FAILED</td><td>Agent</td><td>Taps "Failed Delivery" with reason selection</td></tr>
+  </tbody>
+</table>
+
+<h3>Failed Delivery Handling</h3>
+<div class="codeblock"><span class="ck">if</span> (order.status === <span class="cs">'FAILED_DELIVERY'</span>) {
+  <span class="cm">// 1. Immediate notification to customer (WhatsApp)</span>
+  <span class="cm">//    "We couldn't deliver your bowl — customer was absent"</span>
+
+  <span class="cm">// 2. Customer resolution options (shown in app):</span>
+  <span class="cm">//    a. Reschedule to today afternoon slot (if available)</span>
+  <span class="cm">//    b. Add ₹[amount] credit to next billing</span>
+  <span class="cm">//    c. Request refund (only for non-daily plans)</span>
+
+  <span class="cm">// 3. Admin is alerted if failure rate for agent > 5%</span>
+  <span class="cm">// 4. Failure is logged for agent performance metrics</span>
+}</div>
+
+<h3>Real-Time Order Tracking</h3>
+<p>When order status becomes <code>OUT_FOR_DELIVERY</code>:</p>
+<ul>
+  <li>Customer sees a live map with agent's dot moving in real-time</li>
+  <li>ETA calculated using Google Maps Distance Matrix from agent's current location</li>
+  <li>Updates via Server-Sent Events (SSE) — no WebSocket needed for one-way push</li>
+  <li>Agent location polled from Redis (updated every 60s by agent app)</li>
+  <li>Once delivered, map replaced with "Delivered ✓" confirmation with timestamp</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════ DELIVERY ════════ -->
+<div class="sec" id="sec-feat-delivery">
+<div class="topbar"><div><div class="tb-eye">FEATURES</div><h1>Delivery System</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">16 — DELIVERY</div>
+  <h2>Delivery Zones, Agents & Routing</h2>
+  <p>How the physical delivery operation is managed: zone assignment, route optimization, and agent tools.</p>
+</div>
+
+<h3>Zone System Design</h3>
+<div class="grid g2">
+  <div class="card b">
+    <div class="ct">📍 Zone Setup</div>
+    <div class="cb">City divided into 5–15 zones by pincode clusters. Admin assigns primary + backup agent to each zone. A subscription's delivery zone is determined by address pincode at subscription creation time.</div>
+  </div>
+  <div class="card g">
+    <div class="ct">⚙️ Auto-Assignment</div>
+    <div class="cb">At 5:00 AM daily, the delivery assignment job runs. For each zone with orders today, assigns primary agent. If primary is marked unavailable, assigns backup. Admin can manually reassign any order.</div>
+  </div>
+</div>
+
+<h3>Route Optimization</h3>
+<div class="codeblock"><span class="cm">// 5:00 AM job: optimize agent routes after assignment</span>
+<span class="ck">async</span> optimizeAgentRoute(agentId: string, date: Date) {
+  <span class="ck">const</span> orders = <span class="ck">await</span> orderRepo.findByAgentAndDate(agentId, date);
+  <span class="ck">const</span> addresses = orders.map(o => ({ lat: o.address.lat, lng: o.address.lng }));
+
+  <span class="cm">// Google Maps Distance Matrix API for TSP approximation</span>
+  <span class="ck">const</span> matrix = <span class="ck">await</span> googleMaps.distanceMatrix({
+    origins: [KITCHEN_LOCATION, ...addresses],
+    destinations: addresses,
+    mode: <span class="cs">'driving'</span>,
+    departureTime: <span class="cs">'now'</span>
+  });
+
+  <span class="cm">// Nearest neighbor heuristic for route ordering</span>
+  <span class="ck">const</span> optimizedOrder = nearestNeighbor(matrix.rows);
+
+  <span class="cm">// Save route order to orders table</span>
+  <span class="ck">for</span> (<span class="ck">let</span> i = <span class="cn">0</span>; i &lt; optimizedOrder.length; i++) {
+    <span class="ck">await</span> orderRepo.setRouteOrder(orders[optimizedOrder[i]].id, i + <span class="cn">1</span>);
+  }
+}</div>
+
+<h3>Kitchen Packing List</h3>
+<p>Generated at 5:00 AM after agent assignment. Format:</p>
+<div class="codeblock"><span class="cm">PACKING LIST — 2025-06-15 (Bangalore South Zone)</span>
+<span class="cm">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+AGENT: Ravi Kumar (📱 9876543210)
+Total Deliveries: 12
+
+Order #001 — Priya S. | HSR Layout, 560102
+  × 1 Tropical Sunrise Bowl (M) [VEGAN]
+  × 1 Granola Power Bowl (M)
+
+Order #002 — Arjun M. | Koramangala, 560034
+  × 2 Mango Tango Bowl (L) [DIABETIC-FRIENDLY]
+
+<span class="cm">━━━━━━ TOTAL ITEMS TO PACK ━━━━━━</span>
+Tropical Sunrise Bowl (M): 8
+Granola Power Bowl (M): 5
+Mango Tango Bowl (L): 3
+...</div>
+
+<h3>Agent Mobile App Screens</h3>
+<ul>
+  <li><strong>Today Screen:</strong> Ordered list of deliveries by route sequence. Shows address, customer name, slot time, bowl summary</li>
+  <li><strong>Map Screen:</strong> Full-screen route map with stops. Navigate to next stop with one tap (opens Google Maps)</li>
+  <li><strong>Delivery Screen:</strong> Customer details, ring bell / call buttons, Mark Delivered + photo capture, or Mark Failed with reason</li>
+  <li><strong>History Screen:</strong> Past deliveries, performance metrics (on-time %, ratings received)</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════ PAYMENTS ════════ -->
+<div class="sec" id="sec-feat-payments">
+<div class="topbar"><div><div class="tb-eye">FEATURES</div><h1>Payments & Billing</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">17 — PAYMENTS</div>
+  <h2>Razorpay Integration & Billing Engine</h2>
+  <p>Complete payment flow, auto-renewal architecture, failed payment handling, and invoice generation.</p>
+</div>
+
+<h3>Payment Flows by Plan Type</h3>
+<div class="grid g3">
+  <div class="card o">
+    <div class="ct">Daily Trial</div>
+    <div class="cb">One-time payment. Standard Razorpay order → payment → verify. No mandate required. Manual re-purchase for each day.</div>
+  </div>
+  <div class="card y">
+    <div class="ct">Weekly Plan</div>
+    <div class="cb">Razorpay Subscription with weekly interval. UPI AutoPay or card mandate collected at signup. Auto-charged every 7 days.</div>
+  </div>
+  <div class="card g">
+    <div class="ct">Monthly Plan</div>
+    <div class="cb">Razorpay Subscription with monthly interval. Mandate collected at signup. Auto-charged 3 days before renewal date.</div>
+  </div>
+</div>
+
+<h3>Subscription Checkout Flow</h3>
+<div class="flow">
+  <div class="fs fh">POST /subscriptions</div><div class="fa">→</div>
+  <div class="fs">Backend creates Razorpay Subscription</div><div class="fa">→</div>
+  <div class="fs">Returns: {subscriptionId, planId, key}</div><div class="fa">→</div>
+  <div class="fs fh">Frontend: Razorpay Checkout opens</div><div class="fa">→</div>
+  <div class="fs">User authorizes UPI AutoPay / card</div><div class="fa">→</div>
+  <div class="fs fy">Webhook: subscription.authenticated</div><div class="fa">→</div>
+  <div class="fs fh">Subscription → ACTIVE</div>
+</div>
+
+<h3>Auto-Renewal & Failed Payment Handling</h3>
+<div class="codeblock"><span class="cm">// Razorpay handles auto-charge on renewal date</span>
+<span class="cm">// We listen to webhooks:</span>
+
+POST /payments/webhook
+
+<span class="cm">subscription.charged  →  Extend subscription end_date</span>
+                          Create payment record
+                          Generate invoice PDF → S3
+                          Email invoice to customer
+                          Send WhatsApp: "Plan renewed successfully"
+
+<span class="cm">subscription.halted   →  Status: PAYMENT_FAILED</span>
+                          Send urgent notification (all channels)
+                          Retry via Razorpay in 24h, 48h, 72h
+                          Grace period: 48h (deliveries continue)
+                          After grace: status → SUSPENDED
+
+<span class="cm">payment.failed (3rd)  →  Status: SUSPENDED</span>
+                          Stop order generation
+                          Allow customer to pay manually to reactivate
+                          After 7 days suspended → CANCELLED</div>
+
+<h3>Invoice PDF Generation</h3>
+<div class="codeblock"><span class="cm">// Triggered by invoice-gen BullMQ queue after payment success</span>
+
+<span class="ck">async</span> generateInvoice(paymentId: string) {
+  <span class="ck">const</span> payment = <span class="ck">await</span> db.payment.findUnique({ where: { id: paymentId }, include: { user, subscription, plan }});
+  <span class="ck">const</span> html = renderInvoiceTemplate({
+    invoiceNumber: <span class="cs">`FB-${payment.id.slice(-8).toUpperCase()}`</span>,
+    date: payment.createdAt,
+    customer: payment.user,
+    plan: payment.subscription.plan,
+    subtotal: payment.amount - payment.gstAmount,
+    gst: payment.gstAmount,
+    total: payment.amount
+  });
+
+  <span class="ck">const</span> pdf = <span class="ck">await</span> chromium.puppeteer.pdf({ content: html });
+  <span class="ck">const</span> s3Key = <span class="cs">`invoices/${payment.userId}/${paymentId}.pdf`</span>;
+  <span class="ck">await</span> s3.upload({ Bucket: BUCKET, Key: s3Key, Body: pdf });
+  <span class="ck">await</span> db.payment.update({ where: {id: paymentId}, data: { invoiceUrl: s3Key }});
+  <span class="cm">// Then queue: send invoice email with download link</span>
+}</div>
+</div>
+</div>
+
+<!-- ════════ NOTIFICATIONS ════════ -->
+<div class="sec" id="sec-feat-notifications">
+<div class="topbar"><div><div class="tb-eye">FEATURES</div><h1>Notification System</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">18 — NOTIFICATIONS</div>
+  <h2>Multi-Channel Notification Architecture</h2>
+  <p>WhatsApp, email, push, SMS — how every notification gets to the right person on the right channel.</p>
+</div>
+
+<h3>Channel Priority (India-first)</h3>
+<div class="layers">
+  <div class="layer lg"><div class="ln">WhatsApp</div><div class="ld">Primary channel for transactional alerts. 98% open rate in India. Via Twilio or Wati (WhatsApp Business API). Template-based (pre-approved by Meta).</div><div class="ltags"><span class="tag tg">PRIMARY</span></div></div>
+  <div class="layer lb"><div class="ln">Push (FCM)</div><div class="ld">Firebase Cloud Messaging for web (PWA) and mobile. Real-time delivery status updates. Silent pushes can trigger app data refresh.</div><div class="ltags"><span class="tag tb">REAL-TIME</span></div></div>
+  <div class="layer ly"><div class="ln">Email</div><div class="ld">Via SendGrid. Used for invoices, subscription confirmations, weekly nutrition reports. Rich HTML templates. Lower urgency content.</div><div class="ltags"><span class="tag ty">TRANSACTIONAL</span></div></div>
+  <div class="layer lr"><div class="ln">SMS</div><div class="ld">Via MSG91. Fallback when WhatsApp fails. OTP backup. Low cost. Plain text only.</div><div class="ltags"><span class="tag">FALLBACK</span></div></div>
+</div>
+
+<h3>Complete Notification Events</h3>
+<table>
+  <thead><tr><th>Trigger Event</th><th>WhatsApp</th><th>Email</th><th>Push</th><th>SMS</th></tr></thead>
+  <tbody>
+    <tr><td>Registration</td><td class="tg">✓ Welcome</td><td class="tg">✓ Verify email</td><td>—</td><td>—</td></tr>
+    <tr><td>OTP request</td><td>—</td><td>—</td><td>—</td><td class="tg">✓ OTP</td></tr>
+    <tr><td>Subscription created</td><td class="tg">✓ Confirmation</td><td class="tg">✓ Details + invoice</td><td class="tg">✓</td><td>—</td></tr>
+    <tr><td>Daily order generated (6 AM)</td><td class="tg">✓ "Bowl coming!"</td><td>—</td><td class="tg">✓</td><td>—</td></tr>
+    <tr><td>Order out for delivery</td><td class="tg">✓ ETA + track link</td><td>—</td><td class="tg">✓ Live</td><td>—</td></tr>
+    <tr><td>Order delivered</td><td class="tg">✓ + Rate prompt</td><td>—</td><td class="tg">✓</td><td>—</td></tr>
+    <tr><td>Failed delivery</td><td class="tg">✓ Options shown</td><td>—</td><td class="tg">✓</td><td class="ty">✓ Backup</td></tr>
+    <tr><td>Payment success</td><td class="tg">✓ Receipt</td><td class="tg">✓ Invoice PDF</td><td>—</td><td>—</td></tr>
+    <tr><td>Payment failed</td><td class="tg">✓ Urgent</td><td class="tg">✓</td><td class="tg">✓</td><td class="tg">✓</td></tr>
+    <tr><td>Renewal in 3 days</td><td class="tg">✓ Reminder</td><td class="tg">✓</td><td>—</td><td>—</td></tr>
+    <tr><td>Subscription paused</td><td class="tg">✓ Confirm</td><td class="tg">✓</td><td>—</td><td>—</td></tr>
+    <tr><td>Weekly nutrition summary</td><td>—</td><td class="tg">✓ Rich report</td><td>—</td><td>—</td></tr>
+    <tr><td>Subscription cancelled</td><td class="tg">✓ Confirmation</td><td class="tg">✓ + Resubscribe CTA</td><td>—</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<h3>Notification Queue Architecture</h3>
+<div class="codeblock"><span class="cm">// All notifications are queued, never sent synchronously</span>
+
+<span class="cm">// Producer (anywhere in codebase):</span>
+this.notifQueue.add(<span class="cs">'send'</span>, {
+  userId: <span class="cs">'user_abc'</span>,
+  template: <span class="cs">'ORDER_DISPATCHED'</span>,
+  channels: [<span class="cs">'whatsapp'</span>, <span class="cs">'push'</span>],
+  variables: { eta: <span class="cs">'09:30 AM'</span>, trackUrl: <span class="cs">'freshbowl.in/track/xyz'</span> }
+}, {
+  attempts: <span class="cn">3</span>,
+  backoff: { type: <span class="cs">'exponential'</span>, delay: <span class="cn">10000</span> },
+  priority: <span class="cn">1</span>  <span class="cm">// 1=high, 5=low</span>
+});
+
+<span class="cm">// Worker processes each notification:</span>
+@<span class="ct">Process</span>(<span class="cs">'send'</span>)
+<span class="ck">async</span> processNotification(job: Job) {
+  <span class="ck">const</span> { userId, template, channels, variables } = job.data;
+  <span class="ck">const</span> user = <span class="ck">await</span> this.userRepo.findById(userId);
+  <span class="ck">const</span> tmpl = this.templates.get(template);
+
+  <span class="ck">for</span> (<span class="ck">const</span> channel <span class="ck">of</span> channels) {
+    <span class="ck">try</span> {
+      <span class="ck">await</span> this.senders[channel].send(user, tmpl.render(variables));
+      <span class="ck">await</span> this.logRepo.record({ userId, template, channel, status: <span class="cs">'SENT'</span> });
+    } <span class="ck">catch</span> (e) {
+      <span class="ck">await</span> this.logRepo.record({ userId, template, channel, status: <span class="cs">'FAILED'</span>, error: e.message });
+    }
+  }
+}</div>
+</div>
+</div>
+
+<!-- ════════ ADMIN ════════ -->
+<div class="sec" id="sec-feat-admin">
+<div class="topbar"><div><div class="tb-eye">FEATURES</div><h1>Admin Dashboard</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">19 — ADMIN</div>
+  <h2>Admin & Operations Dashboard</h2>
+  <p>Internal tool for the FreshBowl operations team. Covers analytics, customer management, order ops, and delivery management.</p>
+</div>
+
+<h3>Dashboard Modules</h3>
+<div class="grid g2">
+  <div class="card g"><div class="ci">📊</div><div class="ct">Revenue Analytics</div><div class="cb">MRR chart, ARR projection, revenue by plan type, daily revenue, churn rate trend, LTV by cohort. Recharts line and bar charts with date range picker.</div></div>
+  <div class="card g"><div class="ci">👥</div><div class="ct">Subscriber Analytics</div><div class="cb">New subs per day/week, plan distribution pie, geographic heatmap of customers by pincode, retention curves, upgrade/downgrade funnel.</div></div>
+  <div class="card y"><div class="ci">🍱</div><div class="ct">Menu Management</div><div class="cb">Table of all items with availability toggle. Create/edit form with image upload (S3 direct), nutrition fields, tag selection. Bulk enable/disable by day.</div></div>
+  <div class="card y"><div class="ci">📦</div><div class="ct">Daily Operations</div><div class="cb">Today's packing list (printable). Order status overview: how many PENDING/PREPARING/DELIVERED. Failed delivery count. Quick actions: reassign agent, mark resolved.</div></div>
+  <div class="card o"><div class="ci">👤</div><div class="ct">Customer Management</div><div class="cb">Search by name/phone/email. View full subscription history, payment history, delivery history. Actions: issue credit, pause sub, cancel sub, reset password.</div></div>
+  <div class="card o"><div class="ci">🚴</div><div class="ct">Agent Management</div><div class="cb">Agent list with zone assignment. Mark available/unavailable. Today's performance: deliveries completed, failed, on-time rate. Create zone, assign pincodes.</div></div>
+  <div class="card b"><div class="ci">💳</div><div class="ct">Payment Operations</div><div class="cb">All transactions with status. Failed payments queue needing attention. Issue refund (calls Razorpay). Download payment CSV for accounting.</div></div>
+  <div class="card b"><div class="ci">📢</div><div class="ct">Notifications</div><div class="cb">Send broadcast WhatsApp / email to segments: all active subs, specific plan, specific zone. Schedule for future send. View delivery stats per notification.</div></div>
+</div>
+
+<h3>Key Admin Metrics</h3>
+<div class="grid g4">
+  <div class="metric"><div class="mv">MRR</div><div class="ml">Monthly Recurring Revenue</div><div class="md">Active monthly subs × price + weekly subs annualized</div></div>
+  <div class="metric"><div class="mv">Churn %</div><div class="ml">Monthly Churn Rate</div><div class="md">Cancelled ÷ Active start-of-month × 100</div></div>
+  <div class="metric"><div class="mv">DSR %</div><div class="ml">Delivery Success Rate</div><div class="md">Delivered ÷ (Delivered + Failed) × 100</div></div>
+  <div class="metric"><div class="mv">LTV</div><div class="ml">Avg Customer Lifetime Value</div><div class="md">Avg monthly revenue × avg subscription months</div></div>
+</div>
+</div>
+</div>
+
+<!-- ════════ DEVOPS ════════ -->
+<div class="sec" id="sec-infra-devops">
+<div class="topbar"><div><div class="tb-eye">INFRASTRUCTURE</div><h1>DevOps & Cloud</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">20 — DEVOPS</div>
+  <h2>AWS Architecture, Docker & CI/CD</h2>
+  <p>Complete infrastructure setup from local development to production deployment.</p>
+</div>
+
+<h3>Environments</h3>
+<div class="grid g3">
+  <div class="card o"><div class="ct">🖥️ Local (Dev)</div><div class="cb">Docker Compose: Postgres 15 + Redis 7 + API (hot reload) + Frontend (hot reload). No external services — Razorpay in test mode, SMS mocked, emails to Mailhog.</div></div>
+  <div class="card y"><div class="ct">🧪 Staging</div><div class="cb">AWS ECS Fargate. Real services in test mode. Same Terraform config as prod. Used for QA, PM review, and UAT before every release.</div></div>
+  <div class="card g"><div class="ct">🚀 Production</div><div class="cb">AWS ECS Fargate (auto-scaled). RDS PostgreSQL Multi-AZ. ElastiCache Redis. CloudFront CDN. Route53 DNS. All Terraform-managed.</div></div>
+</div>
+
+<h3>Production AWS Architecture</h3>
+<div class="arch-box">VPC (10.0.0.0/16)
+├── Public Subnets (2 AZs)
+│   ├── ALB (Application Load Balancer) — HTTPS on port 443
+│   └── NAT Gateway
+│
+├── Private Subnets (2 AZs) — Application Tier
+│   └── ECS Fargate Service
+│       ├── API Tasks: 2–10 tasks (auto-scale by CPU/memory)
+│       │   Each task: 1vCPU, 2GB RAM
+│       └── Worker Tasks: 1–3 tasks (BullMQ workers)
+│           Each task: 0.5vCPU, 1GB RAM
+│
+└── Database Subnets (2 AZs) — Data Tier
+    ├── RDS PostgreSQL 15 (Multi-AZ)
+    │   Primary: db.t3.medium (2vCPU, 4GB, 100GB SSD)
+    │   Standby: Automatic failover in &lt;60s
+    └── ElastiCache Redis (cluster.t3.micro)
+        2 nodes (primary + replica)
+
+S3 Buckets:
+  freshbowl-media/       → Menu images, profile photos
+  freshbowl-invoices/    → PDF invoices (private, signed URLs)
+  freshbowl-proofs/      → Delivery proof photos
+
+CloudFront Distributions:
+  cdn.freshbowl.in → S3 freshbowl-media (public)
+  api.freshbowl.in → ALB (API)
+  freshbowl.in     → Vercel (Next.js)</div>
+
+<h3>Docker Compose (Local Dev)</h3>
+<div class="codeblock"><span class="cm"># docker-compose.yml</span>
+<span class="ck">services</span>:
+  postgres:
+    image: postgres:<span class="cn">15</span>
+    environment:
+      POSTGRES_DB: freshbowl
+      POSTGRES_PASSWORD: devpass
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    ports: [<span class="cs">"5432:5432"</span>]
+
+  redis:
+    image: redis:<span class="cn">7</span>-alpine
+    ports: [<span class="cs">"6379:6379"</span>]
+
+  mailhog:                    <span class="cm"># local email server (catch-all)</span>
+    image: mailhog/mailhog
+    ports: [<span class="cs">"1025:1025"</span>, <span class="cs">"8025:8025"</span>]
+
+  api:
+    build: { context: ./backend, target: dev }
+    environment:
+      DATABASE_URL: postgresql://postgres:devpass@postgres:5432/freshbowl
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+    volumes: [./backend/src:/app/src]   <span class="cm"># hot reload</span>
+    ports: [<span class="cs">"3001:3001"</span>]
+    depends_on: [postgres, redis]
+
+  frontend:
+    build: { context: ./web, target: dev }
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:3001/v1
+    volumes: [./web:/app]
+    ports: [<span class="cs">"3000:3000"</span>]</div>
+
+<h3>CI/CD Pipeline (GitHub Actions)</h3>
+<div class="codeblock"><span class="cm"># .github/workflows/deploy.yml</span>
+<span class="ck">on</span>: push: branches: [main]
+
+<span class="ck">jobs</span>:
+  test:
+    <span class="cm">- checkout + install deps</span>
+    <span class="cm">- Run lint (ESLint + Prettier check)</span>
+    <span class="cm">- Run unit tests (Jest) — fail if coverage &lt; 80%</span>
+    <span class="cm">- Run integration tests (Postgres test DB in service container)</span>
+    <span class="cm">- Type check (tsc --noEmit)</span>
+
+  build-and-push:
+    needs: test
+    <span class="cm">- Build Docker image (multi-stage)</span>
+    <span class="cm">- Push to AWS ECR (Elastic Container Registry)</span>
+    <span class="cm">- Tag: {commit-sha} + latest</span>
+
+  deploy-staging:
+    needs: build-and-push
+    <span class="cm">- Update ECS service task definition (staging)</span>
+    <span class="cm">- Run DB migrations (Prisma migrate deploy)</span>
+    <span class="cm">- Wait for ECS service stable</span>
+    <span class="cm">- Run smoke tests (Playwright against staging API)</span>
+
+  deploy-production:
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    environment: production  <span class="cm">← requires manual approval</span>
+    <span class="cm">- Update ECS service task definition (prod)</span>
+    <span class="cm">- Blue/Green deployment via AWS CodeDeploy</span>
+    <span class="cm">- Notify Slack on success/failure</span></div>
+</div>
+</div>
+
+<!-- ════════ SECURITY ════════ -->
+<div class="sec" id="sec-infra-security">
+<div class="topbar"><div><div class="tb-eye">INFRASTRUCTURE</div><h1>Security</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">21 — SECURITY</div>
+  <h2>Security Architecture</h2>
+  <p>Encryption, PCI compliance, input validation, rate limiting, and secret management.</p>
+</div>
+
+<h3>Security Layers</h3>
+<div class="grid g2">
+  <div class="card g"><div class="ct">🔒 Encryption</div><div class="cb"><strong>In transit:</strong> TLS 1.3 enforced via CloudFront + ALB. HTTP redirected to HTTPS.<br/><strong>At rest:</strong> RDS storage encrypted (AES-256). S3 server-side encryption. Redis ElastiCache encrypted.<br/><strong>Passwords:</strong> bcrypt with cost factor 12. Never stored plain.</div></div>
+  <div class="card y"><div class="ci"></div><div class="ct">🛑 Rate Limiting</div><div class="cb">Nginx + Redis-backed rate limiting:<br/>• Auth endpoints: 5 req/min per IP<br/>• OTP send: 3 per phone per 15 min<br/>• General API: 100 req/min per user<br/>• Admin API: 200 req/min<br/>429 response with Retry-After header.</div></div>
+  <div class="card b"><div class="ct">💳 PCI Compliance</div><div class="cb">Zero card data passes through our servers. Razorpay handles all card processing. We store only:<br/>• Razorpay payment_id (reference)<br/>• Razorpay subscription_id (reference)<br/>• Masked card last 4 digits (from webhook, display only)</div></div>
+  <div class="card o"><div class="ct">🧪 Input Validation</div><div class="cb">All API inputs validated with <strong>Zod</strong> schemas at controller level before reaching service layer. Prisma parameterized queries prevent SQL injection. Content-Security-Policy headers prevent XSS. CORS whitelist: only freshbowl.in domains.</div></div>
+  <div class="card p"><div class="ct">🔑 Secret Management</div><div class="cb">All credentials in <strong>AWS Secrets Manager</strong>. Never in .env files in production. Accessed via AWS SDK at runtime. Rotated quarterly. Local dev uses .env.local (gitignored).</div></div>
+  <div class="card"><div class="ct">📋 Audit Log</div><div class="cb">Every payment event, subscription change, admin action, and login written to <strong>audit_log</strong> table. Append-only (no UPDATE/DELETE on this table). Retained 2 years for compliance. Queryable by admin.</div></div>
+</div>
+
+<h3>OWASP Top 10 Coverage</h3>
+<table>
+  <thead><tr><th>Threat</th><th>Mitigation</th></tr></thead>
+  <tbody>
+    <tr><td>Injection (SQL, NoSQL)</td><td class="tg">Prisma parameterized queries. Never raw SQL with user input.</td></tr>
+    <tr><td>Broken Authentication</td><td class="tg">JWT rotation, HTTP-only cookies, bcrypt, OTP, account lockout after 5 failed logins.</td></tr>
+    <tr><td>Sensitive Data Exposure</td><td class="tg">TLS everywhere, no card data, encrypted at rest, secrets in AWS SM.</td></tr>
+    <tr><td>Broken Access Control</td><td class="tg">RolesGuard on every endpoint, users can only access own data.</td></tr>
+    <tr><td>Security Misconfiguration</td><td class="tg">Terraform IaC (no manual console changes), Security Groups restrict all ports except 443/80.</td></tr>
+    <tr><td>XSS</td><td class="tg">Content-Security-Policy headers. React escapes by default. Input sanitization.</td></tr>
+    <tr><td>CSRF</td><td class="tg">SameSite=Strict cookie. CSRF token for state-changing requests from web.</td></tr>
+    <tr><td>Insecure Dependencies</td><td class="tg">Dependabot alerts. npm audit in CI pipeline. Fail build on critical CVE.</td></tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+<!-- ════════ SCALING ════════ -->
+<div class="sec" id="sec-infra-scaling">
+<div class="topbar"><div><div class="tb-eye">INFRASTRUCTURE</div><h1>Scalability</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">22 — SCALABILITY</div>
+  <h2>Scaling Strategy</h2>
+  <p>How the system scales from 100 to 100,000 subscribers without architectural rewrites.</p>
+</div>
+
+<h3>Current Architecture Limits</h3>
+<table>
+  <thead><tr><th>Component</th><th>Current Capacity</th><th>Scales To</th><th>How</th></tr></thead>
+  <tbody>
+    <tr><td>API (ECS Fargate)</td><td>500 concurrent</td><td>10,000+</td><td>Auto-scale ECS tasks. Add more task instances.</td></tr>
+    <tr><td>PostgreSQL (RDS)</td><td>~5,000 subscribers</td><td>50,000+</td><td>Upgrade instance class. Add read replicas for analytics queries.</td></tr>
+    <tr><td>Redis (ElastiCache)</td><td>100K cache keys</td><td>Millions</td><td>Cluster mode with sharding.</td></tr>
+    <tr><td>Order Generation Job</td><td>10,000 orders in 5 min</td><td>100,000+</td><td>Parallelize with multiple BullMQ workers. Batch DB inserts.</td></tr>
+    <tr><td>Notifications</td><td>10K/day</td><td>1M+/day</td><td>Increase BullMQ concurrency. Rate-limit per channel to avoid provider limits.</td></tr>
+  </tbody>
+</table>
+
+<h3>Database Scaling Path</h3>
+<div class="codeblock">Phase 1 (0–5K subs):    Single RDS db.t3.medium
+Phase 2 (5K–20K subs):  Add 1 Read Replica → analytics queries go to replica
+Phase 3 (20K–100K):     Upgrade to db.r6g.large + 2 read replicas
+                         Add connection pooler (PgBouncer via RDS Proxy)
+Phase 4 (100K+):         Partition orders table by month (range partitioning)
+                         Consider TimescaleDB for time-series analytics</div>
+
+<h3>Microservices Extraction Order</h3>
+<p>When specific modules hit limits, extract them in this priority order:</p>
+<ol>
+  <li><strong>Notification Service</strong> — highest message volume, needs dedicated rate limiting</li>
+  <li><strong>Order Generation Service</strong> — can parallelize across multiple instances</li>
+  <li><strong>Analytics Service</strong> — separate read DB, OLAP workload</li>
+  <li><strong>Payment Service</strong> — isolation for PCI compliance simplification</li>
+</ol>
+
+<div class="hbox hb">
+  <strong>Key Design Decision:</strong> Because we built the monolith with strict module boundaries and event-based communication, extracting a module to a microservice means: move the module code to a new repo, replace EventEmitter with Kafka/RabbitMQ events, replace in-process service calls with HTTP/gRPC. The business logic doesn't change — only the transport layer.
+</div>
+</div>
+</div>
+
+<!-- ════════ MONITORING ════════ -->
+<div class="sec" id="sec-infra-monitoring">
+<div class="topbar"><div><div class="tb-eye">INFRASTRUCTURE</div><h1>Monitoring & Observability</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">23 — MONITORING</div>
+  <h2>Observability Stack</h2>
+  <p>Error tracking, performance metrics, logging, and alerting so you know before customers do.</p>
+</div>
+
+<h3>The Three Pillars</h3>
+<div class="grid g3">
+  <div class="card g"><div class="ci">📊</div><div class="ct">Metrics — Datadog</div><div class="cb">API response times (p50/p95/p99), error rates, ECS CPU/memory, RDS connections, BullMQ queue depth, active subscriber count. Custom dashboards per team.</div></div>
+  <div class="card b"><div class="ci">📝</div><div class="ct">Logs — CloudWatch + Loki</div><div class="cb">Structured JSON logs from all API instances. Log levels: ERROR/WARN/INFO. Correlation ID on every request for distributed tracing. Search and filter in Grafana.</div></div>
+  <div class="card o"><div class="ci">🐛</div><div class="ct">Errors — Sentry</div><div class="cb">Frontend (React) + Backend (Node.js) + Mobile (React Native). Stack traces with source maps. User context. Performance tracing. Slack alerts for new issues.</div></div>
+</div>
+
+<h3>Critical Alerts</h3>
+<table>
+  <thead><tr><th>Alert</th><th>Threshold</th><th>Channel</th><th>Severity</th></tr></thead>
+  <tbody>
+    <tr><td>Order generation job failed</td><td>Any failure</td><td>PagerDuty + Slack</td><td class="to">🔴 CRITICAL</td></tr>
+    <tr><td>Payment webhook failing</td><td>&gt;3 consecutive failures</td><td>PagerDuty + Slack</td><td class="to">🔴 CRITICAL</td></tr>
+    <tr><td>API error rate</td><td>&gt;5% over 5 min</td><td>Slack</td><td class="ty">🟡 HIGH</td></tr>
+    <tr><td>API p95 latency</td><td>&gt;1000ms over 5 min</td><td>Slack</td><td class="ty">🟡 HIGH</td></tr>
+    <tr><td>RDS CPU</td><td>&gt;80% over 5 min</td><td>Slack</td><td class="ty">🟡 HIGH</td></tr>
+    <tr><td>BullMQ queue depth</td><td>&gt;1000 jobs waiting</td><td>Slack</td><td class="ty">🟡 HIGH</td></tr>
+    <tr><td>Failed deliveries today</td><td>&gt;10% of total</td><td>Slack</td><td class="tg">🟢 MEDIUM</td></tr>
+    <tr><td>Notification failures</td><td>&gt;50 in 10 min</td><td>Slack</td><td class="tg">🟢 MEDIUM</td></tr>
+  </tbody>
+</table>
+
+<h3>Health Check Endpoint</h3>
+<div class="codeblock">GET /health
+{
+  <span class="cs">"status"</span>: <span class="cs">"ok"</span>,
+  <span class="cs">"checks"</span>: {
+    <span class="cs">"database"</span>: { <span class="cs">"status"</span>: <span class="cs">"up"</span>, <span class="cs">"latency_ms"</span>: <span class="cn">3</span> },
+    <span class="cs">"redis"</span>: { <span class="cs">"status"</span>: <span class="cs">"up"</span>, <span class="cs">"latency_ms"</span>: <span class="cn">1</span> },
+    <span class="cs">"queue"</span>: { <span class="cs">"status"</span>: <span class="cs">"up"</span>, <span class="cs">"waiting"</span>: <span class="cn">14</span> }
+  },
+  <span class="cs">"version"</span>: <span class="cs">"1.4.2"</span>,
+  <span class="cs">"uptime_s"</span>: <span class="cn">86400</span>
+}</div>
+</div>
+</div>
+
+<!-- ════════ TECH STACK ════════ -->
+<div class="sec" id="sec-techstack">
+<div class="topbar"><div><div class="tb-eye">DELIVERY</div><h1>Tech Stack Summary</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">24 — STACK</div>
+  <h2>Every Tool, Every Reason</h2>
+  <p>The complete technology stack with the reasoning behind each choice.</p>
+</div>
+
+<h3>Frontend</h3>
+<table>
+  <thead><tr><th>Tool</th><th>Version</th><th>Role</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Next.js</td><td class="tm">14 (App Router)</td><td>Customer Web + Admin</td><td>SSR/ISR/SSG flexibility, built-in routing, API routes for BFF, Vercel deployment</td></tr>
+    <tr><td>React Native + Expo</td><td class="tm">0.74 / SDK 51</td><td>iOS & Android App</td><td>Shared JS logic with web, Expo managed workflow for OTA updates, large community</td></tr>
+    <tr><td>TailwindCSS</td><td class="tm">3.4</td><td>Web Styling</td><td>Utility-first, JIT compiler, consistent design tokens, no CSS-in-JS overhead</td></tr>
+    <tr><td>shadcn/ui</td><td class="tm">latest</td><td>UI Components</td><td>Accessible, copy-paste components, built on Radix, customizable to brand</td></tr>
+    <tr><td>TanStack Query</td><td class="tm">v5</td><td>Server State</td><td>Automatic caching, background refetch, optimistic updates, offline support (mobile)</td></tr>
+    <tr><td>Zustand</td><td class="tm">4.x</td><td>Client State</td><td>Minimal boilerplate, no context/provider hell, persisted to localStorage/MMKV</td></tr>
+    <tr><td>React Navigation</td><td class="tm">6.x</td><td>Mobile Navigation</td><td>De facto standard for RN, native transitions, deep link support</td></tr>
+    <tr><td>Recharts</td><td class="tm">2.x</td><td>Data Visualization</td><td>React-native charting, nutrition dashboards, revenue charts in admin</td></tr>
+  </tbody>
+</table>
+
+<h3>Backend</h3>
+<table>
+  <thead><tr><th>Tool</th><th>Version</th><th>Role</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>NestJS</td><td class="tm">10.x</td><td>API Framework</td><td>TypeScript-first, built-in DI, module system maps perfectly to our domain modules</td></tr>
+    <tr><td>PostgreSQL</td><td class="tm">15</td><td>Primary Database</td><td>ACID transactions critical for billing; JSON support for flexible nutrition data</td></tr>
+    <tr><td>Prisma</td><td class="tm">5.x</td><td>ORM</td><td>Type-safe queries, auto-migration, great DX, Prisma Studio for DB inspection</td></tr>
+    <tr><td>Redis</td><td class="tm">7</td><td>Cache + Sessions</td><td>Sub-millisecond reads for menu cache, session storage, OTP codes, rate limiting</td></tr>
+    <tr><td>BullMQ</td><td class="tm">4.x</td><td>Job Queue</td><td>Redis-backed, retry logic, cron scheduling, monitoring via BullBoard UI</td></tr>
+    <tr><td>Zod</td><td class="tm">3.x</td><td>Validation</td><td>Runtime type safety for all API inputs. Shared schemas between frontend and backend possible.</td></tr>
+    <tr><td>Passport.js</td><td class="tm">0.7</td><td>Auth Strategies</td><td>JWT strategy + Google OAuth strategy. Integrates cleanly with NestJS guards.</td></tr>
+  </tbody>
+</table>
+
+<h3>External Services</h3>
+<table>
+  <thead><tr><th>Service</th><th>Purpose</th><th>Tier / Cost</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Razorpay</strong></td><td>Payments: UPI, cards, wallets, subscriptions, auto-renewal</td><td>2% per transaction</td></tr>
+    <tr><td><strong>Twilio / Wati</strong></td><td>WhatsApp Business API for delivery alerts and OTP</td><td>~₹0.50–1.50 per message</td></tr>
+    <tr><td><strong>SendGrid</strong></td><td>Transactional emails: invoices, welcome, nutrition reports</td><td>Free 100/day, ~$20/mo for scale</td></tr>
+    <tr><td><strong>Firebase (FCM)</strong></td><td>Push notifications to mobile + web (PWA)</td><td>Free tier sufficient for launch</td></tr>
+    <tr><td><strong>Google Maps Platform</strong></td><td>Address autocomplete, distance matrix for routing, tracking map</td><td>~$5–10/month at launch scale</td></tr>
+    <tr><td><strong>AWS S3</strong></td><td>Menu images, invoice PDFs, delivery proof photos</td><td>~$2–5/month at launch</td></tr>
+    <tr><td><strong>Sentry</strong></td><td>Error tracking and performance monitoring (FE + BE + Mobile)</td><td>Free up to 5K errors/month</td></tr>
+    <tr><td><strong>Datadog</strong></td><td>Infrastructure metrics, APM, log management</td><td>~$15/host/month</td></tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+<!-- ════════ ROADMAP ════════ -->
+<div class="sec" id="sec-roadmap">
+<div class="topbar"><div><div class="tb-eye">DELIVERY</div><h1>Build Roadmap</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">25 — ROADMAP</div>
+  <h2>18-Week Build Plan</h2>
+  <p>Phase-by-phase development plan from zero to production launch with clear deliverables.</p>
+</div>
+
+<div class="phase-list">
+  <div class="phase-item">
+    <div class="pnum">Phase 1<br/>Wk 1–2</div>
+    <div class="div-x">
+      <div class="ptitle">Project Foundation</div>
+      <div class="pdesc">Scaffold all repos, set up dev environment, establish code standards and CI pipeline skeleton.</div>
+      <div class="ptasks">
+        <span class="ptask">NestJS project setup + module structure</span>
+        <span class="ptask">Next.js 14 project setup</span>
+        <span class="ptask">React Native + Expo project setup</span>
+        <span class="ptask">Docker Compose local environment</span>
+        <span class="ptask">PostgreSQL schema + Prisma migrations</span>
+        <span class="ptask">GitHub repos + branch strategy (main/develop/feature/*)</span>
+        <span class="ptask">ESLint + Prettier + Husky pre-commit hooks</span>
+        <span class="ptask">CI: GitHub Actions test pipeline (skeleton)</span>
+        <span class="ptask">Terraform: staging AWS environment</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-item">
+    <div class="pnum">Phase 2<br/>Wk 3–4</div>
+    <div class="div-x">
+      <div class="ptitle">Authentication System</div>
+      <div class="pdesc">Complete auth: registration, login, OTP, Google OAuth, JWT tokens, RBAC middleware.</div>
+      <div class="ptasks">
+        <span class="ptask">User model + addresses</span>
+        <span class="ptask">Register + login API (email+password)</span>
+        <span class="ptask">JWT access + refresh token rotation</span>
+        <span class="ptask">Phone OTP via Twilio SMS</span>
+        <span class="ptask">Google OAuth via Passport.js</span>
+        <span class="ptask">RBAC guards (JwtAuthGuard + RolesGuard)</span>
+        <span class="ptask">Web: login/register/OTP UI screens</span>
+        <span class="ptask">Mobile: auth flow screens (React Navigation)</span>
+        <span class="ptask">Axios interceptor for token refresh</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-item">
+    <div class="pnum">Phase 3<br/>Wk 5–6</div>
+    <div class="div-x">
+      <div class="ptitle">Catalog & Bowl Builder</div>
+      <div class="pdesc">Menu management for admin, bowl builder UI for customers, nutrition data display.</div>
+      <div class="ptasks">
+        <span class="ptask">Menu item CRUD API (admin)</span>
+        <span class="ptask">S3 image upload for menu items</span>
+        <span class="ptask">Plan configuration API</span>
+        <span class="ptask">Menu catalog API with filters and caching</span>
+        <span class="ptask">Bowl builder multi-step UI (web)</span>
+        <span class="ptask">Bowl builder screens (mobile)</span>
+        <span class="ptask">Admin: menu management table</span>
+        <span class="ptask">Nutrition display components</span>
+        <span class="ptask">Menu catalog page with dietary filters</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-item">
+    <div class="pnum">Phase 4<br/>Wk 7–8</div>
+    <div class="div-x">
+      <div class="ptitle">Subscription Engine</div>
+      <div class="pdesc">Full subscription CRUD, state machine, pause/resume/cancel, delivery schedule generation.</div>
+      <div class="ptasks">
+        <span class="ptask">Subscription create/read/update API</span>
+        <span class="ptask">Subscription state machine implementation</span>
+        <span class="ptask">Pause + resume logic</span>
+        <span class="ptask">Skip delivery with cutoff validation</span>
+        <span class="ptask">Plan upgrade with proration calculation</span>
+        <span class="ptask">Address management API + Google Maps autocomplete</span>
+        <span class="ptask">Web: subscription management screens</span>
+        <span class="ptask">Mobile: subscription screens</span>
+        <span class="ptask">Admin: customer subscription management</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-item">
+    <div class="pnum">Phase 5<br/>Wk 9–10</div>
+    <div class="div-x">
+      <div class="ptitle">Payments & Billing</div>
+      <div class="pdesc">Razorpay integration, subscription auto-charge mandate, webhook handler, invoice PDF generation.</div>
+      <div class="ptasks">
+        <span class="ptask">Razorpay SDK integration (backend)</span>
+        <span class="ptask">Payment order creation + verification API</span>
+        <span class="ptask">Razorpay subscription mandate flow</span>
+        <span class="ptask">Webhook handler (all events)</span>
+        <span class="ptask">Failed payment retry job (BullMQ delayed)</span>
+        <span class="ptask">Invoice PDF generation (Puppeteer + S3)</span>
+        <span class="ptask">GST calculation for B2B customers</span>
+        <span class="ptask">Web + Mobile: checkout flow UI</span>
+        <span class="ptask">Billing history screen (web + mobile)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-item">
+    <div class="pnum">Phase 6<br/>Wk 11–12</div>
+    <div class="div-x">
+      <div class="ptitle">Order Generation & Delivery</div>
+      <div class="pdesc">Daily order cron, delivery zone system, agent assignment, packing list, agent app MVP.</div>
+      <div class="ptasks">
+        <span class="ptask">BullMQ setup + daily order cron job</span>
+        <span class="ptask">Delivery zone CRUD (admin)</span>
+        <span class="ptask">Agent auto-assignment by zone</span>
+        <span class="ptask">Route optimization (Google Distance Matrix)</span>
+        <span class="ptask">Kitchen packing list API + UI</span>
+        <span class="ptask">Order status update API</span>
+        <span class="ptask">Agent mobile app: today's deliveries</span>
+        <span class="ptask">Agent: one-tap delivery confirm + photo</span>
+        <span class="ptask">Order status timeline UI (customer)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-item">
+    <div class="pnum">Phase 7<br/>Wk 13–14</div>
+    <div class="div-x">
+      <div class="ptitle">Real-Time Tracking & Notifications</div>
+      <div class="pdesc">Live delivery map, SSE for real-time updates, full multi-channel notification system.</div>
+      <div class="ptasks">
+        <span class="ptask">Agent location tracking API (GPS polling)</span>
+        <span class="ptask">Server-Sent Events for order tracking</span>
+        <span class="ptask">Live delivery map (web + mobile)</span>
+        <span class="ptask">WhatsApp notification integration (Twilio/Wati)</span>
+        <span class="ptask">SendGrid email templates</span>
+        <span class="ptask">Firebase push notifications (FCM)</span>
+        <span class="ptask">SMS fallback (MSG91)</span>
+        <span class="ptask">Notification BullMQ queue + worker</span>
+        <span class="ptask">All notification events implemented</span>
+        <span class="ptask">Push token registration (web + mobile)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-item">
+    <div class="pnum">Phase 8<br/>Wk 15–16</div>
+    <div class="div-x">
+      <div class="ptitle">Admin Dashboard & Analytics</div>
+      <div class="pdesc">Full admin panel: revenue analytics, customer management, agent management, operations tools.</div>
+      <div class="ptasks">
+        <span class="ptask">Revenue analytics API + charts</span>
+        <span class="ptask">Subscriber cohort analytics</span>
+        <span class="ptask">Customer search + management actions</span>
+        <span class="ptask">Agent performance metrics</span>
+        <span class="ptask">Refund management UI</span>
+        <span class="ptask">Broadcast notification tool</span>
+        <span class="ptask">Nutrition summary weekly email</span>
+        <span class="ptask">Delivery rating + feedback system</span>
+        <span class="ptask">CSV export (customers, payments)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-item">
+    <div class="pnum">Phase 9<br/>Wk 17–18</div>
+    <div class="div-x">
+      <div class="ptitle">Testing, Security & Launch</div>
+      <div class="pdesc">End-to-end testing, security audit, production infrastructure, soft launch with beta users.</div>
+      <div class="ptasks">
+        <span class="ptask">Unit tests: all services (Jest, 80%+ coverage)</span>
+        <span class="ptask">Integration tests: all API endpoints</span>
+        <span class="ptask">E2E tests: critical flows (Playwright)</span>
+        <span class="ptask">Load testing: 500 concurrent (k6)</span>
+        <span class="ptask">Security audit (OWASP checklist)</span>
+        <span class="ptask">Production AWS setup (Terraform)</span>
+        <span class="ptask">GitHub Actions full CI/CD pipeline</span>
+        <span class="ptask">Sentry + Datadog monitoring setup</span>
+        <span class="ptask">App Store submission (iOS + Android)</span>
+        <span class="ptask">Beta launch: 50 customers in 1 zone</span>
+        <span class="ptask">Runbook: incident response procedures</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ════════ COST ════════ -->
+<div class="sec" id="sec-cost">
+<div class="topbar"><div><div class="tb-eye">DELIVERY</div><h1>Cost Estimation</h1></div><span class="version-pill">v2.0</span></div>
+<div style="padding:0 48px 80px">
+<div class="sec-head">
+  <div class="sh-label">26 — COSTS</div>
+  <h2>Infrastructure Cost Breakdown</h2>
+  <p>Monthly operational cost estimates at different growth stages.</p>
+</div>
+
+<h3>Monthly Infrastructure Costs</h3>
+<table>
+  <thead><tr><th>Service</th><th>Spec</th><th>Cost at Launch (~500 subs)</th><th>Cost at Scale (~5K subs)</th></tr></thead>
+  <tbody>
+    <tr><td>Vercel (Frontend)</td><td>Pro plan</td><td class="tg">$20/mo</td><td class="tg">$20/mo</td></tr>
+    <tr><td>AWS ECS Fargate (API)</td><td>2 tasks × 1vCPU/2GB</td><td class="tg">~$40/mo</td><td class="ty">~$200/mo</td></tr>
+    <tr><td>AWS RDS PostgreSQL</td><td>db.t3.medium Multi-AZ</td><td class="ty">~$100/mo</td><td class="ty">~$200/mo</td></tr>
+    <tr><td>AWS ElastiCache Redis</td><td>cache.t3.micro</td><td class="tg">~$20/mo</td><td class="tg">~$40/mo</td></tr>
+    <tr><td>AWS ALB</td><td>1 load balancer</td><td class="tg">~$18/mo</td><td class="tg">~$18/mo</td></tr>
+    <tr><td>AWS S3 + CloudFront</td><td>~50GB storage, CDN</td><td class="tg">~$10/mo</td><td class="tg">~$30/mo</td></tr>
+    <tr><td>Twilio (WhatsApp)</td><td>~15K msgs/mo at 500 subs</td><td class="ty">~₹7,500/mo</td><td class="to">~₹75,000/mo</td></tr>
+    <tr><td>SendGrid (Email)</td><td>~3K emails/mo</td><td class="tg">Free tier</td><td class="tg">~$20/mo</td></tr>
+    <tr><td>Firebase (FCM)</td><td>Push notifications</td><td class="tg">Free</td><td class="tg">Free</td></tr>
+    <tr><td>Google Maps API</td><td>Autocomplete + Distance</td><td class="tg">~$10/mo</td><td class="ty">~$50/mo</td></tr>
+    <tr><td>Sentry</td><td>Error tracking</td><td class="tg">Free tier</td><td class="gm">~$26/mo</td></tr>
+    <tr><td>Datadog</td><td>1 host APM</td><td class="ty">~$23/mo</td><td class="to">~$100/mo</td></tr>
+    <tr><td><strong>Total Monthly (USD)</strong></td><td></td><td class="tg"><strong>~$250–300/mo</strong></td><td class="ty"><strong>~$800–1000/mo</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="hbox hg">
+  <strong>Revenue vs Cost at 500 Monthly Subscribers:</strong>
+  Revenue: 500 subs × ₹2,499/month = ₹12,49,500/month (~$15,000)
+  Infrastructure: ~$300/month (~₹25,000)
+  Infrastructure is less than 2% of revenue — completely sustainable.
+</div>
+
+<h3>Razorpay Transaction Fees</h3>
+<table>
+  <thead><tr><th>Plan Type</th><th>Avg Transaction Value</th><th>Razorpay Fee (2%)</th><th>Per Subscriber/Month</th></tr></thead>
+  <tbody>
+    <tr><td>Daily (30 transactions)</td><td>₹119</td><td>₹2.38 × 30</td><td>₹71.40</td></tr>
+    <tr><td>Weekly (4 transactions)</td><td>₹699</td><td>₹13.98 × 4</td><td>₹55.92</td></tr>
+    <tr><td>Monthly (1 transaction)</td><td>₹2,499</td><td>₹49.98 × 1</td><td>₹49.98</td></tr>
+  </tbody>
+</table>
+
+<p>Monthly plan is most cost-efficient for both customer (largest discount) and you (lowest transaction fees + highest retention).</p>
+</div>
+</div>
+
+</div><!-- /#main -->
+
+<script>
+function show(id) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  event.currentTarget.classList.add('active');
+  document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

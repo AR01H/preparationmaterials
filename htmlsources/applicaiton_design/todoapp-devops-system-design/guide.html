@@ -510,26 +510,29 @@
       </div>
 
       <div class="file-tree">
-<span class="ft-dir">todo-app/</span>
-├── <span class="ft-dir">frontend/</span>
-│   ├── <span class="ft-dir">src/</span>
-│   │   └── <span class="ft-file">App.jsx</span>          <span class="ft-note"># React UI with CRUD</span>
-│   ├── <span class="ft-file">Dockerfile</span>           <span class="ft-note"># Multi-stage: build → nginx</span>
-│   ├── <span class="ft-file">nginx.conf</span>           <span class="ft-note"># Serve SPA + proxy /api</span>
-│   ├── <span class="ft-file">index.html</span>           <span class="ft-note"># Vite entry point</span>
-│   └── <span class="ft-file">package.json</span>
-│
-├── <span class="ft-dir">backend/</span>
-│   ├── <span class="ft-file">server.js</span>            <span class="ft-note"># Express + pg CRUD API</span>
-│   ├── <span class="ft-file">Dockerfile</span>           <span class="ft-note"># node:alpine image</span>
-│   └── <span class="ft-file">package.json</span>
-│
-├── <span class="ft-dir">k8s/</span>
-│   ├── <span class="ft-file">manifests.yaml</span>       <span class="ft-note"># Deployments, Services, Ingress</span>
-│   ├── <span class="ft-file">secret.yaml</span>          <span class="ft-note"># DB credentials (never commit!)</span>
-│   └── <span class="ft-file">hpa.yaml</span>             <span class="ft-note"># Auto-scaling config</span>
-│
-└── <span class="ft-file">docker-compose.yml</span>       <span class="ft-note"># Local 3-service orchestration</span>
+        <pre><code>
+          <span class="ft-dir">todo-app/</span>
+          ├── <span class="ft-dir">frontend/</span>
+          │   ├── <span class="ft-dir">src/</span>
+          │   │   └── <span class="ft-file">App.jsx</span>          <span class="ft-note"># React UI with CRUD</span>
+          │   ├── <span class="ft-file">Dockerfile</span>           <span class="ft-note"># Multi-stage: build → nginx</span>
+          │   ├── <span class="ft-file">nginx.conf</span>           <span class="ft-note"># Serve SPA + proxy /api</span>
+          │   ├── <span class="ft-file">index.html</span>           <span class="ft-note"># Vite entry point</span>
+          │   └── <span class="ft-file">package.json</span>
+          │
+          ├── <span class="ft-dir">backend/</span>
+          │   ├── <span class="ft-file">server.js</span>            <span class="ft-note"># Express + pg CRUD API</span>
+          │   ├── <span class="ft-file">Dockerfile</span>           <span class="ft-note"># node:alpine image</span>
+          │   └── <span class="ft-file">package.json</span>
+          │
+          ├── <span class="ft-dir">k8s/</span>
+          │   ├── <span class="ft-file">manifests.yaml</span>       <span class="ft-note"># Deployments, Services, Ingress</span>
+          │   ├── <span class="ft-file">secret.yaml</span>          <span class="ft-note"># DB credentials (never commit!)</span>
+          │   └── <span class="ft-file">hpa.yaml</span>             <span class="ft-note"># Auto-scaling config</span>
+          │
+          └── <span class="ft-file">docker-compose.yml</span>       <span class="ft-note"># Local 3-service orchestration</span>
+
+        </code></pre>
       </div>
 
       <div class="info-box warn">
